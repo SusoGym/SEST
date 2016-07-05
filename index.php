@@ -2,9 +2,11 @@
 
 session_start();
 
-require("class.controller.php", "class.model.php", "class.view.php");
+require "class.controller.php";
+require "class.model.php";
+require "class.view.php";
 
 $input = array_merge($_GET, $_POST);
-Controller $control = new Controller($input);
+$control = new Controller($input);
 
 ?>
