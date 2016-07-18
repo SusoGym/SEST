@@ -1,7 +1,7 @@
 <?php
 /**
-*Connection Klasse
-*erstellt die Verbindung zur Datenbank
+* Database Connection Klasse
+* erstellt die Verbindung zur Datenbank
 */
 class Connection
 {
@@ -11,9 +11,9 @@ private $pass;
 private $connID;
 private $database;
 /*
-*Konstruktor der automatisch die Datenbankverbindung
-*bei Instanzierung aufbaut
-*@param String Datenbankname
+* Konstruktor der automatisch die Datenbankverbindung
+* bei Instanzierung aufbaut
+* @param String Datenbankname
 *
 */
 public function __construct($db)
@@ -22,7 +22,7 @@ $this->getCredentials();
 $this->connect($db);
 }
 /**
-*Ermittelt die Serververbindung, benutzer une Passwort zur Basisdatenbank
+* Ermittelt die Serververbindung, benutzer und Passwort zur Basisdatenbank
 */
 private function getCredentials(){
 $f=fopen("cfg.ini","r");
@@ -43,25 +43,25 @@ fclose($f);
 }
 
 /**
-*Verbindet mit der jeweils benutzten Schuldatenbank
+* Verbindet mit der jeweils benutzten Datenbank
 */
 private function connect($database)
 {
 $mysqli=new mysqli($this -> server,$this -> user,$this -> pass,$this -> database);
 $this->connID=$mysqli;
 if ($mysqli->connect_errno) {
-printf("Connect failed: %s\n", $mysqli->connect_error);
-$_SESSION['bereich']=null;
-exit();
+  printf("Connect failed: %s\n", $mysqli->connect_error);
+  exit();
 }
+
 mysqli_set_charset($mysqli, 'utf8');
 }
 /*
-*universelle Methode zur Rückgabe von Abfrageergebnissen
-*@param string SQL Abfrage
-*@return Array[][] welches im ersten Index die Zeile, im Zweiten Index die Spalte bezeichnet
-* zur Abfrage kann also jeweils im zeiten Index auf die einzelnen Ergebnisse in angegebener
-* Reihenfolge zurückgegriffen werden
+* universelle Methode zur Rückgabe von Abfrageergebnissen
+* @param string SQL Abfrage
+* @return Array[][] welches im ersten Index die Zeile, im Zweiten Index die Spalte bezeichnet
+*  zur Abfrage kann also jeweils im zweiten Index auf die einzelnen Ergebnisse in angegebener
+*  Reihenfolge zurückgegriffen werden
 */
 public function selectValues($query)
 {
@@ -73,20 +73,20 @@ $anz=$result->field_count;
 $valCount=0;
 while ($row=$result->fetch_array(MYSQLI_NUM))
 {
-for ($x=0;$x<$anz;$x++)
-{
-$value[$valCount][$x]=$row[$x];
-}
-$valCount++;
+  for ($x=0;$x<$anz;$x++)
+  {
+    $value[$valCount][$x]=$row[$x];
+  }
+  $valCount++;
 }
 $result->free();
 return $value;
 }
 /**
-*Gibt assoziative Arrays zurückg
-*Indizes mit Feldnamen
-*@param $quer String SQL Query
-*@return Array[Feldname][]
+* Gibt assoziative Arrays zurück
+* Indizes mit Feldnamen
+* @param $quer String SQL Query
+* @return Array[Feldname][]
 */
 public function selectAssociativeValues($query)
 {
@@ -109,9 +109,9 @@ $result->free();
 return $assocValue;
 }
 /*
-*Universelle Methode zum Einfügen von Daten
-*@param string SQL Abfrage
-*@return int Insert ID
+* Universelle Methode zum Einfügen von Daten
+* @param string SQL Abfrage
+* @return int Insert ID
 *
 */
 public function insertValues($query)
@@ -122,17 +122,8 @@ $mysqli->query($query);
 return $mysqli->insert_id;
 }
 /**
-*Ändert einzelne Felder
-*@param $query String SQL Query
-*/
-public function updateValues($query)
-{
-$mysqli=$this->connID;
-$mysqli->query($query);
-}
-/**
-*Führt eine SQL Query durch
-*@param $query String SQL Query
+* Führt eine SQL Query durch
+* @param $query String SQL Query
 */
 function straightQuery($query)
 {
@@ -140,7 +131,7 @@ $mysqli=$this->connID;
 $mysqli->query($query);
 }
 /**
-*Schließt die Datenbank Verbindung
+* Schließt die Datenbank Verbindung
 */
 public function close(){
 $mysqli=$this->connID;
