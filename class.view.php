@@ -1,14 +1,14 @@
 <?php
 
 /**
- *
+ * View Class
  */
-class View
+class view
 {
 
-  function __construct()
+  function __construct($template)
   {
-    # code...
+    include("templates/$template.php");
   }
 }
 
