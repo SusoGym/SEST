@@ -36,18 +36,20 @@ class Controller
   	      
   	    default:
   	      $this->tpl = "login";
+  	      $this->infoToView = null;
           $this->display();
       }
 
     } else {
       $this->tpl = "login";
+      $this->infoToView = null;
       $this->display();
     }
   }
 
   function display()
   {
-    $view = new View($this->tpl);
+    $view = new View($this->tpl, $this->infoToView);
   }
 
 }
