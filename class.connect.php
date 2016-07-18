@@ -9,7 +9,7 @@ private $server;
 private $user;
 private $pass;
 private $connID;
-$private $database;
+private $database;
 /*
 *Konstruktor der automatisch die Datenbankverbindung
 *bei Instanzierung aufbaut
@@ -23,7 +23,6 @@ $this->connect($db);
 }
 /**
 *Ermittelt die Serververbindung, benutzer une Passwort zur Basisdatenbank
-*@return array("SERVER","USER","PASS")
 */
 private function getCredentials(){
 $f=fopen("cfg.ini","r");
