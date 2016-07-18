@@ -18,7 +18,8 @@ class Model
   
   /**
    * Schülerexistenz prüfen
-   * 
+   * @param $name string Schuelername
+   * @param $bday string Geburtsdatum
    * /
    public function checkPupilExist($name,$bday){
    $id=null;
