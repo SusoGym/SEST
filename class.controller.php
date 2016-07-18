@@ -34,9 +34,19 @@ class Controller
   	      # check, then write into database, then login (session var...)
   	      break;
   	      
-  	    default:
+  	    case "logout":
+  	      session_destroy();
+  	      
   	      $this->tpl = "login";
-  	      $this->infoToView = null;
+  	      $this->infoToView = array('notifications' => array('Erfolgreich abgemeldet'));
+  	      $this->display();
+  	      break;
+  	      
+  	    default:
+  	      session_destroy();
+  	      
+  	      $this->tpl = "login";
+  	      $this->infoToView = array('notifications' => array('A fehler occurred'));
           $this->display();
       }
 
