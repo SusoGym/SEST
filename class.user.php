@@ -8,20 +8,12 @@ require("class.model.php");
 class User
 {
 
-  function __construct($id, $set)
+  function __construct($id)
   {
     $model = new Model();
-    if !(isset($set)) {
       $this->type = $model->user_get_type($id);
-      if ($this->type == 1) {
-        return new Parent($id, 0);
-      } elseif ($this->type == 2) {
-        return new Teacher($id, 0);
-      }
-    } else {
       $this->id = $id;
-      $this->name = $model->user_get_name($id);
-    }
+      //$this->name = $model->user_get_name($id);
   }
 
   function get_id()
@@ -51,6 +43,7 @@ class Parent extends User
   {
     $model = new Model();
     $this->children = $model->parent_get_children($this->id);
+    $this->name = $model->parent_get_name($id);
   }
 
   function get_children()
@@ -88,7 +81,7 @@ class Teacher extends User
 
   function __construct()
   {
-    # code...
+    $this->name = $model->teacher_get_name($id);
   }
 }
 
