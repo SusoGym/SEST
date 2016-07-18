@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
   <head>
-    <title>LogIn - SUSO EST</title>
+    <title>Zitate</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -35,13 +35,13 @@
               <form method="get" action="login.php" autocomplete="off">
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
-                  <input id="usr" name="usr" type="text" required>
-                  <label for="usr">Name</label>
+                  <input id="name" name="name" type="text" required>
+                  <label for="name">Name</label>
                 </div>
                 <div class="input-field">
                   <i class="material-icons prefix">face</i>
                   <input id="student" name="student" type="text" required>
-                  <label for="student">Schüler</label>
+                  <label for="student">Sch&uuml;ler</label>
                 </div>
                 <div class="input-field">
                   <i class="material-icons prefix">mail</i>
@@ -53,6 +53,11 @@
                   <input id="pwd" name="pwd" type="password" required>
                   <label for="pwd">Passwort</label>
                 </div>
+                <div class="input-field ">
+                  <i class="material-icons prefix">cached</i>
+                  <input id="pwdrep" name="pwdrep" type="password" required>
+                  <label for="pwdrep">Passwort wiederholen</label>
+                </div>
               </form>
             </div>
           </li>
@@ -63,6 +68,13 @@
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="http://materializecss.com/bin/materialize.js"></script>
+    <script>
+      <?php
+	foreach ($this->data['notifications'] as $not) {
+          echo "Materialize.toast('" . $not . "', 4000)";
+        }
+      ?>
+    </script>
   </body>
 
 </html>
