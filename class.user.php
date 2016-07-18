@@ -68,7 +68,14 @@ class Parent extends User
     foreach ($classes as $key => $value) {
       $teachers = array_merge($teachers, $model->class_get_teachers($value));
     }
-    return $teachers;
+    sort($teachers);
+    $size = count($teachers);
+    for ($i = 1; $i <= $size; $i++) {
+      if ($teachers[$i] != $teachers[$i-1]) {
+        $tchrs_f[] = $teachers[$i]
+      }
+    }
+    return $tchrs_f;
   }
 }
 
