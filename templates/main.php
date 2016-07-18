@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>SUSO EST</title>
+    <title>ESPT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link type="text/css" rel="stylesheet" href="http://materializecss.com/bin/materialize.css"  media="screen,projection"/>
@@ -14,8 +14,7 @@
       <div class="nav-wrapper teal">
         <a href="#" style="margin-left: 20px" class="brand-logo">Elternsprechtag</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-          <li><a href="">Eintragen</a></li>
-          <li><a href="">Termine anzeigen</a></li>
+          <li><a href="index.php?type=logout"><i class="material-icons">power_settings_new</i></a></li>
         </ul>
       </div>
     </nav>
@@ -57,4 +56,3 @@
     </script>
   </body>
 </html>
-
