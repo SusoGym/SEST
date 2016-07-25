@@ -11,17 +11,24 @@ class Controller
     $model = new Model();
     if (isset($_SESSION['user'])) {
       if ($_SESSION['user']['type'] == 1) {
-        $this->user = new Parent($_SESSION['user']);
+        $this->user = new Parent($_SESSION['user']['id']);
       } elseif ($_SESSION['user']['type']) {
-        $this->user = new Teacher($_SESSION['user']);
+        $this->user = new Teacher($_SESSION['user']['id']);
       }
     }
     if (isset($input['type'])) {
       switch ($input['type']) {
         case "login":
-  	      # validate, then set session var
+          if ($model->password_validate($input['login']['user'], $input['login']['password']) == true) {
+            $_SESSION['user']['id'] = $model->user_name_get_id();
+            $_SESSION['user']['type'] = $model->user_get_type($_SESSION['user']['id']);
+          } else {
+            $this->tpl = "login";
+    	      $this->infoToView = array('notifications' => array('Benutzername oder Passwort falsch'));
+    	      $this->display();
+          }
   	      break;
-  	      
+
   	    case "booking":
   	      if ($input['booking']['action'] == "add") {
             $model->booking_add($input['booking']['slot'], $this->user->get_id(), $input['booking']['teacher']);
@@ -29,22 +36,22 @@ class Controller
             $model->booking_delete($input['booking']['slot'], $this->user->get_id());
           }
           break;
-          
+
         case "register":
   	      # check, then write into database, then login (session var...)
   	      break;
-  	      
+
   	    case "logout":
   	      session_destroy();
-  	      
+
   	      $this->tpl = "login";
   	      $this->infoToView = array('notifications' => array('Erfolgreich abgemeldet'));
   	      $this->display();
   	      break;
-  	      
+
   	    default:
   	      session_destroy();
-  	      
+
   	      $this->tpl = "login";
   	      $this->infoToView = array('notifications' => array('A fehler occurred'));
           $this->display();
