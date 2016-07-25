@@ -3,7 +3,7 @@
 /**
  * View Class
  */
-class view
+class View
 {
 
   function __construct($template, $data)
