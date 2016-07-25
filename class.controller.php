@@ -22,6 +22,9 @@ class Controller
           if ($model->password_validate($input['login']['user'], $input['login']['password']) == true) {
             $_SESSION['user']['id'] = $model->user_name_get_id();
             $_SESSION['user']['type'] = $model->user_get_type($_SESSION['user']['id']);
+            $this->tpl = "main";
+    	      $this->infoToView = null;
+    	      $this->display();
           } else {
             $this->tpl = "login";
     	      $this->infoToView = array('notifications' => array('Benutzername oder Passwort falsch'));
@@ -35,6 +38,9 @@ class Controller
           } elseif ($input['booking']['action'] == "delete") {
             $model->booking_delete($input['booking']['slot'], $this->user->get_id());
           }
+          $this->tpl = "main";
+          $this->infoToView = null;
+          $this->display();
           break;
 
         case "register":
