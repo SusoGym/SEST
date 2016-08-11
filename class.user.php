@@ -3,29 +3,42 @@
 require("class.model.php");
 
 /**
- *
+ *User class used to get user related data easily
  */
 class User
 {
 
+  /**
+   *Construct method of User class
+   *@param int id
+   */
   function __construct($id)
   {
-    $model = new Model();
-      $this->type = $model->user_get_type($id);
-      $this->id = $id;
-      //$this->name = $model->user_get_name($id);
+    $this->id = $id;
   }
 
+  /**
+   *Returns user ID
+   *@return int id
+   */
   function get_id()
   {
     return $this->id;
   }
 
+  /**
+   *Returns user name
+   *@return string name
+   */
   function get_name()
   {
     return $this->name;
   }
 
+  /**
+   *Returns user type (0 for admin, 1 for parent, 2 for teacher)
+   *@return int type
+   */
   function get_type()
   {
     return $this->type;
@@ -34,11 +47,14 @@ class User
 
 
 /**
- *
+ *Parent class as subclass of User class
  */
 class Parent extends User
 {
 
+  /**
+   *Contructor of Parent class
+   */
   function __construct()
   {
     $model = new Model();
@@ -46,11 +62,19 @@ class Parent extends User
     $this->name = $model->parent_get_name($id);
   }
 
+  /**
+   *Returns child(ren)'s id(s)
+   *@return Array[] children
+   */
   function get_children()
   {
     return $this->children;
   }
 
+  /**
+   *Returns all teachers that teach any of the parents children
+   *@return Array[] teachers
+   */
   function get_teachers()
   {
     $model = new Model();
@@ -74,14 +98,18 @@ class Parent extends User
 
 
 /**
- *
+ *Teacher class as subclass of User class
  */
 class Teacher extends User
 {
 
+  /**
+   *Constructor of Teacher class
+   */
   function __construct()
   {
     $this->name = $model->teacher_get_name($id);
+    $this->type = 2;
   }
 }
 

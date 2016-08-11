@@ -1,7 +1,7 @@
 <?php
 
 /**
- *
+ *Controller class handles input and other data
  */
 class Controller
 {
@@ -9,6 +9,8 @@ class Controller
   function __construct($input)
   {
     $model = new Model();
+
+    //Create User object
     if (isset($_SESSION['user'])) {
       if ($_SESSION['user']['type'] == 1) {
         $this->user = new Parent($_SESSION['user']['id']);
@@ -16,6 +18,8 @@ class Controller
         $this->user = new Teacher($_SESSION['user']['id']);
       }
     }
+
+    //Handle input
     if (isset($input['type'])) {
       switch ($input['type']) {
         case "login":
@@ -70,6 +74,9 @@ class Controller
     }
   }
 
+  /**
+   *Creates view and sends relevant data
+   */
   function display()
   {
     $view = new View($this->tpl, $this->infoToView);
