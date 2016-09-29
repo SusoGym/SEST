@@ -2,6 +2,7 @@
 
 session_start();
 
+require "class.connect.php";
 require "class.controller.php";
 require "class.model.php";
 require "class.view.php";
