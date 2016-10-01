@@ -39,7 +39,7 @@ class Model
     public function userGetType($userid)
     {
         $data = $this->connection->selectValues("SELECT user_type FROM user WHERE id=$userid");
-
+        return $data;
     }
 
     /**
@@ -49,7 +49,7 @@ class Model
     {
         $userName = $this->connection->escape_string($userName);
         $data = $this->connection->selectValues("SELECT id FROM user WHERE username='$userName'");
-
+        return $data;
     }
 
     /**
@@ -58,7 +58,7 @@ class Model
     public function parentGetName($userId)
     {
         $data = $this->connection->selectValues("SELECT eltern.* FROM eltern, user WHERE eltern.userid=user.id AND user.id=$userId AND user.user_type=1");
-
+        return $data;
     }
 
     /**
@@ -67,7 +67,7 @@ class Model
     public function teacherGetName($userId)
     {
         $data = $this->connection->selectValues("SELECT lehrer.* FROM lehrer, user WHERE lehrer.userid=user.id AND user.id=$userId AND user.user_type=2");
-
+        return $data;
     }
 
     /**
@@ -76,6 +76,7 @@ class Model
     public function parentGetChildren($elternId)
     {
         $data = $this->connection->selectValues("SELECT * FROM schueler WHERE eid=$elternId");
+        return $data;
     }
 
     /**
@@ -84,6 +85,7 @@ class Model
     public function studentGetClass($schuelerId)
     {
         $data = $this->connection->selectValues("SELECT schueler.klasse FROM schueler WHERE id=$schuelerId");
+        return $data;
     }
 
     /**
@@ -93,7 +95,7 @@ class Model
     {
         $class = $this->connection->escape_string($class);
         $data = $this->connection->selectValues("SELECT lehrer.* FROM lehrer, unterricht WHERE unterricht.klasse='$class' AND unterricht.lid=lehrer.id");
-
+        return $data;
     }
 
     /**
