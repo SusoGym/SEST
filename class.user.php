@@ -8,6 +8,8 @@ require("class.model.php");
 class User
 {
 
+  private $type;
+
   /**
    *Construct method of User class
    *@param int id
@@ -60,6 +62,7 @@ class Parent extends User
     $model = new Model();
     $this->children = $model->parent_get_children($this->id);
     $this->name = $model->parent_get_name($id);
+    $this->$type = 1;
   }
 
   /**

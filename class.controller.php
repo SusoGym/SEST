@@ -24,10 +24,10 @@ class Controller
       switch ($input['type']) {
         case "login":
           if ($model->password_validate($input['login']['user'], $input['login']['password']) == true) {
-            $_SESSION['user']['id'] = $model->user_name_get_id();
-            $_SESSION['user']['type'] = $model->user_get_type($_SESSION['user']['id']);
+            $_SESSION['user']['id'] = $model->usernameGetId();
+            $_SESSION['user']['type'] = $model->userGetType($_SESSION['user']['id']);
             $this->tpl = "main";
-    	      $this->infoToView = null;
+    	      $this->infoToView = [];
     	      $this->display();
           } else {
             $this->tpl = "login";
@@ -38,12 +38,12 @@ class Controller
 
   	    case "booking":
   	      if ($input['booking']['action'] == "add") {
-            $model->booking_add($input['booking']['slot'], $this->user->get_id(), $input['booking']['teacher']);
+            $model->bookingAdd($input['booking']['slot'], $this->user->get_id(), $input['booking']['teacher']);
           } elseif ($input['booking']['action'] == "delete") {
-            $model->booking_delete($input['booking']['slot'], $this->user->get_id());
+            $model->bookingDelete($input['booking']['slot'], $this->user->get_id());
           }
           $this->tpl = "main";
-          $this->infoToView = null;
+          $this->infoToView = [];
           $this->display();
           break;
 
@@ -79,6 +79,23 @@ class Controller
    */
   function display()
   {
+    $model = new Model();
+    if ($this->tpl == "main") {
+      if ($this->user->get_type() == 1) {
+        $tchrs = $this->user->get_teachers();
+        $schedule = [];
+        foreach ($tchrs as $key => $tchrid) {
+          $schedule = array_merge($schedule, array($tchrid => $model->teacherGetSlots($tchrid)))
+        }
+        $this->infoToView = array_merge($this->infoToView, array('parent_schedule' => $schedule));
+      } elseif ($this->user->get_type() == 2) {
+        $schedule = $model->teacherGetSlots($this->user->id);
+        $this->infoToView = array_merge($this->infoToView, array('teacher_schedule' => $schedule));
+      }
+
+      $userinfo = array('name' => $this->user->get_name(), 'type' => $this->user->get_type());
+      $this->infoToView = array_merge($this->infoToView, array('user_info' => $userinfo));
+    }
     $view = new View($this->tpl, $this->infoToView);
   }
 
