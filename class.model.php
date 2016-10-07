@@ -1,18 +1,32 @@
 <?php
 
 /**
- *
+ * The model class
  */
 class Model
 {
+    /**
+     * @var Connection
+     */
     private $connection;//Connection Object
+    /**
+     * @var Model
+     */
+    private static $model;
 
     /**
      *Konstruktor
      */
-    function __construct()
+    private function __construct()
     {
-        $this->connection = new Connection();
+
+        $this->connection =  Controller::$connection;
+
+    }
+
+    static function getInstance()
+    {
+        return self::$model == null ? self::$model = new Model() : self::$model;
     }
 
     /**

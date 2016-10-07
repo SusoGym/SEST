@@ -5,10 +5,16 @@
  */
 class Controller
 {
+    /**
+     * @var Connection
+     */
+    static $connection;
 
   function __construct($input)
   {
-    $model = new Model();
+      self::$connection = new Connection();
+      $model = Model::getInstance();
+      $this->infoToView = array();
 
     //Create User object
     if (isset($_SESSION['user']['type'])) {
@@ -56,7 +62,6 @@ class Controller
 
                ChromePhp::info("User '$usr' with id $uid of type $type successfully logged in @ $time");
                $this->tpl = "main";
-               $this->infoToView = null;
     	       $this->display();
            } else {
                ChromePhp::info("Invalid login data");
@@ -69,9 +74,9 @@ class Controller
         //Start booking logic
   	    case "booking":
   	      if ($input['booking']['action'] == "add") {
-            $model->bookingAdd($input['booking']['slot'], $this->user->get_id(), $input['booking']['teacher']);
+            $model->bookingAdd($input['booking']['slot'], $this->user->getId(), $input['booking']['teacher']);
           } elseif ($input['booking']['action'] == "delete") {
-            $model->bookingDelete($input['booking']['slot'], $this->user->get_id());
+            $model->bookingDelete($input['booking']['slot'], $this->user->getId());
           }
           $this->tpl = "main";
           $this->display();
@@ -102,7 +107,6 @@ class Controller
     } else {
         // TODO check if $_SESSION contains login
       $this->tpl = "login";
-      $this->infoToView = null;
       $this->display();
     }
   }
@@ -112,21 +116,28 @@ class Controller
    */
   function display()
   {
-    $model = new Model();
+    $model = Model::getInstance();
     if ($this->tpl == "main") {
-      if ($this->user->get_type() == 1) {
-        $tchrs = $this->user->get_teachers();
+      if ($this->user->getType() == 1) { // is parent/guardian
+
+          /** @var Guardian $guardian */
+            $guardian = $this->user;
+        $tchrs = $guardian->getTeachers();
         $schedule = [];
+
         foreach ($tchrs as $key => $tchrid) {
-          $schedule = array_merge($schedule, array($tchrid => $model->teacherGetSlots($tchrid)))
+          $schedule = array_merge($schedule, array($tchrid => $model->teacherGetSlots($tchrid)));
         }
         $this->infoToView = array_merge($this->infoToView, array('parent_schedule' => $schedule));
-      } elseif ($this->user->get_type() == 2) {
-        $schedule = $model->teacherGetSlots($this->user->id);
+      } elseif ($this->user->getType() == 2) { // is teacher
+
+            /** @var Teacher $teacher */
+          $teacher = $this->user;
+        $schedule = $model->teacherGetSlots($teacher->getId());
         $this->infoToView = array_merge($this->infoToView, array('teacher_schedule' => $schedule));
       }
 
-      $userinfo = array('name' => $this->user->get_name(), 'type' => $this->user->get_type());
+      $userinfo = array('name' => $this->user->getName(), 'type' => $this->user->getType());
       $this->infoToView = array_merge($this->infoToView, array('user_info' => $userinfo));
     }
     $view = new View($this->tpl, $this->infoToView);
