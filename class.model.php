@@ -35,25 +35,37 @@ class Model
 
     /**
      * @param int $userid
+     * @return int userType [0 - admin; 1 - parent; 2 - teacher]
      */
     public function userGetType($userid)
     {
-        $data = $this->connection->selectValues("SELECT user_type FROM user WHERE id=$userid");
+        $data = $this->connection->selectValues("SELECT user_type FROM user WHERE id=" .$userid);
+
+        if(!isset($data[0]))
+            return null;
+
+        return intval($data[0][0]);
 
     }
 
     /**
      * @param string $userName
+     * @return int userId
      */
     public function usernameGetId($userName)
     {
         $userName = $this->connection->escape_string($userName);
         $data = $this->connection->selectValues("SELECT id FROM user WHERE username='$userName'");
 
+        if($data == null)
+            return null;
+
+        return $data[0][0];
     }
 
     /**
      * @param int $userId
+     * @return string
      */
     public function parentGetName($userId)
     {
@@ -63,6 +75,7 @@ class Model
 
     /**
      * @param int $userId
+     * @return string
      */
     public function teacherGetName($userId)
     {
@@ -72,6 +85,7 @@ class Model
 
     /**
      * @param int $elternId
+     * @return mixed // not defined yet
      */
     public function parentGetChildren($elternId)
     {
@@ -80,6 +94,7 @@ class Model
 
     /**
      * @param int $schuelerId
+     * @return string
      */
     public function studentGetClass($schuelerId)
     {
@@ -88,6 +103,7 @@ class Model
 
     /**
      * @param string $class
+     * @return int
      */
     public function classGetTeachers($class)
     {
@@ -115,11 +131,27 @@ class Model
     /**
      * @param $userName
      * @param $password
+     * @return bool user exists in database and password is equal with the one in the database
      */
     public function passwordValidate($userName, $password)
-    { //TODO gehört das überhaupt in das model?
+    {
+        $userName = $this->connection->escape_string($userName);
+        //$password = $this->connection->escape_string($userName);
 
+        $data = $this->connection->selectAssociativeValues("SELECT password_hash from user WHERE username='$userName'");
+
+        if($data == null)
+            return false;
+
+
+        $data = $data[0];
+
+        $pwd_hash = $data['password_hash'];
+
+
+        return password_verify($password, $pwd_hash);
     }
+
 }
 
 

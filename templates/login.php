@@ -13,19 +13,21 @@
 
         <ul class="collapsible white" data-collapsible="accordion">
           <li>
-            <div class="collapsible-header"><i class="material-icons">filter_drama</i>Anmelden</div>
+            <div class="collapsible-header active"><i class="material-icons">filter_drama</i>Anmelden</div>
             <div class="collapsible-body" style="padding: 20px;">
-              <form method="get" action="login.php" autocomplete="off">
+              <form method="get" autocomplete="off">
+                  <input type="hidden" name="type" value="login">
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
-                  <input id="usr" name="usr" type="text" required>
+                  <input id="usr" name="login[user]" type="text" required>
                   <label for="usr">Benutzername</label>
                 </div>
                 <div class="input-field ">
                   <i class="material-icons prefix">vpn_key</i>
-                  <input id="pwd" name="pwd" type="password" required>
+                  <input id="pwd" name="login[password]" type="password" required>
                   <label for="pwd">Passwort</label>
                 </div>
+                      <button class="btn waves-effect waves-light" type="submit" name="action">Submit<i class="material-icons right">send</i>
               </form>
             </div>
           </li>
@@ -70,9 +72,10 @@
     <script type="text/javascript" src="http://materializecss.com/bin/materialize.js"></script>
     <script>
       <?php
-	foreach ($this->data['notifications'] as $not) {
-          echo "Materialize.toast('" . $not . "', 4000)";
-        }
+          if(isset($data['notifications']))
+            foreach ($data['notifications'] as $not) {
+                   echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
+            }
       ?>
     </script>
   </body>

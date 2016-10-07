@@ -63,12 +63,18 @@ class Connection
   * Verbindet mit der jeweils benutzten Datenbank
   */
   private function connect(){
+
+      $reporting = error_reporting(0);
       $mysqli = $this->connID = new mysqli($this->server, $this->user, $this->pass, $this->database);
+      error_reporting($reporting);
 
       if ($mysqli->connect_errno) {
-        printf("Connect failed: %s\n", $mysqli->connect_error);
+        printf("Connection to database failed: %s\n", $mysqli->connect_error);
+        ChromePhp::error("Connection to database failed: " . $mysqli->connect_error);
         exit();
       }
+
+      ChromePhp::info("Connection to database " . $this->user . "@" . $this->server . "/" . $this->database . " successful!");
 
       mysqli_set_charset($mysqli, 'utf8');
   }
@@ -84,7 +90,7 @@ class Connection
   public function selectValues($query)
   {
       $mysqli=$this->connID;
-      $result=$mysqli->query($query) or die($mysqli->error);
+      $result=$mysqli->query($query) or die($mysqli->error . "</br></br>" . $query . "</br></br>" . $this->getCaller());
       $value=null;
       $anz=$result->field_count;
       $valCount=0;
@@ -183,6 +189,19 @@ class Connection
   function escape_string($string)
   {
     return $this->connID->real_escape_string($string);
+  }
+
+    /**
+     * @return string location the caller method was called from
+     */
+  function getCaller()
+  {
+      $info = debug_backtrace();
+      $file = $info[1]['file'];
+      $line = $info[1]['line'];
+      $method = $info[2]['function'];
+      return "$file:$line / $method()";
+
   }
 
 

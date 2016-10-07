@@ -1,6 +1,7 @@
 # Custom
 
-cfg.ini # -> config must be changed by each user and not uploaded to git (db pass, ...)
+cfg.ini
+# -> config must be changed by each user and not uploaded to git (db pass, ...)
 
 
 

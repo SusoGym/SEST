@@ -38,8 +38,7 @@ CREATE TABLE `user` (
  id                   int PRIMARY KEY NOT NULL  ,
  username             varchar(100) UNIQUE NOT NULL  ,
  user_type            int   DEFAULT 1 ,
- password_hash        text  NOT NULL  ,
- password_salt        text  NOT NULL
+ password_hash        text  NOT NULL
 ) engine=InnoDB;
 
 CREATE TABLE eltern (
