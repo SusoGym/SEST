@@ -13,5 +13,7 @@ booking_add(slot, parent, teacher):= selbsterklaerend
 booking_delete(slot, parent):= selbsterklaerend
 password_validate(user_name, password):= selbsterklaerend, gibt true oder false
 
+teacherGetSlots(teacher_id):= gibt ein Array mit allen Slots und deren Status aus, die der Lehrer im Moment hat
+
 Viel Spass dabei
 Gregor

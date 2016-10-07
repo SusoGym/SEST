@@ -151,7 +151,6 @@ class Model
 
         return password_verify($password, $pwd_hash);
     }
-
 }
 
 
