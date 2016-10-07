@@ -12,24 +12,16 @@ class Controller
 
   function __construct($input)
   {
+
+      ChromePhp::info("-------- Next Page --------");
+      ChromePhp::info("Input: " . json_encode($input));
+
       self::$connection = new Connection();
       $model = Model::getInstance();
       $this->infoToView = array();
 
-    //Create User object
-    if (isset($_SESSION['user']['type'])) {
-        $usr_type = $_SESSION['user']['type'];
-      if ($usr_type == 1) {
-        $this->user = new Guardian(intval($_SESSION['user']['id']));
-      } elseif ($usr_type) {
-        $this->user = new Teacher(intval($_SESSION['user']['id']));
-      }
-        ChromePhp::info($this->user);
-    }
-
     //Handle input
     if (isset($input['type'])) {
-        ChromePhp::info("Type is: " . $input['type']);
 
       switch ($input['type']) {
         //Start login logic
@@ -45,24 +37,12 @@ class Controller
                 break;
             }
 
-           if ($model->passwordValidate($usr = $input['login']['user'], $input['login']['password']) == true) {
-               $uid = $_SESSION['user']['id'] = $model->usernameGetId($usr);
+            $pwd = $_SESSION['user']['pwd'] = $input['login']['password'];
+            $usr = $_SESSION['user']['name'] = $input['login']['user'];
 
-               if($uid == null)
-               {
-                   $this->notify("Database error!");
-                   $this->display();
-
-                   ChromePhp::error("Unexpected database response! requested uid = null!");
-                   exit();
-               }
-
-               $type = $_SESSION['user']['type'] = $model->userGetType($uid);
-               $time = $_SESSION['user']['logintime'] = time();
-
-               ChromePhp::info("User '$usr' with id $uid of type $type successfully logged in @ $time");
+           if ($this->login($usr, $pwd)) {
                $this->tpl = "main";
-    	       $this->display();
+               $this->display();
            } else {
                ChromePhp::info("Invalid login data");
                $this->notify('Benutzername oder Passwort falsch');
@@ -90,6 +70,7 @@ class Controller
         // Start logout logic
   	    case "logout":
   	      session_destroy();
+          unset($_SESSION);
 
   	      $this->tpl = "login";
   	      $this->notify('Erfolgreich abgemeldet');
@@ -105,10 +86,40 @@ class Controller
       }
 
     } else {
-        // TODO check if $_SESSION contains login
+        ChromePhp::info("No type specified!");
+
+        if(isset($_SESSION['user']['name']) && isset($_SESSION['user']['pwd']))
+        {
+            // alread logged in!
+            $name = $_SESSION['user']['name'];
+            $pwd = $_SESSION['user']['pwd'];
+
+            if($this->login($name, $pwd))
+            {
+                ChromePhp::info("Relogin with valid user data");
+                $this->tpl = "main";
+                $this->display();
+                return;
+            }
+            else
+            {
+                ChromePhp::info("Relogin with invalid user data. Redirecting to login page");
+            }
+
+        }
+
       $this->tpl = "login";
-      $this->display();
+          $this->display();
     }
+
+
+    //Create User object
+    if (isset($_SESSION['user']['id'])) {
+      $this->user = User::fetchFromDB($_SESSION['user']['id']);
+      ChromePhp::info("Userobject: " . $this->user);
+    }
+
+
   }
 
   /**
@@ -116,6 +127,8 @@ class Controller
    */
   function display()
   {
+      ChromePhp::info("Displaying 'templates/" . $this->tpl . ".php' with data " . json_encode($this->infoToView));
+
     $model = Model::getInstance();
     if ($this->tpl == "main" && isset($this->user)) {
       if ($this->user->getType() == 1) { // is parent/guardian
@@ -161,10 +174,35 @@ class Controller
       array_push($notsArray, array("msg" => $message, "time" => $time));
 
       $this->infoToView['notifications'] = $notsArray;
-      ChromePhp::info("Notifications: " . json_encode($notsArray));
 
   }
 
+
+
+  function login($usr, $pwd)
+  {
+      $model = Model::getInstance();
+      if($model->passwordValidate($usr, $pwd)) {
+
+          $uid = $_SESSION['user']['id'] = $model->usernameGetId($usr);
+          if ($uid == null) {
+              $this->notify("Database error!");
+              $this->display();
+
+              ChromePhp::error("Unexpected database response! requested uid = null!");
+              exit();
+          }
+
+          $type = $model->userGetType($uid);
+          $time = $_SESSION['user']['logintime'] = time();
+
+          ChromePhp::info("User '$usr' with id $uid of type $type successfully logged in @ $time");
+
+          return true;
+      }
+
+      return false;
+  }
 
 
 }

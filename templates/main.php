@@ -10,11 +10,15 @@
   </head>
   <body class="grey lighten-2">
 
+  <form id="logoutform" action="" method="post"><!-- logout form -->
+      <input type="hidden" name="type" value="logout">
+  </form>
+
     <nav>
       <div class="nav-wrapper teal">
         <a href="#" style="margin-left: 20px" class="brand-logo">Elternsprechtag</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-          <li><a href="index.php?type=logout"><i class="material-icons">power_settings_new</i></a></li>
+          <li><a id="logout" onclick="document.getElementById('logoutform').submit()" href="#"><i class="material-icons">power_settings_new</i></a></li>
         </ul>
       </div>
     </nav>

@@ -78,6 +78,20 @@ class Model
     }
 
     /**
+     * @param $id int userId
+     * @return string userName
+     */
+    public function idGetUsername($id)
+    {
+        $data = $this->connection->selectValues("SELECT username FROM user WHERE id=$id");
+
+        if($data == null)
+            return null;
+
+        return $data[0][0];
+    }
+
+    /**
      * @param int $userId
      * @return string
      */

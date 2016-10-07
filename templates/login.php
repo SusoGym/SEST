@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
   <head>
-    <title>Zitate</title>
+    <title>ESPT - Login</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -15,7 +15,7 @@
           <li>
             <div class="collapsible-header active"><i class="material-icons">filter_drama</i>Anmelden</div>
             <div class="collapsible-body" style="padding: 20px;">
-              <form method="get" autocomplete="off">
+              <form method="post" autocomplete="off">
                   <input type="hidden" name="type" value="login">
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
@@ -34,7 +34,7 @@
           <li>
             <div class="collapsible-header"><i class="material-icons">place</i>Registrieren</div>
             <div class="collapsible-body" style="padding: 20px;">
-              <form method="get" action="login.php" autocomplete="off">
+              <form method="post" action="login.php" autocomplete="off">
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
                   <input id="name" name="name" type="text" required>

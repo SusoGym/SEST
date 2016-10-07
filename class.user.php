@@ -9,7 +9,6 @@ class User
   protected $type;
   protected $name;
   protected $id;
-  protected $model;
 
   /**
    *Construct method of User class
@@ -18,7 +17,30 @@ class User
   function __construct($id)
   {
     $this->id = $id;
-    $this->model = Model::getInstance();
+  }
+
+  /**
+   * @param $id int user id
+   * @return User fitting extension of user (Guardian | Teacher)
+   */
+  static function fetchFromDB($id)
+  {
+      $model = Model::getInstance();
+      $type = $model->userGetType($id); // 0 - Admin; 1 - parent; 2 - teacher
+
+      $user = null;
+
+      if($type == 1)
+          $user = new Guardian($id);
+      else if($type == 2)
+          $user = new Teacher($id);
+      else
+          die("No Admin implemented yet!");
+
+      $user->type = $type;
+      $user->name = $model->idGetUsername($id);
+
+      return $user;
   }
 
   /**
@@ -47,6 +69,16 @@ class User
   {
     return $this->type;
   }
+
+
+  /**
+   * @return string this class as string
+   */
+  function __toString()
+  {
+    return "User{id=" . $this->id . ", name=\"" . $this->name . "\",type=" . $this->type . "}";
+  }
+
 }
 
 
@@ -69,8 +101,8 @@ class Guardian extends User
   {
     parent::__construct($id);
 
-    $this->children = $this->model->parentGetChildren($this->id);
-    $this->name = $this->model->parentGetName($this->id);
+    $this->children = Model::getInstance()->parentGetChildren($this->id);
+    $this->name = Model::getInstance()->parentGetName($this->id);
     $this->type = 1;
   }
 
@@ -93,7 +125,7 @@ class Guardian extends User
       if($this->getChildren() == null)
           return array();
 
-    $model = $this->model;
+    $model = Model::getInstance();
     $classes = array();
     foreach ($this->getChildren() as $key => $value) {
       $classes[] = $model->studentGetClass(intval($value));
@@ -131,7 +163,7 @@ class Teacher extends User
   {
     parent::__construct($id);
 
-    $this->name = $this->model->teacherGetName($id);
+    $this->name = Model::getInstance()->teacherGetName($id);
     $this->type = 2;
   }
 }
