@@ -117,7 +117,7 @@ class Controller
   function display()
   {
     $model = Model::getInstance();
-    if ($this->tpl == "main") {
+    if ($this->tpl == "main" && isset($this->user)) {
       if ($this->user->getType() == 1) { // is parent/guardian
 
           /** @var Guardian $guardian */
