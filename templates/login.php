@@ -19,7 +19,7 @@
                   <input type="hidden" name="type" value="login">
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
-                  <input id="usr" name="login[user]" type="text" required>
+                  <input id="usr" name="login[user]" type="text" required <?php if(isset($_SESSION['failed_login']['name'])){echo 'value="' . $_SESSION['failed_login']['name'] . '"';}?>>
                   <label for="usr">Benutzername</label>
                 </div>
                 <div class="input-field ">

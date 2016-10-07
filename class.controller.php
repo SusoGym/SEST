@@ -15,6 +15,7 @@ class Controller
 
       ChromePhp::info("-------- Next Page --------");
       ChromePhp::info("Input: " . json_encode($input));
+      ChromePhp::info("Session: " . json_encode($_SESSION));
 
       self::$connection = new Connection();
       $model = Model::getInstance();
@@ -41,10 +42,13 @@ class Controller
             $usr = $_SESSION['user']['name'] = $input['login']['user'];
 
            if ($this->login($usr, $pwd)) {
+
                $this->tpl = "main";
                $this->display();
            } else {
-               ChromePhp::info("Invalid login data");
+
+               ChromePhp::info("Invalid login data");                 // eigentlich sollte man das mit js machen, damit Seite bei (fehlerhaft) anmelden nicht neu läd.....
+               $_SESSION['failed_login']['name'] = $usr;
                $this->notify('Benutzername oder Passwort falsch');
     	       $this->display();
            }
