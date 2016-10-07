@@ -4,7 +4,7 @@ session_start();
 
 require "ChromePhp.php"; // debugging
 require "class.connect.php";
-require "class.usertypes.php";
+require "class.user.php";
 require "class.controller.php";
 require "class.model.php";
 require "class.view.php";

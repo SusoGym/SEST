@@ -1,29 +1,31 @@
 <?php
 
-require("class.model.php");
-
 /**
  *User class used to get user related data easily
  */
 class User
 {
 
-  private $type;
+  protected $type;
+  protected $name;
+  protected $id;
+  protected $model;
 
   /**
    *Construct method of User class
-   *@param int id
+   *@param int $id userId
    */
   function __construct($id)
   {
     $this->id = $id;
+    $this->model = Model::getInstance();
   }
 
   /**
    *Returns user ID
    *@return int id
    */
-  function get_id()
+  function getId()
   {
     return $this->id;
   }
@@ -32,7 +34,7 @@ class User
    *Returns user name
    *@return string name
    */
-  function get_name()
+  function getName()
   {
     return $this->name;
   }
@@ -41,7 +43,7 @@ class User
    *Returns user type (0 for admin, 1 for parent, 2 for teacher)
    *@return int type
    */
-  function get_type()
+  function getType()
   {
     return $this->type;
   }
@@ -49,50 +51,65 @@ class User
 
 
 /**
- *Parent class as subclass of User class
+ * Guardian class as subclass of User class representing parents
  */
-class Parent extends User
+class Guardian extends User
 {
 
   /**
-   *Contructor of Parent class
+   * @var array
    */
-  function __construct()
+  private $children;
+
+  /**
+   * Contructor of Parent class
+   * @param int $id userId
+   */
+  function __construct($id)
   {
-    $model = new Model();
-    $this->children = $model->parent_get_children($this->id);
-    $this->name = $model->parent_get_name($id);
-    $this->$type = 1;
+    parent::__construct($id);
+
+    $this->children = $this->model->parentGetChildren($this->id);
+    $this->name = $this->model->parentGetName($this->id);
+    $this->type = 1;
   }
 
   /**
    *Returns child(ren)'s id(s)
-   *@return Array[] children
+   *@return array[] children
    */
-  function get_children()
+  function getChildren()
   {
     return $this->children;
   }
 
   /**
    *Returns all teachers that teach any of the parents children
-   *@return Array[] teachers
+   *@return array[] teachers
    */
-  function get_teachers()
+  function getTeachers()
   {
-    $model = new Model();
-    foreach ($this->children as $key => $value) {
-      $classes[] = $model->student_get_class($value);
+
+      if($this->getChildren() == null)
+          return array();
+
+    $model = $this->model;
+    $classes = array();
+    foreach ($this->getChildren() as $key => $value) {
+      $classes[] = $model->studentGetClass(intval($value));
     }
     $teachers = array();
-    foreach ($classes as $key => $value) {
-      $teachers = array_merge($teachers, $model->class_get_teachers($value));
+    foreach ($classes as $key => $class) {
+      $teachers = array_merge($teachers, $model->classGetTeachers($class));
     }
+
     sort($teachers);
-    $size = count($teachers);
-    for ($i = 1; $i <= $size; $i++) {
+
+    $tchrs_f = array();
+
+    for ($i = 1; $i <= count($teachers); $i++) {
       if ($teachers[$i] != $teachers[$i-1]) {
-        $tchrs_f[] = $teachers[$i]
+        $tchrs_f[] = $teachers[$i];
       }
     }
     return $tchrs_f;
@@ -108,10 +125,13 @@ class Teacher extends User
 
   /**
    *Constructor of Teacher class
+   * @param int $id userId
    */
-  function __construct()
+  function __construct($id)
   {
-    $this->name = $model->teacher_get_name($id);
+    parent::__construct($id);
+
+    $this->name = $this->model->teacherGetName($id);
     $this->type = 2;
   }
 }
