@@ -41,6 +41,11 @@ class Controller
             $pwd = $_SESSION['user']['pwd'] = $input['login']['password'];
             $usr = $_SESSION['user']['name'] = $input['login']['user'];
 
+            if(isset($input['console'])) // used to only get raw login state -> can be used in js
+            {
+                die($this->login($usr, $pwd) ? "true" : "false");
+            }
+
            if ($this->login($usr, $pwd)) {
 
                $this->tpl = "main";
@@ -74,11 +79,11 @@ class Controller
         // Start logout logic
   	    case "logout":
   	      session_destroy();
-          unset($_SESSION);
+          session_start();
 
-  	      $this->tpl = "login";
-  	      $this->notify('Erfolgreich abgemeldet');
-  	      $this->display();
+          $_SESSION['logout'] = true; // notify about logout after reloading the page to delete all $_POST data
+
+          header("Location: /");
   	      break;
           // End logout logic
   	    default:
@@ -112,8 +117,14 @@ class Controller
 
         }
 
-      $this->tpl = "login";
-          $this->display();
+        if(isset($_SESSION['logout']))
+        {
+            unset($_SESSION['logout']);
+            $this->notify('Erfolgreich abgemeldet');
+        }
+
+        $this->tpl = "login";
+        $this->display();
     }
 
 

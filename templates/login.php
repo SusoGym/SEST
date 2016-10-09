@@ -15,19 +15,18 @@
           <li>
             <div class="collapsible-header active"><i class="material-icons">filter_drama</i>Anmelden</div>
             <div class="collapsible-body" style="padding: 20px;">
-              <form method="post" autocomplete="off">
-                  <input type="hidden" name="type" value="login">
+              <form autocomplete="off" onsubmit="submitLogin()" action="javascript:void(0);">
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
-                  <input id="usr" name="login[user]" type="text" required <?php if(isset($_SESSION['failed_login']['name'])){echo 'value="' . $_SESSION['failed_login']['name'] . '"';}?>>
+                  <input id="usr_login" type="text" required <?php if(isset($_SESSION['failed_login']['name'])){echo 'value="' . $_SESSION['failed_login']['name'] . '"';}?>>
                   <label for="usr">Benutzername</label>
                 </div>
                 <div class="input-field ">
                   <i class="material-icons prefix">vpn_key</i>
-                  <input id="pwd" name="login[password]" type="password" required>
+                  <input id="pwd_login" type="password" required>
                   <label for="pwd">Passwort</label>
                 </div>
-                      <button class="btn waves-effect waves-light" type="submit" name="action">Submit<i class="material-icons right">send</i>
+                  <button class="btn waves-effect waves-light" id="btn_login" type="submit">Submit<i class="material-icons right">send</i>
               </form>
             </div>
           </li>
@@ -76,7 +75,31 @@
             foreach ($data['notifications'] as $not) {
                    echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
             }
+
       ?>
+
+
+      function submitLogin()
+      {
+          var pwd = $('#pwd_login').val();
+          var usr = $('#usr_login').val();
+          var url = "?console&type=login&login[password]=" + pwd + "&login[user]=" + usr;
+          console.info(url);
+
+          $.get( "index.php?console&type=login&login[password]=" + pwd + "&login[user]=" + usr, function (data) {
+
+              if(data === "true")
+              {
+                  location.reload();
+              } else {
+                  Materialize.toast("Benutzername oder Passwort falsch", 4000);
+                  $('#pwd_login').val("");
+              }
+          });
+
+          return false;
+      }
+
     </script>
   </body>
 
