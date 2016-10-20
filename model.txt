@@ -17,3 +17,5 @@ teacherGetSlots(teacher_id):= gibt ein Array mit allen Slots und deren Status au
 
 Viel Spass dabei
 Gregor
+
+registerParent(userName, pupilID, mail, pwd):= vermerkt neuen User in der Database und returnt dessen neue ID
