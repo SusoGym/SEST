@@ -5,10 +5,6 @@
  */
 class Controller
 {
-    /**
-     * @var Connection
-     */
-    static $connection;
 
   function __construct($input)
   {
@@ -17,7 +13,6 @@ class Controller
       ChromePhp::info("Input: " . json_encode($input));
       ChromePhp::info("Session: " . json_encode($_SESSION));
 
-      self::$connection = new Connection();
       $model = Model::getInstance();
       $this->infoToView = array();
 

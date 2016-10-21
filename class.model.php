@@ -8,7 +8,7 @@ class Model
     /**
      * @var Connection
      */
-    private $connection;//Connection Object
+    private static $connection;
     /**
      * @var Model
      */
@@ -19,8 +19,8 @@ class Model
      */
     private function __construct()
     {
-
-        $this->connection =  Controller::$connection;
+        if(self::$connection != null)
+            self::$connection = new Connection();
 
     }
 
@@ -39,9 +39,9 @@ class Model
     public function checkPupilExist($vorname, $name, $bday)
     { //TODO -> $name und $vorname beinhalten auch zweit namen -> optional oder pflicht bei registierung?
         $id = null;
-        $name = $this->connection->escape_string($name);
-        $bday = $this->connection->escape_string($bday);
-        $data = $this->connection->selectValues("SELECT id FROM schueler WHERE vorname='$vorname' AND name='$name' AND gebdatum='$bday' AND eid IS NULL");
+        $name = self::$connection->escape_string($name);
+        $bday = self::$connection->escape_string($bday);
+        $data = self::$connection->selectValues("SELECT id FROM schueler WHERE vorname='$vorname' AND name='$name' AND gebdatum='$bday' AND eid IS NULL");
         if (isset($data[0][0]))
             $id = $data[0][0];
         return $id;
@@ -53,7 +53,7 @@ class Model
      */
     public function userGetType($userid)
     {
-        $data = $this->connection->selectValues("SELECT user_type FROM user WHERE id=" .$userid);
+        $data = self::$connection->selectValues("SELECT user_type FROM user WHERE id=" .$userid);
 
         if(!isset($data[0]))
             return null;
@@ -68,8 +68,8 @@ class Model
      */
     public function usernameGetId($userName)
     {
-        $userName = $this->connection->escape_string($userName);
-        $data = $this->connection->selectValues("SELECT id FROM user WHERE username='$userName'");
+        $userName = self::$connection->escape_string($userName);
+        $data = self::$connection->selectValues("SELECT id FROM user WHERE username='$userName'");
 
         if($data == null)
             return null;
@@ -83,7 +83,7 @@ class Model
      */
     public function idGetUsername($id)
     {
-        $data = $this->connection->selectValues("SELECT username FROM user WHERE id=$id");
+        $data = self::$connection->selectValues("SELECT username FROM user WHERE id=$id");
 
         if($data == null)
             return null;
@@ -97,7 +97,12 @@ class Model
      */
     public function parentGetName($userId)
     {
-        $data = $this->connection->selectValues("SELECT eltern.* FROM eltern, user WHERE eltern.userid=user.id AND user.id=$userId AND user.user_type=1");
+        $data = self::$connection->selectAssociativeValues("SELECT eltern.* FROM eltern, user WHERE eltern.userid=user.id AND user.id=$userId AND user.user_type=1");
+
+        $name = $data["name"];
+        $surname = $data["vorname"];
+
+        return $surname . " " . $name; //TODO: really?
 
     }
 
@@ -107,17 +112,30 @@ class Model
      */
     public function teacherGetName($userId)
     {
-        $data = $this->connection->selectValues("SELECT lehrer.* FROM lehrer, user WHERE lehrer.userid=user.id AND user.id=$userId AND user.user_type=2");
+        $data = self::$connection->selectAssociativeValues("SELECT lehrer.* FROM lehrer, user WHERE lehrer.userid=user.id AND user.id=$userId AND user.user_type=2");
 
+        $name = $data["name"];
+        $surname = $data["vorname"];
+
+        return $surname . " " . $name; //TODO: really?
     }
 
     /**
      * @param int $elternId
-     * @return mixed // not defined yet
+     * @return array[int] array[childrenId]
      */
     public function parentGetChildren($elternId)
     {
-        $data = $this->connection->selectValues("SELECT * FROM schueler WHERE eid=$elternId");
+        $data = self::$connection->selectValues("SELECT * FROM schueler WHERE eid=$elternId");
+
+        $ids = array();
+
+        foreach ($data as $item) {
+            $pid = intval($item[0]);
+            array_push($ids, $pid);
+        }
+
+        return $ids;
     }
 
     /**
@@ -126,17 +144,29 @@ class Model
      */
     public function studentGetClass($schuelerId)
     {
-        $data = $this->connection->selectValues("SELECT schueler.klasse FROM schueler WHERE id=$schuelerId");
+        $data = self::$connection->selectValues("SELECT schueler.klasse FROM schueler WHERE id=$schuelerId");
+
+        return $data[0][0];
     }
 
     /**
      * @param string $class
-     * @return int
+     * @return array[int] array with teacherIds
      */
     public function classGetTeachers($class)
     {
-        $class = $this->connection->escape_string($class);
-        $data = $this->connection->selectValues("SELECT lehrer.* FROM lehrer, unterricht WHERE unterricht.klasse='$class' AND unterricht.lid=lehrer.id");
+        $class = self::$connection->escape_string($class);
+        $data = self::$connection->selectValues("SELECT lehrer.id FROM lehrer, unterricht WHERE unterricht.klasse='$class' AND unterricht.lid=lehrer.id"); // returns data[n][data]
+
+        $ids = array();
+
+        foreach ($data as $item)
+        {
+            $tid = intval($item[0]);
+            array_push($ids, $tid);
+        }
+
+        return $ids;
 
     }
 
@@ -163,10 +193,10 @@ class Model
      */
     public function passwordValidate($userName, $password)
     {
-        $userName = $this->connection->escape_string($userName);
-        //$password = $this->connection->escape_string($userName);
+        $userName = self::$connection->escape_string($userName);
+        //$password = self::$connection->escape_string($userName);
 
-        $data = $this->connection->selectAssociativeValues("SELECT password_hash from user WHERE username='$userName'");
+        $data = self::$connection->selectAssociativeValues("SELECT password_hash from user WHERE username='$userName'");
 
         if($data == null)
             return false;
@@ -191,12 +221,12 @@ class Model
     public function registerParent($usr, $pid, $email, $pwd)
     {
 
-        $usr = $this->connection->escape_string($usr);
-        $email = $this->connection->escape_string($email);
+        $usr = self::$connection->escape_string($usr);
+        $email = self::$connection->escape_string($email);
         $pwd = password_hash($pwd, PASSWORD_DEFAULT);
 
         //Create parent in database and return eid
-        $data = $this->connection->selectAssociativeValues("INSERT IGNORE INTO user (username, user_type, password_hash, email) VALUES ('$usr', 1,'$pwd', '$email'); SELECT LAST_INSERT_ID() as id;");
+        $data = self::$connection->selectAssociativeValues("INSERT IGNORE INTO user (username, user_type, password_hash, email) VALUES ('$usr', 1,'$pwd', '$email'); SELECT LAST_INSERT_ID() as id;");
 
         $parentId = $data[0]['id'];
 
@@ -213,7 +243,7 @@ class Model
             $query .= "UPDATE schueler SET eid=$parentId WHERE id=$pupilId;";
         }
 
-        $this->connection->straightQuery($query);
+        self::$connection->straightQuery($query);
 
         //return eid
         return intval($parentId);
