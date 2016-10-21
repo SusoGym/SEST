@@ -74,31 +74,35 @@ class Controller
         // Start register logic
         case "register":
   	      # check, then write into database, then login (session var...)
-          $successfull = true;
+          $success = true;
 
           $username = $input['register']['username'];
           if ($model->usernameGetId($username) != null) {
             $this->notify("Dieser Benutzername ist bereits vergeben");
-            $successfull = false;
+              $success = false;
           }
 
-          $pname = explode(" ", $input['register']['student']);
-          $pid = $model->checkPupilExist($pname[0], $pname[1], $input['register']['pbday']);
+          //TODO: check duplicate email
+          //TODO: check valid email
+
+          $pname = explode(" ", $input['register']['student']);     //TODO: multiple pupil instances
+          $pid = $model->checkPupilExist($pname[0], $pname[1], $input['register']['pbday']); //TODO: surname middle_name last_name || return int[] with multiple pupils
+          //TODO: check if pupil alread has parent
           if ($pid == null) {
             $this->notify("Bitte überprüfen Sie die angegebenen Schülerdaten");
-            $successfull = false;
+              $success = false;
           }
 
           $pwd = $input['register']['pwd'];
           if ($pwd != $input['register']['pwdrep']) {
-            $this->notify("Die Passwörter stimmen nicht überein")
-            $successfull = false;
+            $this->notify("Die Passwörter stimmen nicht überein");
+            $success = false;
           }
 
-          if ($successfull == true) {
-            $userid = $model->registerParent($username), $pid, $input['register']['mail'], $pwd);
+          if ($success == true) {
+            $userid = $model->registerParent($username, $pid, $input['register']['mail'], $pwd);
             $_SESSION['user']['id'] = $userid;
-            $_SESSION['user']['type'] = 1; //Is this enough to make the thing work? I still don't understand that 'Create User' thing around line 160
+
           } else {
             $this->tpl = "login";
             $this->display();

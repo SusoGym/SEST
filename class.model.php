@@ -179,6 +179,47 @@ class Model
 
         return password_verify($password, $pwd_hash);
     }
+
+
+    /**
+     * @param $usr string parents username
+     * @param $pid array or int parents children ids (array[int] || int)
+     * @param $email string parents email
+     * @param $pwd string parents password
+     * @return int newly created parents id
+     */
+    public function registerParent($usr, $pid, $email, $pwd)
+    {
+
+        $usr = $this->connection->escape_string($usr);
+        $email = $this->connection->escape_string($email);
+        $pwd = password_hash($pwd, PASSWORD_DEFAULT);
+
+        //Create parent in database and return eid
+        $data = $this->connection->selectAssociativeValues("INSERT IGNORE INTO user (username, user_type, password_hash, email) VALUES ('$usr', 1,'$pwd', '$email'); SELECT LAST_INSERT_ID() as id;");
+
+        $parentId = $data[0]['id'];
+
+        // transform given int into array
+        if(!is_array($pid))
+        {
+            $pid = array($pid);
+        }
+
+        // query each given pupil and set eid (one query to spare resources)
+        $query = "";
+        foreach ($pid as $pupilId)
+        {
+            $query .= "UPDATE schueler SET eid=$parentId WHERE id=$pupilId;";
+        }
+
+        $this->connection->straightQuery($query);
+
+        //return eid
+        return intval($parentId);
+
+    }
+
 }
 
 

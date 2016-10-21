@@ -35,10 +35,11 @@ CREATE TABLE unterricht (
 ) engine=InnoDB;
 
 CREATE TABLE `user` (
- id                   int PRIMARY KEY NOT NULL  ,
+ id                   int PRIMARY KEY NOT NULL AUTO_INCREMENT,
  username             varchar(100) UNIQUE NOT NULL  ,
  user_type            int   DEFAULT 1 ,
- password_hash        text  NOT NULL
+ password_hash        text  NOT NULL,
+  email                varchar(100)  NOT NULL UNIQUE
 ) engine=InnoDB;
 
 CREATE TABLE eltern (
