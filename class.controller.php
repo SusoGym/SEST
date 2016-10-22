@@ -71,37 +71,79 @@ class Controller
   	      # check, then write into database, then login (session var...)
           $success = true;
 
+          ChromePhp::info("-- Register --");
+
           $username = $input['register']['username'];
+          ChromePhp::info("Username: " . $username);
+
           if ($model->usernameGetId($username) != null) {
             $this->notify("Dieser Benutzername ist bereits vergeben");
-              $success = false;
+            $success = false;
           }
 
           //TODO: check duplicate email
           //TODO: check valid email
 
-          $pname = explode(" ", $input['register']['student']);     //TODO: multiple pupil instances
-          $pid = $model->checkPupilExist($pname[0], $pname[1], $input['register']['pbday']); //TODO: surname middle_name last_name || return int[] with multiple pupils
+          $rawName = $input['register']['student'];
+          $pname = explode(" ", $rawName);     //TODO: multiple pupil instances
+          $bday = $input['register']['pday'];
+          $pwd = $input['register']['pwd'];
+          $pwdrep = $input['register']['pwdrep'];
+          $mail = $input['register']['mail'];
+
+          ChromePhp::info("Input: " . json_encode(array("student" => $pname, "student_bday" => $bday, "mail" => $mail, "pwd" => $pwd, "pwdrep" => $pwdrep)));
+
+          $studentData = $model->checkPupilExist($pname[0], $pname[1], $bday); //TODO: surname middle_name last_name || return int[] with multiple pupils
+
+          $pid = $studentData["id"];
+          $studentEid = $studentData["eid"];
+
+            ChromePhp::info("Student: " . json_encode($pname) . " born on " . $bday . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($studentEid == null ? "no parents set" : "parent with id $studentEid")));
+
           //TODO: check if pupil alread has parent
-          if ($pid == null) {
-            $this->notify("Bitte überprüfen Sie die angegebenen Schülerdaten");
+
+          if ($success && $pid == null) {
+              $this->notify("Bitte überprüfen Sie die angegebenen Schülerdaten");
               $success = false;
           }
 
-          $pwd = $input['register']['pwd'];
-          if ($pwd != $input['register']['pwdrep']) {
+          if($success && $studentEid != null)
+          {
+              $this->notify("Dem Schüler $rawName ist bereits ein Elternteil zugeordnet!"); //TODO: get student name with correct upper/lower case etc. from database (student object)
+              $success = false;
+          }
+
+          if ($success && $pwd != $pwdrep)  //TODO: don't check this with php but with javascript?
+          {
+              ChromePhp::info("Passwords not identical");
             $this->notify("Die Passwörter stimmen nicht überein");
             $success = false;
           }
+          else if($pwd == $pwdrep)
+          {
+              ChromePhp::info("Passwords identical");
+          }
+
+          ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
 
           if ($success == true) {
-            $userid = $model->registerParent($username, $pid, $input['register']['mail'], $pwd);
+            $userid = $model->registerParent($username, $pid, $mail, $pwd);
             $_SESSION['user']['id'] = $userid;
+
+              $time = $_SESSION['user']['logintime'] = time();
+
+              ChromePhp::info("Registered new user '$username' with id $userid and logged in @ $time");
+
+              $this->tpl = "main";
+              $this->display();
+
 
           } else {
             $this->tpl = "login";
             $this->display();
           }
+
+
   	      break;
           // End register logic
         // Start logout logic

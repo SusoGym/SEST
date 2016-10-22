@@ -19,7 +19,7 @@ class Model
      */
     private function __construct()
     {
-        if(self::$connection != null)
+        if(self::$connection == null)
             self::$connection = new Connection();
 
     }
@@ -34,17 +34,27 @@ class Model
      * @param string $vorname Schueler Vorname
      * @param string $name Schueler Nachname
      * @param string $bday Geburtsdatum
-     * @return int SchuelerID
+     * @return array[int] array[SchuelerID, ElternId] TODO: would be nicer to create student object here
      **/
     public function checkPupilExist($vorname, $name, $bday)
     { //TODO -> $name und $vorname beinhalten auch zweit namen -> optional oder pflicht bei registierung?
         $id = null;
+        $eid = null;
         $name = self::$connection->escape_string($name);
         $bday = self::$connection->escape_string($bday);
-        $data = self::$connection->selectValues("SELECT id FROM schueler WHERE vorname='$vorname' AND name='$name' AND gebdatum='$bday' AND eid IS NULL");
+
+        $data = self::$connection->selectValues("SELECT id, eid FROM schueler WHERE vorname='$vorname' AND name='$name' AND gebdatum='$bday'");
+
+        ChromePhp::info(json_encode($data[0]));
         if (isset($data[0][0]))
             $id = $data[0][0];
-        return $id;
+        if(isset($data[0][1]))
+            $eid = $data[0][1];
+
+        if($id == null)
+            return null;
+
+        return array("id"=>$id, "eid"=>$eid);
     }
 
     /**
@@ -181,7 +191,7 @@ class Model
     /**
      * @param int $terminId
      */
-    public function bookingDeleate($terminId)
+    public function bookingDelete($terminId)
     {
 
     }
@@ -225,10 +235,14 @@ class Model
         $email = self::$connection->escape_string($email);
         $pwd = password_hash($pwd, PASSWORD_DEFAULT);
 
-        //Create parent in database and return eid
-        $data = self::$connection->selectAssociativeValues("INSERT IGNORE INTO user (username, user_type, password_hash, email) VALUES ('$usr', 1,'$pwd', '$email'); SELECT LAST_INSERT_ID() as id;");
+        $query = "INSERT INTO user (username, user_type, password_hash, email) VALUES ('$usr', 1,'$pwd', '$email');";
 
-        $parentId = $data[0]['id'];
+        ChromePhp::info($query);
+
+        //Create parent in database and return eid
+        self::$connection->straightQuery($query);
+
+        $parentId = self::$connection->getConnection()->insert_id;
 
         // transform given int into array
         if(!is_array($pid))
