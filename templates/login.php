@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
   <head>
-    <title>ESPT - Login</title>
+    <title>Suso-Elternsprechtag</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -13,7 +13,7 @@
 
         <ul class="collapsible white" data-collapsible="accordion">
           <li>
-            <div class="collapsible-header active"><i class="material-icons">filter_drama</i>Anmelden</div>
+            <div class="collapsible-header active"><i class="material-icons">person</i>Anmelden</div>
             <div class="collapsible-body" style="padding: 20px;">
               <form autocomplete="off" onsubmit="submitLogin()" action="javascript:void(0);">
                 <div class="input-field">
@@ -26,23 +26,20 @@
                   <input id="pwd_login" type="password" required>
                   <label for="pwd">Passwort</label>
                 </div>
-                  <button class="btn waves-effect waves-light" id="btn_login" type="submit">Submit<i class="material-icons right">send</i>
+                <div class="row" style="margin-bottom: 0px;">
+                    <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i class="material-icons right">send</i></button>
+                </div>
               </form>
             </div>
           </li>
           <li>
-            <div class="collapsible-header"><i class="material-icons">place</i>Registrieren</div>
+            <div class="collapsible-header"><i class="material-icons">person_add</i>Registrieren</div>
             <div class="collapsible-body" style="padding: 20px;">
-              <form method="post" action="login.php" autocomplete="off">
+              <form method="post" action="?type=register" autocomplete="off">
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
                   <input id="name" name="name" type="text" required>
                   <label for="name">Name</label>
-                </div>
-                <div class="input-field">
-                  <i class="material-icons prefix">face</i>
-                  <input id="student" name="student" type="text" required>
-                  <label for="student">Sch&uuml;ler</label>
                 </div>
                 <div class="input-field">
                   <i class="material-icons prefix">mail</i>
@@ -59,12 +56,20 @@
                   <input id="pwdrep" name="pwdrep" type="password" required>
                   <label for="pwdrep">Passwort wiederholen</label>
                 </div>
+                <a class="btn-flat teal-text" style="margin-bottom: 10px;" onclick="moreFields();" id="moreFields"><i class="material-icons left">add</i>Schüler hinzufügen</a>
+                <span id="write"></span>
+                <div class="row" style="margin-bottom: 0px;">
+                    <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i class="material-icons right">send</i></button>
+                </div>
               </form>
             </div>
           </li>
         </ul>
-
       </div>
+    </div>
+    <div id="read" class="row" style="display: none;">
+      <input id="stuname" class="col s6" name="stuname" type="text" class="autocomplete" placeholder="Name">
+      <input id="bday" class="col s6" name="stubday" type="text" placeholder="tt.mm.yyyy">
     </div>
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
@@ -78,6 +83,25 @@
 
       ?>
 
+      var counter = 0;
+
+      function moreFields() {
+      	counter++;
+        if (counter <= 100) {
+        	var newFields = document.getElementById('read').cloneNode(true);
+        	newFields.id = '';
+        	newFields.style.display = 'block';
+          newFields.required;
+        	var newField = newFields.childNodes;
+        	for (var i=0;i<newField.length;i++) {
+        		var theName = newField[i].name
+        		if (theName)
+        			newField[i].name = theName + counter;
+        	}
+        	var insertHere = document.getElementById('write');
+        	insertHere.parentNode.insertBefore(newFields,insertHere);
+        }
+      }
 
       function submitLogin()
       {
