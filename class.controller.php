@@ -212,6 +212,7 @@ class Controller
    */
   function display()
   {
+
       ChromePhp::info("Displaying 'templates/" . $this->tpl . ".php' with data " . json_encode($this->infoToView));
 
     $model = Model::getInstance();

@@ -1,3 +1,12 @@
+<?php
+$model = Model::getInstance();
+//$tchrs = $model->classGetTeachers($model->studentGetClass(/*$_SESSION['user']['id']*/1));
+$tchrsids = $model->getTeachers();
+foreach ($tchrsids as $tchr) {
+  $tchrs[$tchr] = $model->teacherGetName($tchr);
+}
+?>
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -7,6 +16,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link type="text/css" rel="stylesheet" href="http://materializecss.com/bin/materialize.css"  media="screen,projection"/>
+    <style>
+      .action { margin-left: 10px; }
+      .info { margin-left: 10px; font-style: italic; }
+    </style>
   </head>
   <body class="grey lighten-2">
 
@@ -29,26 +42,66 @@
         <div class="card-content">
           <span class="card-title">Termin buchen</span>
           <div class="row">
-	    <div class="col l3">
-                <ul class="teachers collection">
-                  <li class="tab"><a class="collection-item" href="#test1">Lehrer 1</a></li>
-                  <li class="tab"><a class="collection-item" href="#test2">Lehrer 2</a></li>
-                  <li class="tab"><a class="collection-item" href="#test3">Lehrer 3</a></li>
-                  <li class="tab"><a class="collection-item" href="#test4">Lehrer 4</a></li>
-                </ul>
+            <div class="col l3">
+              <ul class="teachers collection">
+                <?php foreach ($tchrs as $id => $name) { ?>
+                  <li class="tab"><a class="collection-item" onclick="$('html, body').animate({ scrollTop: 0 }, 200);" href="#test<?php echo $id; ?>"><?php echo $name['name'].', '.$name['surname']; ?></a></li>
+                <?php } ?>
+              </ul>
             </div>
-	    <div class="col l9">
-                <div id="test1" class="col s12">Buchen für Lehrer 1</div>
-                <div id="test2" class="col s12">Buchen für Lehrer 2</div>
-                <div id="test3" class="col s12">Buchen für Lehrer 3</div>
-                <div id="test4" class="col s12">Buchen für Lehrer 4</div>
+            <div class="col l9">
+              <?php foreach ($tchrs as $id => $name) { ?>
+                <div id="test<?php echo $id; ?>" class="col s12">
+                  <ul class="collection with-header">
+                    <li class="collection-header"><h4>Termin bei <font class="teal-text"><?php echo $name['surname'] . " " . $name['name']; ?></font> buchen</h4></li>
+
+                    <li class="collection-item">
+                      <div>
+                        slot
+                        <a href="#!" class="secondary-content action">
+                          <i class="material-icons">assignment</i>
+                        </a>
+                        <span href="#!" class="secondary-content info grey-text">
+                          freier Termin
+                        </span>
+                      </div>
+                    </li>
+
+                    <li class="collection-item">
+                      <div>
+                        slot
+                        <a href="#!" class="secondary-content action">
+                          <i class="material-icons">assignment</i>
+                        </a>
+                        <span href="#!" class="secondary-content info grey-text">
+                          bereits von Ihnen gebucht
+                        </span>
+                      </div>
+                    </li>
+
+                    <li class="collection-item">
+                      <div>
+                        slot
+                        <a href="#!" class="secondary-content action">
+                          <i class="material-icons">assignment</i>
+                        </a>
+                        <span href="#!" class="secondary-content info grey-text">
+                          bereits belegter Termin
+                        </span>
+                      </div>
+                    </li>
+
+                  </ul>
+                </div>
+              <?php } ?>
             </div>
-	  </div>
+          </div>
         </div>
         <div class="card-action center">
-	  &copy; <?php echo date("Y"); ?> Heinrich-Suso-Gymnasium Konstanz
+          &copy; <?php echo date("Y"); ?> Heinrich-Suso-Gymnasium Konstanz
         </div>
       </div>
+
     </div>
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>

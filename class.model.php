@@ -117,17 +117,17 @@ class Model
     }
 
     /**
-     * @param int $userId
-     * @return string
+     * @param int $tchrId, string $sort
+     * @return array(surname, name)
      */
-    public function teacherGetName($userId)
+    public function teacherGetName($tchrId, $sort = "name ASC")
     {
-        $data = self::$connection->selectAssociativeValues("SELECT lehrer.* FROM lehrer, user WHERE lehrer.userid=user.id AND user.id=$userId AND user.user_type=2");
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id=$tchrId ORDER BY $sort");
 
-        $name = $data["name"];
-        $surname = $data["vorname"];
+        $name = $data[0]["name"];
+        $surname = $data[0]["vorname"];
 
-        return $surname . " " . $name; //TODO: really?
+        return array('surname' => $surname, 'name' => $name); //TODO: really?
     }
 
     /**
@@ -180,6 +180,20 @@ class Model
 
     }
 
+    public function getTeachers() {
+      $data = self::$connection->selectValues("SELECT id FROM lehrer"); // returns data[n][data]
+
+      $ids = array();
+
+      foreach ($data as $item)
+      {
+          $tid = intval($item[0]);
+          array_push($ids, $tid);
+      }
+
+      return $ids;
+    }
+
     /**
      * @param int $terminId
      */
@@ -203,6 +217,7 @@ class Model
      */
     public function passwordValidate($userName, $password)
     {
+
         $userName = self::$connection->escape_string($userName);
         //$password = self::$connection->escape_string($userName);
 
