@@ -102,18 +102,18 @@ class Controller
 
           //TODO: check if pupil alread has parent
 
-          if ($success && $pid == null) {
+          if ($pid == null) {
               $this->notify("Bitte überprüfen Sie die angegebenen Schülerdaten");
               $success = false;
           }
 
-          if($success && $studentEid != null)
+          if($studentEid != null)
           {
-              $this->notify("Dem Schüler $rawName ist bereits ein Elternteil zugeordnet!"); //TODO: get student name with correct upper/lower case etc. from database (student object)
+              $this->notify("Dem Schüler ".$rawName." ist bereits ein Elternteil zugeordnet"); //TODO: get student name with correct upper/lower case etc. from database (student object)
               $success = false;
           }
 
-          if ($success && $pwd != $pwdrep)  //TODO: don't check this with php but with javascript?
+          if ($pwd != $pwdrep)  //TODO: don't check this with php but with javascript?
           {
               ChromePhp::info("Passwords not identical");
             $this->notify("Die Passwörter stimmen nicht überein");
