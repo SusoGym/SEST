@@ -68,8 +68,8 @@
       </div>
     </div>
     <div id="read" class="row" style="display: none;">
-      <input id="stuname" class="col s6" name="stuname" type="text" class="autocomplete" placeholder="Name">
-      <input id="bday" class="col s6" name="stubday" type="text" placeholder="tt.mm.yyyy">
+      <input id="student" class="col s6" name="student" type="text" class="autocomplete" placeholder="Name">
+      <input id="bday" class="col s6" name="bday" type="text" placeholder="tt.mm.yyyy">
     </div>
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
@@ -96,7 +96,7 @@
         	for (var i=0;i<newField.length;i++) {
         		var theName = newField[i].name
         		if (theName)
-        			newField[i].name = theName + counter;
+        			newField[i].name = theName + "[" + counter + "]";
         	}
         	var insertHere = document.getElementById('write');
         	insertHere.parentNode.insertBefore(newFields,insertHere);
