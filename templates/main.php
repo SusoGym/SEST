@@ -64,11 +64,11 @@ foreach ($tchrsids as $tchr) {
                     <li class="collection-item">
                       <div>
                         slot
-                        <a href="#!" class="secondary-content action">
-                          <i class="material-icons">assignment</i>
+                        <a href class="secondary-content action">
+                          <i class="material-icons green-text">forward</i>
                         </a>
                         <span href="#!" class="secondary-content info grey-text">
-                          freier Termin
+                          jetzt buchen
                         </span>
                       </div>
                     </li>
@@ -76,11 +76,11 @@ foreach ($tchrsids as $tchr) {
                     <li class="collection-item">
                       <div>
                         slot
-                        <a href="#!" class="secondary-content action">
-                          <i class="material-icons">assignment</i>
-                        </a>
+                        <span href="#!" class="secondary-content action">
+                          <i class="material-icons grey-text">check</i>
+                        </span>
                         <span href="#!" class="secondary-content info grey-text">
-                          bereits von Ihnen gebucht
+                          gebucht
                         </span>
                       </div>
                     </li>
@@ -88,11 +88,11 @@ foreach ($tchrsids as $tchr) {
                     <li class="collection-item">
                       <div>
                         slot
-                        <a href="#!" class="secondary-content action">
-                          <i class="material-icons">assignment</i>
-                        </a>
+                        <span class="secondary-content action">
+                          <i class="material-icons red-text">clear</i>
+                        </span>
                         <span href="#!" class="secondary-content info grey-text">
-                          bereits belegter Termin
+                          nicht verfügbar
                         </span>
                       </div>
                     </li>
@@ -104,6 +104,7 @@ foreach ($tchrsids as $tchr) {
           </div>
         </div>
         <div class="card-action center">
+          <div class="divider"></div> <br />
           &copy; <?php echo date("Y"); ?> Heinrich-Suso-Gymnasium Konstanz
         </div>
       </div>
@@ -130,9 +131,9 @@ foreach ($tchrsids as $tchr) {
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="http://materializecss.com/bin/materialize.js"></script>
     <script>
-        $(".button-collapse").sideNav();
         $(document).ready(function(){
           $('ul.teachers').tabs();
+          $(".button-collapse").sideNav();
         });
     </script>
   </body>
