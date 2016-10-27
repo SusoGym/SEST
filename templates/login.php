@@ -19,12 +19,12 @@
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
                   <input id="usr_login" type="text" required <?php if(isset($_SESSION['failed_login']['name'])){echo 'value="' . $_SESSION['failed_login']['name'] . '"';}?>>
-                  <label for="usr">Benutzername</label>
+                  <label for="usr_login">Benutzername</label>
                 </div>
                 <div class="input-field ">
                   <i class="material-icons prefix">vpn_key</i>
                   <input id="pwd_login" type="password" required>
-                  <label for="pwd">Passwort</label>
+                  <label for="pwd_login">Passwort</label>
                 </div>
                 <div class="row" style="margin-bottom: 0px;">
                     <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i class="material-icons right">send</i></button>
@@ -33,31 +33,31 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header"><i class="material-icons">person_add</i>Registrieren</div>
+            <div class="collapsible-header"><i class="material-icons">person_add</i>Registrieren</div><!-- TODO: Do with JS! -->
             <div class="collapsible-body" style="padding: 20px;">
-              <form method="post" action="?type=register" autocomplete="off">
+              <form method="post" onsubmit="submitRegister()" action="javascript:void(0);" autocomplete="off">
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
-                  <input id="name" name="name" type="text" required>
-                  <label for="name">Name</label>
+                  <input id="name_register" name="name" type="text" required>
+                  <label for="name_register">Name</label>
                 </div>
                 <div class="input-field">
                   <i class="material-icons prefix">mail</i>
-                  <input id="mail" name="mail" type="text" required>
-                  <label for="mail">Email</label>
+                  <input id="mail_register" name="mail" type="text" required>
+                  <label for="mail_register">Email</label>
                 </div>
                 <div class="input-field ">
                   <i class="material-icons prefix">vpn_key</i>
-                  <input id="pwd" name="pwd" type="password" required>
-                  <label for="pwd">Passwort</label>
+                  <input id="pwd_register" name="pwd" type="password" required>
+                  <label for="pwd_register">Passwort</label>
                 </div>
                 <div class="input-field ">
                   <i class="material-icons prefix">cached</i>
-                  <input id="pwdrep" name="pwdrep" type="password" required>
-                  <label for="pwdrep">Passwort wiederholen</label>
+                  <input id="pwdrep_register" name="pwdrep" type="password" required>
+                  <label for="pwdrep_register">Passwort wiederholen</label>
                 </div>
-                <a class="btn-flat teal-text" style="margin-bottom: 10px;" onclick="moreFields();" id="moreFields"><i class="material-icons left">add</i>Schüler hinzufügen</a>
-                <span id="write"></span>
+                <a class="btn-flat teal-text" style="margin-bottom: 10px;" onclick="addStudent();" id="moreFields"><i class="material-icons left">add</i>Schüler hinzufügen</a>
+                <span id="students"></span>
                 <div class="row" style="margin-bottom: 0px;">
                     <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i class="material-icons right">send</i></button>
                 </div>
@@ -67,9 +67,9 @@
         </ul>
       </div>
     </div>
-    <div id="read" class="row" style="display: none;">
-      <input id="student" class="col s6" name="student" type="text" class="autocomplete" placeholder="Name">
-      <input id="bday" class="col s6" name="bday" type="text" placeholder="tt.mm.yyyy">
+    <div id="student_blueprint" class="row" style="display: none;">
+      <input id="student" class="col s6" name="student" type="text" class="autocomplete name" placeholder="Name">
+      <input id="bday" class="col s6" name="bday" type="text" class="bday" placeholder="tt.mm.yyyy">
     </div>
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
@@ -85,32 +85,34 @@
 
       var counter = 0;
 
-      function moreFields() {
+      function addStudent() {
       	counter++;
         if (counter <= 100) {
-        	var newFields = document.getElementById('read').cloneNode(true);
-        	newFields.id = '';
-        	newFields.style.display = 'block';
-          newFields.required;
-        	var newField = newFields.childNodes;
-        	for (var i=0;i<newField.length;i++) {
-        		var theName = newField[i].name
-        		if (theName)
-        			newField[i].name = theName + "[" + counter + "]";
-        	}
-        	var insertHere = document.getElementById('write');
-        	insertHere.parentNode.insertBefore(newFields,insertHere);
+        	var clonedNode = document.getElementById('student_blueprint').cloneNode(true);
+        	clonedNode.id = ''; // reset id name of clone
+        	clonedNode.style.display = 'block'; // remove display: none; from clone
+            clonedNode.className = 'student_instance';
+        	var childNodes = clonedNode.childNodes;
+            childNodes.forEach(function(childNode) {
+                var nodeName = childNode.name;
+        		if (nodeName)
+        			childNode.name = nodeName + "[" + counter + "]";
+        	});
+        	var insertHere = document.getElementById('students');
+        	insertHere.parentNode.insertBefore(clonedNode, insertHere);
         }
       }
+
+      addStudent(); // -> create one default student field
 
       function submitLogin()
       {
           var pwd = $('#pwd_login').val();
           var usr = $('#usr_login').val();
-          var url = "?console&type=login&login[password]=" + pwd + "&login[user]=" + usr;
-          console.info(url);
+          var url =  "index.php?console&type=login&login[password]=" + pwd + "&login[user]=" + usr;
 
-          $.get( "index.php?console&type=login&login[password]=" + pwd + "&login[user]=" + usr, function (data) {
+
+          $.get(url, function (data) {
 
               if(data === "true")
               {
@@ -122,6 +124,66 @@
           });
 
           return false;
+      }
+      
+      function submitRegister()
+      {
+          // register[ usr, mail, pwd, student[ [name, bday], [name, bday], ...]
+          var url_param = "?console&type=register";
+
+          //TODO: check inputs for correct syntax etc. and correct password repeat
+          var usr = $('#name_register').val();
+          var mail = $('#mail_register').val();
+          var pwd = $('#pwd_register').val();
+          var pwdrep = $('#pwdrep_register').val();
+
+          if(pwd != pwdrep)
+          {
+              $('#pwd_register').val("");
+              $('#pwdrep_register').val("");
+              Materialize.toast("Die eingegebenen Passwörter stimmen nicht überein!", 4000);
+
+              return;
+          }
+
+
+
+          url_param += "&register[usr]=" + usr + "&register[mail]=" + mail + "&register[pwd]=" + pwd;
+
+
+          var studentNotes = document.getElementsByClassName('student_instance');
+
+            for(var i = 0; i < studentNotes.length; i++)
+            {
+                var student = studentNotes[i];
+                var name = student.childNodes[1].value;
+                var bday = student.childNodes[3].value;  // magic numbers op!
+
+                if(name == "" || bday == "")
+                    continue;
+
+                url_param += "&register[student][]=" + name + ":" + bday;
+
+          }
+
+            // give request to backend and utilize response
+          $.get("index.php" + url_param, function (data) {
+              var myData = JSON.parse(data);
+              if(myData.success)
+              {
+                location.reload();
+              }
+              else
+              { // oh no! ;-;
+                  var notifications = myData['notifications'];
+                  notifications.forEach(function (data) {
+                      Materialize.toast(data, 4000);
+                  });
+              }
+
+          });
+
+        
       }
 
     </script>

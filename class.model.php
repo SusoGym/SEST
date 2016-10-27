@@ -45,7 +45,6 @@ class Model
 
         $data = self::$connection->selectValues("SELECT id, eid FROM schueler WHERE vorname='$vorname' AND name='$name' AND gebdatum='$bday'");
 
-        ChromePhp::info(json_encode($data[0]));
         if (isset($data[0][0]))
             $id = $data[0][0];
         if(isset($data[0][1]))
@@ -252,18 +251,16 @@ class Model
 
         $query = "INSERT INTO user (username, user_type, password_hash, email) VALUES ('$usr', 1,'$pwd', '$email');";
 
-        ChromePhp::info($query);
-
         //Create parent in database and return eid
-        self::$connection->straightQuery($query);
-
-        $parentId = self::$connection->getConnection()->insert_id;
+        $parentId = self::$connection->insertValues($query);
 
         // transform given int into array
         if(!is_array($pid))
         {
             $pid = array($pid);
         }
+
+        ChromePhp::info("New parents id is $parentId and student ids are " . json_encode($pid));
 
         // query each given pupil and set eid (one query to spare resources)
         $query = "";

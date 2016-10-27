@@ -9,8 +9,24 @@ require "class.controller.php";
 require "class.model.php";
 require "class.view.php";
 // ChromePhp::setEnabled(false);  // disable debugging
-
+enableCustomErrorHandler();
 $input = array_merge($_GET, $_POST);
 $control = new Controller($input);
+
+
+/**
+ * This function will throw Exceptions instead of warnings (better to debug)
+ */
+function enableCustomErrorHandler()
+{
+    set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
+        // error was suppressed with the @-operator
+        if (0 === error_reporting()) {
+            return false;
+        }
+
+        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    });
+}
 
 ?>
