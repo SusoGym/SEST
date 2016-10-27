@@ -114,9 +114,9 @@ foreach ($tchrsids as $tchr) {
       <li>
         <div class="userView">
           <img class="background grey" src="http://materializecss.com/images/office.jpg">
-          <a href="#!user"><img class="circle" src="http://www.motormasters.info/wp-content/uploads/2015/02/dummy-profile-pic-male1.jpg"></a>
-          <a href="#!name"><span class="white-text name"><?php echo $_SESSION['user']['name']; ?></span></a>
-          <a href="#!email"><span class="white-text email">dummymail@example.com</span></a>
+          <img class="circle" src="http://www.motormasters.info/wp-content/uploads/2015/02/dummy-profile-pic-male1.jpg">
+          <span class="white-text name"><?php echo $_SESSION['user']['name']; ?></span>
+          <span class="white-text email"><?php echo(isset($_SESSION['user']['email']) ? $_SESSION['user']['email'] : ""); ?></span>
         </div>
       </li>
       <li><a class="waves-effect" href="#!"><i class="material-icons">cloud</i>First Menu Item</a></li>
