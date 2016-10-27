@@ -209,7 +209,7 @@ class Controller
           $name = $student[0];
           $bday = $student[1];
 
-          $studentData = $model->checkPupilExist(explode(" ", $name)[0], explode(" ", $name)[1], $bday); //TODO: surname middle_name last_name || return int[] with multiple pupils
+          $studentData = $model->checkPupilExist(explode(" ", $name)[0], explode(" ", $name)[1], $bday);
           $pid = $studentData["id"];
           $studentEid = $studentData["eid"];
 
