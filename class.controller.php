@@ -77,7 +77,7 @@ class Controller
               if($this->checkLogin($name, $pwd))
               {
                   ChromePhp::info("Relogin with valid user data");
-                  $this->display("main");
+                  $this->display("parent_dashboard");
                   return;
               }
               else
@@ -116,7 +116,7 @@ class Controller
           $this->model->bookingDelete($this->input['booking']['slot'], $this->user->getId());
       }
 
-      return "main";
+      return "parent_dashboard";
   }
 
   /**
@@ -158,7 +158,7 @@ class Controller
 
       if ($this->checkLogin($usr, $pwd)) {
 
-          return "main";
+          return "parent_dashboard";
       } else {
 
           ChromePhp::info("Invalid login data");
@@ -246,6 +246,7 @@ class Controller
 
           $_SESSION['user']['name'] = $username;
           $_SESSION['user']['pwd'] = $pwd;
+          $_SESSION['user']['email'] = $mail;
 
           ChromePhp::info("Registered new user '$username' with id $userid and logged in @ $time");
 
@@ -265,7 +266,7 @@ class Controller
 
       if ($success == true) {
 
-          return "main";
+          return "parent_dashboard";
 
       } else {
 
@@ -291,7 +292,7 @@ class Controller
       ChromePhp::info("Displaying 'templates/$template.php' with data " . json_encode($this->infoToView));
 
     $model = Model::getInstance();
-   /* if ($template == "main" && isset($this->user)) {
+   /* if ($template == "parent_dashboard" && isset($this->user)) {
       if ($this->user->getType() == 1) { // is parent/guardian
 
           /** @var Guardian $guardian
@@ -341,14 +342,14 @@ class Controller
 
 
   private function checkLogin($usr, $pwd)
-  {
+  { //TODO: get email from db and save to $_SESSION['user']['email']
       $model = Model::getInstance();
       if($model->passwordValidate($usr, $pwd)) {
 
           $uid = $_SESSION['user']['id'] = $model->usernameGetId($usr);
           if ($uid == null) {
               $this->notify("Database error!");
-              $this->display();
+              $this->display("login");
 
               ChromePhp::error("Unexpected database response! requested uid = null!");
               exit();
