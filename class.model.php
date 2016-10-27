@@ -126,7 +126,7 @@ class Model
         $name = $data[0]["name"];
         $surname = $data[0]["vorname"];
 
-        return array('surname' => $surname, 'name' => $name); //TODO: really?
+        return array('surname' => $surname, 'name' => $name);
     }
 
     /**

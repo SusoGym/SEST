@@ -33,7 +33,7 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header"><i class="material-icons">person_add</i>Registrieren</div><!-- TODO: Do with JS! -->
+            <div class="collapsible-header"><i class="material-icons">person_add</i>Registrieren</div>
             <div class="collapsible-body" style="padding: 20px;">
               <form method="post" onsubmit="submitRegister()" action="javascript:void(0);" autocomplete="off">
                 <div class="input-field">
@@ -131,7 +131,7 @@
           // register[ usr, mail, pwd, student[ [name, bday], [name, bday], ...]
           var url_param = "?console&type=register";
 
-          //TODO: check inputs for correct syntax etc. and correct password repeat
+          //TODO: check inputs for correct syntax etc.
           var usr = $('#name_register').val();
           var mail = $('#mail_register').val();
           var pwd = $('#pwd_register').val();
