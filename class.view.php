@@ -6,7 +6,7 @@
 class View
 {
 
-  function __construct($template, $data)
+  public function __construct($template, $data)
   {
     $this->data = $data;
     include("templates/$template.php");

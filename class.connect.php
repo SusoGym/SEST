@@ -156,7 +156,7 @@ class Connection
   * Führt eine SQL Query durch
   * @param $query String SQL Query
   */
-  function straightQuery($query)
+  public function straightQuery($query)
   {
 
       $this->connID->query($query);
@@ -186,7 +186,7 @@ class Connection
    * @param $string
    * @return string
    */
-  function escape_string($string)
+  public function escape_string($string)
   {
     return $this->connID->real_escape_string($string);
   }
@@ -194,7 +194,7 @@ class Connection
     /**
      * @return string location the caller method was called from
      */
-  function getCaller()
+  private function getCaller()
   {
       $info = debug_backtrace();
       $file = $info[1]['file'];
