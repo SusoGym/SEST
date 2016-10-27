@@ -186,7 +186,6 @@ class Controller
       ChromePhp::info("-- Register --");
 
       //TODO: check duplicate email
-      //TODO: check valid email
       $username = $input['register']['usr'];
       $pwd = $input['register']['pwd'];
       $mail =  $input['register']['mail'];

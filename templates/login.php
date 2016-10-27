@@ -43,7 +43,7 @@
                 </div>
                 <div class="input-field">
                   <i class="material-icons prefix">mail</i>
-                  <input id="mail_register" name="mail" type="text" required>
+                  <input id="mail_register" name="mail" type="email" required="required" class="validate">
                   <label for="mail_register">Email</label>
                 </div>
                 <div class="input-field ">
@@ -68,8 +68,8 @@
       </div>
     </div>
     <div id="student_blueprint" class="row" style="display: none;">
-      <input id="student" class="col s6" name="student" type="text" class="autocomplete name" placeholder="Name">
-      <input id="bday" class="col s6" name="bday" type="text" class="bday" placeholder="tt.mm.yyyy">
+      <input id="student" class="col s6 autocomplete name" name="student" type="text" placeholder="Name">
+      <input type="date" class="datepicker col s6 bday" id="bday" name="bday" placeholder="Geburtsdatum"><!-- id="bday" class="col s6" name="bday" type="date" class="bday" -->
     </div>
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
@@ -82,6 +82,33 @@
             }
 
       ?>
+      function initDatepick()
+      {
+
+          $('.datepicker').pickadate({
+              selectMonths: true,
+              selectYears: 20,
+              max: new Date(),
+              format: "dd.mm.yyyy",
+
+              labelMonthNext: 'Nächster Monat',
+              labelMonthPrev: 'Vorheriger Monat',
+              labelMonthSelect: 'Monat wählen',
+              labelYearSelect: 'Jahr wählen',
+              monthsFull: [ 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember' ],
+              monthsShort: [ 'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez' ],
+              weekdaysFull: [ 'Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag' ],
+              weekdaysShort: [ 'So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa' ],
+              weekdaysLetter: [ 'S', 'M', 'D', 'M', 'D', 'F', 'S' ],
+              today: 'Heute',
+              clear: 'Löschen',
+              close: 'Ok',
+              firstDay: 1
+
+          });
+
+      }
+
 
       var counter = 0;
 
@@ -101,6 +128,8 @@
         	var insertHere = document.getElementById('students');
         	insertHere.parentNode.insertBefore(clonedNode, insertHere);
         }
+
+        initDatepick();
       }
 
       addStudent(); // -> create one default student field
@@ -185,6 +214,10 @@
 
         
       }
+
+      
+
+      
 
     </script>
   </body>
