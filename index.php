@@ -10,6 +10,9 @@ require "class.model.php";
 require "class.view.php";
 // ChromePhp::setEnabled(false);  // disable debugging
 enableCustomErrorHandler();
+
+date_default_timezone_set('Europe/Berlin'); // if not corretly set in php.ini
+
 $input = array_merge($_GET, $_POST);
 $control = new Controller($input);
 
