@@ -252,7 +252,9 @@ class Model
         $query = "INSERT INTO user (username, user_type, password_hash, email) VALUES ('$usr', 1,'$pwd', '$email');";
 
         //Create parent in database and return eid
-        $parentId = self::$connection->insertValues($query);
+        $usrId = self::$connection->insertValues($query);
+
+        $parentId = self::$connection->insertValues("INSERT INTO eltern (userid) VALUES ($usrId);");
 
         // transform given int into array
         if(!is_array($pid))
