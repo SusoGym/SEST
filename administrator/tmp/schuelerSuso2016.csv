@@ -1,0 +1,689 @@
+Schueler_id;Geburtstag;Klasse;Name;Vorname
+9999;12.01.2006;05a;Hartleitner;Lily
+9998;13.01.2006;05a;Tesleute;Testinchen
+841;22.11.2001;09a;Alfian;Aurel
+1186;05.08.2003;06a;Ali;Haider
+953;25.08.2003;07c;Amer;Carlotta Sibylle
+786;08.05.2001;09c;Annabring;Olivia
+787;07.02.2001;09c;Anslik;Jelena
+1102;01.04.2003;06d;Armgardt;Hannah Sophie
+1253;08.07.2005;05c;Arndt;Felix
+955;24.03.2003;07c;Ball;Jonas
+788;06.04.2001;09d;Bambusch;Anton Gerhard
+1267;24.02.2005;05b;Bambusch;Gustav
+737;16.02.2001;09c;Bantle;Jenny Angelika
+1222;15.12.2005;05d;Bartels;Benedict
+757;09.02.2001;09a;Bathelt;Esther
+956;30.07.2003;07a;Baumann;Marie
+789;28.09.2000;09a;Baumann;Moritz
+27;10.02.1998;12;Baur;Louis
+819;04.01.2001;09b;Bäurer;Maximilian
+13;29.04.1999;12;Bäurer;Philipp
+759;31.05.2001;09c;Bechtold;Julia Sophie
+33;11.05.1999;11;Beck;Marie
+790;18.10.2000;09c;Becker;Franziska Luise
+36;05.08.1998;11;Becker;Jonathan
+1314;18.08.2004;05a;Becker;Laurenz Johann
+37;31.12.1998;12;Becker;Luise
+38;05.11.1997;12;Becker;Milena
+843;10.07.2002;08b;Becker;Sebastian
+1109;22.07.2004;06a;Beemelmans;Anatole
+791;30.11.2001;09b;Beemelmans;Maximin
+1270;22.02.2005;05c;Beganovic;Boris
+844;28.03.2002;08a;Berg;Jette
+957;16.11.2002;07c;Berndt;Angelina  Zoe
+1324;22.06.2005;05c;Berndt;Isabella
+939;28.09.1998;12;Berns;Philipp Manuel
+44;17.06.2000;10c;Berszin;Kai Wolf
+1196;04.06.2001;09b;Bestler;Melina
+46;26.02.1999;11;Besuden;Erik
+48;22.11.1997;12;Biegert;Carla Marie-Lisa
+951;13.05.2002;08b;Bielitzer;Joshua
+1173;28.01.2004;06b;Bippus;Felix
+1142;13.04.2004;06c;Birwe;Eva-Maria
+52;18.08.2000;10a;Bitsch;Sara
+847;26.01.2002;08d;Blaier;Linda
+1215;14.07.2005;05d;Blaier;Sofie
+848;29.04.2002;08b;Blumberg;Sarah - Zoe
+1148;22.02.2004;06d;Bohl;Jana
+958;19.10.2002;07a;Böhme;Nicole
+60;23.11.2000;10b;Bohnet Millan;Daniel
+61;13.12.1997;12;Both;Julian
+849;24.09.2002;08a;Bountis;Leonidas
+1268;23.03.2005;05c;Bountis;Timon
+1062;10.07.1997;12;Boxler;Jakob
+63;25.10.1999;11;Brackemann;Elisabeth
+1089;16.12.2003;06c;Brandes;Paul
+65;24.09.1997;12;Bräunlinger;Jessica
+67;24.01.2000;10c;Bredenbröker;Dana Inez
+960;04.07.2003;07c;Brenner;Pia Pauline
+1192;31.12.2003;06d;Brülke;Florentine
+1330;07.08.2005;05d;Brune;Lennard
+76;17.11.1999;10b;Buckenberger;Laurin Julian
+1178;22.02.2004;06c;Bücking;Paula Francesca
+81;16.12.1998;11;Buggle;David
+82;27.04.1999;11;Bumler;Danja
+1420;09.05.2000;09a;Bürgi;Simon
+1120;18.05.2004;06c;Büttner;Maria Johanna Paula
+79;09.07.1998;11;Büttner;Michael
+89;26.08.1997;12;Butz;Lara-Sophie
+851;25.07.2002;08c;Buurman;Antonia
+852;25.07.2002;08c;Buurman;Pauline
+1295;15.03.2004;05b;Camilla - Ugarte;Maria Esperanza
+731;09.02.2001;09d;Chan;Maja
+92;14.03.1999;11;Christ;Celina
+812;12.02.2001;09b;Christ;Janine
+820;12.09.2002;09b;Christian;Soraya Marie
+1272;15.06.2005;05c;Christian;Vincent Elijah
+963;28.10.2002;07a;Ciupuliga;Marie-Lise
+1320;10.08.2005;05a;Conrad;Julie
+964;27.07.2003;07a;Cordes;Gabriel
+94;16.04.1999;10c;Cristiano;Nino
+965;25.10.2002;07a;Czupryna;Piotr
+96;25.04.1998;12;Dachtler;Frederik Manfred
+947;12.09.1999;10a;de la Torre Grau;Ronja Marija
+853;09.02.2002;08c;De Oliveira;Juana
+967;28.12.2002;07d;Degen;Josiah
+813;12.08.2001;09b;Deggelmann;Tim
+781;29.04.2001;09a;Deiss;Romina
+762;26.02.2001;09a;Deller;Jan
+739;18.03.2001;09c;Dellit;Joana Camilla Sophie
+102;01.08.1998;12;Dellit;Paula Victoria
+1098;27.02.2004;06a;Demšar;Maruška
+108;09.01.1997;12;Detten;Maximilian von
+968;29.01.2003;07d;Deuling de la Rosa;David Alexander
+109;26.07.2000;10d;Diatzko;Gregor
+1316;13.08.2005;05b;Diergarten;Christoph
+945;10.01.2001;09d;Dietrich;Raphaela Ulrika
+113;04.03.2000;10b;Dix;Jonas
+114;07.05.1998;12;Dix;Lara
+1289;27.06.2005;05a;Dix;Sebastian
+1229;07.08.2005;05d;Doberstein;Janina
+116;24.11.1997;12;Dodel;Lara
+1281;20.05.2005;05a;Dospil;Julius
+117;14.01.2001;10c;Dransfeld;Sophie Christina
+119;16.01.1998;12;Drechsler;Julia
+857;10.06.2002;08a;Driller;Béla
+1298;13.02.2005;05b;Driller;Emese
+969;03.03.2003;07a;Dude;Norah Maria
+858;13.03.2003;08b;Dufner;Daniela
+1254;27.11.2005;05c;Dufner;Simon
+124;21.12.2000;10a;Ebert;Daniel
+125;26.10.2000;10c;Ebert;Moritz
+1245;18.09.2004;05b;Ebert;Paul
+126;22.10.1998;11;Ebert;Simon Martin
+128;14.05.1998;12;Eble;Caroline
+129;20.03.2000;10d;Eble;Franziska Kathrin
+859;08.09.2002;08a;Ecke;Jonas Paul
+943;23.08.2001;08b;Eckert;Amelie
+1076;07.03.2004;06d;Eckert;Lara Sophie
+1087;03.01.2004;06a;Eden;Richard
+133;22.06.1999;11;Ege;Alexia Valerie
+1309;29.01.2005;05d;Egenhofer;Jasmin Helene
+136;02.07.1999;11;Egervari;Sophie Naomi
+1221;21.07.2005;05b;Ehret;Mirabell
+730;01.08.2001;09b;Eigenfeld;Vanessa
+142;12.05.2000;10a;Elbl;Nils
+860;11.09.2002;08d;Elbl;Philipp
+1124;16.05.2004;06d;Ellegast;Lea Yara
+826;18.08.2002;09d;Ellsiepen;Paul
+970;06.03.2003;07a;Enceanu;Lorena
+1294;11.01.2005;05c;Enceanu;Victoria
+146;28.01.1998;12;English;Rebecca
+971;23.04.2003;07d;English;Samuel
+972;11.01.2003;07a;Ermuth;Mia-Sophie
+1346;30.08.2001;09a;Eschenbacher;Nina
+1176;04.12.2002;06c;Eutebach;Paul
+148;12.08.1998;11;Exner;David
+973;26.09.2003;07a;Exner;Phil Andre
+154;01.07.1997;12;Fauser;Pauline
+1187;18.10.2003;06b;Fauth;Jonas
+1169;01.09.2003;06d;Feil;Amelie
+974;04.11.2002;07a;Feil;Marek
+158;16.07.1998;12;Feil;Yannick
+1112;21.09.2003;06a;Fesel;Max
+1224;02.02.2005;05a;Fichter;Hannah Sofie
+159;19.02.1999;11;Fiedler;Heike Angela
+160;17.10.2000;10a;Fiedler;Simone
+163;01.04.1998;12;Fischer;Alexandra
+1095;08.06.2004;06d;Fix;Theodor Raphael
+167;13.07.1999;10b;Flöß;Joshua
+861;25.05.2002;08a;Flöß;Victoria
+932;27.12.2000;08d;Franke;Lyn
+171;19.06.2000;10d;Franke;Magdalena Sophia
+172;07.11.1999;10c;Franzl;Carolin
+976;15.04.2003;07c;Frick;Jasmin Annabelle
+1092;27.05.2004;06c;Fritsch;Katharina
+177;25.03.1998;12;Fritz;Jakob
+1079;10.10.2004;06a;Fröher;Eric Jonas
+1074;05.09.2004;06a;Fuchs;Katharina
+1181;01.12.2003;06d;Fuchs;Niels Johannes
+181;21.07.2000;10d;Fukamachi;Akane
+1191;22.06.2004;06b;Furgacz;Jeanette
+1156;31.07.2004;06d;Gäbler;Lajos Aljoscha
+809;05.08.2001;09a;Gäbler;Tosia Dorothea
+1252;12.04.2005;05d;Gabor;Gabriel
+977;11.07.2003;07a;Gabor;Melanie
+783;22.05.2001;09c;Gabor;Sebastian Leander
+186;02.07.1997;12;Galizia;Chiara Caterina
+863;05.01.2003;08d;Gärtner;Daniel
+191;14.11.1997;12;Gauer;Elias
+864;01.01.2002;08c;Gauer;Tonio
+192;02.11.1998;11;Gaupmann;Kathrin
+193;13.01.2000;10d;Gebhardt;Aidan Lucrezio
+1177;05.05.2004;06b;Gebhardt;Estella
+1307;16.07.2005;05b;Gebhardt;Lea Maria
+1137;30.06.2004;06d;Gehringer;Paula
+195;28.01.2000;10a;Gehringer;Sophie
+978;16.04.2003;07b;Geiger;Lukas
+763;13.07.2001;09c;Geiger;Tobias Anton
+198;29.06.1999;11;Geistler;Jan-Nicolai
+865;27.06.2002;08c;Gerbig;Hannes
+203;04.03.1998;12;Gerstmair;Lynn
+204;14.12.1999;11;Ghanem;Maximilian Alexander
+979;29.08.2003;07c;Ghanem;Nicolai Alexander
+866;28.03.2002;08a;Ghatei;Lena
+205;03.09.1997;12;Ghatei;Sarah
+206;19.06.1998;12;Giel;Johanna
+207;29.07.1999;11;Gius;Carla Maria
+867;04.11.2001;08a;Gius;Maya
+1082;03.02.2004;06b;Glaser;Yannik
+210;06.10.2000;10a;Glaßner;Marius Tom
+868;21.01.2002;08d;Glöckner;Iannis
+981;09.03.2003;07c;Gnan;Katharina
+1160;16.08.2004;06c;Goebel;Kilian Isidor
+214;01.02.1999;11;Göhde;Sebastian
+869;17.09.2001;08c;Golke Perez;Anna Kamila
+1285;10.05.2005;05c;Gorre;Jona Linus
+1249;29.09.2005;05a;Götz;Philip
+822;01.11.2001;09d;Goutier;Ann Chantal
+984;13.09.2003;07b;Gouveia Pflüger;Laila
+1179;10.11.2002;06c;Gräfingholt;Carla Sophie
+1237;14.02.2005;05d;Gräfingholt;Paula
+870;17.11.2001;08a;Grahl;Immanuel
+218;14.11.1998;11;Griener;Felix Pascal
+1111;18.04.2004;06d;Griener;Julian
+1335;07.01.1999;11;Gronbach;Clemens
+226;20.10.1998;11;Groß;Philipp Sebastian
+983;03.12.2003;07a;Gröttrup;Hanna Marie
+1326;01.12.2005;05c;Grummt;Franka
+1069;19.05.2004;06c;Grummt;Lukas Sören
+985;12.03.2003;07c;Grummt;Rouven
+230;07.05.2000;10a;Gunkel;Sophia
+1266;17.06.2005;05a;Günter;Lia Anna Barbara
+229;25.12.1999;10b;Günther;Lena Marie
+986;17.06.2003;07d;Gütler;Judith Agnes
+1113;07.12.2004;06d;Haase;Alexander
+1116;21.06.2004;06d;Haberbosch;Lisa
+234;13.05.2000;10a;Haberbosch;Nick
+987;02.09.2002;07b;Hafner;Hannah
+1259;16.06.2005;05b;Halves;Armin
+243;14.09.1998;10b;Halves;Sandra
+244;19.05.1999;11;Hannemann;Esther Amina
+246;15.03.1999;11;Hardy;Frederic
+1185;02.01.2004;06c;Hardy;Naomi
+247;11.08.2000;10b;Harrabi;Ines
+248;24.01.1999;11;Harter;Loreena
+249;13.08.2000;10a;Harter;Tamara
+764;31.05.2001;09c;Hartwich;Selina
+1241;28.02.2005;05c;Hashagen;Annina Marie
+988;11.05.2003;07b;Häßler;Jonathan
+250;23.09.2000;10b;Hauber;Jule Marie
+872;27.02.2002;08d;Hauswald;Felix
+1141;05.06.2004;06c;Hautkappe;Jakob
+1084;20.04.2004;06a;Hehle;Chiara
+253;13.06.1999;11;Heiligmann;Charlotte
+255;21.05.2000;10b;Heines;Viva
+728;03.11.1998;11;Hekmat;Shayan
+1163;02.05.2004;06c;Heller;Lysann
+1115;30.01.2004;06a;Hellmann;Ioannis
+952;07.03.2002;07d;Hembes;Nina
+1152;24.05.2003;05a;Henninger;Benedict
+1305;02.03.2005;05b;Henninger;Raphael
+1287;02.10.2005;05b;Henrich;Clara Marie
+258;06.01.2000;10d;Henschel;Katharina
+989;24.06.2003;07c;Hentschel;Thordis
+1189;09.11.2003;06d;Hermann;Jil
+1240;24.11.2004;05a;Herwig;Allegra Katharina
+765;20.10.2001;09b;Herwig;Henryk
+733;23.05.2001;09d;Herzog;Clara
+1315;12.05.2005;05b;Hesse;Linus
+262;12.01.1997;12;Hetz;Hilda
+766;21.06.2001;09c;Hoefer;Elena
+269;01.10.1999;10b;Hoffmann;Dominik
+1149;20.01.2004;06b;Hoffmann;Jona Frederick
+1165;21.06.2004;06a;Hollatz;Leif Connor
+1110;22.08.2004;06b;Holm;Clara Sophie
+274;03.02.2000;10d;Holzleitner;Noah Ernst
+267;14.10.1998;12;Hönig;Maren Julia
+1207;29.08.2005;05d;Hoppach;Lennart
+276;05.05.1999;11;Hoppe;Adrian
+277;06.08.1998;12;Horlacher;Bérénice
+793;25.09.2000;09a;Horlacher;Tristan
+874;12.01.2002;08c;Horn;Inka
+278;18.01.2000;10a;Horn;Leonard
+815;09.03.2001;09b;Hösl;Ava Sophia
+814;09.03.2001;09b;Hösl;Susan Maria
+990;28.08.2003;07b;Hugel;Anton
+823;15.08.1999;09d;Hund;Andreas Raphael
+875;20.01.2003;08a;Hundsdörfer;Sven
+1077;07.05.2004;06b;Hunger;Gita Purnami
+876;11.12.2001;08b;Hunger;Surya
+285;07.06.1999;11;Ilse;Max
+784;08.04.2001;09c;Ittner;Helene Josepha
+878;20.05.2002;08a;Jäger;Maria Christina
+289;31.07.1998;11;Jäger;Sebastian
+291;26.01.1998;12;Jäkle;Nicolai
+879;12.12.2002;08b;Jehle;Niklas
+296;26.10.1999;10b;Jenne;Josua
+1190;22.05.2004;06b;Jooß;Sophia
+297;08.05.1999;11;Jordan;Jerôme
+300;02.07.1999;10c;Junge;Annika
+1284;09.04.2005;05a;Junker;Rahel Carla
+881;01.10.2001;08d;Kaas;Jakob
+1280;27.09.2004;05b;Kaas;Johanna Marlies
+302;18.06.2000;10a;Kabitzke;Dinah
+304;08.09.1997;12;Kaibach;Julia
+1080;15.01.2004;06a;Kaiser;Lisa Marie
+309;30.04.2000;10c;Kaltenbacher;Robert Lew Karl
+992;13.11.2003;07b;Kammerer;Elijah
+740;18.04.2001;09c;Kammerer;Jonah
+1278;13.11.2004;05b;Kampmann;Leopold
+882;31.05.2002;07b;Karnabi;Kevin
+1200;04.03.2005;06a;Karrer;Amelie
+993;12.03.2003;07b;Karrer;Maximilian Eugen Leopold
+741;22.08.2001;09c;Kaschny;Moritz Johannes
+1104;23.03.2004;06b;Kauer;Mario
+312;19.02.2000;10d;Kaufmann;Dorothea
+767;18.09.2001;09d;Kaufmann;Rebekka
+1107;16.12.2003;06c;Kautz;Eva Lotta
+314;05.11.1997;12;Kempe;Alicia Evelyn
+315;01.07.1999;11;Kenda;Franka
+1103;26.08.2004;06b;Kern;Zoë-Maria
+994;13.05.2003;07b;Kerner;Maja Kiara
+1117;08.01.2004;06a;Kind;Hannes
+319;08.04.2000;10c;Kind;Kalle Michael
+995;01.06.2003;07c;Kirchgäßner;Hannah
+821;06.05.2001;09a;Kisters;Gregor
+1299;14.07.2005;05c;Kisters;Salomon
+1340;13.08.1998;10c;Klaiber;Max
+1269;09.09.2005;05c;Kleibrink;Charlotte
+883;08.11.2001;08b;Klein;Damian
+996;24.02.2003;07d;Klein;Käthe
+323;14.11.1999;10c;Kleiner;Peer Sebastian
+326;05.02.1999;11;Kleinöder;Leonie
+329;22.01.2000;10d;Klevenz;Estelle
+333;23.07.1997;12;Kluthe;Cedric
+742;09.04.2001;09a;Kmoth;Noémi Evita
+1073;29.10.2004;06b;Kneer;Amelia
+1085;14.07.2004;06a;Knodel;Jakob Konstantin
+346;01.08.2000;10c;Köbberling;Ella
+885;20.09.2002;08c;Köbberling;Merle
+886;31.01.2002;08a;Köberle;Carolin
+743;19.06.2001;09a;Koch;Helen Marie
+948;30.04.1999;11;Koch;Nicoletta
+347;14.01.2000;10a;Kögel;Paul Francis
+1318;07.06.2005;05c;Kolmerer;Anna Victoria
+998;19.04.2002;07c;Kolmerer;Paul
+1078;26.08.2004;06a;Könner;Lili
+351;28.10.1997;12;Koschorke;Moritz
+349;01.06.1999;10c;Kößler;Jakob
+999;06.03.2003;07b;Kößler;Paul
+1306;11.12.2004;05b;Koubba;Dyna
+1119;27.07.2004;06d;Kovar;Luna Aurelia
+1292;05.04.2005;05a;Krämer;Luca
+352;25.10.1998;11;Krampe;Konstantin-Niklas
+1275;31.05.2005;05b;Kranz;Lennard
+355;18.05.2001;10d;Krauter;Jasper Jakob
+1000;10.09.2002;07a;Krehl;Ben
+357;04.11.1998;11;Kreitmeier;Lisa
+359;07.01.1998;12;Krenz;Janis
+1195;14.09.2003;07c;Krüssel;Paul
+1310;07.10.2004;05b;Küchler;Alexander
+367;17.07.1998;11;Küchler;Anna Lara
+1157;31.10.2003;06d;Küchler;Florian Tobias
+744;24.04.2001;09a;Küchler;Marc Anton Ingbert
+769;20.10.2000;09a;Küchler;Nicolas
+1064;19.09.2003;07b;Kugler;Samuel
+1001;24.09.2003;07b;Kühnapfel;Isabel
+1122;28.10.2004;06a;Kühnapfel;Joshua
+371;28.04.1998;12;Kuhnkies;Jan-Moritz
+770;27.08.2001;09a;Kulman;Linus
+373;29.03.1998;12;Kunath;Katharina
+1002;28.07.2003;07b;Kunath;Paula Maditha
+1066;09.11.2000;10d;Kuppel;Tim
+377;16.12.1999;10a;Kustos;Sven
+887;28.02.2002;08c;Laib;Maria
+888;18.05.2002;08c;Lang;Leonard
+1003;08.02.2004;07a;Lang;Luna
+388;29.07.1997;12;Lanner;Sebastian
+1004;16.11.2003;07a;Lanoue;Joshua
+949;25.06.2001;08c;Lauinger;Maleen Josephin
+391;11.03.1999;11;Lehn;Sarah
+1182;10.11.2004;06c;Lengerke von;Maren
+1005;14.07.2003;07c;Leube;Annika
+1133;12.01.2004;06b;Leuschner;Eske
+1134;12.01.2004;06d;Leuschner;Ida
+1342;08.06.2001;10d;L'Hospitalier;Anna
+1154;20.09.1999;11;Lichtenauer;Carlotta
+1072;20.04.2004;06c;Lichtenauer;Fabian
+1153;27.04.2001;09c;Lichtenauer;Florian
+1105;04.05.2004;06c;Linden;Yannick
+1135;25.02.2004;06c;Lipski;Skrollan
+1159;21.08.2004;06d;Löffler;Henri Leonard
+1202;28.07.1996;12;Löhle;Paul
+407;14.03.2000;10a;Longére;Teresa Eva Maria
+745;19.02.2001;09a;Lorinser;Anna-Maria
+1256;16.09.2005;05c;Lu;Liang Yun
+889;10.08.2002;08a;Lu;Sin - Mei
+890;27.05.2002;08d;Luckow;Fynn
+411;02.11.1996;12;Lupin;Leron von
+1006;10.03.2003;07c;Lutz;Nicolai
+412;24.11.1999;09a;Maag;Jeremy
+1297;02.12.2004;05a;Mäding;Jan
+414;15.01.1998;12;Maggi;Erik
+418;20.06.1999;10c;Manger;Julie
+1118;02.03.2004;06a;Mangold;Jan
+1274;06.07.2005;05a;Mangold;Stella Beatrix
+419;23.02.1998;12;Mann;Konstantin
+1008;03.01.2003;07b;Marinov;Jonas
+1127;02.11.2003;06d;Marschall;Mara
+1244;13.03.2005;05b;Martins;Lotte Marie
+1162;21.09.2004;06c;Matkovic-Torrecillas;Noemi
+892;24.08.2002;08a;Matkovic-Torrecillas;Tristan
+423;21.10.1999;09c;Matschulat;Tim Leon
+425;04.11.1998;12;Matthews;George
+429;08.05.2001;10d;Mayer;Cecilia Friderica
+734;02.09.2000;09a;Mayer;Mia Laetitia
+1218;10.08.2005;05d;Mayer;Richard Curt Frederic
+1094;04.05.2004;06d;Mbamala;Adaeze Martina
+1009;30.05.2003;07d;Mehmeti;Inesa
+1166;24.09.2004;06c;Mehmeti;Yllka
+1088;29.04.2004;06c;Michlbernhard;Lena Maria
+444;18.11.1998;10b;Mildner;Tobias
+445;10.02.2000;10d;Mischlinski;Maurice Paul
+771;12.07.2001;09c;Moest;Maxim
+1010;03.10.2003;07d;Mohring;Jule Sophie
+1301;11.07.2004;05c;Moll;Alicia
+1303;11.07.2004;05c;Moll;Lara
+1258;18.01.2005;05b;Möller;Johannes Flynn
+1286;22.01.2005;05b;Montada;Nina
+1261;06.12.2005;05c;Monteiro;Maria Adétola
+1067;19.04.2002;09d;Mörtl;Klara
+456;09.05.1999;11;Mühlhäußer;Dore
+893;27.09.2002;08c;Mühlhäußer;Tonia
+1236;27.02.2005;05a;Müller;Justus
+458;15.04.1999;10c;Müller;Moritz
+894;14.08.2002;08a;Müller;Rahel Malou
+459;25.11.2000;11;Müller;Vanessa
+1288;24.05.2005;05c;Müller;Xeno Fritz
+464;06.10.1998;11;Mutterer;Sabrina
+1090;11.04.2004;06d;Mykhaylova;Anna Elina
+1273;12.06.2005;05c;Nafzger;Carolin Sophie
+1011;15.05.2003;07b;Nauth;Luis Valentin
+1091;11.05.2004;06d;Neher;Amy Lee
+1097;09.12.2004;06c;Neher;Jannes
+467;19.09.1998;11;Neher;Nora
+468;20.02.2000;10c;Neher;Philipp
+1246;25.03.2006;05c;Neumann;Aurica Laetitia
+1058;04.04.2003;08b;Neumann;Nadia Felicia
+1060;15.06.2001;08c;Nickel;Alexander
+824;07.04.2000;10d;Nickolaus;Lara
+1329;05.09.2005;05a;Niederdräing;Elias
+1199;12.01.1998;12;Nieswand;Stella
+1012;10.07.2003;07d;Nsakala;Bakisi Cyrill Landu
+478;15.05.1999;11;Obermaier;Elena
+1264;24.02.2006;05d;O'Donnell;Cathal James
+479;30.08.1998;12;Oed;Kilian
+480;23.08.1998;12;Oehri;Sven
+482;02.09.1998;12;Ohlsen;Annemarie
+896;26.02.2002;08a;Ohlsen;Elisabeth
+1271;11.02.2005;05a;Oldhaus;Maren
+1257;31.08.2005;05c;Onofrietto;Nora Ann
+795;24.11.2000;09a;Ortoulidis-Pflanz;Paul
+1147;11.02.2005;06c;Özsatmaz;Anisa
+487;28.06.1999;11;Pappalardo;Marco
+488;03.05.2000;10a;Pappenberger;Julian
+489;21.01.1998;12;Pappenberger;Ronja
+490;30.06.1999;10a;Paredes Santa Maria;Marco
+1312;02.04.2005;05b;Pasetti;Claudio
+898;26.08.2002;08b;Pasetti;Giulia
+1013;07.02.2003;07c;Pavel;Anastasia
+941;19.05.2002;08b;Pelivan;Gabriel
+494;28.09.1997;12;Perculija-Speitling;Janek
+899;16.09.2002;08a;Perculija-Speitling;Luka
+772;13.12.2001;09b;Pfeifer;Lisa
+900;27.08.2002;08b;Pieper;Quirin
+1014;11.11.2003;07a;Pieper;Therese
+901;22.03.2002;08c;Pilger;Charlotte
+902;10.03.2002;08b;Pitiakoudes;Sophia
+903;29.08.2001;08d;Post;Stephanie
+509;26.02.2000;10a;Preiß;Falk
+746;24.07.2001;09d;Preiß;Finn Wilhelm Julius
+1170;22.09.2003;06c;Puschmann;Sophie
+510;02.02.1998;12;Quehl;Timm
+773;02.02.2002;09b;Quintini;Daniel
+511;28.06.1999;10c;Quintini;Gaia
+1151;15.08.2004;06b;Radtke;Paul Jonathan
+1260;26.08.2005;05a;Raich;Merlin
+905;19.09.2001;08b;Rapp;Lena-Lucie
+1015;06.12.2002;07c;Reckling;Valentina
+747;06.07.2001;09b;Reckling;Victoria Sophie
+517;21.03.1998;11;Reichel;Clemens Karl August
+1319;07.09.2004;05a;Reichel;Michael
+522;11.05.2000;10c;Rest;Emma
+1054;25.11.2003;06a;Reuter;Max Jonas
+1250;27.06.2005;05a;Ricciardi;Isabella Rosa Maria
+1016;19.01.2003;07c;Riegger;Oliver
+1017;15.04.2003;07d;Riehle;Constanze
+528;11.02.1999;11;Riehle;Friederike
+785;03.01.2001;09a;Riehle;Julius
+531;25.05.1998;12;Rimbach;Florian
+796;28.11.2001;09a;Rivoletti;Laura
+1333;18.11.2005;05d;Roche;Louis
+907;04.06.2002;08a;Rode - Kotzé;Milena
+1150;06.12.2003;06a;Rodler;Josephine Emilia
+535;22.08.1997;12;Rogg;Lea
+1242;08.01.2005;05c;Röh;Alexandra
+908;11.05.2002;08b;Röh;Victoria
+534;24.05.1999;11;Röhl;Jan Constantin
+1255;19.05.2005;05a;Röhl;Lukas Carl Ferdinand
+536;26.07.1998;12;Roller;Johannes
+538;04.02.2001;10c;Roller;Philipp
+909;06.09.2001;08a;Romer;Felix
+910;25.04.2002;08d;Romer;Felix Herbert
+1220;18.02.2005;05b;Romer;Lilly
+1172;16.01.2004;06b;Romer;Simon
+539;26.04.1999;10c;Roos;Franz Xaver
+1328;21.01.2004;07d;Rössler;Julie Mina
+1018;20.03.2003;07a;Rowolt;Kevin
+1158;22.05.2004;06d;Ruchti;Leander
+545;05.08.1998;12;Saberi;Armin Soheil
+1317;31.03.2005;05c;Saile;Elijah Tom
+1243;25.04.2005;05c;Salloukh;Eleonora
+1019;24.01.2003;07c;Sauer;Carola
+748;23.10.2000;09c;Sauer;Juliana
+547;26.05.1998;12;Schaden;Franziska
+548;06.11.1999;10b;Schaden;Johanna
+817;06.09.2001;09b;Schaden;Judith
+1174;22.10.2003;06b;Schäfer;Johanna
+551;29.12.1997;10b;Schäfer;Karim Gaston
+911;22.05.2002;08c;Schäfer;Samira Alicia
+797;01.08.2001;09a;Schanuel;Sophie
+1300;28.07.2004;05b;Schaper;Maximilian
+556;29.07.1998;12;Schauenburg;Paul
+775;16.03.2001;09c;Scherberich;Leah
+1096;12.03.2004;06d;Schimkat;Lilly
+560;02.01.1999;11;Schlegel;Johanna
+1021;18.08.2002;07a;Schleiffer;Indra
+912;31.12.2002;08b;Schlemper;Anna - Charlotte
+1022;03.04.2003;07b;Schmid;Markus Fritz
+1291;22.09.2005;05a;Schmid;Nikolas
+913;07.09.2002;08b;Schmidt;Ianto
+1188;05.05.2004;06b;Schmidt;Luis Jakob
+1075;13.08.2004;06d;Schmidt;Maximilian
+565;07.06.2000;10b;Schmidt;Ruben Vincent
+1023;22.12.2002;07d;Schmidt;Vincent
+1024;03.06.2003;07b;Schmitz;Fabian
+749;05.06.2001;09d;Schmitz;Yannick Alexander
+1277;15.02.2005;05d;Schneider;Julius
+1025;04.09.2003;07c;Schneider;Lilli Pia
+914;01.03.2002;08c;Schnepper;Nadine
+572;29.12.1998;11;Schöbel;Stefania
+573;27.10.1997;12;Schöller;Florian Johannes
+574;25.08.1999;11;Schöller;Yasmin
+575;07.09.1998;11;Schonert;Christopher Emmanuel
+735;04.04.2001;09b;Schonert;Josephine Mariel
+1290;20.11.2004;05a;Schöning;Alma
+1026;19.04.2003;07c;Schoster;Jule
+1308;12.05.2005;05c;Schoster;Leonie
+578;16.10.1998;11;Schrempp;Klara  Maria
+1136;16.01.2004;06b;Schröder;Leander
+581;17.07.2000;10a;Schröer;Julie
+582;31.08.1998;10a;Schröfel;Emil
+1283;22.12.2004;05a;Schuchmann;Benedikt
+1027;24.08.2003;07b;Schuchmann;Theresa
+1106;29.06.2004;06a;Schuchna;Matthäus
+1125;15.01.2004;06b;Schuphan;Fynn
+1251;04.01.2005;05c;Schuster;Justus
+589;09.12.1999;09b;Seger;Luca Sebastian
+593;06.10.1999;10b;Seiter;Patrick Oskar
+594;17.02.2000;10b;Selca;Nora
+930;12.04.2002;08d;Sender;Bianca
+1028;10.09.2002;07a;Sendi;Swar Rony
+798;22.12.2000;09c;Shergill;Julian Suraj
+1323;25.06.2005;05b;Shergill;Sara Kiran
+596;24.09.1998;12;Sieck;Ciara
+1030;15.04.2003;07b;Sieck;Shana
+1031;07.08.2003;07b;Sieß;Julia Tabea
+600;25.01.1997;12;Six;Christian
+1032;14.08.2003;07d;Slowik;Alexandra
+916;07.12.2001;08a;Socas;Franziska
+1034;18.03.2003;07d;Somerville;Katharine
+605;17.07.1997;12;Sommer;Anton
+1033;30.10.2002;07d;Sommer;Emma
+1130;08.10.2004;06b;Sommer;Jana Sarah
+1262;12.10.2004;05b;Sommer;Katharina
+1139;02.06.2004;06b;Sommer;Paula Antonia
+950;12.09.2001;08a;Sommer;Sophia
+1121;11.11.2004;06c;Sottile Russo;Gabriela
+818;17.07.2001;09b;Spitzhüttl;Meinrad Friedrich
+609;12.05.1998;12;Spitzhüttl;Pia
+1263;13.01.2005;05c;Spranz;Eleni
+830;20.08.1999;10c;Stanglmeier;Moritz
+1231;24.01.2005;05b;Stastny;Colin
+617;16.11.1998;12;Steffan;Anton
+619;30.03.2000;10c;Steiger;Leon
+799;31.12.2000;09b;Steiner;Emmy Viveca
+800;10.04.2001;09c;Stenger;Luca
+621;24.06.1998;12;Steuer;Sarah
+1035;18.09.2003;07c;Stötzner;Caroline
+1036;03.10.2003;07a;Strauss;Marius
+1143;05.06.2004;06b;Strobel;Marcel Simon
+1343;15.04.2002;08c;Strohm;Anna Victoria
+1161;09.06.2004;06d;Sturm;Jardena
+776;27.03.2001;09b;Sturm;Jendrik
+630;06.02.2000;11;Suchan;Gregor
+1339;16.03.2003;07b;Suchan;Prisca Antonia
+1055;20.06.2002;07a;Tanke;Ariane Selin
+919;27.02.2002;08c;Targan;Leo
+920;30.05.2002;08b;Taubner;Benjamin
+636;29.11.1998;11;Taubner;Tobias
+917;14.10.2002;08c;Taut;Gregor
+750;29.12.2000;09c;Taut;Johanna
+1293;14.03.2005;05c;Taut;Lydia Gudrun
+777;23.12.2000;09b;Terberger;Leon
+1037;27.04.2003;07a;Thamm;Philip
+801;25.08.2001;09c;Theimer;Annkathrin Maria
+1140;04.02.2004;06a;Thibaut;Linus Nicolai
+751;24.02.2001;09c;Tholen;Eva
+1313;26.10.2005;05b;Thurau - Zürn;Géraldine - Marie
+646;04.01.2000;10c;Trampedach;Sophia Irene
+1238;08.10.2005;05b;Trevisiol;Clara
+647;02.01.1998;12;Tzschetzsch;Timo
+1276;06.09.2006;05d;Uhl;Nadja Sophie
+921;05.01.2002;08b;Uhrmeister;Alexander
+649;18.09.1998;11;Ullmann;Monika
+802;29.09.2000;09a;Ullrich;Sean
+1038;19.08.2002;07a;Untaru;Sebastian
+1070;31.05.2006;05d;Urupin;Mark
+1155;01.10.2003;06d;Utz;Benedict Carl
+653;21.05.2000;10b;Veeser;Laetitia
+752;28.10.2000;09c;Vogler;Jonathan Christoph
+665;07.07.1998;11;Vogler;Paulina
+1194;23.09.2002;06a;Vogler;Sarah-Anna
+666;20.09.1999;10b;Vollmer;Levin
+667;05.01.2000;10a;Vollstädt;Lena
+753;19.03.2002;09b;Vollstädt;Meike Luise
+668;03.11.1997;12;Vollstädt;Sven
+1039;29.06.2003;07d;Volz;Lucia
+669;04.06.1999;11;Volz;Patrick Florian
+922;23.04.2002;08c;Voosen;Esther Carlina
+673;04.04.1999;11;Voosen;Jakob Nepomuk
+1128;06.09.2004;06a;Voss;Paula
+934;17.06.2002;08c;Wagenhäuser;Lea Valentina
+944;15.09.2001;09d;Wagenknecht;Anna Lena
+1040;18.08.2003;07b;Wagner;Lukas
+678;02.11.1997;11;Wahl;Elias
+1321;05.08.2005;05b;Warzecha;Jakub
+1041;03.10.2002;07d;Weber;Jannik
+684;20.08.1998;11;Weber;Noemi
+1042;15.09.2002;07b;Weber;Odin Josef
+1235;01.10.2004;05a;Weber;Sammy John Robin
+923;06.02.2002;08b;Weber;Timon
+686;26.11.1997;12;Wehinger;Vanessa
+804;15.05.2001;09b;Weidl;Maja
+687;12.07.1999;10c;Weidl;Niklas
+1043;13.12.2002;07c;Weise;Luisa
+1279;25.03.2005;05d;Wenger;Lea Caroline
+693;06.10.1998;11;Wesner;Anselm
+827;09.10.2000;09b;Wesner;David
+1044;02.05.2003;07c;Wesner;Stella
+695;27.10.1997;12;Wiedemann;Katharina
+1248;04.01.2005;05a;Wiedey;Ludovica Hanna
+924;05.01.2002;08b;Wiehler;Daniel
+697;23.01.1998;12;Wiemers;Klara
+803;02.01.2001;09a;Wietersheim von;Antonia
+1100;15.04.2004;06c;Wietersheim von;Felicitas
+1144;05.04.2004;06b;Wilhelmi;Felicia Maren
+925;02.04.2002;08a;Wilhelmi;Juliana
+1311;05.10.2004;05a;Williams;Samuel
+1046;20.12.2002;07d;Wilz;Ina
+806;07.05.2001;09b;Wind;Sophia Sylvia
+699;23.03.1999;10b;Winter;Elena Noemi
+778;17.09.2001;09b;Winter;Hannah
+1131;05.10.2003;06a;Winter;Simon
+700;12.08.1998;11;Winter;Tim
+701;26.06.1998;12;Wintersig;Christin
+702;04.08.1999;10a;Witte;Philipp Karl
+1047;23.02.2003;07b;Witte;Pia
+1145;25.11.2004;06a;Wolf;Joram
+926;31.12.2001;08b;Würfel;Agnes
+708;12.02.1999;11;Würfel;Judith
+736;09.10.2000;09d;Ye;Jasmin Yiying
+1219;10.03.2005;05d;Zademack;David Léo
+1126;29.03.2004;06a;Zaharka;Salma Elizabeth
+1223;02.02.2005;05d;Zahn;Florian
+710;15.10.1997;12;Zajic;Viktor
+1048;04.06.2003;07a;Zantl;Helena Inge
+779;23.09.2000;09c;Zantl;Simon
+1296;06.10.2004;05b;Zefic;Adam
+711;23.12.1999;10b;Zefic;Cheryn
+1138;01.10.2004;06a;Zeiter;Lisa
+712;23.01.2000;09a;Zena;Lukas Tessvai Julian
+1052;07.09.2003;07c;Zillikens;Maya
+755;29.03.2001;09b;Zimmerer;Tizian David
+1049;12.10.2002;07d;Zimmermann;Jakob
+716;21.07.2000;10a;Zimmermann;Philipp
+1099;20.08.2004;06b;Zinsmaier;Benedict Victor
+829;13.03.2001;09c;Zinsmaier;Vincent
+1123;01.07.2003;06b;Zuderman;Victoria
+1232;28.09.2005;05d;Zumbusch;Nathan
+1304;27.01.2005;05a;Zumkehr;Alexa Marie
+927;15.11.2001;08b;Zumkehr;Carla
+1050;23.04.2003;07a;Zwack;Marie
+726;04.08.1999;10b;Zwicker;Carlotta
+1265;15.09.2005;05c;Zwicker;Isabella
+
+
+
