@@ -126,6 +126,9 @@ class Model
 		($student) ? $table="schueler" : $table="lehrer";
 		$string=null;
 		foreach($line as $key=>$value){
+		$key=trim($key);
+		$value=trim($value);
+
 		if(isset($string)) {$string=$string.",$key=\"$value\" ";} else {$string="$key=\"$value\" ";}
 		}
 		$string=$string.",upd=1 WHERE id=$id";
