@@ -1,0 +1,21 @@
+Hi Joni,
+
+folgende Funktionen brauche ich vom Model:
+
+user_get_type(user_id):= Gibt an, ob der User ein Admin (0), ein Elter (1) oder ein Lehrer (2) ist
+user_name_get_id(user_name):= Gibt user_id fuer gegebenen user_name
+parent_get_name(user_id):= selbsterklaerend
+teacher_get_name(user_id):= selbsterklaerend
+parent_get_children(eltern_id):= gibt ein Array, in dem die Schüler IDs aller Kinder dieses Elters sind
+student_get_class(schueler_id):= selbsterklaerend
+class_get_teachers(class_id):= gibt ein Array mit allen Lehrern, die diese Klasse unterrichten
+booking_add(slot, parent, teacher):= selbsterklaerend
+booking_delete(slot, parent):= selbsterklaerend
+password_validate(user_name, password):= selbsterklaerend, gibt true oder false
+
+teacherGetSlots(teacher_id):= gibt ein Array mit allen Slots und deren Status aus, die der Lehrer im Moment hat
+
+Viel Spass dabei
+Gregor
+
+registerParent(userName, pupilID, mail, pwd):= vermerkt neuen User in der Database und returnt dessen neue ID

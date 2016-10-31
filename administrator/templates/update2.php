@@ -14,8 +14,10 @@
 		  <div class="row">
 		  <b><?php echo $this->action ?></b>
 		  <br><b>Daten wurden gelesen</b><br>
-		  <?php echo $this->data[0] ?> Datensätze eingefügt <br>
-		  <?php echo $this->data[1] ?> Datensätze gelöscht 
+		  überprüfte Datensätze: <?php echo $this->data[0] ?><br> 
+		  eingefügte Datensätze:   <?php echo $this->data[1] ?><br>
+		  gelöschte Datensätze: <?php echo $this->data[2] ?>
+		  
 		  </div>
 		  
 		  

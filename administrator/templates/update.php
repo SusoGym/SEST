@@ -7,7 +7,7 @@
 
       <div class="card ">
         <div class="card-content">
-          <form enctype="multipart/form-data" onsubmit="submitFile()" action="index.php?type=uschoose" method="POST">
+          <form enctype="multipart/form-data" onsubmit="submitFile($this->actionType)" action="index.php?type=<?php echo $this->actionType; ?>" method="POST">
 		  <div class="row">
 		  <b><?php echo $this->action ?></b>
 		  <br>Bitte wählen Sie eine Quelldatei
@@ -35,13 +35,14 @@
           $(".button-collapse").sideNav();
         });
 		
-		 function submitFile()
+		 function submitFile(actionType)
       {
           var file = $('#Datei').val();
           var url = "?console&type=uschoose;
+		  var actionType=actionType;
           console.info(url);
 
-          $.get( "index.php?console&type=uschoose", function (data) {
+          $.get( "index.php?console&type="+actionType, function (data) {
 
               if(data === "true")
               {
