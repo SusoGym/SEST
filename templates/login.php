@@ -18,8 +18,8 @@
               <form autocomplete="off" onsubmit="submitLogin()" action="javascript:void(0);">
                 <div class="input-field">
                   <i class="material-icons prefix">person</i>
-                  <input id="usr_login" type="text" required <?php if(isset($_SESSION['failed_login']['name'])){echo 'value="' . $_SESSION['failed_login']['name'] . '"';}?>>
-                  <label for="usr_login">Benutzername</label>
+                  <input id="usr_login" type="text" required>
+                  <label for="usr_login">Email-Addresse</label>
                 </div>
                 <div class="input-field ">
                   <i class="material-icons prefix">vpn_key</i>
@@ -37,14 +37,9 @@
             <div class="collapsible-body" style="padding: 20px;">
               <form method="post" onsubmit="submitRegister()" action="javascript:void(0);" autocomplete="off">
                 <div class="input-field">
-                  <i class="material-icons prefix">person</i>
-                  <input id="name_register" name="name" type="text" required>
-                  <label for="name_register">Name</label>
-                </div>
-                <div class="input-field">
                   <i class="material-icons prefix">mail</i>
                   <input id="mail_register" name="mail" type="email" required="required" class="validate">
-                  <label for="mail_register">Email</label>
+                  <label for="mail_register">Email-Addresse</label>
                 </div>
                 <div class="input-field ">
                   <i class="material-icons prefix">vpn_key</i>
@@ -68,7 +63,7 @@
       </div>
     </div>
     <div id="student_blueprint" class="row" style="display: none;">
-      <input id="student" class="col s6 autocomplete name" name="student" type="text" placeholder="Name">
+      <input id="student" class="col s6 autocomplete name" name="student" type="text" placeholder="Vor- und Nachname">
       <input type="date" class="datepicker col s6 bday" id="bday" name="bday" placeholder="Geburtsdatum"><!-- id="bday" class="col s6" name="bday" type="date" class="bday" -->
     </div>
 
@@ -138,7 +133,7 @@
       {
           var pwd = $('#pwd_login').val();
           var usr = $('#usr_login').val();
-          var url =  "index.php?console&type=login&login[password]=" + pwd + "&login[user]=" + usr;
+          var url =  "index.php?console&type=login&login[password]=" + pwd + "&login[mail]=" + usr;
 
 
           $.get(url, function (data) {
@@ -161,7 +156,6 @@
           var url_param = "?console&type=register";
 
           //TODO: check inputs for correct syntax etc.
-          var usr = $('#name_register').val();
           var mail = $('#mail_register').val();
           var pwd = $('#pwd_register').val();
           var pwdrep = $('#pwdrep_register').val();
@@ -177,8 +171,9 @@
 
 
 
-          url_param += "&register[usr]=" + usr + "&register[mail]=" + mail + "&register[pwd]=" + pwd;
+          url_param += "&register[mail]=" + mail + "&register[pwd]=" + pwd;
 
+            var num_validStudents = 0;
 
           var studentNotes = document.getElementsByClassName('student_instance');
 
@@ -191,12 +186,21 @@
                 if(name == "" || bday == "")
                     continue;
 
+                num_validStudents++;
                 url_param += "&register[student][]=" + name + ":" + bday;
 
           }
 
+          if(num_validStudents == 0)
+          {// No valid Students...
+              Materialize.toast("Bitte geben sie mindestens einen Schüler an.");
+              return;
+          }
+
             // give request to backend and utilize response
           $.get("index.php" + url_param, function (data) {
+
+            try{
               var myData = JSON.parse(data);
               if(myData.success)
               {
@@ -204,11 +208,18 @@
               }
               else
               { // oh no! ;-;
-                  var notifications = myData['notifications'];
-                  notifications.forEach(function (data) {
-                      Materialize.toast(data, 4000);
-                  });
+                var notifications = myData['notifications'];
+                notifications.forEach(function (data) {
+                  Materialize.toast(data, 4000);
+                });
               }
+            }catch (e) {
+              Materialize.toast('Interner Server Fehler!');
+                console.error(e);
+                console.info('Request: ' + url_param);
+                console.info('Response: ' + data);
+            }
+
 
           });
 
