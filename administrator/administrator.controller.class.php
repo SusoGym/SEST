@@ -150,6 +150,16 @@ class Controller
 		case "utstart":
 		    $this->performDataUpdate(false,$input);
 			break;
+		//SEST configuration
+		case "sestconfig":
+			$this->header="Konfiguration Elternsprechtag (z.B. Klassen/Lehrer, Slotdaten eingeben etc.)";
+			$this->tpl="settings";
+			break;
+		//News configuration
+		case "newsconfig":
+			$this->header="Konfiguration Newsletter (z.B. Emailversand/Anhänge etc.)";
+			$this->tpl="settings";
+			break;
 		//Set SEST Slots
   	    case "slots":
   	      
