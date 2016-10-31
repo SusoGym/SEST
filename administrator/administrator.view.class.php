@@ -26,6 +26,11 @@ private $data;
 *@var string filename 
 */
 private $file; 
+
+/**
+*@var string 
+*/
+private $actionType; //z.B. zur Unterscheidung von leher oder Schüleraktionen
   
 /**
 *Template Dateien werden geladen
@@ -66,7 +71,13 @@ public function setFile($file){
 public function setHeader($string){
 	$this->action=$string;
 	}
-
+/**
+*set actionType
+*@param array
+*/
+public function setActionType($string){
+	$this->actionType=$string;
+	}
 	
 }
 

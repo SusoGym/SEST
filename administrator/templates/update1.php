@@ -6,7 +6,7 @@
       <div class="card ">
         <div class="card-content">
 						
-          <form action="index.php?type=usstart" method="POST">
+          <form action="index.php?type=<?php echo $this->actionType ?>" method="POST">
 		  <div class="row">
 		  <b><?php echo $this->action ?></b>
 		  <br><b>Wählen Sie eine Zuordnung der Quelldaten zu den Zieldatenfeldern in der Datenbank</b>

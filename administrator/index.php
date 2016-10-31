@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+
 require "ChromePhp.php"; // debugging
 require "administrator.connect.class.php";
 require "administrator.controller.class.php";

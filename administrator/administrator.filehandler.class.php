@@ -73,6 +73,8 @@ return $sourceData;
 */
 public function updateData($student,$data){
 $insertCounter=0;
+$updateCounter=0;
+$changesApplied=array();
 $this->model->setUpdateStatusZero($student);
 $sourceLines=$this->readSourceData();
 $lineFieldValue=array();	
@@ -90,15 +92,18 @@ foreach($sourceLines as $line){
 	}
 	
 	foreach($lineFieldValue as $l){
-		if($this->model->checkDBData(true,$l["id"])){
-			$this->model->updateData(true,$l["id"],$l);
+		if($this->model->checkDBData($student,$l["id"])){
+			$this->model->updateData($student,$l["id"],$l);
+			$updateCounter++;
 			}
 		else{
-			$this->model->insertData(true,$l);
+			$this->model->insertData($student,$l);
 			$insertCounter++;
 		}
 	}
-	return $insertCounter;
+	$changesApplied[0]=$updateCounter;
+	$changesApplied[1]=$insertCounter;
+	return $changesApplied;
 }
 
 

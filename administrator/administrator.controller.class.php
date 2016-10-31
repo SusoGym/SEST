@@ -25,6 +25,11 @@ class Controller
 	*/
 	private $header;
 	
+	/**
+	*@var string actiontype For view
+	*/
+	private $actionType;
+	
 /**
 *Konstruktor
 *@param array 
@@ -110,18 +115,21 @@ class Controller
   	    case "update_t":
   	      //Einlesen der Lehrerdaten 
 		  $this->header="Lehrerdaten abgleichen";
+		  $this->actionType="utchoose";
 		  $this->tpl = "update";
           break;
         //Update student data
         case "update_s":
   	      $this->header="Schülerdaten abgleichen";
+		  $this->actionType="uschoose";
 		  $this->tpl = "update";
   	      break;
 		//student file upload
 		case "uschoose":
 		    if($this->fileUpload(true)) {
-			$this->header="Datei upload zur Aktualkisierung der Schülerdaten";
+			$this->header="Datei upload zur Aktualisierung der Schülerdaten";
 			$this->prepareDataUpdate(true);
+			$this->actionType="usstart";
 			$this->tpl="update1";	
 			}
 			else{
@@ -132,8 +140,9 @@ class Controller
 		//teacher file upload
 		case "utchoose":
 			if($this->fileUpload(true)) {
-				$this->header="Datei upload zur Aktualkisierung der Lehrerdaten";
+				$this->header="Datei upload zur Aktualisierung der Lehrerdaten";
 				$this->prepareDataUpdate(false);
+				$this->actionType="utstart";
 				$this->tpl="update1";	
 				}
 			else{
@@ -142,13 +151,15 @@ class Controller
 			break;
 		//Student Update start
 		case "usstart":
-			$this->header="Schülerdaten aktualisieren";
+			$this->header="Schülerdaten aktualisiert";
 			$this->performDataUpdate(true,$input);
 			$this->tpl="update2";
 			break;
 		//Teacher update start
 		case "utstart":
+			$this->header="Lehrerdaten aktualisiert";
 		    $this->performDataUpdate(false,$input);
+			$this->tpl="update2";
 			break;
 		//SEST configuration
 		case "sestconfig":
@@ -213,6 +224,7 @@ class Controller
 	if(isset($this->dataForView)) {$view->setViewData($this->dataForView);}
 	if(isset($this->file)) {$view->setFile($this->file);}
 	if(isset($this->header)) {$view->setHeader($this->header);}
+	if(isset($this->actionType)) {$view->setActionType($this->actionType);}
 	$view->loadTemplate($this->tpl);
   }
 
@@ -305,6 +317,8 @@ class Controller
 			$this->dataForView[0]=$fileHandler->readHead();
 			$this->dataForView[1]=$fileHandler->readDBFields($student); //schueler=true
 		}
+	
+	
 	/**
 	*perform update of DB Data
 	*@param bool
@@ -320,8 +334,10 @@ class Controller
 				$updateData[]=array("source"=>$h,"target"=>$input['post_dbfield'][$x]);
 				$x++;
 				}
-			$this->dataForView[]=$fileHandler->updateData($student,$updateData);	//gibt Anzahl eingefügter Zeilen an
-			$this->dataForView[]=$fileHandler->deleteDataFromDB($student);
+			$updateResults=$fileHandler->updateData($student,$updateData);	//gibt Anzahl eingefügter Zeilen an
+			$this->dataForView[0]=$updateResults[0];
+			$this->dataForView[1]=$updateResults[1];
+			$this->dataForView[2]=$fileHandler->deleteDataFromDB($student);
 		}
 }
 
