@@ -66,7 +66,7 @@ class Controller
 				else {
 					ChromePhp::info("Invalid login data");                 // eigentlich sollte man das mit js machen, damit Seite bei (fehlerhaft) anmelden nicht neu läd.....
 					$_SESSION['failed_login']['name'] = $usr;
-					$this->notify('Benutzername oder Passwort falsch');
+					$this->notify('kein admin login');
 					}
 				}
 		}
@@ -119,46 +119,37 @@ class Controller
   	      break;
 		//student file upload
 		case "uschoose":
-			$this->header="Datei upload";
-			/*
-			if(is_uploaded_file($_FILES['Datei']['tmp_name']) &&
-			move_uploaded_file($_FILES['Datei']['tmp_name'], '/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['Datei']['name'])    )
-			{
-			  $this->file='/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['Datei']['name'];
-			}*/
-			if(is_uploaded_file($_FILES['Datei']['tmp_name']) &&
-			move_uploaded_file($_FILES['Datei']['tmp_name'], './tmp/'.$_FILES['Datei']['name'])    )
-			{
-			  $this->file='./tmp/'.$_FILES['Datei']['name'];
+		    if($this->fileUpload(true)) {
+			$this->header="Datei upload zur Aktualkisierung der Schülerdaten";
+			$this->prepareDataUpdate(true);
+			$this->tpl="update1";	
 			}
-			else
-			{
-			  echo 'Bei dem Upload ist ein Fehler aufgetreten.';
-			  die;
+			else{
+			$this->tpl="update";
 			}
 			
-			$fileHandler=new FileHandler($this->file);
-			$this->dataForView[0]=$fileHandler->readHead();
-			$this->dataForView[1]=$fileHandler->readDBFields(true); //schueler=true
-			$this->tpl="update1";
+			break;
+		//teacher file upload
+		case "utchoose":
+			if($this->fileUpload(true)) {
+				$this->header="Datei upload zur Aktualkisierung der Lehrerdaten";
+				$this->prepareDataUpdate(false);
+				$this->tpl="update1";	
+				}
+			else{
+				$this->tpl="update";
+				}
 			break;
 		//Student Update start
 		case "usstart":
-			$this->header="Daten aktualisieren";
-			$updateData=array();
-			$this->file=$input['file'];
-			$fileHandler=new FileHandler($this->file);
-			$sourceHeads=$fileHandler->readHead();
-			$x=0;
-			foreach($sourceHeads as $h){
-				$updateData[]=array("source"=>$h,"target"=>$input['post_dbfield'][$x]);
-				$x++;
-				}
-			$this->dataForView[]=$fileHandler->updateData(true,$updateData);	//gibt Anzahl eingefügter Zeilen an
-			$this->dataForView[]=$fileHandler->deleteDataFromDB(true);
+			$this->header="Schülerdaten aktualisieren";
+			$this->performDataUpdate(true,$input);
 			$this->tpl="update2";
 			break;
-		
+		//Teacher update start
+		case "utstart":
+		    $this->performDataUpdate(false,$input);
+			break;
 		//Set SEST Slots
   	    case "slots":
   	      
@@ -237,9 +228,12 @@ class Controller
   }
 
 
-
-  function login($usr, $pwd)
-  {
+  /**
+  *check login
+  *@param string user
+  *@param string password
+  */
+  function login($usr, $pwd){
       $model = Model::getInstance();
       if($model->passwordValidate($usr, $pwd)) {
 
@@ -251,19 +245,74 @@ class Controller
               ChromePhp::error("Unexpected database response! requested uid = null!");
               exit();
           }
-
           $type = $model->userGetType($uid);
-          $time = $_SESSION['user']['logintime'] = time();
-
-          //ChromePhp::info("User '$usr' with id $uid of type $type successfully logged in @ $time");
-
-          return true;
+		  
+		  //admin login MUST be type 0
+		  if($type==0){
+				$time = $_SESSION['user']['logintime'] = time();
+				//ChromePhp::info("User '$usr' with id $uid of type $type successfully logged in @ $time");
+          return true;  
+		  }
+		  else{
+			  return false;
+			}
       }
-
       return false;
   }
-
-
+  
+  /**
+  *uploading a file to server
+  */
+  private function fileUpload(){
+		try{
+		/*
+		if(is_uploaded_file($_FILES['Datei']['tmp_name']) &&
+		move_uploaded_file($_FILES['Datei']['tmp_name'], '/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['Datei']['name'])    )
+		{
+		  $this->file='/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['Datei']['name'];
+		}*/
+		if(is_uploaded_file($_FILES['Datei']['tmp_name']) &&
+		move_uploaded_file($_FILES['Datei']['tmp_name'], './tmp/'.$_FILES['Datei']['name'])    ){
+			$this->file='./tmp/'.$_FILES['Datei']['name'];
+			$success=true;
+			}
+		}
+		catch(Exception $e)
+		{
+		  $this->notify('error uploading a file');
+		  $success=false;
+		}  
+		finally{
+			return $success;
+		}
+	}
+	/**
+	*prepare update of DB Data
+	*@param bool 
+	*/
+	private function prepareDataUpdate($student){
+			$fileHandler=new FileHandler($this->file);
+			$this->dataForView[0]=$fileHandler->readHead();
+			$this->dataForView[1]=$fileHandler->readDBFields($student); //schueler=true
+		}
+	/**
+	*perform update of DB Data
+	*@param bool
+	*@param array input (GET/POST Data)
+	*/
+	private function performDataUpdate($student,$input){
+		$updateData=array();
+			$this->file=$input['file'];
+			$fileHandler=new FileHandler($this->file);
+			$sourceHeads=$fileHandler->readHead();
+			$x=0;
+			foreach($sourceHeads as $h){
+				$updateData[]=array("source"=>$h,"target"=>$input['post_dbfield'][$x]);
+				$x++;
+				}
+			$this->dataForView[]=$fileHandler->updateData($student,$updateData);	//gibt Anzahl eingefügter Zeilen an
+			$this->dataForView[]=$fileHandler->deleteDataFromDB($student);
+		}
 }
 
 ?>
