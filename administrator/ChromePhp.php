@@ -1,4 +1,4 @@
-<?php
+<?php namespace administrator;
 /**
  * Copyright 2010-2013 Craig Campbell
  *
