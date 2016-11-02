@@ -19,7 +19,7 @@ class Model
      */
     private function __construct()
     {
-        if(self::$connection == null)
+        if (self::$connection == null)
             self::$connection = new Connection();
 
     }
@@ -50,17 +50,17 @@ class Model
 
         if (isset($data[0][0]))
             $id = $data[0][0];
-        if(isset($data[0][1]))
+        if (isset($data[0][1]))
             $eid = $data[0][1];
-        if(isset($data[0][2]))
+        if (isset($data[0][2]))
             $name = $data[0][2];
-        if(isset($data[0][3]))
+        if (isset($data[0][3]))
             $vorname = $data[0][3];
 
-        if($id == null)
+        if ($id == null)
             return null;
 
-        return array("id"=>$id, "eid"=>$eid, "name"=>$name, "vorname"=>$vorname);
+        return array("id" => $id, "eid" => $eid, "name" => $name, "vorname" => $vorname);
     }
 
     /**
@@ -69,9 +69,9 @@ class Model
      */
     public function userGetType($userid)
     {
-        $data = self::$connection->selectValues("SELECT user_type FROM user WHERE id=" .$userid);
+        $data = self::$connection->selectValues("SELECT user_type FROM user WHERE id=" . $userid);
 
-        if(!isset($data[0]))
+        if (!isset($data[0]))
             return null;
 
         return intval($data[0][0]);
@@ -87,7 +87,7 @@ class Model
         $email = self::$connection->escape_string($email);
         $data = self::$connection->selectValues("SELECT id FROM user WHERE email='$email'");
 
-        if($data == null)
+        if ($data == null)
             return null;
 
         return $data[0][0];
@@ -101,7 +101,7 @@ class Model
     {
         $data = self::$connection->selectValues("SELECT email FROM user WHERE id=$id");
 
-        if($data == null)
+        if ($data == null)
             return null;
 
         return $data[0][0];
@@ -123,7 +123,7 @@ class Model
     }
 
     /**
-     * @param int $tchrId, string $sort
+     * @param int $tchrId
      * @param string $sort
      * @return array(surname, name)
      */
@@ -177,8 +177,7 @@ class Model
 
         $ids = array();
 
-        foreach ($data as $item)
-        {
+        foreach ($data as $item) {
             $tid = intval($item[0]);
             array_push($ids, $tid);
         }
@@ -187,34 +186,47 @@ class Model
 
     }
 
-    public function getTeachers() {
-      $data = self::$connection->selectValues("SELECT id FROM lehrer"); // returns data[n][data]
+    public function getTeachers()
+    {
+        $data = self::$connection->selectValues("SELECT id FROM lehrer"); // returns data[n][data]
 
-      $ids = array();
+        $ids = array();
 
-      foreach ($data as $item)
-      {
-          $tid = intval($item[0]);
-          array_push($ids, $tid);
-      }
+        foreach ($data as $item) {
+            $tid = intval($item[0]);
+            array_push($ids, $tid);
+        }
 
-      return $ids;
+        return $ids;
     }
 
     /**
-     * @param int $terminId
+     * @param int $slotId
+     * @param int $userId
+     * @param int $teacherId
+     * @return int appointmentId
      */
-    public function bookingAdd($terminId)
+    public function bookingAdd($slotId, $userId, $teacherId)
+    {
+        return -1;
+    }
+
+    /**
+     * @param int $appointment
+     */
+    public function bookingDelete($appointment)
     {
 
     }
 
     /**
-     * @param int $terminId
+     * @param $slotId int
+     * @param $userId int
+     * @return int appointmentId
      */
-    public function bookingDelete($terminId)
+    public function getAppointment($slotId, $userId)
     {
-
+        return -1;
     }
 
     /**
@@ -230,7 +242,7 @@ class Model
 
         $data = self::$connection->selectAssociativeValues("SELECT password_hash from user WHERE email='$email'");
 
-        if($data == null)
+        if ($data == null)
             return false;
 
 
@@ -263,8 +275,7 @@ class Model
         $parentId = self::$connection->insertValues("INSERT INTO eltern (userid) VALUES ($usrId);");
 
         // transform given int into array
-        if(!is_array($pid))
-        {
+        if (!is_array($pid)) {
             $pid = array($pid);
         }
 
@@ -272,8 +283,7 @@ class Model
 
         // query each given pupil and set eid (one query to spare resources)
         $query = "";
-        foreach ($pid as $pupilId)
-        {
+        foreach ($pid as $pupilId) {
             $query .= "UPDATE schueler SET eid=$parentId WHERE id=$pupilId;";
         }
 

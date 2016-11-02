@@ -1,11 +1,10 @@
- 
+<?php namespace administrator;
+       include("header.php"); ?>
 
-    <?php include("header.php"); ?>
-	
-	
-	
-	
-	
+
+
+
+
     <div class="container">
 
       <div class="card">
@@ -14,26 +13,22 @@
           <b><?php echo $this->action ?></b>
          </div>
 		  <div class="row">
-             <ul ><a id="home" href="index.php?type=update_s">Abgleich Schülerdaten</a></ul>
+             <ul ><a id="home" href="?type=update_s">Abgleich Schülerdaten</a></ul>
          </div>
 		 <div class="row">
-             <ul><a id="home" href="index.php?type=update_t">Abgleich Lehrerdaten</a></ul>
+             <ul><a id="home" href="?type=update_t">Abgleich Lehrerdaten</a></ul>
          </div>
         </div>
-       
+
         </div>
-     
-	  
+
+
 
     </div>
-    
 
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="http://materializecss.com/bin/materialize.js"></script>
-    <script>
-        $(document).ready(function(){
-          $(".button-collapse").sideNav();
-        });
-    </script>
+
+    <!-- Include Javascript -->
+    <?php include("js.php") ?>
+
   </body>
 </html>

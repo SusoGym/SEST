@@ -6,78 +6,78 @@
 class User
 {
 
-  protected $type;
-  protected $name;
-  protected $id;
+    protected $type;
+    protected $name;
+    protected $id;
 
-  /**
-   *Construct method of User class
-   *@param int $id userId
-   */
-  public function __construct($id)
-  {
-    $this->id = $id;
-  }
+    /**
+     *Construct method of User class
+     * @param int $id userId
+     */
+    public function __construct($id)
+    {
+        $this->id = $id;
+    }
 
-  /**
-   * @param $id int user id
-   * @return User fitting extension of user (Guardian | Teacher)
-   */
-  public static function fetchFromDB($id)
-  {
-      $model = Model::getInstance();
-      $type = $model->userGetType($id); // 0 - Admin; 1 - parent; 2 - teacher
+    /**
+     * @param $id int user id
+     * @return User fitting extension of user (Guardian | Teacher)
+     */
+    public static function fetchFromDB($id)
+    {
+        $model = Model::getInstance();
+        $type = $model->userGetType($id); // 0 - Admin; 1 - parent; 2 - teacher
 
-      $user = null;
+        $user = null;
 
-      if($type == 1)
-          $user = new Guardian($id);
-      else if($type == 2)
-          $user = new Teacher($id);
-      else
-          die("No Admin implemented yet!");
+        if ($type == 1)
+            $user = new Guardian($id);
+        else if ($type == 2)
+            $user = new Teacher($id);
+        else
+            die("No Admin implemented yet!");
 
-      $user->type = $type;
-      $user->name = $model->idGetUsername($id);
+        $user->type = $type;
+        $user->name = $model->idGetUsername($id);
 
-      return $user;
-  }
+        return $user;
+    }
 
-  /**
-   *Returns user ID
-   *@return int id
-   */
-  public function getId()
-  {
-    return $this->id;
-  }
+    /**
+     *Returns user ID
+     * @return int id
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
-  /**
-   *Returns user name
-   *@return string name
-   */
-  public function getName()
-  {
-    return $this->name;
-  }
+    /**
+     *Returns user name
+     * @return string name
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 
-  /**
-   *Returns user type (0 for admin, 1 for parent, 2 for teacher)
-   *@return int type
-   */
-  public function getType()
-  {
-    return $this->type;
-  }
+    /**
+     *Returns user type (0 for admin, 1 for parent, 2 for teacher)
+     * @return int type
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
 
 
-  /**
-   * @return string this class as string
-   */
-  public function __toString()
-  {
-    return "User{id=" . $this->id . ", name=\"" . $this->name . "\",type=" . $this->type . "}";
-  }
+    /**
+     * @return string this class as string
+     */
+    public function __toString()
+    {
+        return "User{id=" . $this->id . ", name=\"" . $this->name . "\",type=" . $this->type . "}";
+    }
 
 }
 
@@ -88,64 +88,64 @@ class User
 class Guardian extends User
 {
 
-  /**
-   * @var array
-   */
-  private $children;
+    /**
+     * @var array
+     */
+    private $children;
 
-  /**
-   * Contructor of Parent class
-   * @param int $id userId
-   */
-  public function __construct($id)
-  {
-    parent::__construct($id);
+    /**
+     * Contructor of Parent class
+     * @param int $id userId
+     */
+    public function __construct($id)
+    {
+        parent::__construct($id);
 
-    $this->children = Model::getInstance()->parentGetChildren($this->id);
-    $this->name = Model::getInstance()->parentGetName($this->id);
-    $this->type = 1;
-  }
-
-  /**
-   *Returns child(ren)'s id(s)
-   *@return array[] children
-   */
-  public function getChildren()
-  {
-    return $this->children;
-  }
-
-  /**
-   *Returns all teachers that teach any of the parents children
-   *@return array[] teachers
-   */
-  public function getTeachers()
-  {
-
-      if($this->getChildren() == null)
-          return array();
-
-    $model = Model::getInstance();
-    $classes = array();
-    foreach ($this->getChildren() as $key => $value) {
-      $classes[] = $model->studentGetClass(intval($value));
-    }
-    $teachers = array();
-    foreach ($classes as $key => $class) {
-      $teachers = array_merge($teachers, $model->classGetTeachers($class));
+        $this->children = Model::getInstance()->parentGetChildren($this->id);
+        $this->name = Model::getInstance()->parentGetName($this->id);
+        $this->type = 1;
     }
 
-    sort($teachers);
-
-    $tchrs_f = array();
-
-    for ($i = 1; $i <= count($teachers); $i++) {
-      if ($teachers[$i] != $teachers[$i-1]) {
-        $tchrs_f[] = $teachers[$i];
-      }
+    /**
+     *Returns child(ren)'s id(s)
+     * @return array[] children
+     */
+    public function getChildren()
+    {
+        return $this->children;
     }
-    return $tchrs_f;
-  }
+
+    /**
+     *Returns all teachers that teach any of the parents children
+     * @return array[] teachers
+     */
+    public function getTeachers()
+    {
+
+        if ($this->getChildren() == null)
+            return array();
+
+        $model = Model::getInstance();
+        $classes = array();
+        foreach ($this->getChildren() as $key => $value) {
+            $classes[] = $model->studentGetClass(intval($value));
+        }
+        $teachers = array();
+        foreach ($classes as $key => $class) {
+            $teachers = array_merge($teachers, $model->classGetTeachers($class));
+        }
+
+        sort($teachers);
+
+        $tchrs_f = array();
+
+        for ($i = 1; $i <= count($teachers); $i++) {
+            if ($teachers[$i] != $teachers[$i - 1]) {
+                $tchrs_f[] = $teachers[$i];
+            }
+        }
+        return $tchrs_f;
+    }
 }
 
 
@@ -155,17 +155,17 @@ class Guardian extends User
 class Teacher extends User
 {
 
-  /**
-   *Constructor of Teacher class
-   * @param int $id userId
-   */
-  public function __construct($id)
-  {
-    parent::__construct($id);
+    /**
+     *Constructor of Teacher class
+     * @param int $id userId
+     */
+    public function __construct($id)
+    {
+        parent::__construct($id);
 
-    $this->name = Model::getInstance()->teacherGetName($id);
-    $this->type = 2;
-  }
+        $this->name = Model::getInstance()->teacherGetName($id);
+        $this->type = 2;
+    }
 }
 
 ?>
