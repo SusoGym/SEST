@@ -36,24 +36,31 @@ class Model
      * @param string $bday Geburtsdatum
      * @return array[int] array[SchuelerID, ElternId] TODO: would be nicer to create student object here
      **/
-    public function checkPupilExist($vorname, $name, $bday)
+    public function checkPupilExist($name, $bday)
     { //TODO -> $name und $vorname beinhalten auch zweit namen -> optional oder pflicht bei registierung?
+
+        $name = self::$connection->escape_string($name);
+
+        $data = self::$connection->selectValues("SELECT id, eid, name, vorname FROM schueler WHERE Replace(CONCAT(vorname, name), ' ', '') = '$name' AND gebdatum='$bday'");
+
         $id = null;
         $eid = null;
-        $name = self::$connection->escape_string($name);
-        $bday = self::$connection->escape_string($bday);
-
-        $data = self::$connection->selectValues("SELECT id, eid FROM schueler WHERE vorname='$vorname' AND name='$name' AND gebdatum='$bday'");
+        $name = null;
+        $vorname = null;
 
         if (isset($data[0][0]))
             $id = $data[0][0];
         if(isset($data[0][1]))
             $eid = $data[0][1];
+        if(isset($data[0][2]))
+            $name = $data[0][2];
+        if(isset($data[0][3]))
+            $vorname = $data[0][3];
 
         if($id == null)
             return null;
 
-        return array("id"=>$id, "eid"=>$eid);
+        return array("id"=>$id, "eid"=>$eid, "name"=>$name, "vorname"=>$vorname);
     }
 
     /**
@@ -72,13 +79,13 @@ class Model
     }
 
     /**
-     * @param string $userName
+     * @param string $email the user email
      * @return int userId
      */
-    public function usernameGetId($userName)
+    public function userGetIdByMail($email)
     {
-        $userName = self::$connection->escape_string($userName);
-        $data = self::$connection->selectValues("SELECT id FROM user WHERE username='$userName'");
+        $email = self::$connection->escape_string($email);
+        $data = self::$connection->selectValues("SELECT id FROM user WHERE email='$email'");
 
         if($data == null)
             return null;
@@ -88,11 +95,11 @@ class Model
 
     /**
      * @param $id int userId
-     * @return string userName
+     * @return string email
      */
-    public function idGetUsername($id)
+    public function idGetEmail($id)
     {
-        $data = self::$connection->selectValues("SELECT username FROM user WHERE id=$id");
+        $data = self::$connection->selectValues("SELECT email FROM user WHERE id=$id");
 
         if($data == null)
             return null;
@@ -117,6 +124,7 @@ class Model
 
     /**
      * @param int $tchrId, string $sort
+     * @param string $sort
      * @return array(surname, name)
      */
     public function teacherGetName($tchrId, $sort = "name ASC")
@@ -210,17 +218,17 @@ class Model
     }
 
     /**
-     * @param $userName
+     * @param $email
      * @param $password
      * @return bool user exists in database and password is equal with the one in the database
      */
-    public function passwordValidate($userName, $password)
+    public function passwordValidate($email, $password)
     {
 
-        $userName = self::$connection->escape_string($userName);
+        $email = self::$connection->escape_string($email);
         //$password = self::$connection->escape_string($userName);
 
-        $data = self::$connection->selectAssociativeValues("SELECT password_hash from user WHERE username='$userName'");
+        $data = self::$connection->selectAssociativeValues("SELECT password_hash from user WHERE email='$email'");
 
         if($data == null)
             return false;
@@ -236,20 +244,18 @@ class Model
 
 
     /**
-     * @param $usr string parents username
      * @param $pid array or int parents children ids (array[int] || int)
      * @param $email string parents email
      * @param $pwd string parents password
      * @return int newly created parents id
      */
-    public function registerParent($usr, $pid, $email, $pwd)
+    public function registerParent($pid, $email, $pwd)
     {
 
-        $usr = self::$connection->escape_string($usr);
         $email = self::$connection->escape_string($email);
         $pwd = password_hash($pwd, PASSWORD_DEFAULT);
 
-        $query = "INSERT INTO user (username, user_type, password_hash, email) VALUES ('$usr', 1,'$pwd', '$email');";
+        $query = "INSERT INTO user (user_type, password_hash, email) VALUES (1,'$pwd', '$email');";
 
         //Create parent in database and return eid
         $usrId = self::$connection->insertValues($query);

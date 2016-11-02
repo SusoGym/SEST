@@ -68,13 +68,13 @@ class Controller
       } else {
           ChromePhp::info("No type specified!");
 
-          if(isset($_SESSION['user']['name']) && isset($_SESSION['user']['pwd']))
+          if(isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd']))
           {
               // alread logged in!
-              $name = $_SESSION['user']['name'];
+              $email = $_SESSION['user']['mail'];
               $pwd = $_SESSION['user']['pwd'];
 
-              if($this->checkLogin($name, $pwd))
+              if($this->checkLogin($email, $pwd))
               {
                   ChromePhp::info("Relogin with valid user data");
                   $this->display("parent_dashboard");
@@ -141,29 +141,27 @@ class Controller
 
       $input = $this->input;
 
-      if(!isset($input['login']['user']) || !isset($input['login']['password']))
+      if(!isset($input['login']['mail']) || !isset($input['login']['password']))
       {
-          ChromePhp::info("No username || pwd in input[]");
-          $this->notify('Kein Benutzername oder Passwort angegeben');
+          ChromePhp::info("No mail || pwd in input[]");
+          $this->notify('Keine Email-Addresse oder Passwort angegeben');
           return "login";
       }
 
       $pwd = $_SESSION['user']['pwd'] = $input['login']['password'];
-      $usr = $_SESSION['user']['name'] = $input['login']['user'];
+      $mail = $_SESSION['user']['mail'] = $input['login']['mail'];
 
       if(isset($input['console'])) // used to only get raw login state -> can be used in js
       {
-          die($this->checkLogin($usr, $pwd) ? "true" : "false");
+          die($this->checkLogin($mail, $pwd) ? "true" : "false");
       }
 
-      if ($this->checkLogin($usr, $pwd)) {
-
+      if ($this->checkLogin($mail, $pwd)) {
           return "parent_dashboard";
       } else {
 
           ChromePhp::info("Invalid login data");
-          $_SESSION['failed_login']['name'] = $usr;
-          $this->notify('Benutzername oder Passwort falsch');
+          $this->notify('Email-Addresse oder Passwort falsch');
           return "login";
       }
   }
@@ -185,16 +183,15 @@ class Controller
 
       ChromePhp::info("-- Register --");
 
-      //TODO: check duplicate email
-      $username = $input['register']['usr'];
       $pwd = $input['register']['pwd'];
       $mail =  $input['register']['mail'];
       $students = $input['register']['student']; // format : ["name:bday", "name:bday", ...]
 
-      ChromePhp::info("Username: " . $username);
+      ChromePhp::info("Email: " . $mail);
 
-      if ($model->usernameGetId($username) != null) {
-          array_push($notification, "Dieser Benutzername ist bereits vergeben");
+      if (($id = $model->userGetIdByMail($mail)) != null) {
+          array_push($notification, "Diese Email-Addresse ist bereits registriert.");
+          ChromePhp::info("Email bereits registriert mit id $id");
           $success = false;
       }
 
@@ -208,17 +205,19 @@ class Controller
           $name = $student[0];
           $bday = $student[1];
 
-          $studentData = $model->checkPupilExist(explode(" ", $name)[0], explode(" ", $name)[1], $bday);
+          $studentData = $model->checkPupilExist(str_replace(" ", "", $name), $bday);
           $pid = $studentData["id"];
           $studentEid = $studentData["eid"];
+          $name = $studentData['name'];
+          $vorname = $studentData['vorname'];
 
-          ChromePhp::info("Student: " . json_encode($name) . " born on " . $bday . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($studentEid == null ? "no parents set" : "parent with id $studentEid")));
+          ChromePhp::info("Student: " . json_encode($name) . "($name, $vorname) born on " . $bday . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($studentEid == null ? "no parents set" : "parent with id $studentEid")));
 
           if ($pid == null) {
               $wrongStudentData = true;
           } else if($studentEid != null)
           {
-              array_push($notification, "Dem Schüler ".$name." ist bereits ein Elternteil zugeordnet"); //TODO: get student name with correct upper/lower case etc. from database (student object)
+              array_push($notification, "Dem Schüler $vorname $name ist bereits ein Elternteil zugeordnet");
               $success = false;
           }
           else
@@ -239,16 +238,15 @@ class Controller
 
       if($success)
       {
-          $userid = $model->registerParent($username, $pids, $mail, $pwd);
+          $userid = $model->registerParent($pids, $mail, $pwd);
           $_SESSION['user']['id'] = $userid;
 
           $time = $_SESSION['user']['logintime'] = time();
 
-          $_SESSION['user']['name'] = $username;
           $_SESSION['user']['pwd'] = $pwd;
-          $_SESSION['user']['email'] = $mail;
+          $_SESSION['user']['mail'] = $mail;
 
-          ChromePhp::info("Registered new user '$username' with id $userid and logged in @ $time");
+          ChromePhp::info("Registered new user '$mail' with id $userid and logged in @ $time");
 
       }
 
@@ -342,11 +340,11 @@ class Controller
 
 
   private function checkLogin($usr, $pwd)
-  { //TODO: get email from db and save to $_SESSION['user']['email']
+  {
       $model = Model::getInstance();
       if($model->passwordValidate($usr, $pwd)) {
 
-          $uid = $_SESSION['user']['id'] = $model->usernameGetId($usr);
+          $uid = $_SESSION['user']['id'] = $model->userGetIdByMail($usr);
           if ($uid == null) {
               $this->notify("Database error!");
               $this->display("login");
@@ -362,6 +360,8 @@ class Controller
 
           return true;
       }
+
+      //TODO: validate login by username xor norvell(for teachers etc.)
 
       return false;
   }
