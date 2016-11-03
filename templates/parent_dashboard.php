@@ -11,48 +11,9 @@ foreach ($tchrsids as $tchr) {
     $tchrs[$tchr] = $model->teacherGetName($tchr);
 }
 
+include("header.php");
+
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>ESPT</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <!--suppress HtmlUnknownTarget -->
-    <link rel="icon" type="image/ico" href="favicon.ico">
-    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="http://materializecss.com/bin/materialize.css"
-          media="screen,projection"/>
-    <style>
-        .action {
-            margin-left: 10px;
-        }
-
-        .info {
-            margin-left: 10px;
-            font-style: italic;
-        }
-    </style>
-</head>
-<body class="grey lighten-2">
-
-<form id="logoutform" action="" method="post"><!-- logout form -->
-    <input type="hidden" name="type" value="logout">
-</form>
-
-<nav>
-    <div class="nav-wrapper teal">
-        <a href="#" style="margin-left: 20px" class="brand-logo">Elternsprechtag</a>
-        <a href="#" data-activates="mobile-nav" class="button-collapse" style="padding-left:20px;padding-right:20px;"><i
-                class="material-icons">menu</i></a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a id="logout" onclick="document.getElementById('logoutform').submit()" href="#"><i
-                        class="material-icons">power_settings_new</i></a></li>
-        </ul>
-    </div>
-</nav>
 
 <div class="container">
 
@@ -133,13 +94,10 @@ foreach ($tchrsids as $tchr) {
             <img class="background grey" src="http://materializecss.com/images/office.jpg">
             <img class="circle"
                  src="http://www.motormasters.info/wp-content/uploads/2015/02/dummy-profile-pic-male1.jpg">
-            <span class="white-text name"><?php echo $_SESSION['user']['name']; ?></span>
-            <span
-                class="white-text email"><?php echo(isset($_SESSION['user']['email']) ? $_SESSION['user']['email'] : ""); ?></span>
+            <span class="white-text name"><?php echo $_SESSION['user']['mail']; ?></span>
         </div>
     </li>
-    <li><a class="waves-effect" href="#!"><i class="material-icons">cloud</i>First Menu Item</a></li>
-    <li><a class="waves-effect" href="#!"><i class="material-icons">cloud</i>Second Link</a></li>
+        <?php $mobile = true; include("navbar.php"); ?>
     <li>
         <div class="divider"></div>
     </li>
@@ -151,14 +109,7 @@ foreach ($tchrsids as $tchr) {
     <?php } ?>
 </ul>
 
-<script src="https://code.jquery.com/jquery-2.2.4.min.js"
-        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="http://materializecss.com/bin/materialize.js"></script>
-<script>
-    $(document).ready(function () {
-        $('ul.teachers').tabs();
-        $(".button-collapse").sideNav();
-    });
-</script>
+<?php include("js.php"); ?>
+
 </body>
 </html>

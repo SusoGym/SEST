@@ -59,45 +59,49 @@ class Controller
                     break;
                 case "logout":
                     $this->logout();
-                    break;
-
-
-                default:
-                    session_destroy();
-                    ChromePhp::error("Error: invalid type in input[] specified");
                     $template = "login";
-                    $this->notify('A fehler occurred');
+                    break;
+                default:
+
+                    break;
             }
 
             if ($template != null) {
-                $this->display($template);
-            }
 
-        } else {
-            ChromePhp::info("No type specified!");
-
-            if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd'])) {
-                // alread logged in!
-                $email = $_SESSION['user']['mail'];
-                $pwd = $_SESSION['user']['pwd'];
-
-                if ($this->checkLogin($email, $pwd)) {
-                    ChromePhp::info("Relogin with valid user data");
-                    $this->display("parent_dashboard");
-                    return;
-                } else {
-                    ChromePhp::info("Relogin with invalid user data. Redirecting to login page");
+                //Create User object
+                if (isset($_SESSION['user']['id'])) {
+                    $this->user = User::fetchFromDB($_SESSION['user']['id']);
+                    ChromePhp::info("Userobject: " . $this->user);
                 }
 
+                $this->display($template);
+                return;
             }
 
-            if (isset($_SESSION['logout'])) {
-                unset($_SESSION['logout']);
-                $this->notify('Erfolgreich abgemeldet');
-            }
-
-            $this->display("login");
         }
+        ChromePhp::info("No type specified!");
+
+        if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd'])) {
+            // alread logged in!
+            $email = $_SESSION['user']['mail'];
+            $pwd = $_SESSION['user']['pwd'];
+
+            if ($this->checkLogin($email, $pwd)) {
+                ChromePhp::info("Relogin with valid user data");
+                $this->display("parent_dashboard");
+                return;
+            } else {
+                ChromePhp::info("Relogin with invalid user data. Redirecting to login page");
+            }
+
+        }
+
+        if (isset($_SESSION['logout'])) {
+            unset($_SESSION['logout']);
+            $this->notify('Erfolgreich abgemeldet');
+        }
+
+        $this->display("login");
 
 
         //Create User object
