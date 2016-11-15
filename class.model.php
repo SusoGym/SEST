@@ -62,7 +62,7 @@ class Model
      */
     public function getUserById($uid)
     {
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM USER WHERE id=$uid");
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM user WHERE id=$uid");
         if ($data == null)
             return null;
         $data = $data[0];
@@ -71,7 +71,7 @@ class Model
 
         switch ($type) {
             case 0: // Admin
-                die('No Admin implemented here!');
+                return new Admin($data['id'], $data['username'], $data['email']);
                 break;
             case 1: // Parent / Guardian
                 $parentId = self::$connection->selectAssociativeValues("SELECT id FROM eltern WHERE userid=$uid")[0]['id'];
@@ -201,18 +201,22 @@ class Model
 
     }
 
+    /**
+     * Returns all Teachers
+     * @return array[Teacher]
+     */
     public function getTeachers()
     {
         $data = self::$connection->selectValues("SELECT id FROM lehrer"); // returns data[n][data]
 
-        $ids = array();
+        $teachers = array();
 
         foreach ($data as $item) {
             $tid = intval($item[0]);
-            array_push($ids, $tid);
+            array_push($teachers, $this->getTeacherByTeacherId($tid));
         }
 
-        return $ids;
+        return $teachers;
     }
 
     /**

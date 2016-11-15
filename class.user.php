@@ -300,6 +300,23 @@ class Teacher extends User
     }
 }
 
+class Admin extends User
+{
+
+    function __construct($id, $username, $email)
+    {
+        parent::__construct($id, $username, 0, $email);
+    }
+
+    /** Returns class type
+     * @return string
+     */
+    public function getClassType()
+    {
+        return "Admin";
+    }
+
+}
 
 /**
  * Class Student

@@ -132,7 +132,10 @@
         initDatepick();
     }
 
-    addStudent(); // -> create one default student field
+    $(document).ready(function () {
+        addStudent(); // -> create one default student field
+
+    });
 
     function submitLogin() {
         var pwd = $('#pwd_login').val();
@@ -141,11 +144,15 @@
 
 
         $.get(url, function (data) {
-
-            if (data === "true") {
+            if (data == "true") {
                 location.reload();
-            } else {
+            } else if(data == "false"){
                 Materialize.toast("Email-Addresse oder Passwort falsch", 4000);
+                $('#pwd_login').val("");
+
+                $('label[for="pwd_login"]').removeClass("active");
+            } else {
+                Materialize.toast("Unexpected response: " + data, 4000);
                 $('#pwd_login').val("");
 
                 $('label[for="pwd_login"]').removeClass("active");

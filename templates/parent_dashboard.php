@@ -10,6 +10,9 @@ $teacherObjs = array();
 $user = Controller::getUser();
 if ($user instanceof Guardian) {
     $teacherObjs = $user->getTeachers(); // getTeachersByClass -> UI to change selected class
+} else if($user instanceof Admin)
+{
+    $teacherObjs = $model->getTeachers();
 }
 
 foreach ($teacherObjs as $teacherObj/** @var $teacherObj Teacher */) {
