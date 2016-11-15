@@ -69,6 +69,19 @@ class Controller
                     $this->logout();
                     $template = "login";
                     break;
+                case "changeDashboard":
+                    if($this->createUserObject() instanceof Admin)
+                    {
+                        $dashBoard = $_SESSION['board_type'];
+
+                        if($dashBoard == 'parent')
+                            $dashBoard = 'teacher';
+                        else
+                            $dashBoard = 'parent';
+
+                        $_SESSION['board_type'] = $dashBoard;
+                    }
+                    break;
                 default:
 
                     break;
@@ -93,7 +106,7 @@ class Controller
 
             if ($this->checkLogin($email, $pwd)) {
                 ChromePhp::info("Relogin with valid user data");
-                $this->display("parent_dashboard");
+                $this->display($this->getDashBoardName());
                 return;
             } else {
                 ChromePhp::info("Relogin with invalid user data. Redirecting to login page");
@@ -115,6 +128,7 @@ class Controller
 
     /**
      * Creates userobject of logged in user and saves it to Controller:$user
+     * @return User the current userobject
      */
     private function createUserObject()
     {
@@ -122,6 +136,8 @@ class Controller
             self::$user = Model::getInstance()->getUserById($_SESSION['user']['id']);
             ChromePhp::info("Userobject: " . self::$user);
         }
+
+        return self::getUser();
     }
 
     /**
@@ -136,7 +152,7 @@ class Controller
             $this->model->bookingDelete($this->model->getAppointment($this->input['booking']['slot'], self::$user->getId()));
         }
 
-        return "parent_dashboard";
+        return $this->getDashBoardName();
     }
 
     /**
@@ -177,7 +193,7 @@ class Controller
         }
 
         if ($this->checkLogin($mail, $pwd)) {
-            return "parent_dashboard";
+            return $this->getDashBoardName();
         } else {
 
             ChromePhp::info("Invalid login data");
@@ -277,7 +293,7 @@ class Controller
 
         if ($success == true) {
 
-            return "parent_dashboard";
+            return $this->getDashBoardName();
 
         } else {
 
@@ -293,6 +309,32 @@ class Controller
     }
 
     /**
+     * Returns the name of the correct dashboard
+     * @return string
+     */
+    private function getDashBoardName()
+    {
+        $this->createUserObject(); // create user obj if not already done
+        $user = self::getUser();
+
+        if($user instanceof Admin)
+        {
+            if(!isset($_SESSION['board_type']))
+            {
+                $_SESSION['board_type'] = 'parent';
+            }
+            return $_SESSION['board_type'] . '_dashboard';
+        } else if ($user instanceof Teacher)
+        {
+            return "teacher_dashboard";
+        } else
+        {
+            return "parent_dashboard";
+        }
+
+    }
+
+    /**
      *Creates view and sends relevant data
      * @param $template string the template to be displayed
      */
@@ -302,29 +344,6 @@ class Controller
         ChromePhp::info("Displaying 'templates/$template.php' with data " . json_encode($this->infoToView));
 
         $model = Model::getInstance();
-        /* if ($template == "parent_dashboard" && isset($this->user)) {
-           if ($this->user->getType() == 1) { // is parent/guardian
-
-               /** @var Guardian $guardian
-                 $guardian = $this->user;
-             $tchrs = $guardian->getTeachers();
-             $schedule = [];
-
-             foreach ($tchrs as $key => $tchrid) {
-               $schedule = array_merge($schedule, array($tchrid => $model->teacherGetSlots($tchrid)));
-             }
-             $this->infoToView = array_merge($this->infoToView, array('parent_schedule' => $schedule));
-           } elseif ($this->user->getType() == 2) { // is teacher
-
-                 /** @var Teacher $teacher
-               $teacher = $this->user;
-             $schedule = $model->teacherGetSlots($teacher->getId());
-             $this->infoToView = array_merge($this->infoToView, array('teacher_schedule' => $schedule));
-           }
-
-           $userinfo = array('name' => $this->user->getName(), 'type' => $this->user->getType());
-           $this->infoToView = array_merge($this->infoToView, array('user_info' => $userinfo));
-         }*/
         new View($template, $this->infoToView);
     }
 
