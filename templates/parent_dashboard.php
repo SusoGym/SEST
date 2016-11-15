@@ -4,11 +4,17 @@
 // TODO: give real data
 
 $model = Model::getInstance();
-$tchrs = array();
+$teacherNames = array();
 //$tchrs = $model->classGetTeachers($model->studentGetClass(/*$_SESSION['user']['id']*/1));
-$tchrsids = $model->getTeachers();
-foreach ($tchrsids as $tchr) {
-    $tchrs[$tchr] = $model->teacherGetName($tchr);
+$teacherObjs = array();
+$user = Controller::getUser();
+if ($user instanceof Guardian) {
+    $teacherObjs = $user->getTeachers(); // getTeachersByClass -> UI to change selected class
+}
+
+foreach ($teacherObjs as $teacherObj/** @var $teacherObj Teacher */) {
+    $teacherId = $teacherObj->getTeacherId();
+    $teacherNames[intval($teacherId)] = $teacherObj->getFullname();
 }
 
 include("header.php");
@@ -22,20 +28,20 @@ include("header.php");
             <div class="row">
                 <div class="col l3 hide-on-med-and-down">
                     <ul class="teachers collection">
-                        <?php foreach ($tchrs as $id => $name) { ?>
+                        <?php foreach ($teacherNames as $id => $name) { ?>
                             <li class="tab"><a class="collection-item"
                                                onclick="$('html, body').animate({ scrollTop: 0 }, 200);"
-                                               href="#tchr<?php echo $id; ?>"><?php echo $name['name'] . ', ' . $name['surname']; ?></a>
+                                               href="#tchr<?php echo $id; ?>"><?php echo $name; ?></a>
                             </li>
                         <?php } ?>
                     </ul>
                 </div>
                 <div class="col l9 m12 s12">
-                    <?php foreach ($tchrs as $id => $name) { ?>
+                    <?php foreach ($teacherNames as $id => $name) { ?>
                         <div id="tchr<?php echo $id; ?>" class="col s12">
                             <ul class="collection with-header">
                                 <li class="collection-header"><h4>Termin bei <span
-                                            class="teal-text"><?php echo $name['surname'] . " " . $name['name']; ?></span>
+                                            class="teal-text"><?php echo $name; ?></span>
                                         buchen</h4></li>
 
                                 <li class="collection-item">
@@ -97,14 +103,15 @@ include("header.php");
             <span class="white-text name"><?php echo $_SESSION['user']['mail']; ?></span>
         </div>
     </li>
-        <?php $mobile = true; include("navbar.php"); ?>
+    <?php $mobile = true;
+    include("navbar.php"); ?>
     <li>
         <div class="divider"></div>
     </li>
     <li><a class="subheader">Teachers</a></li>
-    <?php foreach ($tchrs as $id => $name) { ?>
+    <?php foreach ($teacherNames as $id => $name) { ?>
         <li class="tab"><a class="waves-effect"
-                           onclick="$('ul.teachers').tabs('select_tab', 'tchr<?php echo $id; ?>');$('.button-collapse').sideNav('hide');"><?php echo $name['name'] . ', ' . $name['surname']; ?></a>
+                           onclick="$('ul.teachers').tabs('select_tab', 'tchr<?php echo $id; ?>');$('.button-collapse').sideNav('hide');"><?php echo $name; ?></a>
         </li>
     <?php } ?>
 </ul>

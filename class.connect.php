@@ -125,7 +125,7 @@ class Connection
     public function selectAssociativeValues($query)
     {
         $mysqli = $this->connID;
-        $result = $mysqli->query($query) or die($mysqli->error);
+        $result = $mysqli->query($query) or die($mysqli->error . "</br></br>" . $query . "</br></br>" . $this->getCaller());
         $assocValue = null;
         $fieldName = null;
         $anz = $result->field_count;
@@ -153,7 +153,7 @@ class Connection
     public function insertValues($query)
     {
         $mysqli = $this->connID;
-        $mysqli->query($query) or die($mysqli->error);
+        $mysqli->query($query) or die($mysqli->error . "</br></br>" . $query . "</br></br>" . $this->getCaller());
         return $mysqli->insert_id;
     }
 

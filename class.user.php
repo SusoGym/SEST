@@ -1,46 +1,48 @@
 <?php
 
 /**
- *User class used to get user related data easily
+ * User class used to get user related data easily
  */
-class User
+class User extends Printable
 {
 
+    /**
+     * @var int 0 -> Admin, 1 -> Parent/Guardian, 2 -> Teacher
+     */
     protected $type;
-    protected $name;
+    /**
+     * @var string username
+     */
+    protected $username;
+    /**
+     * @var int userId
+     */
     protected $id;
+    /**
+     * @var user's email
+     */
+    protected $email;
+    /**
+     * @var $surname string Surname name of the user
+     */
+    protected $surname;
+    /**
+     * @var $surname string Name name of the user
+     */
+    protected $name;
 
     /**
      *Construct method of User class
      * @param int $id userId
      */
-    public function __construct($id)
+    public function __construct($id, $username, $type, $email, $name = null, $surname = null)
     {
         $this->id = $id;
-    }
-
-    /**
-     * @param $id int user id
-     * @return User fitting extension of user (Guardian | Teacher)
-     */
-    public static function fetchFromDB($id)
-    {
-        $model = Model::getInstance();
-        $type = $model->userGetType($id); // 0 - Admin; 1 - parent; 2 - teacher
-
-        $user = null;
-
-        if ($type == 1)
-            $user = new Guardian($id);
-        else if ($type == 2)
-            $user = new Teacher($id);
-        else
-            die("No Admin implemented yet!");
-
-        $user->type = $type;
-        $user->name = $model->idGetUsername($id);
-
-        return $user;
+        $this->username = $username;
+        $this->type = $type;
+        $this->email = $email;
+        $this->name = $name;
+        $this->surname = $surname;
     }
 
     /**
@@ -53,12 +55,12 @@ class User
     }
 
     /**
-     *Returns user name
+     *Returns username
      * @return string name
      */
-    public function getName()
+    public function getUsername()
     {
-        return $this->name;
+        return $this->username;
     }
 
     /**
@@ -70,15 +72,37 @@ class User
         return $this->type;
     }
 
-
     /**
-     * @return string this class as string
+     * @return string
      */
-    public function __toString()
+    public function getFullname()
     {
-        return "User{id=" . $this->id . ", name=\"" . $this->name . "\",type=" . $this->type . "}";
+        return $this->name . ' ' . $this->surname;
     }
 
+    /**
+     * @return User
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * @return array[String => Data] used for creating __toString and jsonSerialize
+     */
+    public function getData()
+    {
+        return array("userid" => $this->id, "username" => $this->username, "type" => $this->type, "name" => $this->name, "surname" => $this->surname, "email" => $this->email);
+    }
+
+    /** Returns class type
+     * @return string
+     */
+    public function getClassType()
+    {
+        return "Student";
+    }
 }
 
 
@@ -92,23 +116,30 @@ class Guardian extends User
      * @var array
      */
     private $children;
+    /**
+     * @var int
+     */
+    private $parentId;
 
     /**
      * Contructor of Parent class
      * @param int $id userId
+     * @param string $username
+     * @param string $email
      */
-    public function __construct($id)
+    public function __construct($id, $username, $email, $parentId)
     {
-        parent::__construct($id);
+        $nameArr = Model::getInstance()->parentGetName($id);
+        parent::__construct($id, $username, 1, $email, $nameArr['name'], $nameArr['surname']);
 
-        $this->children = Model::getInstance()->parentGetChildren($this->id);
-        $this->name = Model::getInstance()->parentGetName($this->id);
-        $this->type = 1;
+        $this->parentId = $parentId;
+        $this->children = Model::getInstance()->getChildrenByParentUserId($this->id);
+
     }
 
     /**
      *Returns child(ren)'s id(s)
-     * @return array[] children
+     * @return array[Student] children
      */
     public function getChildren()
     {
@@ -116,8 +147,26 @@ class Guardian extends User
     }
 
     /**
-     *Returns all teachers that teach any of the parents children
-     * @return array[] teachers
+     * Returns all classes that are related to the parent's children
+     * @return array[String]
+     */
+    public function getClasses()
+    {
+        if ($this->getChildren() == null)
+            return array();
+
+        $model = Model::getInstance();
+        $classes = array();
+        foreach ($this->getChildren() as $student/** @var $student Student */) {
+            $classes[] = $student->getClass();
+        }
+
+        return $classes;
+    }
+
+    /**
+     * Returns all teachers that teach any of the parents children
+     * @return array[Teacher] teachers
      */
     public function getTeachers()
     {
@@ -126,25 +175,75 @@ class Guardian extends User
             return array();
 
         $model = Model::getInstance();
-        $classes = array();
-        foreach ($this->getChildren() as $key => $value) {
-            $classes[] = $model->studentGetClass(intval($value));
-        }
+        $classes = $this->getClasses();
+
         $teachers = array();
-        foreach ($classes as $key => $class) {
-            $teachers = array_merge($teachers, $model->classGetTeachers($class));
+        foreach ($classes as $class) {
+            $teacher = $model->getTeachersByClass($class);
+            if ($teacher == null)
+                continue;
+            $teachers = array_merge($teachers, $teacher);
         }
 
         sort($teachers);
 
         $tchrs_f = array();
 
-        for ($i = 1; $i <= count($teachers); $i++) {
-            if ($teachers[$i] != $teachers[$i - 1]) {
+        for ($i = 1; $i < sizeof($teachers); $i++) {
+            if ($teachers[$i] != $teachers[$i - 1]) { // check duplicate
                 $tchrs_f[] = $teachers[$i];
             }
         }
         return $tchrs_f;
+    }
+
+    /**
+     * Returns all teachers for the children ordered by class
+     * @return array[String => array(Teacher)]
+     */
+    public function getTeachersByClass()
+    {
+        if ($this->getChildren() == null)
+            return array();
+
+        $model = Model::getInstance();
+        $classes = $this->getClasses();
+
+        $teachers = array();
+        foreach ($classes as $class) {
+            $teacher = $model->getTeachersByClass($class);
+            if ($teacher == null)
+                continue;
+
+            $teachers[$class] = $teacher;
+
+        }
+
+        return $teachers;
+    }
+
+    /**
+     * @return int parent ID
+     */
+    public function getParentId()
+    {
+        return $this->parentId;
+    }
+
+    /**
+     * @return array[String => mixed] returns all data of this class as array
+     */
+    public function getData()
+    {
+        return array_merge(parent::getData(), array("parentId" => $this->parentId, "children" => $this->children));
+    }
+
+    /** Returns class type
+     * @return string
+     */
+    public function getClassType()
+    {
+        return "Guardian";
     }
 }
 
@@ -156,16 +255,158 @@ class Teacher extends User
 {
 
     /**
-     *Constructor of Teacher class
-     * @param int $id userId
+     * @var int Teacher ID
      */
-    public function __construct($id)
-    {
-        parent::__construct($id);
+    protected $teacherId;
 
-        $this->name = Model::getInstance()->teacherGetName($id);
-        $this->type = 2;
+    /**
+     * Contructor of Teacher class
+     * @param int $id userId
+     * @param string $username
+     * @param string $email
+     */
+    public function __construct($id, $username, $email, $teacherId)
+    {
+
+        $nameArr = Model::getInstance()->getTeacherNameByTeacherId($teacherId);
+
+        $this->teacherId = $teacherId;
+
+        parent::__construct($id, $username, 2, $email, $nameArr['name'], $nameArr['surname']);
+    }
+
+    /**
+     * @return int
+     */
+    public function getTeacherId()
+    {
+        return $this->teacherId;
+    }
+
+    /**
+     * @return array[String => mixed] returns all data of this class as array
+     */
+    public function getData()
+    {
+        return array_merge(parent::getData(), array("teacherId" => $this->teacherId));
+     }
+
+    /** Returns class type
+     * @return string
+     */
+    public function getClassType()
+    {
+        return "Teacher";
     }
 }
+
+
+/**
+ * Class Student
+ */
+class Student extends Printable
+{
+
+    /**
+     * @var int student ID
+     */
+    protected $id;
+    /**
+     * @var string student's class
+     */
+    protected $class;
+    /**
+     * @var string student's surname
+     */
+    protected $surname;
+    /**
+     * @var string student's name
+     */
+    protected $name;
+    /**
+     * @var int parent ID
+     */
+    protected $eid;
+    /**
+     * @var string student's birthday
+     */
+    protected $bday;
+
+    public function __construct($id, $class, $surname, $name, $bday, $eid = null)
+    {
+        $this->id = $id;
+        $this->class = $class;
+        $this->surname = $surname;
+        $this->name = $name;
+        $this->bday = $bday;
+        $this->eid = $eid;
+    }
+
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClass()
+    {
+        return $this->class;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSurname()
+    {
+        return $this->surname;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return int
+     */
+    public function getEid()
+    {
+        return $this->eid;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBday()
+    {
+        return $this->bday;
+    }
+
+    /**
+     * @return array[String => Data] used for creating __toString and jsonSerialize
+     */
+    public function getData()
+    {
+        return array("id" => $this->id, "class" => $this->class, "surname" => $this->surname, "name" => $this->name, "eid" => $this->eid, "bday" => $this->bday);
+    }
+
+    /** Returns class type
+     * @return string
+     */
+    public function getClassType()
+    {
+        return "Student";
+    }
+}
+
 
 ?>
