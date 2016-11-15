@@ -29,157 +29,172 @@ class Model
         return self::$model == null ? self::$model = new Model() : self::$model;
     }
 
+
     /**
-     * Schuelerexistenz prüfen
      * @param string $vorname Schueler Vorname
      * @param string $name Schueler Nachname
-     * @param string $bday Geburtsdatum
-     * @return array[int] array[SchuelerID, ElternId] TODO: would be nicer to create student object here
+     * @return Student
      **/
-    public function checkPupilExist($name, $bday)
+    public function getStudentByName($name, $surname = null)
     { //TODO -> $name und $vorname beinhalten auch zweit namen -> optional oder pflicht bei registierung?
 
         $name = self::$connection->escape_string($name);
+        if ($surname != null) {
+            $surname = self::$connection->escape_string($surname);
+            $wholeName = str_replace(' ', '', $name . $surname);
+        } else {
+            $wholeName = $name;
+        }
 
-        $data = self::$connection->selectValues("SELECT id, eid, name, vorname FROM schueler WHERE Replace(CONCAT(vorname, name), ' ', '') = '$name' AND gebdatum='$bday'");
+        $data = self::$connection->selectValues("SELECT * FROM schueler WHERE Replace(CONCAT(vorname, name), ' ', '') = '$wholeName'");
 
-        $id = null;
-        $eid = null;
-        $name = null;
-        $vorname = null;
-
-        if (isset($data[0][0]))
-            $id = $data[0][0];
-        if (isset($data[0][1]))
-            $eid = $data[0][1];
-        if (isset($data[0][2]))
-            $name = $data[0][2];
-        if (isset($data[0][3]))
-            $vorname = $data[0][3];
-
-        if ($id == null)
+        if ($data == null)
             return null;
 
-        return array("id" => $id, "eid" => $eid, "name" => $name, "vorname" => $vorname);
+        $data = $data[0];
+
+        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['eid']);
     }
 
     /**
-     * @param int $userid
-     * @return int userType [0 - admin; 1 - parent; 2 - teacher]
+     * @param $uid int
+     * @return User
      */
-    public function userGetType($userid)
+    public function getUserById($uid)
     {
-        $data = self::$connection->selectValues("SELECT user_type FROM user WHERE id=" . $userid);
-
-        if (!isset($data[0]))
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM USER WHERE id=$uid");
+        if ($data == null)
             return null;
+        $data = $data[0];
 
-        return intval($data[0][0]);
+        $type = $data['user_type'];
+
+        switch ($type) {
+            case 0: // Admin
+                die('No Admin implemented here!');
+                break;
+            case 1: // Parent / Guardian
+                $parentId = self::$connection->selectAssociativeValues("SELECT id FROM eltern WHERE userid=$uid")[0]['id'];
+                return new Guardian($data['id'], $data['username'], $data['email'], $parentId);
+            case 2:
+                $id = self::$connection->selectAssociativeValues("SELECT id FROM lehrer WHERE userid=$uid")[0]['id'];
+                return new Teacher($data['id'], $data['username'], $data['email'], $id);
+            default:
+                return null;
+                break;
+        }
 
     }
 
     /**
      * @param string $email the user email
-     * @return int userId
+     * @return User user
      */
-    public function userGetIdByMail($email)
+    public function getUserByMail($email)
     {
         $email = self::$connection->escape_string($email);
-        $data = self::$connection->selectValues("SELECT id FROM user WHERE email='$email'");
+        $data = self::$connection->selectAssociativeValues("SELECT id FROM user WHERE email='$email'");
 
         if ($data == null)
             return null;
 
-        return $data[0][0];
-    }
-
-    /**
-     * @param $id int userId
-     * @return string email
-     */
-    public function idGetEmail($id)
-    {
-        $data = self::$connection->selectValues("SELECT email FROM user WHERE id=$id");
-
-        if ($data == null)
-            return null;
-
-        return $data[0][0];
+        return $this->getUserById($data[0]['id']);
     }
 
     /**
      * @param int $userId
      * @return string
+     * FIXME: Never used, empty in db...
      */
     public function parentGetName($userId)
     {
         $data = self::$connection->selectAssociativeValues("SELECT eltern.* FROM eltern, user WHERE eltern.userid=user.id AND user.id=$userId AND user.user_type=1");
 
-        $name = $data["name"];
-        $surname = $data["vorname"];
+        if(!isset($data[0]))
+            return array("name" => null, "surname" => null);
 
-        return $surname . " " . $name; //TODO: really?
+        $data = $data[0];
+
+        $surname = $data["name"];
+        $name = $data["vorname"];
+
+        return array("name" => $name, "surname" => $surname);
 
     }
 
     /**
      * @param int $tchrId
-     * @param string $sort
-     * @return array(surname, name)
+     * @return array[String => String]
      */
-    public function teacherGetName($tchrId, $sort = "name ASC")
+    public function getTeacherNameByTeacherId($teacherId)
     {
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id=$tchrId ORDER BY $sort");
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE lehrer.id=$teacherId");
 
-        $name = $data[0]["name"];
-        $surname = $data[0]["vorname"];
+        if(!isset($data[0]))
+            return array("name" => null, "surname" => null);
 
-        return array('surname' => $surname, 'name' => $name);
+        $data = $data[0];
+
+        $surname = $data["name"];
+        $name = $data["vorname"];
+
+        return array("name" => $name, "surname" => $surname);
     }
 
     /**
-     * @param int $elternId
-     * @return array[int] array[childrenId]
+     * @param int $usrId UserId
+     * @return array[Student] array[childrenId]
      */
-    public function parentGetChildren($elternId)
+    public function getChildrenByParentUserId($usrId)
     {
-        $data = self::$connection->selectValues("SELECT * FROM schueler WHERE eid=$elternId");
+        $data = self::$connection->selectAssociativeValues("SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId");
 
-        $ids = array();
+        if ($data == null)
+            return array();
+
+        $students = array();
 
         foreach ($data as $item) {
-            $pid = intval($item[0]);
-            array_push($ids, $pid);
+            $pid = intval($item['id']);
+            $student = $this->getStudentById($pid);
+            array_push($students, $student);
         }
 
-        return $ids;
+        return $students;
     }
 
     /**
-     * @param int $schuelerId
-     * @return string
+     * @param $studentId int
+     * @return Student
      */
-    public function studentGetClass($schuelerId)
+    public function getStudentById($studentId)
     {
-        $data = self::$connection->selectValues("SELECT schueler.klasse FROM schueler WHERE id=$schuelerId");
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE id=$studentId");
 
-        return $data[0][0];
+
+        if ($data == null)
+            return null;
+
+        $data = $data[0];
+        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid']);
     }
 
     /**
      * @param string $class
-     * @return array[int] array with teacherIds
+     * @return array[Teacher] array with teacherIds
      */
-    public function classGetTeachers($class)
+    public function getTeachersByClass($class)
     {
         $class = self::$connection->escape_string($class);
         $data = self::$connection->selectValues("SELECT lehrer.id FROM lehrer, unterricht WHERE unterricht.klasse='$class' AND unterricht.lid=lehrer.id"); // returns data[n][data]
 
-        $ids = array();
+        if ($data == null)
+            return null;
 
+        $ids = array();
         foreach ($data as $item) {
             $tid = intval($item[0]);
-            array_push($ids, $tid);
+            array_push($ids, $this->getTeacherByTeacherId($tid));
         }
 
         return $ids;
@@ -198,6 +213,39 @@ class Model
         }
 
         return $ids;
+    }
+
+    /**
+     * @param $tchrId int teacherId
+     * @return Teacher
+     */
+    public function getTeacherByTeacherId($tchrId)
+    {
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id=$tchrId");
+        if ($data == null)
+            return null;
+        $data = $data[0];
+
+        $usrId = $data['userid'];
+        if ($usrId == -1) { // teacher has not registered yet...
+            return new Teacher(null, null, $data['email'], $data['id']);
+        }
+
+        return $this->getUserById($usrId);
+    }
+
+    /**
+     * @param $eid int parentId
+     * @return Guardian
+     */
+    public function getParentByParentId($eid)
+    {
+        $data = self::$connection->selectAssociativeValues("SELECT userid FROM eltern WHERE id=$eid");
+        if ($data == null)
+            return null;
+        $data = $data[0];
+
+        return $this->getUserById($data['userid']);
     }
 
     /**

@@ -1,7 +1,13 @@
-<?php if ($mobile) { ?>
+<?php
+$userObj = null;
+if (isset($_SESSION['user']['id'])) {
+    $userObj = Controller::getUser();
+}
+
+if ($mobile) { ?>
 
 
-    <?php if (isset($_SESSION['user']['id']) && Model::getInstance()->userGetType($_SESSION['user']['id']) == 0) { //only if user == admin?>
+    <?php if ($userObj != null && $userObj->getType() == 0) { //only if user == admin?>
 
         <li><a class="waves-effect" href="/administrator"><i class="material-icons">adb</i>Administration</a></li>
 
@@ -12,7 +18,7 @@
 <?php } else { ?>
 
 
-    <?php if (isset($_SESSION['user']['id']) && Model::getInstance()->userGetType($_SESSION['user']['id']) == 0) { //only if user == admin?>
+    <?php if ($userObj != null && $userObj->getType() == 0) { //only if user == admin?>
 
         <li><a id="admin" href="/administrator" title="Administration"><i class="material-icons">adb</i></a></li>
 

@@ -1,21 +1,24 @@
 <?php
-
-session_start();
-
+/* Debug Classes */
 require "ChromePhp.php"; // debugging
-require "class.connect.php";
+/* Utility Classes */
+require "class.utility.php";
 require "class.user.php";
+/* Functional Classes */
+require "class.connect.php";
 require "class.controller.php";
 require "class.model.php";
 require "class.view.php";
+/* Settings */
 // ChromePhp::setEnabled(false);  // disable debugging
 enableCustomErrorHandler();
 
 date_default_timezone_set('Europe/Berlin'); // if not corretly set in php.ini
 
+/* Let's go! */
+session_start();
 $input = array_merge($_GET, $_POST);
 $control = new Controller($input);
-
 
 /**
  * This function will throw Exceptions instead of warnings (better to debug)

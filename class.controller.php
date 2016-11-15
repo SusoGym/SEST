@@ -18,7 +18,15 @@ class Controller
     /**
      * @var User
      */
-    private $user;
+    private static $user;
+
+    /**
+     * @return User
+     */
+    public static function getUser()
+    {
+        return self::$user;
+    }
 
     /**
      * Controller constructor.
@@ -69,10 +77,7 @@ class Controller
             if ($template != null) {
 
                 //Create User object
-                if (isset($_SESSION['user']['id'])) {
-                    $this->user = User::fetchFromDB($_SESSION['user']['id']);
-                    ChromePhp::info("Userobject: " . $this->user);
-                }
+                $this->createUserObject();
 
                 $this->display($template);
                 return;
@@ -105,9 +110,17 @@ class Controller
 
 
         //Create User object
-        if (isset($_SESSION['user']['id'])) {
-            $this->user = User::fetchFromDB($_SESSION['user']['id']);
-            ChromePhp::info("Userobject: " . $this->user);
+        $this->createUserObject();
+    }
+
+    /**
+     * Creates userobject of logged in user and saves it to Controller:$user
+     */
+    private function createUserObject()
+    {
+        if (isset($_SESSION['user']['id']) && (self::$user == null || self::$user->getId() != $_SESSION['user']['id'])) {
+            self::$user = Model::getInstance()->getUserById($_SESSION['user']['id']);
+            ChromePhp::info("Userobject: " . self::$user);
         }
     }
 
@@ -118,9 +131,9 @@ class Controller
     private function booking()
     {
         if ($this->input['booking']['action'] == "add") {
-            $this->model->bookingAdd($this->input['booking']['slot'], $this->user->getId(), $this->input['booking']['teacher']);
+            $this->model->bookingAdd($this->input['booking']['slot'], self::$user->getId(), $this->input['booking']['teacher']);
         } elseif ($this->input['booking']['action'] == "delete") {
-            $this->model->bookingDelete($this->model->getAppointment($this->input['booking']['slot'], $this->user->getId()));
+            $this->model->bookingDelete($this->model->getAppointment($this->input['booking']['slot'], self::$user->getId()));
         }
 
         return "parent_dashboard";
@@ -196,7 +209,8 @@ class Controller
 
         ChromePhp::info("Email: " . $mail);
 
-        if (($id = $model->userGetIdByMail($mail)) != null) {
+        if (($userObj = $model->getUserByMail($mail)) != null) {
+            $id = $userObj->getId();
             array_push($notification, "Diese Email-Addresse ist bereits registriert.");
             ChromePhp::info("Email bereits registriert mit id $id");
             $success = false;
@@ -211,17 +225,21 @@ class Controller
             $name = $student[0];
             $bday = $student[1];
 
-            $studentData = $model->checkPupilExist(str_replace(" ", "", $name), $bday);
-            $pid = $studentData["id"];
-            $studentEid = $studentData["eid"];
-            $name = $studentData['name'];
-            $vorname = $studentData['vorname'];
+            $studentObj = $model->getStudentByName($name);
+
+            if ($studentObj == null) {
+                $wrongStudentData = true;
+                continue;
+            }
+
+            $pid = $studentObj->getId();
+            $studentEid = $studentObj->getEid();
+            $name = $studentObj->getSurname();
+            $vorname = $studentObj->getName();
 
             ChromePhp::info("Student: " . json_encode($name) . "($name, $vorname) born on " . $bday . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($studentEid == null ? "no parents set" : "parent with id $studentEid")));
 
-            if ($pid == null) {
-                $wrongStudentData = true;
-            } else if ($studentEid != null) {
+            if ($studentEid != null) {
                 array_push($notification, "Dem Schüler $vorname $name ist bereits ein Elternteil zugeordnet");
                 $success = false;
             } else {
@@ -241,14 +259,8 @@ class Controller
 
         if ($success) {
             $userid = $model->registerParent($pids, $mail, $pwd);
-            $_SESSION['user']['id'] = $userid;
 
-            $time = $_SESSION['user']['logintime'] = time();
-
-            $_SESSION['user']['pwd'] = $pwd;
-            $_SESSION['user']['mail'] = $mail;
-
-            ChromePhp::info("Registered new user '$mail' with id $userid and logged in @ $time");
+            $this->checkLogin($mail, $pwd);
 
         }
 
@@ -338,21 +350,29 @@ class Controller
     }
 
 
+    /**
+     * @param $usr string user name
+     * @param $pwd string user pwd
+     * @return bool success of login
+     */
     private function checkLogin($usr, $pwd)
     {
         $model = Model::getInstance();
         if ($model->passwordValidate($usr, $pwd)) {
 
-            $uid = $_SESSION['user']['id'] = $model->userGetIdByMail($usr);
-            if ($uid == null) {
-                $this->notify("Database error!");
+            $userObj = $model->getUserByMail($usr);
+            if ($userObj == null) {
+                $this->notify("Falsche Anmeldedaten!");
                 $this->display("login");
 
-                ChromePhp::error("Unexpected database response! requested uid = null!");
-                exit();
+                //ChromePhp::error("Unexpected database response! requested uid = null!");
+                return false;
             }
 
-            $type = $model->userGetType($uid);
+
+            $type = $userObj->getType();
+            $uid = $_SESSION['user']['id'] = $userObj->getId();
+            $this->createUserObject();
             $time = $_SESSION['user']['logintime'] = time();
 
             ChromePhp::info("User '$usr' with id $uid of type $type successfully logged in @ $time");

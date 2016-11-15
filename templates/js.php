@@ -28,7 +28,7 @@
         document.forms['openLink'].submit();
     }
 
-
+/*
     $('a').click(function (e) {
 
         if(!e.currentTarget.href.includes("type="))
@@ -41,5 +41,5 @@
 
 
     });
-
+*/
 </script>
