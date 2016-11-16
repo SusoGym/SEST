@@ -166,7 +166,6 @@
         // register[ usr, mail, pwd, student[ [name, bday], [name, bday], ...]
         var url_param = "?console&type=register";
 
-        //TODO: check inputs for correct syntax etc.
         var mail = $('#mail_register').val();
         var pwd = $('#pwd_register');
         var pwdrep = $('#pwdrep_register');

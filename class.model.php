@@ -36,7 +36,7 @@ class Model
      * @return Student
      **/
     public function getStudentByName($name, $surname = null)
-    { //TODO -> $name und $vorname beinhalten auch zweit namen -> optional oder pflicht bei registierung?
+    { //TODO -> $name und $vorname beinhalten auch zweit namen -> optional oder pflicht bei registierung bzw. muss man noch aus db löschen...?
 
         $name = self::$connection->escape_string($name);
         if ($surname != null) {
