@@ -1,15 +1,11 @@
 <?php
 
-// ALL OF THIS IS DUMMY DATA
-// TODO: give real data
-
 $model = Model::getInstance();
 $teacherNames = array();
-//$tchrs = $model->classGetTeachers($model->studentGetClass(/*$_SESSION['user']['id']*/1));
 $teacherObjs = array();
 $user = Controller::getUser();
 if ($user instanceof Guardian) {
-    $teacherObjs = $user->getTeachers(); // getTeachersByClass -> UI to change selected class
+    $teacherObjs = $user->getTeachers(); //TODO: getTeachersByClass -> UI to change selected class
 } else if($user instanceof Admin)
 {
     $teacherObjs = $model->getTeachers();
