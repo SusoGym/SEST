@@ -212,6 +212,99 @@ class Model
         ($student) ? $table = "schueler" : $table = "lehrer";
         self::$connection->straightQuery("UPDATE $table SET upd=0");
     }
+	
+	
+	/**
+     * get all teachers
+     * @return array[int] array with teacherIds
+     */
+    public function getTeachers()
+    {
+        $data = self::$connection->selectValues("SELECT id FROM lehrer order by Name"); // returns data[n][data]
+
+        $ids = array();
+
+        foreach ($data as $item)
+        {
+            $tid = intval($item[0]);
+            array_push($ids, $tid);
+        }
+		return $ids;
+
+    }
+	/**
+     * @param int $tchrId, string $sort
+     * @return array(surname, name)
+     */
+    public function teacherGetName($tchrId, $sort = "name ASC")
+    {
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id=$tchrId ORDER BY $sort");
+
+        $name = $data[0]["name"];
+        $surname = $data[0]["vorname"];
+
+        return array('surname' => $surname, 'name' => $name);
+    }
+	
+	/**
+	*
+	*@return array(string) with form names
+	*/
+	public function getForms()
+    {
+        $data = self::$connection->selectValues("SELECT DISTINCT klasse FROM schueler order by klasse"); // returns data[n][data]
+
+        $forms = array();
+
+        foreach ($data as $item)
+        {
+            array_push($forms, $item[0]);
+        }
+		
+		return $forms;
+
+    }
+	
+	
+	/**
+	* connect teacher with form
+	* @param array(int)  with teacer Ids
+	* @param string Klasse
+	*/
+	public function setTeacherToForm($teacher,$form){
+		//check if this connection exists
+		self::$connection->straightQuery("DELETE FROM unterricht WHERE klasse=\"$form\" ");
+		if(isset($teacher)) {
+		foreach($teacher as $t){
+			self::$connection->insertValues("INSERT INTO unterricht (`id`,`lid`,`klasse`) VALUES ('','$t','$form')");
+			}	
+		}
+		
+		
+	}
+	
+	/**
+	* get teachers in form
+	* @param string form
+	* @return array[teacherId](array(form) )
+	*/
+	public function getTeachersOfForm($form){
+		$teachersOfForm = array();
+		$teachers = array();
+		$tchrs = self::$connection->selectValues("SELECT lid FROM unterricht WHERE klasse=\"$form\" ");
+				if(count($tchrs) > 0){
+					foreach($tchrs as $t){
+						$teachers[] = $t[0];
+						}
+					}
+				else{
+					$teachers=null;
+					}
+		
+		$teachersOfForm[$form] = $teachers;
+		unset($teachers);			
+		return $teachersOfForm;	
+	}
 
 }
 

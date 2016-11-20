@@ -4,6 +4,8 @@
 
 <script>
     $(document).ready(function(){
+		$('ul.forms').tabs();
+		$('select').material_select();
         $(".button-collapse").sideNav();
     });
 </script>
@@ -16,8 +18,15 @@
         $('#insert').html('<form action="" name="openLink" method="post" style="display:none;"><input type="text" name="type" value="' + target + '" /> </form>');
         document.forms['openLink'].submit();
     }
+	
+	function chooseForm(f)
+		{
+		  var form = f;
+		  var url = "index.php?type=setclasses&form=" + form ;
+         	 this.document.location.href = url;
+		}
 
-
+	
     $('a').click(function (e) {
 
         if(!e.currentTarget.href.includes("type="))
@@ -30,7 +39,7 @@
 
 
     });
-
+	
 
 
 </script>

@@ -30,7 +30,7 @@
 
 /*
     $('a').click(function (e) {
-
+		
         if(!e.currentTarget.href.includes("type="))
             return;
 

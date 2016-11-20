@@ -6,8 +6,15 @@
       <div class="card ">
         <div class="card-content">
           <div class="row">
-			<?php isset($this->dataForView['title']) ? $title = $this->dataForView['title'] : $title =""; ?>
-			<b><?php echo $title ?></b>
+
+			<b><?php echo $this->action ?></b>
+
+          </div>
+		   <div class="row">
+             <ul><a id="home" href="?type=sestconfig">Elternsprechtag konfigurieren</a></ul>
+         </div>
+		 <div class="row">
+            <ul><a id="home" href="?type=newsconfig">Newsletter konfigurieren</a></ul>
           </div>
         </div>
 
@@ -17,6 +24,7 @@
 
     <!-- Include Javascript -->
     <?php include("js.php") ?>
+
 
 </body>
 </html>
