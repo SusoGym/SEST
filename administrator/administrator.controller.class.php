@@ -8,7 +8,12 @@ class Controller
     /**
      * @var string file name
      */
-    private $file;
+    private $file=null;
+	
+	/**
+	* @var array 
+	*/
+	private $fileData=null;
 
     /**
      * @var array data - various data to be used in view
@@ -16,19 +21,44 @@ class Controller
     private $dataForView = array();
 
     /**
-     * @var string header for view
-     */
-    private $header;
-
-    /**
-     * @var string actiontype For view
-     */
-    private $actionType;
-
-    /**
-     * @var Model
-     */
-    private $model;
+	*@var string title/header of card 
+	*/
+	private $title=null;
+	
+	/**
+	*@var string actiontype For view
+	*/
+	private $actionType=null;
+	
+	/**
+	*@var array menueItems for view
+	*/
+	private $simpleMenueItems=null;
+	
+	/**
+	*@var astring backButton link
+	*/
+	private $backButton=null;
+	
+	/**
+	*@var array includes an array of all teachers of all forms to be transmitted to view
+	*/
+	private $teachersOfForm=null;
+	
+	/**
+	*@var array(int) all teacherIDs
+	*/
+	private $allTeachers=null;
+	
+	/**
+	*@var array(String) allForms
+	*/
+	private $allForms=null;
+	
+	/**
+	*@var string Klasse die bearbeitet wird
+	*/
+	private $currentForm=null;
 
     /**
      *Konstruktor
@@ -90,44 +120,51 @@ class Controller
             switch ($input['type']) {
                 //User Management
                 case "usrmgt":
-                    $this->header = "Benutzerverwaltung";
+                    $this->title = "Benutzerverwaltung";
                     $this->display("usermgt");
                     break;
                 //Settings
                 case "settings":
-                    $this->header = "Einstellungen";
-                    $this->display("settings");
-                    break;
+                    $this->title="Einstellungen";
+					$this->simpleMenueItems[0]=array("link"=>"index.php?type=sestconfig","entry"=>"Elternsprechtag konfigurieren");
+					$this->simpleMenueItems[1]=array("link"=>"index.php?type=newsconfig","entry"=>"Newsletter konfigurieren");
+					$this->display("simple_menue");
+					break;
                 //Enter Newsletter
                 case "news":
-                    $this->header = "Newsletter eintragen";
+                    $this->title = "Newsletter eintragen";
                     $this->display("enternews");
                     break;
                 //Select update options
-                case "updmgt":
-                    $this->header = "Datenabgleich";
-                    $this->display("updatemenue");
-                    break;
+				case "updmgt":
+					$this->title="Datenabgleich";
+					$this->simpleMenueItems[0]=array("link"=>"index.php?type=update_s","entry"=>"Abgleich Schülerdaten");
+					$this->simpleMenueItems[1]=array("link"=>"index.php?type=update_t","entry"=>"Abgleich Lehrerdaten");
+					$this->display("simple_menue");
+					break;
                 //Update teacher data
                 case "update_t":
                     //Einlesen der Lehrerdaten
-                    $this->header = "Lehrerdaten abgleichen";
-                    $this->actionType = "utchoose";
-                    $this->display("update");
+                    $this->title="Lehrerdaten abgleichen";
+					$this->actionType="utchoose";
+					$this->display("update");
                     break;
                 //Update student data
                 case "update_s":
-                    $this->header = "Schülerdaten abgleichen";
-                    $this->actionType = "uschoose";
-                    $this->display("update");
+                    $this->title = "Schülerdaten abgleichen";
+					$this->actionType="uschoose";
+					$this->display("update");		
                     break;
                 //student file upload
                 case "utchoose":
                 case "uschoose":
-
                     $student = $input['type'] == "uschoose";
-
+					//von mir hinzugefügt
+					$input['type'] == "uschoose" ? $student = true : $student = false;
+					
                     $upload = $this->fileUpload();
+					
+					
 
                     $success = $upload['success'];
                     $written = $success? "true" : "false";
@@ -147,9 +184,12 @@ class Controller
                     }
 
                     if ($success) {
-                        $this->header = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
-                        $this->prepareDataUpdate(true);
+						echo "<script> alert($student);   </script>  " ; 
+                        $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
+                        $this->prepareDataUpdate($student);
                         $this->actionType = $student ? "usstart" : "utstart";
+						$student ? $this->actionType = "usstart" : $this->actionType = "utstart";
+						echo $this->actionType; 
                         $this->display("update1");
                     } else {
                         $this->display("update");
@@ -160,7 +200,7 @@ class Controller
                 case "disptupdate1":
 
                     $student = $input['type'] == "dispsupdate1";
-                    $this->header = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
+                    $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
                     $this->prepareDataUpdate(true);
                     $this->actionType = $student ? "usstart" : "utstart";
                     $this->display("update1");
@@ -168,32 +208,54 @@ class Controller
                 //Student/Teacher Update start
                 case "usstart":
                 case "utstart":
-
-                    $student = $input['type'] == "usstart";
-
-                    $this->header = $student?"Schüler":"Lehrer" . "daten aktualisiert";
+					$input['type'] == "usstart" ? $student = true : $student = false;
+                    //$student = $input['type'] == "usstart";
+echo "Schüleroperation:".$student; die;
+                    $this->title = $student?"Schüler":"Lehrer" . "daten aktualisiert";
 
                     $this->performDataUpdate($student, $input);
                     $this->display("update2");
                     break;
                 //SEST configuration
-                case "sestconfig":
-                    $this->header = "Konfiguration Elternsprechtag (z.B. Klassen/Lehrer, Slotdaten eingeben etc.)";
-                    $this->display("settings");
-                    break;
+				case "sestconfig":
+					$this->title="Konfiguration Elternsprechtag";
+					$this->simpleMenueItems[0]=array("link"=>"index.php?type=setclasses","entry"=>"Unterrichtszuordnung einrichten");
+					$this->simpleMenueItems[1]=array("link"=>"index.php?type=setslots","entry"=>"Sprechzeiten einrichten");
+					$this->backButton="index.php?type=settings";
+					$this->display("simple_menue");
+					break;
                 //News configuration
-                case "newsconfig":
-                    $this->header = "Konfiguration Newsletter (z.B. Emailversand/Anhänge etc.)";
-                    $this->display("settings");
-                    break;
-                //Set SEST Slots
+				case "newsconfig":
+					$this->title = "Konfiguration Newsletter (z.B. Emailversand/Anhänge etc.)";
+					$this->backButton = "index.php?type=settings";
+					$this->display("simple_menue");
+					break;
+                //Set SEST classes/teachers
+				case "setclasses":
+					$this->allTeachers = $this->model->getTeachers();
+					$this->allForms = $this->model->getForms();
+					(isset($input['teacher'] ) ) ? $t = $input['teacher'] : $t = null;
+					(isset($input['update'] ) ) ? $u = $input['update'] : $u = null;
+					(isset($input['form']) ) ? $f = $input['form'] : $f=null;
+					$this->classOperations($f,$u,$t);
+					$this->title= "Lehrer zu Klassen zuweisen";
+					$this->backButton = "index.php?type=sestconfig";
+					$this->display("unterricht");
+					break;
+				//Set SEST Slots 
+				case "setslots":
+					$this->title= "Sprechzeiten einrichten";
+					$this->backButton = "index.php?type=sestconfig";
+					$this->display("simple_menue");
+					break;
+				//Set SEST Slots
                 case "slots":
 
                     break;
                 default:
-                    $this->header = "Startseite";
-                    $this->display("main");
+                    $this->title = "Startseite";
                     unset($_SESSION['file']);
+					$this->display("main");
                     break;
             }
     }
@@ -238,20 +300,12 @@ class Controller
     function display($template)
     {
         $view = new View();
-
-        if (isset($this->dataForView)) {
-            $view->setViewData($this->dataForView);
-        }
-        if (isset($_SESSION['file'])) {
-            $view->setFile($_SESSION['file']);
-        }
-        if (isset($this->header)) {
-            $view->setHeader($this->header);
-        }
-        if (isset($this->actionType)) {
-            $view->setActionType($this->actionType);
-        }
-
+		
+		$dataForViewKeys=array("title","action","menueItems","backButton","allteachers","allForms","teachersOfForm","currentForm","fileName","fileData");
+		$dataForViewValues=array($this->title,$this->actionType,$this->simpleMenueItems,$this->backButton,$this->allTeachers,$this->allForms,
+		$this->teachersOfForm,$this->currentForm,$this->file,$this->fileData);
+		$view->setDataForView(array_combine($dataForViewKeys,$dataForViewValues)) ;
+       
         ChromePhp::info("Displaying 'templates/$template.php' with data: " . json_encode($this->dataForView));
         $view->loadTemplate($template);
     }
@@ -336,7 +390,8 @@ class Controller
      */
     private function fileUpload()
     {
-        $ret = array("success" => false);
+
+	   $ret = array("success" => false);
         $success = false;
         try {
             /*
@@ -374,8 +429,8 @@ class Controller
             header("Location: /administrator"); //TODO: hardcoded ;-;
         }
         $fileHandler = new FileHandler($_SESSION['file']);
-        $this->dataForView[0] = $fileHandler->readHead();
-        $this->dataForView[1] = $fileHandler->readDBFields($student); //schueler=true
+        $this->fileData[0] = $fileHandler->readHead();
+        $this->fileData[1] = $fileHandler->readDBFields($student); //schueler=true
     }
 
 
@@ -386,8 +441,7 @@ class Controller
      */
     private function performDataUpdate($student, $input)
     {
-
-        if(!isset($_SESSION['file']))
+		if(!isset($_SESSION['file']))
         {
             header("Location: /administrator"); //TODO: hardcoded ;-;
         }
@@ -401,10 +455,29 @@ class Controller
             $x++;
         }
         $updateResults = $fileHandler->updateData($student, $updateData);    //gibt Anzahl eingefügter Zeilen an
-        $this->dataForView[0] = $updateResults[0];
-        $this->dataForView[1] = $updateResults[1];
-        $this->dataForView[2] = $fileHandler->deleteDataFromDB($student);
+        $this->fileData[0] = $updateResults[0];
+        $this->fileData[1] = $updateResults[1];
+        $this->fileData[2] = $fileHandler->deleteDataFromDB($student);
     }
+	
+	
+		/**
+		*set teacher class connections
+		* @param string form
+		* @param array(int) teacherIds
+		*/
+		private function classOperations($form,$update,$teacher){
+		if(isset($update)) {
+		$this->model->setTeacherToForm($teacher,$update);
+		$form = $update;
+		}		
+		//read teachers in forms
+		if( isset($form) ) {
+			$this->currentForm = $form;
+			$this->teachersOfForm = $this->model->getTeachersOfForm($form); 
+			}
+			
+		}
 }
 
 ?>

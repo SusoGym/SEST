@@ -7,16 +7,16 @@
       <div class="card ">
         <div class="card-content">
 
-          <form action="?type=<?php echo $this->actionType ?>" method="POST">
+          <form action="?type=<?php echo $this->dataForView['action']; ?>" method="POST">
 		  <div class="row">
-		  <b><?php echo $this->action ?></b>
+		  <b><?php echo $this->dataForView['title']; echo $this->dataForView['action'];?></b>
 		  <br><b>Wählen Sie eine Zuordnung der Quelldaten zu den Zieldatenfeldern in der Datenbank</b>
 		  </div>
 		  <div class="row">
 				<table width="50%" align="center">
 				<tbody>
 
-				<?php foreach($this->data[0] as $d) { ?>
+				<?php foreach($this->dataForView['fileData'][0] as $d) { ?>
 				<tr>
 				<td>
 
@@ -26,7 +26,7 @@
 				<td>
 					<select class="browser-default right" name="post_dbfield[]" title="Select a file" required>
 						<option selected ></option>
-						<?php foreach($this->data[1] as $f) {?>
+						<?php foreach($this->dataForView['fileData'][1] as $f) {?>
 						<option ><?php echo $f; ?></option>
 						<?php } ?>
 					</select>
@@ -38,7 +38,7 @@
 
 		  </div>
 		  <div class="row">
-			<input type="hidden" name="file" value="<?php echo $this->file ?>">
+			<input type="hidden" name="file" value="<?php echo $this->dataForView['fileName'] ?>">
 
 
 			<button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i class="material-icons right">send</i></button>

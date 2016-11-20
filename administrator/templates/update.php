@@ -7,11 +7,11 @@ include("header.php"); ?>
     <div class="card ">
         <div class="card-content">
             <div class="row">
-                <b><?php echo $this->action ?></b>
+                <b><?php echo $this->dataForView['title'].$this->dataForView['action']; ?></b>
                 <br>Bitte wählen Sie eine Quelldatei
             </div>
-            <form enctype="multipart/form-data" onsubmit="submitFile('<?php echo $this->actionType ?>')" target="myTarget" method="post"
-                  action="?console&type=<?php echo $this->actionType ?>">
+            <form enctype="multipart/form-data"  target="myTarget" method="post"
+                  action="?console&type=<?php echo $this->dataForView['action']; ?>">
                 <div class="row">
                     <input type="file" class="btn-flat left waves-effect waves-teal" name="file" id="file" required>
                     <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
@@ -35,6 +35,7 @@ include("header.php"); ?>
 
     function submitFile(actionType) {
         // file has started loading
+		alert("file");
     }
 
     function uploadComplete(success, error) {

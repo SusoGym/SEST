@@ -9,6 +9,7 @@ require "administrator.controller.class.php";
 require "administrator.model.class.php";
 require "administrator.view.class.php";
 require "administrator.filehandler.class.php";
+require "administrator.user.class.php";
 enableCustomErrorHandler();
 
 

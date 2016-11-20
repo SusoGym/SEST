@@ -11,9 +11,9 @@
 		  <div class="row">
 		  <b><?php echo $this->action ?></b>
 		  <br><b>Daten wurden gelesen</b><br>
-		  überprüfte Datensätze: <?php echo $this->data[0] ?><br>
-		  eingefügte Datensätze:   <?php echo $this->data[1] ?><br>
-		  gelöschte Datensätze: <?php echo $this->data[2] ?>
+		  überprüfte Datensätze: <?php echo $this->dataForView['fileData'][0] ?><br>
+		  eingefügte Datensätze:   <?php echo $this->dataForView['fileData'][1] ?><br>
+		  gelöschte Datensätze: <?php echo $this->dataForView['fileData'][2] ?>
 
 		  </div>
 

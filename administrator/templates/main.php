@@ -7,7 +7,8 @@
       <div class="card">
         <div class="card-content">
           <div class="row">
-            <b><?php echo $this->action ?></b>
+			<?php isset($this->dataForView['title']) ? $title = $this->dataForView['title'] : $title =""; ?>
+			<b><?php echo $title ?></b>
           </div>
 
         </div>
