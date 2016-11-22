@@ -189,6 +189,17 @@ class Connection
         $mysqli->query($query) or die($mysqli->error);
     }
 
+    /**
+     * Führt eine multi SQL Query durch
+     * @param $query
+     */
+    function straightMultiQuery($query)
+    {
+        $mysqli = $this->connID;
+        $mysqli->multi_query($query) or die($mysqli->error);
+        while($mysqli->more_results() && $mysqli->next_result());
+    }
+
 
     /**
      * Schließt die Datenbank Verbindung

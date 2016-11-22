@@ -264,24 +264,63 @@ class Model
 		return $forms;
 
     }
-	
-	
-	/**
-	* connect teacher with form
-	* @param array(int)  with teacer Ids
-	* @param string Klasse
-	*/
-	public function setTeacherToForm($teacher,$form){
-		//check if this connection exists
-		self::$connection->straightQuery("DELETE FROM unterricht WHERE klasse=\"$form\" ");
-		if(isset($teacher)) {
-		foreach($teacher as $t){
-			self::$connection->insertValues("INSERT INTO unterricht (`id`,`lid`,`klasse`) VALUES ('','$t','$form')");
-			}	
-		}
-		
-		
-	}
+
+
+    /**
+     * connect teacher with form
+     * @param array(int)  with teacher Ids
+     * @param string $form class
+     */
+    public function setTeacherToForm($teacher, $form){
+
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM unterricht WHERE klasse='$form'");
+
+        if($data == null)
+        {
+            // ;-;
+        }
+        else
+        {
+            $dbIds = array();
+
+            $new = array();
+            $same = array();
+            $deleted = array();
+
+            foreach ($data as $value)
+            {
+                $id = $value['lid'];
+                $dbIds[] = $id;
+            }
+
+            foreach ($teacher as $id)
+            {
+                if(in_array($id, $dbIds))
+                    $same[] = $id;
+                else
+                    $new[] = $id;
+            }
+
+            foreach ($dbIds as $id)
+            {
+                if(!in_array($id, array_merge($new, $same)))
+                    $deleted[] = $id;
+            }
+
+            $query = "";
+
+            foreach ($deleted as $dId)
+                $query .= "DELETE FROM unterricht WHERE klasse='$form' AND lid=$dId; ";
+            foreach ($new as $aId)
+                $query .= "INSERT INTO unterricht(klasse, lid) VALUES('$form', $aId); ";
+
+            ChromePhp::info($query);
+
+            if($query != '')
+                self::$connection->straightMultiQuery($query);
+        }
+
+    }
 	
 	/**
 	* get teachers in form
