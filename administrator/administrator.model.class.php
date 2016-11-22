@@ -3,30 +3,26 @@
 /**
  * The model class
  */
-class Model
+class Model extends \Model
 {
-    /**
-     * @var Connection
-     */
-    private static $connection;
+
     /**
      * @var Model
      */
-    private static $model;
+    protected static $model;
 
     /**
      *Konstruktor
      */
-    private function __construct()
+    protected function __construct()
     {
-        if (self::$connection == null)
-            self::$connection = new Connection();
+        parent::__construct();
 
     }
 
     static function getInstance()
     {
-        return self::$model == null ? self::$model = new Model() : self::$model;
+        return (self::$model == null || !(self::$model instanceof Model)) ? self::$model = new Model() : self::$model;
     }
 
     /**
@@ -41,78 +37,6 @@ class Model
         return $data;
 
     }
-
-
-    /**
-     * @param $mail
-     * @param $password
-     * @return bool user exists in database and password is equal with the one in the database
-     */
-    public function passwordValidate($mail, $password)
-    {
-
-        $mail = self::$connection->escape_string($mail);
-        //$password = self::$connection->escape_string($userName);
-
-        $data = self::$connection->selectAssociativeValues("SELECT password_hash from user WHERE email='$mail'");
-
-        if ($data == null)
-            return false;
-
-
-        $data = $data[0];
-
-        $pwd_hash = $data['password_hash'];
-
-
-        return password_verify($password, $pwd_hash);
-    }
-
-
-    /**
-     * @param string $email the user email
-     * @return int userId
-     */
-    public function userGetIdByMail($email)
-    {
-        $email = self::$connection->escape_string($email);
-        $data = self::$connection->selectValues("SELECT id FROM user WHERE email='$email'");
-
-        if ($data == null)
-            return null;
-
-        return $data[0][0];
-    }
-
-    /**
-     * @param $id int userId
-     * @return string email
-     */
-    public function idGetEmail($id)
-    {
-        $data = self::$connection->selectValues("SELECT email FROM user WHERE id=$id");
-
-        if ($data == null)
-            return null;
-
-        return $data[0][0];
-    }
-
-    /**
-     * @param int $userid
-     * @return int userType [0 - admin; 1 - parent; 2 - teacher]
-     */
-    public function userGetType($userid)
-    {
-        $data = self::$connection->selectValues("SELECT user_type FROM user WHERE id=" . $userid);
-
-        if (!isset($data[0]))
-            return null;
-
-        return intval($data[0][0]);
-
-    }
-
 
     /**
      *check if data exist in database
@@ -213,38 +137,7 @@ class Model
         self::$connection->straightQuery("UPDATE $table SET upd=0");
     }
 	
-	
-	/**
-     * get all teachers
-     * @return array[int] array with teacherIds
-     */
-    public function getTeachers()
-    {
-        $data = self::$connection->selectValues("SELECT id FROM lehrer order by Name"); // returns data[n][data]
 
-        $ids = array();
-
-        foreach ($data as $item)
-        {
-            $tid = intval($item[0]);
-            array_push($ids, $tid);
-        }
-		return $ids;
-
-    }
-	/**
-     * @param int $tchrId, string $sort
-     * @return array(surname, name)
-     */
-    public function teacherGetName($tchrId, $sort = "name ASC")
-    {
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id=$tchrId ORDER BY $sort");
-
-        $name = $data[0]["name"];
-        $surname = $data[0]["vorname"];
-
-        return array('surname' => $surname, 'name' => $name);
-    }
 	
 	/**
 	*
@@ -252,7 +145,7 @@ class Model
 	*/
 	public function getForms()
     {
-        $data = self::$connection->selectValues("SELECT DISTINCT klasse FROM schueler order by klasse"); // returns data[n][data]
+        $data = self::$connection->selectValues("SELECT DISTINCT klasse FROM schueler ORDER BY klasse"); // returns data[n][data]
 
         $forms = array();
 
@@ -268,12 +161,13 @@ class Model
 	
 	/**
 	* connect teacher with form
-	* @param array(int)  with teacer Ids
-	* @param string Klasse
+	* @param array(int)  with teacher Ids
+	* @param string $form class
+     * TODO / FIXME : don't delete everything but instead only delete the deleted ones .... may be more database queries but a lot more nicer... my heart is bleeding...
 	*/
 	public function setTeacherToForm($teacher,$form){
 		//check if this connection exists
-		self::$connection->straightQuery("DELETE FROM unterricht WHERE klasse=\"$form\" ");
+		self::$connection->straightQuery("DELETE FROM unterricht WHERE klasse='$form'");
 		if(isset($teacher)) {
 		foreach($teacher as $t){
 			self::$connection->insertValues("INSERT INTO unterricht (`id`,`lid`,`klasse`) VALUES ('','$t','$form')");
@@ -285,7 +179,7 @@ class Model
 	
 	/**
 	* get teachers in form
-	* @param string form
+	* @param string $form
 	* @return array[teacherId](array(form) )
 	*/
 	public function getTeachersOfForm($form){

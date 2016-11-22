@@ -265,10 +265,11 @@ class Teacher extends User
      * @param string $username
      * @param string $email
      */
-    public function __construct($id, $username, $email, $teacherId)
+    public function __construct($id, $username, $email, $teacherId, $rawData = null)
     {
 
-        $nameArr = Model::getInstance()->getTeacherNameByTeacherId($teacherId);
+
+        $nameArr = Model::getInstance()->getTeacherNameByTeacherId($teacherId, $rawData);
 
         $this->teacherId = $teacherId;
 
