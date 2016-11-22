@@ -61,7 +61,7 @@ foreach ($tchrsids as $tId) {
 				  </ul>
 				  
 				  <div class="input-field col s12">
-				  <form method="POST" action="index.php?type=setclasses">
+				  <form method="POST" action="?type=setclasses">
                         <input type="hidden" name="update" value="<?php echo $this->dataForView['currentForm']; ?>">
 						<select multiple  name="teacher[]"  >
 						<option >Bitte wählen</option>
