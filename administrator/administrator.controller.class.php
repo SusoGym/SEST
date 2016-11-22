@@ -3,268 +3,119 @@
 /**
  *Controller class handles input and other data
  */
-class Controller
+class Controller extends \Controller
 {
     /**
      * @var string file name
      */
-    private $file=null;
-	
-	/**
-	* @var array 
-	*/
-	private $fileData=null;
+    private $file = null;
 
     /**
-     * @var array data - various data to be used in view
+     * @var array
      */
-    private $dataForView = array();
+    private $fileData = null;
 
     /**
-	*@var string title/header of card 
-	*/
-	private $title=null;
-	
-	/**
-	*@var string actiontype For view
-	*/
-	private $actionType=null;
-	
-	/**
-	*@var array menueItems for view
-	*/
-	private $simpleMenueItems=null;
-	
-	/**
-	*@var astring backButton link
-	*/
-	private $backButton=null;
-	
-	/**
-	*@var array includes an array of all teachers of all forms to be transmitted to view
-	*/
-	private $teachersOfForm=null;
-	
-	/**
-	*@var array(int) all teacherIDs
-	*/
-	private $allTeachers=null;
-	
-	/**
-	*@var array(String) allForms
-	*/
-	private $allForms=null;
-	
-	/**
-	*@var string Klasse die bearbeitet wird
-	*/
-	private $currentForm=null;
+     * @var string title/header of card
+     */
+    private $title = null;
 
     /**
-     *Konstruktor
+     * @var string actiontype For view
+     */
+    private $actionType = null;
+
+    /**
+     * @var array menueItems for view
+     */
+    private $menueItems = array();
+
+    /**
+     * @var string backButton link
+     */
+    private $backButton = null;
+
+    /**
+     * @var array includes an array of all teachers of all forms to be transmitted to view
+     */
+    private $teachersOfForm = null;
+
+    /**
+     * @var array(int) all teacherIDs
+     */
+    private $allTeachers = null;
+
+    /**
+     * @var array(String) allForms
+     */
+    private $allForms = null;
+
+    /**
+     * @var string Klasse die bearbeitet wird
+     */
+    private $currentForm = null;
+
+    /**
+     * Konstruktor
      * @param array
      */
     function __construct($input)
     {
-
-
-        ChromePhp::info("-------- Next Page --------");
-        ChromePhp::info("Input: " . json_encode($input));
-        ChromePhp::info("Session: " . json_encode($_SESSION));
-
-        $this->model = Model::getInstance();
-        $this->handleLogic($input);
-
-    }
-
-
-    private function handleLogic($input)
-    {
-
-        if(!isset($input['type']))
-        {
+        if (!isset($input['type'])) {
             $input['type'] = "default";
         }
 
-        if(!isset($_SESSION['user']['mail']) || !isset($_SESSION['user']['pwd']))
-        {
-            unset($_SESSION['user']);
-        }
+        $this->model = Model::getInstance();
+
+        parent::__construct($input);
 
 
-            switch ($input['type']) {
-                case 'login':
-                    $this->handleLogin($input);
-                    break;
-                case 'logout':
-                    $this->logout();
-                    break;
-                default:
-                    if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd']) && $this->login($_SESSION['user']['mail'], $_SESSION['user']['pwd']) == 1) { // a.k.a logged in
-                        $this->handleInput($input);
-                    } else {
-                        $this->display("adminlogin");
-                    }
-                    break;
-            }
     }
 
+
+    // --- Start overriding \Controller ---
 
     /**
-     *handles input data
-     * @param array $input
+     * Handles logic
      */
-    private function handleInput($input)
+    protected function handleLogic()
     {
-        //Handle input
-            switch ($input['type']) {
-                //User Management
-                case "usrmgt":
-                    $this->title = "Benutzerverwaltung";
-                    $this->display("usermgt");
+
+
+        $input = $this->input;
+
+        $loggedIn = isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd']) && $this->checkLogin($_SESSION['user']['mail'], $_SESSION['user']['pwd']) == 1;
+
+        switch ($input['type']) {
+            case 'logout':
+                $this->logout();
+                break;
+            case 'login':
+                if (!$loggedIn) {
+                    $this->login();
                     break;
-                //Settings
-                case "settings":
-                    $this->title="Einstellungen";
-					$this->simpleMenueItems[0]=array("link"=>"index.php?type=sestconfig","entry"=>"Elternsprechtag konfigurieren");
-					$this->simpleMenueItems[1]=array("link"=>"index.php?type=newsconfig","entry"=>"Newsletter konfigurieren");
-					$this->display("simple_menue");
-					break;
-                //Enter Newsletter
-                case "news":
-                    $this->title = "Newsletter eintragen";
-                    $this->display("enternews");
-                    break;
-                //Select update options
-				case "updmgt":
-					$this->title="Datenabgleich";
-					$this->simpleMenueItems[0]=array("link"=>"index.php?type=update_s","entry"=>"Abgleich Schülerdaten");
-					$this->simpleMenueItems[1]=array("link"=>"index.php?type=update_t","entry"=>"Abgleich Lehrerdaten");
-					$this->display("simple_menue");
-					break;
-                //Update teacher data
-                case "update_t":
-                    //Einlesen der Lehrerdaten
-                    $this->title="Lehrerdaten abgleichen";
-					$this->actionType="utchoose";
-					$this->display("update");
-                    break;
-                //Update student data
-                case "update_s":
-                    $this->title = "Schülerdaten abgleichen";
-					$this->actionType="uschoose";
-					$this->display("update");		
-                    break;
-                //student file upload
-                case "utchoose":
-                case "uschoose":
-                    $student = $input['type'] == "uschoose";
-					//von mir hinzugefügt
-					$input['type'] == "uschoose" ? $student = true : $student = false;
-					
-                    $upload = $this->fileUpload();
-					
-					
-
-                    $success = $upload['success'];
-                    $written = $success? "true" : "false";
-
-                    ChromePhp::info($student?"Student":"Teacher" . " upload: $written");
-
-                    if($success)
-                    {
-                        $_SESSION['file'] = $upload['location'];
-                    }
-
-                    if(isset($input['console']))
-                    {
-                        $error = (isset($upload['error']) ? $upload['error'] : "");
-
-                        die("<script type='text/javascript'>window.top.window.uploadComplete($written, '$error');</script>");
-                    }
-
-                    if ($success) {
-						echo "<script> alert($student);   </script>  " ; 
-                        $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
-                        $this->prepareDataUpdate($student);
-                        $this->actionType = $student ? "usstart" : "utstart";
-						$student ? $this->actionType = "usstart" : $this->actionType = "utstart";
-						echo $this->actionType; 
-                        $this->display("update1");
-                    } else {
-                        $this->display("update");
-                    }
-
-                    break;
-                case "dispsupdate1":
-                case "disptupdate1":
-
-                    $student = $input['type'] == "dispsupdate1";
-                    $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
-                    $this->prepareDataUpdate(true);
-                    $this->actionType = $student ? "usstart" : "utstart";
-                    $this->display("update1");
-                    break;
-                //Student/Teacher Update start
-                case "usstart":
-                case "utstart":
-					$input['type'] == "usstart" ? $student = true : $student = false;
-                    //$student = $input['type'] == "usstart";
-echo "Schüleroperation:".$student; die;
-                    $this->title = $student?"Schüler":"Lehrer" . "daten aktualisiert";
-
-                    $this->performDataUpdate($student, $input);
-                    $this->display("update2");
-                    break;
-                //SEST configuration
-				case "sestconfig":
-					$this->title="Konfiguration Elternsprechtag";
-					$this->simpleMenueItems[0]=array("link"=>"index.php?type=setclasses","entry"=>"Unterrichtszuordnung einrichten");
-					$this->simpleMenueItems[1]=array("link"=>"index.php?type=setslots","entry"=>"Sprechzeiten einrichten");
-					$this->backButton="index.php?type=settings";
-					$this->display("simple_menue");
-					break;
-                //News configuration
-				case "newsconfig":
-					$this->title = "Konfiguration Newsletter (z.B. Emailversand/Anhänge etc.)";
-					$this->backButton = "index.php?type=settings";
-					$this->display("simple_menue");
-					break;
-                //Set SEST classes/teachers
-				case "setclasses":
-					$this->allTeachers = $this->model->getTeachers();
-					$this->allForms = $this->model->getForms();
-					(isset($input['teacher'] ) ) ? $t = $input['teacher'] : $t = null;
-					(isset($input['update'] ) ) ? $u = $input['update'] : $u = null;
-					(isset($input['form']) ) ? $f = $input['form'] : $f=null;
-					$this->classOperations($f,$u,$t);
-					$this->title= "Lehrer zu Klassen zuweisen";
-					$this->backButton = "index.php?type=sestconfig";
-					$this->display("unterricht");
-					break;
-				//Set SEST Slots 
-				case "setslots":
-					$this->title= "Sprechzeiten einrichten";
-					$this->backButton = "index.php?type=sestconfig";
-					$this->display("simple_menue");
-					break;
-				//Set SEST Slots
-                case "slots":
-
-                    break;
-                default:
-                    $this->title = "Startseite";
-                    unset($_SESSION['file']);
-					$this->display("main");
-                    break;
-            }
+                }
+            default:
+                if ($loggedIn) { // a.k.a logged in
+                    $this->handleInput();
+                } else {
+                    $this->display("adminlogin");
+                }
+                break;
+        }
     }
 
-    private function handleLogin($input)
+    /**
+     * Handles login logic
+     * @param $input array input data
+     * @return string template to be displayed
+     */
+    protected function login()
     {
+        $input = $this->input;
 
         if (!isset($input['login']['mail']) || !isset($input['login']['password'])) {
-            ChromePhp::info("No username || pwd in input[]");
+            \ChromePhp::info("No username || pwd in input[]");
             $this->notify('Kein Benutzername oder Passwort angegeben');
             return "adminlogin";
         }
@@ -272,20 +123,23 @@ echo "Schüleroperation:".$student; die;
         $pwd = $input['login']['password'];
         $usr = $input['login']['mail'];
 
-        $state = $this->login($usr, $pwd);
+        \ChromePhp::error("login()");
+        $state = $this->checkLogin($usr, $pwd);
 
-        ChromePhp::info("Login Success: $state");
+        \ChromePhp::info("Login Success: $state");
 
         if (isset($input['console'])) { // used to only get raw login state -> can be used in js
             die(strval($state));
         }
 
+        // things after here should not naturally happen
+
         if ($state == 1) {
 
-            $this->header = "Startseite";
+            $this->title = "Startseite";
             return "main";
         } else if ($state == 2) {
-            ChromePhp::info("No Admin Permission");
+            \ChromePhp::info("No Admin Permission");
             $this->notify('Ungenügende Berechtigung!');
         } else {
             $this->notify("Falsche Benutzername Passwort Kombination!");
@@ -299,43 +153,46 @@ echo "Schüleroperation:".$student; die;
      */
     function display($template)
     {
-        $view = new View();
-		
-		$dataForViewKeys=array("title","action","menueItems","backButton","allteachers","allForms","teachersOfForm","currentForm","fileName","fileData");
-		$dataForViewValues=array($this->title,$this->actionType,$this->simpleMenueItems,$this->backButton,$this->allTeachers,$this->allForms,
-		$this->teachersOfForm,$this->currentForm,$this->file,$this->fileData);
-		$view->setDataForView(array_combine($dataForViewKeys,$dataForViewValues)) ;
-       
-        ChromePhp::info("Displaying 'templates/$template.php' with data: " . json_encode($this->dataForView));
+        $view = \View::getInstance();
+        $data = array();
+
+        if (isset($_SESSION['dataForView']['notifications'])) {
+            foreach ($_SESSION['dataForView']['notifications'] as $not) {
+                $this->notify($not['msg'], $not['time']);
+            }
+            unset($_SESSION['dataForView']['notifications']);
+        }
+
+        $myDataForView =
+            array("title" => $this->title,
+                "action" => $this->actionType,
+                "menueItems" => $this->menueItems,
+                "backButton" => $this->backButton,
+                "allteachers" => $this->allTeachers,
+                "allForms" => $this->allForms,
+                "teachersOfForm" => $this->teachersOfForm,
+                "currentForm" => $this->currentForm,
+                "fileName" => $this->file,
+                "fileData" => $this->fileData
+            );
+
+        foreach($myDataForView as $key => $value)
+        {
+            if($value != null)
+                $data[$key] = $value;
+        }
+
+        $data = array_merge($data, array_merge($this->infoToView));
+        $view->setDataForView($data);
+
         $view->loadTemplate($template);
-    }
-
-
-    /**
-     * Displayes a materialized toast with specified message
-     * @param string $message the message to display
-     * @param int $time time to display
-     */
-    function notify($message, $time = 4000)
-    {
-        if (!isset($this->dataForView))
-            $this->dataForView = array();
-        if (!isset($this->dataForView['notifications']))
-            $this->dataForView['notifications'] = array();
-
-        $notsArray = $this->dataForView['notifications'];
-
-        array_push($notsArray, array("msg" => $message, "time" => $time));
-
-        $this->dataForView['notifications'] = $notsArray;
-
     }
 
     /**
      * Logout logic
      * @return void
      */
-    private function logout()
+    protected function logout()
     {
         session_destroy();
         session_start();
@@ -351,20 +208,20 @@ echo "Schüleroperation:".$student; die;
      * @param string $pwd
      * @return int 1 => success, 2 => no permission, 0 => invalid login data
      */
-    function login($mail, $pwd)
+    protected function checkLogin($mail, $pwd)
     {
         $model = Model::getInstance();
         if ($model->passwordValidate($mail, $pwd)) {
 
-            $uid = $model->userGetIdByMail($mail);
-            if ($uid == null) {
+            $usr = $model->getUserByMail($mail);
+            if (($uid = $usr->getId()) == null) {
                 $this->notify("Database error!");
                 $this->display("adminlogin");
 
-                ChromePhp::error("Unexpected database response! requested uid = null!");
+                \ChromePhp::error("Unexpected database response! requested uid = null!");
                 exit();
             }
-            $type = $model->userGetType($uid);
+            $type = $usr->getType();
 
             //admin login MUST be type 0
             if ($type == 0) {
@@ -374,7 +231,9 @@ echo "Schüleroperation:".$student; die;
                 $_SESSION['user']['pwd'] = $pwd;
                 $_SESSION['user']['mail'] = $mail;
 
-                ChromePhp::info("User '$mail' with id $uid of type $type successfully logged in @ $time");
+                $this->createUserObject($usr);
+
+                \ChromePhp::info("User '$mail' with id $uid of type $type successfully logged in @ $time");
                 unset($_SESSION['logout']);
                 return 1;
             } else {
@@ -384,6 +243,159 @@ echo "Schüleroperation:".$student; die;
         return 0;
     }
 
+
+    // --- End overriding \Controller ---
+
+
+    /**
+     *handles input data
+     * @param array $input
+     */
+    private function handleInput()
+    {
+        $input = $this->input;
+        //Handle input
+        switch ($input['type']) {
+            //User Management
+            case "usrmgt":
+                $this->title = "Benutzerverwaltung";
+                $this->display("usermgt");
+                break;
+            //Settings
+            case "settings":
+                $this->title = "Einstellungen";
+                $this->addMenueItem("?type=sestconfig", "Elternsprechtag konfigurieren");
+                $this->addMenueItem("?type=newsconfig", "Newsletter konfigurieren");
+                $this->display("simple_menue");
+                break;
+            //Enter Newsletter
+            case "news":
+                $this->title = "Newsletter eintragen";
+                $this->display("enternews");
+                break;
+            //Select update options
+            case "updmgt":
+                $this->title = "Datenabgleich";
+                $this->addMenueItem("?type=update_s", "Ableich Schülerdaten");
+                $this->addMenueItem("?type=update_t", "Abgleich Lehrerdaten");
+                $this->display("simple_menue");
+                break;
+            //Update teacher data
+            case "update_t":
+                //Einlesen der Lehrerdaten
+                $this->title = "Lehrerdaten abgleichen";
+                $this->actionType = "utchoose";
+                $this->display("update");
+                break;
+            //Update student data
+            case "update_s":
+                $this->title = "Schülerdaten abgleichen";
+                $this->actionType = "uschoose";
+                $this->display("update");
+                break;
+            //student file upload
+            case "utchoose":
+            case "uschoose":
+                $student = $input['type'] == "uschoose";
+                //von mir hinzugefügt
+                $input['type'] == "uschoose" ? $student = true : $student = false;
+
+                $upload = $this->fileUpload();
+
+
+                $success = $upload['success'];
+                $written = $success ? "true" : "false";
+
+                \ChromePhp::info($student ? "Student" : "Teacher" . " upload: $written");
+
+                if ($success) {
+                    $_SESSION['file'] = $upload['location'];
+                }
+
+                if (isset($input['console'])) {
+                    $error = (isset($upload['error']) ? $upload['error'] : "");
+
+                    die("<script type='text/javascript'>window.top.window.uploadComplete($written, '$error');</script>");
+                }
+
+                if ($success) {
+                    echo "<script> alert($student);   </script>  ";
+                    $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
+                    $this->prepareDataUpdate($student);
+                    $this->actionType = $student ? "usstart" : "utstart";
+                    $student ? $this->actionType = "usstart" : $this->actionType = "utstart";
+                    echo $this->actionType;
+                    $this->display("update1");
+                } else {
+                    $this->display("update");
+                }
+
+                break;
+            case "dispsupdate1":
+            case "disptupdate1":
+
+                $student = $input['type'] == "dispsupdate1";
+                $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
+                $this->prepareDataUpdate(true);
+                $this->actionType = $student ? "usstart" : "utstart";
+                $this->display("update1");
+                break;
+            //Student/Teacher Update start
+            case "usstart":
+            case "utstart":
+                $input['type'] == "usstart" ? $student = true : $student = false;
+                //$student = $input['type'] == "usstart";
+                echo "Schüleroperation:" . $student;
+                die;
+                $this->title = $student ? "Schüler" : "Lehrer" . "daten aktualisiert";
+
+                $this->performDataUpdate($student, $input);
+                $this->display("update2");
+                break;
+            //SEST configuration
+            case "sestconfig":
+                $this->title = "Konfiguration Elternsprechtag";
+                $this->addMenueItem("?type=setclasses", "Unterrichtszuordnung einrichten");
+                $this->addMenueItem("?type=setslots", "Sprechzeiten einrichten");
+                $this->backButton = "?type=settings";
+                $this->display("simple_menue");
+                break;
+            //News configuration
+            case "newsconfig":
+                $this->title = "Konfiguration Newsletter (z.B. Emailversand/Anhänge etc.)";
+                $this->backButton = "?type=settings";
+                $this->display("simple_menue");
+                break;
+            //Set SEST classes/teachers
+            case "setclasses":
+                $this->allTeachers = $this->model->getTeachers();
+                $this->allForms = $this->model->getForms();
+                isset($input['teacher']) ? $t = $input['teacher'] : $t = null;
+                isset($input['update']) ? $u = $input['update'] : $u = null;
+                isset($input['form']) ? $f = $input['form'] : $f = null;
+                $this->classOperations($f, $u, $t);
+                $this->title = "Lehrer zu Klassen zuweisen";
+                $this->backButton = "?type=sestconfig";
+                $this->display("unterricht");
+                break;
+            //Set SEST Slots
+            case "setslots":
+                $this->title = "Sprechzeiten einrichten";
+                $this->backButton = "?type=sestconfig";
+                $this->display("simple_menue");
+                break;
+            //Set SEST Slots
+            case "slots":
+
+                break;
+            default:
+                $this->title = "Startseite";
+                unset($_SESSION['file']);
+                $this->display("main");
+                break;
+        }
+    }
+
     /**
      *uploading a file to server
      * @return array[]
@@ -391,7 +403,7 @@ echo "Schüleroperation:".$student; die;
     private function fileUpload()
     {
 
-	   $ret = array("success" => false);
+        $ret = array("success" => false);
         $success = false;
         try {
             /*
@@ -424,15 +436,16 @@ echo "Schüleroperation:".$student; die;
     private function prepareDataUpdate($student)
     {
 
-        if(!isset($_SESSION['file']))
-        {
+        if (!isset($_SESSION['file'])) {
             header("Location: /administrator"); //TODO: hardcoded ;-;
+        } else if (!file_exists($_SESSION['file'])) {
+            $_SESSION['dataForView']['notifications'][] = array("msg" => "Invalid File Target!", "time" => 4000);
+            header("Location: /administrator");
         }
         $fileHandler = new FileHandler($_SESSION['file']);
         $this->fileData[0] = $fileHandler->readHead();
         $this->fileData[1] = $fileHandler->readDBFields($student); //schueler=true
     }
-
 
     /**
      *perform update of DB Data
@@ -441,8 +454,7 @@ echo "Schüleroperation:".$student; die;
      */
     private function performDataUpdate($student, $input)
     {
-		if(!isset($_SESSION['file']))
-        {
+        if (!isset($_SESSION['file'])) {
             header("Location: /administrator"); //TODO: hardcoded ;-;
         }
 
@@ -459,25 +471,36 @@ echo "Schüleroperation:".$student; die;
         $this->fileData[1] = $updateResults[1];
         $this->fileData[2] = $fileHandler->deleteDataFromDB($student);
     }
-	
-	
-		/**
-		*set teacher class connections
-		* @param string form
-		* @param array(int) teacherIds
-		*/
-		private function classOperations($form,$update,$teacher){
-		if(isset($update)) {
-		$this->model->setTeacherToForm($teacher,$update);
-		$form = $update;
-		}		
-		//read teachers in forms
-		if( isset($form) ) {
-			$this->currentForm = $form;
-			$this->teachersOfForm = $this->model->getTeachersOfForm($form); 
-			}
-			
-		}
+
+    /**
+     * Adds Menu Item
+     * @param $link string
+     * @param $name string
+     * @return void
+     */
+    private function addMenueItem($link, $name)
+    {
+        array_push($this->menueItems, array("link" => $link, "entry" => $name));
+    }
+
+    /**
+     *set teacher class connections
+     * @param string $form
+     * @param array(int) teacherIds
+     */
+    private function classOperations($form, $update, $teacher)
+    {
+        if (isset($update)) {
+            $this->model->setTeacherToForm($teacher, $update);
+            $form = $update;
+        }
+        //read teachers in forms
+        if (isset($form)) {
+            $this->currentForm = $form;
+            $this->teachersOfForm = $this->model->getTeachersOfForm($form);
+        }
+
+    }
 }
 
 ?>

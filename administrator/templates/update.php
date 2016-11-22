@@ -1,5 +1,7 @@
 <?php namespace administrator;
-include("header.php"); ?>
+include("header.php");
+$data = \View::getInstance()->getDataForView();
+?>
 
 
 <div class="container">
@@ -7,11 +9,11 @@ include("header.php"); ?>
     <div class="card ">
         <div class="card-content">
             <div class="row">
-                <b><?php echo $this->dataForView['title'].$this->dataForView['action']; ?></b>
+                <b><?php echo $data['title']; ?></b>
                 <br>Bitte wählen Sie eine Quelldatei
             </div>
             <form enctype="multipart/form-data"  target="myTarget" method="post"
-                  action="?console&type=<?php echo $this->dataForView['action']; ?>">
+                  action="?console&type=<?php echo $data['action']; ?>">
                 <div class="row">
                     <input type="file" class="btn-flat left waves-effect waves-teal" name="file" id="file" required>
                     <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
@@ -47,11 +49,11 @@ include("header.php"); ?>
         }
         else
         {
-            var student = <?php echo ($this->actionType == "uschoose") ? "true" : "false"; ?>;
+            var student = <?php echo (\View::getInstance()->getActionType() == "uschoose") ? "true" : "false"; ?>;
 
             var type = student ? "dispsupdate1" : "disptupdate1";
 
-            openType(type);
+            window.location = "?type=" + type;
         }
 
     }

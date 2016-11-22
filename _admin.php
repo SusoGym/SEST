@@ -3,20 +3,23 @@
 
 session_start();
 
+$administratorDir = "administrator/";
 
-require "../ChromePhp.php"; // debugging
-require "../class.utility.php";
-require "../class.user.php";
-require "../class.connect.php";
-require "../class.controller.php";
-require "../class.model.php";
-require "../class.view.php";
 
-\Connection::$configFile = "../cfg.ini";
+require "ChromePhp.php"; // debugging
+require "class.utility.php";
+require "class.user.php";
+require "class.connect.php";
+require "class.controller.php";
+require "class.model.php";
+require "class.view.php";
 
-require "administrator.controller.class.php";
-require "administrator.model.class.php";
-require "administrator.filehandler.class.php";
+\Connection::$configFile = "cfg.ini";
+\View::$PATH = $administratorDir . "templates";
+
+require $administratorDir . "administrator.controller.class.php";
+require $administratorDir . "administrator.model.class.php";
+require $administratorDir . "administrator.filehandler.class.php";
 
 
 enableCustomErrorHandler();
