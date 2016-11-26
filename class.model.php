@@ -349,6 +349,22 @@ class Model
         return intval($parentId);
 
     }
+	
+	/**
+	 * Adds new student as child to parent
+	 * @param $pid int Parent ID
+	 * @param $sid int Student ID
+	 * @return string success
+	 */
+	public function parentAddStudent($pid, $sid)
+	{
+		$parent = $this->getParentByParentId($pid);
+		$student = $this->getStudentById($sid);
+		if (($parent == null) || ($student == null)) return false;
+		$query = "UPDATE schueler SET eid=".$pid." WHERE id=".$sid.";";
+		self::$connection->straightQuery($query);
+		return true;
+	}
 
 }
 
