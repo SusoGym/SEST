@@ -239,7 +239,7 @@ class Model
             return new Teacher(null, null, $data['email'], $data['id'], $data);
         }
 
-        return $this->getUserById($usrId, $data);
+        return $this->getUserById($usrId);
     }
 
     /**
