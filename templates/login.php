@@ -53,9 +53,6 @@
                             <input id="pwdrep_register" name="pwdrep" type="password" required>
                             <label for="pwdrep_register">Passwort wiederholen</label>
                         </div>
-                        <a class="btn-flat teal-text" style="margin-bottom: 10px;" onclick="addStudent();"
-                           id="moreFields"><i class="material-icons left">add</i>Schüler hinzufügen</a>
-                        <span id="students"></span>
                         <div class="row" style="margin-bottom: 0;">
                             <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
                                     class="material-icons right">send</i></button>
@@ -110,32 +107,7 @@
     }
 
 
-    var counter = 0;
 
-    function addStudent() {
-        counter++;
-        if (counter <= 100) {
-            var clonedNode = document.getElementById('student_blueprint').cloneNode(true);
-            clonedNode.id = ''; // reset id name of clone
-            clonedNode.style.display = 'block'; // remove display: none; from clone
-            clonedNode.className = 'student_instance';
-            var childNodes = clonedNode.childNodes;
-            childNodes.forEach(function (childNode) {
-                var nodeName = childNode.name;
-                if (nodeName)
-                    childNode.name = nodeName + "[" + counter + "]";
-            });
-            var insertHere = document.getElementById('students');
-            insertHere.parentNode.insertBefore(clonedNode, insertHere);
-        }
-
-        initDatepick();
-    }
-
-    $(document).ready(function () {
-        addStudent(); // -> create one default student field
-
-    });
 
     function submitLogin() {
         var pwd = $('#pwd_login').val();
