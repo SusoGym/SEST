@@ -29,6 +29,9 @@ $data = \View::getInstance()->getDataForView();
 
 </div>
 
+<script>
+    window.top.window.uploadComplete("");
+</script>
 
 <!-- Include Javascript -->
 <?php include("js.php") ?>
@@ -49,7 +52,7 @@ $data = \View::getInstance()->getDataForView();
         }
         else
         {
-            var student = <?php echo (\View::getInstance()->getActionType() == "uschoose") ? "true" : "false"; ?>;
+            var student = <?php echo (\View::getInstance()->getDataForView()['action'] == "uschoose") ? "true" : "false"; ?>;
 
             var type = student ? "dispsupdate1" : "disptupdate1";
 

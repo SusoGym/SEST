@@ -7,7 +7,7 @@ include("header.php") ?>
         <div class="card-content">
             <div class="row">
 
-                <b><?php echo \View::getInstance()->getAction(); ?></b>
+                <b><?php echo \View::getInstance()->getDataForView()['action']; ?></b>
 
             </div>
             <div class="row">
