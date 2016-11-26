@@ -4,7 +4,8 @@
 <script>
     $(document).ready(function () {
         $('ul.teachers').tabs();
-        $(".button-collapse").sideNav();
+        $('ul.students').tabs();
+	$(".button-collapse").sideNav();
     });
 
 
