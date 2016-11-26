@@ -73,14 +73,6 @@ class View
     }
 
     /**
-     * @return mixed
-     */
-    public function getPATH()
-    {
-        return $this->PATH;
-    }
-
-    /**
      * @return string
      */
     public function getTitle()

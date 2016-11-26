@@ -3,6 +3,7 @@
 
 session_start();
 
+const DEBUG = true;
 
 require "../ChromePhp.php"; // debugging
 require "../class.utility.php";
@@ -18,9 +19,12 @@ require "administrator.controller.class.php";
 require "administrator.model.class.php";
 require "administrator.filehandler.class.php";
 
+\ChromePhp::setEnabled(DEBUG);
 
-enableCustomErrorHandler();
-
+if(DEBUG) {
+    ini_set("display_errors",true);
+    enableCustomErrorHandler();
+}
 
 $input = array_merge($_GET, $_POST);
 

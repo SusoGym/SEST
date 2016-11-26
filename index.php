@@ -1,4 +1,7 @@
 <?php
+
+const DEBUG = true;
+
 /* Debug Classes */
 require "ChromePhp.php"; // debugging
 /* Utility Classes */
@@ -10,8 +13,13 @@ require "class.controller.php";
 require "class.model.php";
 require "class.view.php";
 /* Settings */
-// ChromePhp::setEnabled(false);  // disable debugging
-enableCustomErrorHandler();
+
+\ChromePhp::setEnabled(DEBUG);
+
+if(DEBUG) {
+    ini_set("display_errors",true);
+    enableCustomErrorHandler();
+}
 
 date_default_timezone_set('Europe/Berlin'); // if not corretly set in php.ini
 
