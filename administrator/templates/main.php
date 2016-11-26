@@ -7,8 +7,7 @@
       <div class="card">
         <div class="card-content">
           <div class="row">
-			<?php isset($this->dataForView['title']) ? $title = $this->dataForView['title'] : $title =""; ?>
-			<b><?php echo $title ?></b>
+			<b><?php echo \View::getInstance()->getTitle(); ?></b>
           </div>
 
         </div>

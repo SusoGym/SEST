@@ -1,5 +1,6 @@
 <?php namespace administrator;
-       include("header.php"); ?>
+       include("header.php");
+?>
 
 
 
@@ -10,7 +11,7 @@
       <div class="card">
         <div class="card-content ">
           <div class="row">
-          <b><?php echo $this->action ?></b>
+          <b><?php echo \View::getInstance()->getActionType(); ?></b>
          </div>
 		  <div class="row">
              <ul ><a id="home" href="?type=update_s">Abgleich Schülerdaten</a></ul>

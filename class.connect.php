@@ -6,6 +6,11 @@
  */
 class Connection
 {
+
+    /**
+     * @var string configuration file
+     */
+    public static $configFile = "cfg.ini";
     /**
      * @var string database ip
      */
@@ -19,7 +24,7 @@ class Connection
      */
     private $pass;
     /**
-     * @var mysqli database connection instance
+     * @var \mysqli database connection instance
      */
     private $connID;
     /**
@@ -44,7 +49,7 @@ class Connection
      */
     private function getCredentials()
     {
-        $f = fopen("cfg.ini", "r");
+        $f = fopen(self::$configFile, "r");
         while (!feof($f)) {
             $line = fgets($f);
             $larr = explode("=", $line);
@@ -75,7 +80,7 @@ class Connection
     {
 
         $reporting = error_reporting(0);
-        $mysqli = $this->connID = new mysqli($this->server, $this->user, $this->pass, $this->database);
+        $mysqli = $this->connID = new \mysqli($this->server, $this->user, $this->pass, $this->database);
         error_reporting($reporting);
 
         if ($mysqli->connect_errno) {
@@ -84,7 +89,7 @@ class Connection
             exit();
         }
 
-        ChromePhp::info("Connection to database " . $this->user . "@" . $this->server . "/" . $this->database . " successful!");
+        //ChromePhp::log("[SQL] Connection to database " . $this->user . "@" . $this->server . "/" . $this->database . " successful!");
 
         mysqli_set_charset($mysqli, 'utf8');
     }
@@ -99,6 +104,7 @@ class Connection
      */
     public function selectValues($query)
     {
+        ChromePhp::log("[SQL] Selecting values: \"$query\" from " . $this->getCaller());
         $mysqli = $this->connID;
         $result = $mysqli->query($query) or die($mysqli->error . "</br></br>" . $query . "</br></br>" . $this->getCaller());
         $value = null;
@@ -124,8 +130,9 @@ class Connection
      */
     public function selectAssociativeValues($query)
     {
+        ChromePhp::log("[SQL] Selecting values:  \"$query\" from " . $this->getCaller());
         $mysqli = $this->connID;
-        $result = $mysqli->query($query) or die($mysqli->error . "</br></br>" . $query . "</br></br>" . $this->getCaller());
+        $result = $mysqli->query($query) or die($mysqli->error);
         $assocValue = null;
         $fieldName = null;
         $anz = $result->field_count;
@@ -143,6 +150,27 @@ class Connection
         return $assocValue;
     }
 
+    /**
+     * gibt ein Array mit den Feldnamen zurück
+     * @param string $query
+     * @return array
+     */
+    public function selectFieldNames($query)
+    {
+        ChromePhp::log("[SQL] Selecting FieldNames:  \"$query\" from " . $this->getCaller());
+        $fieldNames = array();
+        $mysqli = $this->connID;
+        if ($result = $mysqli->query($query)) {
+            $finfo = $result->fetch_fields();
+            foreach ($finfo as $f) {
+                $fieldNames[] = $f->name;
+            }
+            return $fieldNames;
+        } else {
+            return null;
+        }
+    }
+
 
     /**
      * Universelle Methode zum Einfügen von Daten
@@ -152,8 +180,9 @@ class Connection
      */
     public function insertValues($query)
     {
+        ChromePhp::log("[SQL] Inserting:  \"$query\" from " . $this->getCaller());
         $mysqli = $this->connID;
-        $mysqli->query($query) or die($mysqli->error . "</br></br>" . $query . "</br></br>" . $this->getCaller());
+        $mysqli->query($query) or die($mysqli->error);
         return $mysqli->insert_id;
     }
 
@@ -162,12 +191,24 @@ class Connection
      * Führt eine SQL Query durch
      * @param $query String SQL Query
      */
-    public function straightQuery($query)
+    function straightQuery($query)
     {
+        ChromePhp::log("[SQL] Query:  \"$query\" from " . $this->getCaller());
 
-        $this->connID->query($query);
+        $mysqli = $this->connID;
+        $mysqli->query($query) or die($mysqli->error);
     }
 
+    /**
+     * Führt eine multi SQL Query durch (Statement1 ; Statement2 ; ...)
+     * @param $query
+     */
+    function straightMultiQuery($query)
+    {
+        $mysqli = $this->connID;
+        $mysqli->multi_query($query) or die($mysqli->error);
+        while ($mysqli->more_results() && $mysqli->next_result()) ;
+    }
 
     /**
      * Schließt die Datenbank Verbindung
@@ -180,7 +221,7 @@ class Connection
 
     /**
      * Gibt die genutzte mysqli Klasse zurück
-     * @return mysqli
+     * @return \mysqli
      */
     public function getConnection()
     {
@@ -193,7 +234,7 @@ class Connection
      * @param $string
      * @return string
      */
-    public function escape_string($string)
+    function escape_string($string)
     {
         return $this->connID->real_escape_string($string);
     }
@@ -201,7 +242,7 @@ class Connection
     /**
      * @return string location the caller method was called from
      */
-    private function getCaller()
+    function getCaller()
     {
         $info = debug_backtrace();
         $file = $info[1]['file'];

@@ -8,16 +8,16 @@ class Model
     /**
      * @var Connection
      */
-    private static $connection;
+    protected static $connection;
     /**
      * @var Model
      */
-    private static $model;
+    protected static $model;
 
     /**
      *Konstruktor
      */
-    private function __construct()
+    protected function __construct()
     {
         if (self::$connection == null)
             self::$connection = new Connection();
@@ -58,14 +58,17 @@ class Model
 
     /**
      * @param $uid int
-     * @return User
+     * @return User | Teacher | Admin | Guardian
      */
-    public function getUserById($uid)
+    public function getUserById($uid, $data = null)
     {
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM user WHERE id=$uid");
+
+        if($data == null)
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM user WHERE id=$uid");
         if ($data == null)
             return null;
-        $data = $data[0];
+        if(isset($data[0]))
+            $data = $data[0];
 
         $type = $data['user_type'];
 
@@ -126,14 +129,13 @@ class Model
      * @param int $tchrId
      * @return array[String => String]
      */
-    public function getTeacherNameByTeacherId($teacherId)
+    public function getTeacherNameByTeacherId($teacherId, $data = null)
     {
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE lehrer.id=$teacherId");
+        if($data == null)
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE lehrer.id=$teacherId");
 
-        if(!isset($data[0]))
-            return array("name" => null, "surname" => null);
-
-        $data = $data[0];
+        if(isset($data[0]))
+            $data = $data[0];
 
         $surname = $data["name"];
         $name = $data["vorname"];
@@ -207,13 +209,12 @@ class Model
      */
     public function getTeachers()
     {
-        $data = self::$connection->selectValues("SELECT id FROM lehrer"); // returns data[n][data]
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer"); // returns data[n][data]
 
         $teachers = array();
-
         foreach ($data as $item) {
-            $tid = intval($item[0]);
-            array_push($teachers, $this->getTeacherByTeacherId($tid));
+            $tid = intval($item['id']);
+            array_push($teachers, $this->getTeacherByTeacherId($tid, $item));
         }
 
         return $teachers;
@@ -223,16 +224,19 @@ class Model
      * @param $tchrId int teacherId
      * @return Teacher
      */
-    public function getTeacherByTeacherId($tchrId)
+    public function getTeacherByTeacherId($tchrId, $data = null)
     {
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id=$tchrId");
+        if($data == null)
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id=$tchrId");
         if ($data == null)
             return null;
-        $data = $data[0];
+
+        if(isset($data[0]))
+            $data = $data[0];
 
         $usrId = $data['userid'];
         if ($usrId == -1) { // teacher has not registered yet...
-            return new Teacher(null, null, $data['email'], $data['id']);
+            return new Teacher(null, null, $data['email'], $data['id'], $data);
         }
 
         return $this->getUserById($usrId);
