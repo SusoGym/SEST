@@ -5,15 +5,18 @@ $teacherNames = array();
 $teacherObjs = array();
 $user = Controller::getUser();
 if ($user instanceof Guardian) {
-    $teacherObjs = $user->getTeachers(); //TODO: getTeachersByClass -> UI to change selected class
+  $children = $user->getChildren();
+  foreach ($children as $child) {
+    $students[$child->getId()]['id'] = $child->getId();
+    $students[$child->getId()]['name'] = $child->getFullName();
+    $teachers = $child->getTeachers();
+    foreach ($teachers as $teacher) {
+      $students[$child->getId()]['teachers'][$teacher->getTeacherId()] = array('id' => $teacher->getTeacherId(), 'name' => $teacher->getFullName());
+    }
+  }
 } else if($user instanceof Admin)
 {
     $teacherObjs = $model->getTeachers();
-}
-
-foreach ($teacherObjs as $teacherObj/** @var $teacherObj Teacher */) {
-    $teacherId = $teacherObj->getTeacherId();
-    $teacherNames[intval($teacherId)] = $teacherObj->getFullname();
 }
 
 include("header.php");
@@ -22,65 +25,76 @@ include("header.php");
 
 <div class="container">
 
+<pre><?php //echo json_encode($students, JSON_PRETTY_PRINT); ?></pre>
+
     <div class="card ">
         <div class="card-content">
             <div class="row">
                 <div class="col l3 hide-on-med-and-down">
-                    <ul class="teachers collection">
-                        <?php foreach ($teacherNames as $id => $name) { ?>
-                            <li class="tab"><a class="collection-item"
-                                               onclick="$('html, body').animate({ scrollTop: 0 }, 200);"
-                                               href="#tchr<?php echo $id; ?>"><?php echo $name; ?></a>
-                            </li>
-                        <?php } ?>
-                    </ul>
+
+                  <a class='dropdown-button btn' style="width:100%;" href='#' data-activates='students'>Schüler auswählen</a>
+
+                  <ul id='students' class='dropdown-content students'>
+
+                    <?php
+                      foreach ($students as $student) {
+                        echo "<li class=\"tab\"><a href='#stu";
+                        echo $student["id"];
+                        echo "'>";
+                        echo $student["name"];
+                        echo "</a></li>";
+                      }
+                    ?>
+                  </ul>
+
+
+
+                      <ul class="teachers collection">
+                          <?php foreach ($students as $student) { ?>
+                            <div id='stu<?php echo $student['id']; ?>'>
+                              <?php foreach ($student['teachers'] as $teacher) { ?>
+                                  <li class="tab"><a class="collection-item"
+                                                     onclick="$('html, body').animate({ scrollTop: 0 }, 200);"
+                                                     href="#tchr<?php echo $teacher['id']; ?>"><?php echo $teacher['name']; ?></a>
+                                  </li>
+                              <?php } ?>
+                            </div>
+                        <?php  } ?>
+                      </ul>
+
                 </div>
                 <div class="col l9 m12 s12">
-                    <?php foreach ($teacherNames as $id => $name) { ?>
-                        <div id="tchr<?php echo $id; ?>" class="col s12">
-                            <ul class="collection with-header">
-                                <li class="collection-header"><h4>Termin bei <span
-                                            class="teal-text"><?php echo $name; ?></span>
-                                        buchen</h4></li>
+                  <?php foreach ($students as $student) { ?>
+                      <?php foreach ($student['teachers'] as $teacher) { ?>
+                          <div id="tchr<?php echo $teacher['id']; ?>" class="col s12">
+                              <ul class="collection with-header">
+                                  <li class="collection-header">
+                                    <h4>Termin bei <span class="teal-text"><?php echo $teacher['name']; ?></span> buchen</h4></li>
 
-                                <li class="collection-item">
+                                  <li class="collection-item">
                                     <div>
-                                        slot
-                                        <a href class="secondary-content action">
-                                            <i class="material-icons green-text">forward</i>
-                                        </a>
-                                        <span class="secondary-content info grey-text">
-                          jetzt buchen
-                        </span>
+                                      slot
+                                      <a href class="secondary-content action"><i class="material-icons green-text">forward</i></a>
+                                      <span class="secondary-content info grey-text">jetzt buchen</span>
                                     </div>
-                                </li>
-
-                                <li class="collection-item">
+                                  </li>
+                                  <li class="collection-item">
                                     <div>
-                                        slot
-                                        <span class="secondary-content action">
-                          <i class="material-icons grey-text">check</i>
-                        </span>
-                                        <span class="secondary-content info grey-text">
-                          gebucht
-                        </span>
+                                      slot
+                                      <span class="secondary-content action"><i class="material-icons grey-text">check</i></span>
+                                      <span class="secondary-content info grey-text">gebucht</span>
                                     </div>
-                                </li>
-
-                                <li class="collection-item">
+                                  </li>
+                                  <li class="collection-item">
                                     <div>
-                                        slot
-                                        <span class="secondary-content action">
-                          <i class="material-icons red-text">clear</i>
-                        </span>
-                                        <span class="secondary-content info grey-text">
-                          nicht verfügbar
-                        </span>
+                                      slot
+                                      <span class="secondary-content action"><i class="material-icons red-text">clear</i></span>
+                                      <span class="secondary-content info grey-text">nicht verfügbar</span>
                                     </div>
-                                </li>
-
-                            </ul>
-                        </div>
+                                  </li>
+                              </ul>
+                          </div>
+                      <?php } ?>
                     <?php } ?>
                 </div>
             </div>
@@ -119,3 +133,4 @@ include("header.php");
 
 </body>
 </html>
+
