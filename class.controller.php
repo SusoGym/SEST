@@ -9,16 +9,16 @@ class Controller
     /**
      * @var Model instance of model to be used in this class
      */
-    private $model;
+    protected $model;
     /**
      * @var array combined POST & GET data received from client
      */
-    private $input;
+    protected $input;
 
     /**
      * @var User
      */
-    private static $user;
+    protected static $user;
 
     /**
      * @return User
@@ -39,7 +39,9 @@ class Controller
         ChromePhp::info("Input: " . json_encode($input));
         ChromePhp::info("Session: " . json_encode($_SESSION));
 
-        $this->model = Model::getInstance();
+        if($this->model == null)
+            $this->model = Model::getInstance();
+
         $this->input = $input;
         $this->infoToView = array();
 
@@ -48,7 +50,7 @@ class Controller
 
     }
 
-    private function handleLogic()
+    protected function handleLogic()
     {
         //Handle input
         if (isset($this->input['type'])) {
@@ -128,12 +130,13 @@ class Controller
 
     /**
      * Creates userobject of logged in user and saves it to Controller:$user
+     * @param User $usr specify if object already created
      * @return User the current userobject
      */
-    private function createUserObject()
+    protected function createUserObject($usr = null)
     {
         if (isset($_SESSION['user']['id']) && (self::$user == null || self::$user->getId() != $_SESSION['user']['id'])) {
-            self::$user = Model::getInstance()->getUserById($_SESSION['user']['id']);
+            self::$user = $usr == null ? Model::getInstance()->getUserById($_SESSION['user']['id']) : $usr;
             ChromePhp::info("Userobject: " . self::$user);
         }
 
@@ -144,7 +147,7 @@ class Controller
      * Booking logic
      * @return string the template to be displayed
      */
-    private function booking()
+    protected function booking()
     {
         if ($this->input['booking']['action'] == "add") {
             $this->model->bookingAdd($this->input['booking']['slot'], self::$user->getId(), $this->input['booking']['teacher']);
@@ -159,7 +162,7 @@ class Controller
      * Logout logic
      * @return void
      */
-    private function logout()
+    protected function logout()
     {
         session_destroy();
         session_start();
@@ -173,7 +176,7 @@ class Controller
      * Login logic
      * @return string returns template to be displayed
      */
-    private function login()
+    protected function login()
     {
 
         $input = $this->input;
@@ -206,7 +209,7 @@ class Controller
      * Register logic
      * @return string returns template to be displayed
      */
-    private function register()
+    protected function register()
     {
 
         $input = $this->input;
@@ -312,7 +315,7 @@ class Controller
      * Returns the name of the correct dashboard
      * @return string
      */
-    private function getDashBoardName()
+    protected function getDashBoardName()
     {
         $this->createUserObject(); // create user obj if not already done
         $user = self::getUser();
@@ -338,13 +341,11 @@ class Controller
      *Creates view and sends relevant data
      * @param $template string the template to be displayed
      */
-    private function display($template)
+    protected function display($template)
     {
-
-        ChromePhp::info("Displaying 'templates/$template.php' with data " . json_encode($this->infoToView));
-
-        $model = Model::getInstance();
-        new View($template, $this->infoToView);
+        $view = View::getInstance();
+        $view->setDataForView($this->infoToView);
+        $view->loadTemplate($template);
     }
 
 
@@ -374,7 +375,7 @@ class Controller
      * @param $pwd string user pwd
      * @return bool success of login
      */
-    private function checkLogin($usr, $pwd)
+    protected function checkLogin($usr, $pwd)
     {
         $model = Model::getInstance();
         if ($model->passwordValidate($usr, $pwd)) {

@@ -3,15 +3,28 @@
 
 session_start();
 
-require "ChromePhp.php"; // debugging  -> this way it's modular else we could use ../ChromPhp.php
-require "administrator.connect.class.php";
+const DEBUG = true;
+
+require "../ChromePhp.php"; // debugging
+require "../class.utility.php";
+require "../class.user.php";
+require "../class.connect.php";
+require "../class.controller.php";
+require "../class.model.php";
+require "../class.view.php";
+
+\Connection::$configFile = "../cfg.ini";
+
 require "administrator.controller.class.php";
 require "administrator.model.class.php";
-require "administrator.view.class.php";
 require "administrator.filehandler.class.php";
-require "administrator.user.class.php";
-enableCustomErrorHandler();
 
+\ChromePhp::setEnabled(DEBUG);
+
+if(DEBUG) {
+    ini_set("display_errors",true);
+    enableCustomErrorHandler();
+}
 
 $input = array_merge($_GET, $_POST);
 

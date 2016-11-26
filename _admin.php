@@ -1,32 +1,34 @@
-<?php
+<?php namespace administrator;
 
-const DEBUG = true;
 
-/* Debug Classes */
+session_start();
+
+$administratorDir = "administrator/";
+
+
 require "ChromePhp.php"; // debugging
-/* Utility Classes */
 require "class.utility.php";
 require "class.user.php";
-/* Functional Classes */
 require "class.connect.php";
 require "class.controller.php";
 require "class.model.php";
 require "class.view.php";
-/* Settings */
 
-\ChromePhp::setEnabled(DEBUG);
+\Connection::$configFile = "cfg.ini";
+\View::$PATH = $administratorDir . "templates";
 
-if(DEBUG) {
-    ini_set("display_errors",true);
-    enableCustomErrorHandler();
-}
+require $administratorDir . "administrator.controller.class.php";
+require $administratorDir . "administrator.model.class.php";
+require $administratorDir . "administrator.filehandler.class.php";
 
-date_default_timezone_set('Europe/Berlin'); // if not corretly set in php.ini
 
-/* Let's go! */
-session_start();
+enableCustomErrorHandler();
+
+
 $input = array_merge($_GET, $_POST);
+
 $control = new Controller($input);
+
 
 /**
  * This function will throw Exceptions instead of warnings (better to debug)
@@ -39,7 +41,7 @@ function enableCustomErrorHandler()
             return false;
         }
 
-        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
     });
 }
 
