@@ -53,7 +53,7 @@ class Model
 
         $data = $data[0];
 
-        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['eid']);
+        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid']);
     }
 
     /**
@@ -349,7 +349,7 @@ class Model
         return intval($parentId);
 
     }
-	
+
 	/**
 	 * Adds new student as child to parent
 	 * @param $pid int Parent ID
