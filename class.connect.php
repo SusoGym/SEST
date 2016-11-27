@@ -80,6 +80,7 @@ class Connection
     {
 
         $reporting = error_reporting(0);
+        ChromePhp::info("Connecting to " . $this->user . "@" . $this->server . ":" . $this->database);
         $mysqli = $this->connID = new \mysqli($this->server, $this->user, $this->pass, $this->database);
         error_reporting($reporting);
 
