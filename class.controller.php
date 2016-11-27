@@ -84,6 +84,9 @@ class Controller
                         $_SESSION['board_type'] = $dashBoard;
                     }
                     break;
+				case "addStudent":
+					$this->addStudent();
+					break;
                 default:
 
                     break;
@@ -404,6 +407,42 @@ class Controller
 
         return false;
     }
+
+	/**
+	 * Adds new student as child to logged in parent
+	 * @return bool success
+	 */
+	protected function addStudent()
+	{
+		$name = $this->input['name'];
+		$bday = strtotime($this->input['bday']);
+		$user = self::getUser();
+		$uid = $user->getId();
+
+    $student = $model->getStudentByName($name);
+
+    if ($student == null) {
+      array_push($notification, "Bitte überprüfen Sie die angegebenen Schülerdaten");
+			return true;
+    }
+
+    $sid = $student->getId();
+    $studentEid = $student->getEid();
+    $name = $student->getSurname();
+    $vorname = $student->getName();
+
+    ChromePhp::info("Student: " . json_encode($name) . "($name, $vorname) born on " . $bday . " " . ($sid == null ? "does not exist" : "with id $pid and " . ($studentEid == null ? "no parents set" : "parent with id $studentEid")));
+
+    if ($studentEid != null) {
+      array_push($notification, "Dem Schüler ".$vorname." ".$name." ist bereits ein Elternteil zugeordnet");
+			return true;
+    }
+
+		if ($this->model->parentAddStudent($sid) == false) {
+			ChromePhp:info("Unexpected database error");
+			return false;
+		}
+	}
 
 
 }
