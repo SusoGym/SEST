@@ -6,11 +6,13 @@ $teacherObjs = array();
 $user = Controller::getUser();
 if ($user instanceof Guardian) {
   $children = $user->getChildren();
-  foreach ($children as $child) {
+  /** @var Student $child */
+    foreach ($children as $child) {
     $students[$child->getId()]['id'] = $child->getId();
     $students[$child->getId()]['name'] = $child->getFullName();
     $teachers = $child->getTeachers();
-    foreach ($teachers as $teacher) {
+    /** @var Teacher $teacher */
+        foreach ($teachers as $teacher) {
       $students[$child->getId()]['teachers'][$teacher->getTeacherId()] = array('id' => $teacher->getTeacherId(), 'name' => $teacher->getFullName());
     }
   }
