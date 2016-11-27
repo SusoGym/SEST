@@ -290,7 +290,7 @@ class Teacher extends User
     public function getData()
     {
         return array_merge(parent::getData(), array("teacherId" => $this->teacherId));
-     }
+    }
 
     /** Returns class type
      * @return string
@@ -362,6 +362,7 @@ class Student extends Printable
 
 
     /**
+     * Returns student id
      * @return int
      */
     public function getId()
@@ -401,6 +402,11 @@ class Student extends Printable
         return $this->eid;
     }
 
+    public function getFullName()
+    {
+        return $this->getName() . " " . $this->getSurname();
+    }
+
     /**
      * @return string
      */
@@ -423,6 +429,23 @@ class Student extends Printable
     public function getClassType()
     {
         return "Student";
+    }
+
+    /**
+     * Get all teachers teaching this student
+     * @return array(Teachers)
+     */
+    public function getTeachers()
+    {
+        $model = Model::getInstance();
+
+        $teachers = $model->getTeachersByClass($this->getClass());
+        if ($teachers == null)
+            return array();
+
+        sort($teachers);
+
+        return $teachers;
     }
 }
 
