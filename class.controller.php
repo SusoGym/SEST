@@ -58,7 +58,19 @@ class Controller
             $template = null;
 
             switch ($this->input['type']) {
-                case "login":
+                
+				case "novell":
+					//Nur zum testen verwendet - idealerweise wird beim Logincheck erkannt, ob Email Adresse oder LDAP Name eingegeben wurden
+					$ldap="Suso"; 
+					$pass=""; //real LDAP Data needed here
+					$_SESSION['ldap'] = true;
+					if(isset($this->model->checkNovellLogin($ldap,$pass)->{'code'}) == 200) {
+					$_SESSION['user']['name'] = $this->model->checkNovellLogin($ldap,$pass)->{'name'};
+					$_SESSION['user']['type'] = $this->model->checkNovellLogin($ldap,$pass)->{'type'};
+					}
+					break;
+				
+				case "login":
                     $template = $this->login();
                     break;
                 case "booking":
@@ -103,11 +115,13 @@ class Controller
 
         }
         ChromePhp::info("No type specified!");
-
-        if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd'])) {
+		
+        if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd']) ) {
             // alread logged in!
-            $email = $_SESSION['user']['mail'];
-            $pwd = $_SESSION['user']['pwd'];
+            if (isset($_SESSION['user']['mail'])) {
+				$email = $_SESSION['user']['mail'];
+				$pwd = $_SESSION['user']['pwd'];
+				
 
             if ($this->checkLogin($email, $pwd)) {
                 ChromePhp::info("Relogin with valid user data");
@@ -116,9 +130,37 @@ class Controller
             } else {
                 ChromePhp::info("Relogin with invalid user data. Redirecting to login page");
             }
+			
+			}
+			
 
         }
-
+		elseif (isset($_SESSION['ldap']) ){//Anpassung für Novell Login  - $_SESSION['user']['type'] kommt aus basicAuth data (json) 
+				//Novell User logged in
+				if(isset($_SESSION['user']['type']) ){
+					//LDAP Login successful
+					if($_SESSION['user']['type'] == "Teacher"){
+					//teacher logged in
+					self::$user = new Teacher(null,null,null,null,null,$_SESSION['user']['name']);
+					$this->infoToView['deputat'] = self::$user->getLessonAmount();
+					$this->infoToView['requiredSlots'] = self::$user->getRequiredSlots();
+					$this->display($this->getDashBoardName());		
+					}
+				else {
+					//pupil logged in
+					$this->display($this->getDashBoardName());
+					//Pupil class not yet adapted to create Object
+					}	
+				}
+				else{
+					//LDAP Login failed
+					unset($_SESSION['ldap']);
+					$this->notify('LDAP ERROR');
+					$this->display("login");
+				}
+				
+				return;
+			}
         if (isset($_SESSION['logout'])) {
             unset($_SESSION['logout']);
             $this->notify('Erfolgreich abgemeldet');
@@ -323,6 +365,7 @@ class Controller
         $this->createUserObject(); // create user obj if not already done
         $user = self::getUser();
 
+				
         if($user instanceof Admin)
         {
             if(!isset($_SESSION['board_type']))
@@ -331,7 +374,7 @@ class Controller
             }
             return $_SESSION['board_type'] . '_dashboard';
         } else if ($user instanceof Teacher)
-        {
+			{
             return "teacher_dashboard";
         } else
         {

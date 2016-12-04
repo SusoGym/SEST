@@ -258,6 +258,11 @@ class Teacher extends User
      * @var int Teacher ID
      */
     protected $teacherId;
+	
+	/*
+	* @var int lessonAmount (Deputat)
+	*/
+	protected $lessonAmount;
 
     /**
      * Contructor of Teacher class
@@ -265,15 +270,21 @@ class Teacher extends User
      * @param string $username
      * @param string $email
      */
-    public function __construct($id, $username, $email, $teacherId, $rawData = null)
+    public function __construct($id, $username, $email, $teacherId, $rawData = null, $loginname = null)
     {
 
-
-        $nameArr = Model::getInstance()->getTeacherNameByTeacherId($teacherId, $rawData);
+		if (isset($loginname)){
+			$nameArr = Model::getInstance()->getTeacherDetailsByLDAPName($loginname);
+			$this->lessonAmount = $nameArr['deputat'];
+		}
+		else{
+			$nameArr = Model::getInstance()->getTeacherNameByTeacherId($teacherId, $rawData);
+		}
+        
 
         $this->teacherId = $teacherId;
 
-        parent::__construct($id, $username, 2, $email, $nameArr['name'], $nameArr['surname']);
+        parent::__construct($nameArr['teacherId'], $nameArr['ldap'], 2, $nameArr['email'], $nameArr['name'], $nameArr['surname']);
     }
 
     /**
@@ -299,6 +310,34 @@ class Teacher extends User
     {
         return "Teacher";
     }
+	
+	/**
+	*Returns lesson amount of teacher (Deputat)
+	* @return int
+	*/
+	public function getLessonAmount(){
+		return $this->lessonAmount;
+	}
+	
+	/**
+	*Returns required slots according to lessonAmount
+	* @return int
+	*/
+	public function getRequiredSlots(){
+		$MINAMOUNT = 12.5;
+		$FULL = 10;
+		$HALF = 5;
+		return ($this->getLessonAmount() < $MINAMOUNT) ? $HALF : $FULL;
+	}
+	
+	/**
+	*Enters a teacher slot into DB
+	*@param int slotId
+	*/
+	public function setBookableSlot($slotId){
+		$model = Model::getInstance();
+		$model->setBookableSlot($slotId,$this->id);
+	}
 }
 
 class Admin extends User
