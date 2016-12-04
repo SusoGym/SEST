@@ -142,11 +142,26 @@
             if (isset($data[0]))
                 $data = $data[0];
 
-            $surname = $data["name"];
-            $name = $data["vorname"];
+            $surname = $data[0]["name"];
+			$name = $data[0]["vorname"];
 
             return array("name" => $name, "surname" => $surname);
         }
+		
+		/**
+		*getTeacherName and Id when logged in via LDAP Login
+		*@param LDAPName
+		*/
+		public function getTeacherDetailsByLDAPName($ldapName){
+			
+			$data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE lehrer.ldapname=\"$ldapName\" ");
+			$surname = $data[0]["name"];
+			$name = $data[0]["vorname"];
+			$id = $data[0]["id"];
+			$email = $data[0]["email"];
+			$deputat = $data[0]["deputat"];
+			return array("name" => $name, "surname" => $surname, "ldap" => $ldapName, "teacherId" => $id, "email" => $email, "deputat" => $deputat);
+			}	
 
         /**
          * @param int $usrId UserId
@@ -252,6 +267,7 @@
 
             return $this->getUserById($usrId);
         }
+		
 
         /**
          * @param $eid int parentId
@@ -409,7 +425,6 @@
             {
                 throw new Exception("Response was empty!");
             }
-
             return json_decode($result);
 
         }
