@@ -54,6 +54,11 @@ class Controller extends \Controller
      * @var string Klasse die bearbeitet wird
      */
     private $currentForm = null;
+	
+	/**
+     * @var array eingerichtete Slots
+     */
+    private $existingSlots = null;
 
     /**
      * Konstruktor
@@ -173,7 +178,8 @@ class Controller extends \Controller
                 "teachersOfForm" => $this->teachersOfForm,
                 "currentForm" => $this->currentForm,
                 "fileName" => $this->file,
-                "fileData" => $this->fileData
+                "fileData" => $this->fileData,
+				"slots" => $this->existingSlots
             );
 
         foreach($myDataForView as $key => $value)
@@ -335,8 +341,10 @@ class Controller extends \Controller
             case "disptupdate1":
 
                 $student = $input['type'] == "dispsupdate1";
-                $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
-                $this->prepareDataUpdate(true);
+				//von mir hinzugefügt
+                $input['type'] == "dispsupdate1" ? $student = true : $student = false;
+				$this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
+                $this->prepareDataUpdate($student);
                 $this->actionType = $student ? "usstart" : "utstart";
                 $this->display("update1");
                 break;
@@ -345,10 +353,8 @@ class Controller extends \Controller
             case "utstart":
                 $input['type'] == "usstart" ? $student = true : $student = false;
                 //$student = $input['type'] == "usstart";
-                echo "Schüleroperation:" . $student;
-                die;
+               
                 $this->title = $student ? "Schüler" : "Lehrer" . "daten aktualisiert";
-
                 $this->performDataUpdate($student, $input);
                 $this->display("update2");
                 break;
@@ -382,17 +388,30 @@ class Controller extends \Controller
             case "setslots":
                 $this->title = "Sprechzeiten einrichten";
                 $this->backButton = "?type=sestconfig";
-                $this->display("simple_menue");
+				if (isset($input['del'])) {
+					$this->model->deleteSlot($input['del']);
+					}
+				if(isset($input['start'])) {
+					$this->model->insertSlot($input['start'],$input['end']);
+					}
+				$this->existingSlots = $this->model->getSlots();
+                $this->display("slot_mgt");
                 break;
             //Set SEST Slots
             case "slots":
 
                 break;
+			case "novell":
+				$this->model->checkNovellLogin("GrossA","12345");
+				break;
             default:
                 $this->title = "Startseite";
                 unset($_SESSION['file']);
                 $this->display("main");
                 break;
+				
+				
+				
         }
     }
 
