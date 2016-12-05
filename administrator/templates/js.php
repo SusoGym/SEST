@@ -36,7 +36,8 @@
         var url = "?type=setclasses&form=" + form;
         this.document.location.href = url;
     }
-
+	
+	 
 
     /*$('a').click(function (e) {
 

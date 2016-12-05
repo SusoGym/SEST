@@ -76,7 +76,7 @@
             {
                 $key = trim($key);
                 $value = trim($value);
-
+				$value = addslashes($value);
                 if (isset($string))
                 {
                     $string = $string . ",$key=\"$value\" ";
@@ -87,6 +87,8 @@
             }
             $string = $string . ",upd=1 WHERE id=$id";
             $string = "UPDATE $table SET " . $string;
+			
+			//echo $string.'<br>';
             self::$connection->straightQuery($string);
         }
 
@@ -105,6 +107,7 @@
             {
                 $key = trim($key);
                 $value = trim($value);
+				$value = addslashes($value);
                 if (isset($fieldstring))
                 {
                     $fieldstring = $fieldstring . ",`$key`";
@@ -123,6 +126,7 @@
             $fieldstring = $fieldstring . ",`upd`";
             $valuestring = $valuestring . ",'1'";
             $string = "INSERT INTO $table (" . $fieldstring . ") VALUES (" . $valuestring . ")";
+			//echo $string.'<br>';
             self::$connection->insertValues($string);
 
         }
@@ -265,6 +269,52 @@
 
             return $teachersOfForm;
         }
+		
+		
+		/**
+		*get existing slots parent-teacher meeting
+		* @return array(array("start","ende"))
+		*/
+		public function getSlots(){
+			$slots=array();
+			$data=$tchrs = self::$connection->selectValues("SELECT id,anfang,ende FROM time_slot Order By anfang ");
+			foreach($data as $d){
+				$slots[]=array("id"=>$d[0],"anfang"=>$d[1],"ende"=>$d[2]);
+			}
+			return $slots;
+		}
+		
+		/**
+		*delete Slot from DB
+		*@param int slotId
+		*/
+		public function deleteSlot($id){
+			self::$connection->straightQuery("DELETE FROM time_slot WHERE id=$id");
+			}
+		
+		/**
+		*insert Slot into DB
+		*@param string $start
+		*@param string $end
+		*/
+		public function insertSlot($start,$end){
+			$start = $this->makeDateTime($start);
+			$end = $this->makeDateTime($end);
+			self::$connection->straightQuery("INSERT INTO time_slot (`id`,`anfang`,`ende`) VALUES ('','$start','$end') ");
+			}
+		
+		/**
+		*create DateTime Format
+		*@param string
+		*@return DateTime*/
+		private function makeDateTime($string){
+			$da = explode(" ",$string);
+			$date = $da[0];
+			$time = $da[1];
+			$dateArr = explode (".",$date);
+			$newDate = $dateArr[2]."-".$dateArr[1]."-".$dateArr[0]." ".$time;
+			return $newDate;
+		}
 
     }
 
