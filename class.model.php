@@ -285,14 +285,29 @@
             return $this->getUserById($usrId);
         }
 		
+		/**
+		*get existing slots for parent-teacher meeting
+		* @return array(array("id","start","ende"))
+		*/
+		public function getSlots(){
+			$slots=array();
+			$data=$tchrs = self::$connection->selectValues("SELECT id,anfang,ende FROM time_slot Order By anfang ");
+			if(isset($data)){
+				foreach($data as $d){
+					$slots[]=array("id"=>$d[0],"anfang"=>$d[1],"ende"=>$d[2]);
+					}
+				}
+			
+			return $slots;
+		}
 		
 		/**
 		*enters a bookable Teacher Slot into DB
-		*@param int slotIf
+		*@param int slotId
 		*@param int teacherId
 		*/
-		public function setBookableSlot($slot,$teacher){
-			
+		public function setAssignedSlot($slot,$teacherId){
+			self::$connection->straightQuery("INSERT INTO bookable_slot (`id`,`slotid`,`lid`) VALUES ('','$slot','$teacherId')");
 		}
 		
 		/**
@@ -308,9 +323,10 @@
 				$slots[]=$d[0];
 				}
 			}
-			
 			return $slots;
 		}
+		
+		
 
         /**
          * @param $eid int parentId

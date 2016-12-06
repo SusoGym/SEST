@@ -71,12 +71,23 @@ class Controller
 					break;
 				case "lest": //Teacher chooses est
 					$_SESSION['ldap']=null;
-					
 					self::$user = new Teacher(null,null,null,null,null,$_SESSION['user']['name']);
+					if(isset($this->input['asgn']) ){
+						$this->model->setAssignedSlot($this->input['asgn'],self::$user->getId());
+						}
+					
 					$this->infoToView['deputat'] = self::$user->getLessonAmount();
 					$this->infoToView['requiredSlots'] = self::$user->getRequiredSlots();
 					$this->infoToView['user'] = self::$user;
-					$this->infoToView['missing_slots'] = self::$user->getMissingSlots();
+					$this->infoToView['missing_slots'] = $missingSlots = self::$user->getMissingSlots();
+					if($missingSlots == 0) {
+						$this->infoToView['card_title'] = "Sprechzeiten am Elternsprechtag";
+						$this->infoToView['slots_to_show'] = self::$user->getAssignedSlots();
+						}
+					else{
+						$this->infoToView['card_title'] = "Festlegung der Sprechzeiten";
+						$this->infoToView['slots_to_show'] = self::$user->getSlotListToAssign();
+						}
 					$this->infoToView['slotassignuntil'] = $this->model->getOptions()['slotassign'];
 					
 					$template ="tchr_slots";	
