@@ -29,7 +29,24 @@
             return self::$model == null ? self::$model = new Model() : self::$model;
         }
 
-
+		/**
+		*getOptions
+		*returns option from DB table options 
+		*e.g. slot assignment, booking period, allowed bookings etc
+		*@return array()
+		*/
+		public function getOptions(){
+			$options=array();
+			$data = self::$connection->SelectAssociativeValues("SELECT * FROM options");
+			
+			foreach($data as $d){
+			$options[$d['type']] = $d['value'];	
+				
+			}
+			return $options;
+		}
+		
+		
         /**
          * @param string $vorname Schueler Vorname
          * @param string $name Schueler Nachname
@@ -268,6 +285,32 @@
             return $this->getUserById($usrId);
         }
 		
+		
+		/**
+		*enters a bookable Teacher Slot into DB
+		*@param int slotIf
+		*@param int teacherId
+		*/
+		public function setBookableSlot($slot,$teacher){
+			
+		}
+		
+		/**
+		*returns assigned slots of a teacher
+		*@param int teacherId
+		*@returns array(int)
+		*/
+		public function getAssignedSlots($teacher){
+			$slots = array();
+			$data = self::$connection->selectValues("SELECT slotid FROM bookable_slot WHERE lid=$teacher");
+			if (isset($data)){
+				foreach($data as $d){
+				$slots[]=$d[0];
+				}
+			}
+			
+			return $slots;
+		}
 
         /**
          * @param $eid int parentId
