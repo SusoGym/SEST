@@ -341,16 +341,48 @@ class Teacher extends User
 		$doneyet = count($model->getAssignedSlots($this->id));
 		
 		return $required - $doneyet;
-		
+	}
+	
+	/**
+	*creates and returns an array with all slots included the ones assigned by Teacher
+	*@return array(int,string,string,bool)
+	*/
+	public function getSlotListToAssign(){
+		$slotList=array();
+		$model = Model::getInstance();
+		$assignedSlots = $this->getAssignedSlots($model);
+		$allSlots = $model->getSlots();
+		foreach ($allSlots as $slot){
+			foreach($assignedSlots as $aSlot){
+				if($slot['id'] == $aSlot) {
+					//this slot is assigned by Teacher
+					$slot['assigned'] = true;
+					}
+					
+			}
+			$slotList[]=$slot;
+		}
+		return $slotList;
 	}
 	
 	/**
 	*Enters a teacher slot into DB
 	*@param int slotId
 	*/
-	public function setBookableSlot($slotId){
+	public function setAssignedSlot($slotId){
 		$model = Model::getInstance();
-		$model->setBookableSlot($slotId,$this->id);
+		$model->setAssignedSlot($slotId,$this->id);
+	}
+	
+	/**
+	*returns AssignedSlots
+	*@return array(int)
+	*/
+	public function getAssignedSlots(){
+		$model = Model::getInstance();
+		$assignedSlots = array();
+		$assignedSlots = $model->getAssignedSlots($this->id);
+		return $assignedSlots;
 	}
 }
 
