@@ -25,7 +25,8 @@ if ($mobile) { ?>
         <li><a id="admin" href="/administrator" title="Administration"><i class="material-icons">adb</i></a></li>
 
     <?php } ?>
-
+	<li><a id="logout" href="?type=home" title="Home"><i class="material-icons">home</i></a></li>
     <li><a id="logout" href="?type=logout" title="Logout"><i class="material-icons">power_settings_new</i></a></li>
+	
 
 <?php } ?>

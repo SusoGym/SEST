@@ -69,7 +69,29 @@ class Controller
 					$_SESSION['user']['type'] = $this->model->checkNovellLogin($ldap,$pass)->{'type'};
 					}
 					break;
-				
+				case "lest": //Teacher chooses est
+					$_SESSION['ldap']=null;
+					
+					self::$user = new Teacher(null,null,null,null,null,$_SESSION['user']['name']);
+					$this->infoToView['deputat'] = self::$user->getLessonAmount();
+					$this->infoToView['requiredSlots'] = self::$user->getRequiredSlots();
+					$this->infoToView['user'] = self::$user;
+					$this->infoToView['missing_slots'] = self::$user->getMissingSlots();
+					$this->infoToView['slotassignuntil'] = $this->model->getOptions()['slotassign'];
+					
+					$template ="tchr_slots";	
+					break;
+				case "home":
+					if(isset($_SESSION['user']['type']) == "Teacher"){
+						self::$user = new Teacher(null,null,null,null,null,$_SESSION['user']['name']);
+						$this->infoToView['missing_slots'] = self::$user->getMissingSlots();
+						$this->infoToView['slotassignuntil'] = $this->model->getOptions()['slotassign'];
+						$template = $this->getDashboardName();
+					}
+					else {//which other usertypes are there?
+						
+					}
+					break;
 				case "login":
                     $template = $this->login();
                     break;
@@ -142,8 +164,8 @@ class Controller
 					if($_SESSION['user']['type'] == "Teacher"){
 					//teacher logged in
 					self::$user = new Teacher(null,null,null,null,null,$_SESSION['user']['name']);
-					$this->infoToView['deputat'] = self::$user->getLessonAmount();
-					$this->infoToView['requiredSlots'] = self::$user->getRequiredSlots();
+					$this->infoToView['missing_slots'] = self::$user->getMissingSlots();
+					$this->infoToView['slotassignuntil'] = $this->model->getOptions()['slotassign'];
 					$this->display($this->getDashBoardName());		
 					}
 				else {
@@ -161,6 +183,7 @@ class Controller
 				
 				return;
 			}
+		
         if (isset($_SESSION['logout'])) {
             unset($_SESSION['logout']);
             $this->notify('Erfolgreich abgemeldet');

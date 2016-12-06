@@ -283,7 +283,7 @@ class Teacher extends User
         
 
         $this->teacherId = $teacherId;
-
+		
         parent::__construct($nameArr['teacherId'], $nameArr['ldap'], 2, $nameArr['email'], $nameArr['name'], $nameArr['surname']);
     }
 
@@ -328,6 +328,20 @@ class Teacher extends User
 		$FULL = 10;
 		$HALF = 5;
 		return ($this->getLessonAmount() < $MINAMOUNT) ? $HALF : $FULL;
+	}
+	
+	/**
+	*returns missing slots for openday
+	* @return int
+	*/
+	public function getMissingSlots(){
+		$required = $this->getRequiredSlots();
+		$model = Model::getInstance();
+		
+		$doneyet = count($model->getAssignedSlots($this->id));
+		
+		return $required - $doneyet;
+		
 	}
 	
 	/**
