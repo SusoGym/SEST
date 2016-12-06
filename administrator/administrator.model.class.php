@@ -272,19 +272,6 @@
 		
 		
 		/**
-		*get existing slots parent-teacher meeting
-		* @return array(array("start","ende"))
-		*/
-		public function getSlots(){
-			$slots=array();
-			$data=$tchrs = self::$connection->selectValues("SELECT id,anfang,ende FROM time_slot Order By anfang ");
-			foreach($data as $d){
-				$slots[]=array("id"=>$d[0],"anfang"=>$d[1],"ende"=>$d[2]);
-			}
-			return $slots;
-		}
-		
-		/**
 		*delete Slot from DB
 		*@param int slotId
 		*/
