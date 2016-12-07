@@ -61,8 +61,8 @@ class Controller
                 
 				case "novell":
 					//Nur zum testen verwendet - idealerweise wird beim Logincheck erkannt, ob Email Adresse oder LDAP Name eingegeben wurden
-					$ldap="Suso"; 
-					$pass=""; //real LDAP Data needed here
+					$ldap="Muster"; 
+					$pass="12345"; //real LDAP Data needed here
 					$_SESSION['ldap'] = true;
 					if(isset($this->model->checkNovellLogin($ldap,$pass)->{'code'}) == 200) {
 					$_SESSION['user']['name'] = $this->model->checkNovellLogin($ldap,$pass)->{'name'};
@@ -75,20 +75,27 @@ class Controller
 					if(isset($this->input['asgn']) ){
 						$this->model->setAssignedSlot($this->input['asgn'],self::$user->getId());
 						}
+					if(isset($this->input['del']) ){
+						$this->model->deleteAssignedSlot($this->input['del'],self::$user->getId());
+						}
+
 					
 					$this->infoToView['deputat'] = self::$user->getLessonAmount();
 					$this->infoToView['requiredSlots'] = self::$user->getRequiredSlots();
 					$this->infoToView['user'] = self::$user;
-					$this->infoToView['missing_slots'] = $missingSlots = self::$user->getMissingSlots();
+					($missingSlots = self::$user->getMissingSlots() >0) ? $missingSlots = $missingSlots : $missingSlots = 0;
+					$this->infoToView['missing_slots'] = self::$user->getMissingSlots();
+					$this->infoToView['card_title'] = "Sprechzeiten am Elternsprechtag"; 
 					if($missingSlots == 0) {
-						$this->infoToView['card_title'] = "Sprechzeiten am Elternsprechtag";
-						$this->infoToView['slots_to_show'] = self::$user->getAssignedSlots();
+						
 						}
 					else{
 						$this->infoToView['card_title'] = "Festlegung der Sprechzeiten";
-						$this->infoToView['slots_to_show'] = self::$user->getSlotListToAssign();
 						}
-					$this->infoToView['slotassignuntil'] = $this->model->getOptions()['slotassign'];
+					$this->infoToView['slots_to_show'] = self::$user->getSlotListToAssign();
+					$this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
+					$this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
+
 					
 					$template ="tchr_slots";	
 					break;
@@ -96,7 +103,9 @@ class Controller
 					if(isset($_SESSION['user']['type']) == "Teacher"){
 						self::$user = new Teacher(null,null,null,null,null,$_SESSION['user']['name']);
 						$this->infoToView['missing_slots'] = self::$user->getMissingSlots();
-						$this->infoToView['slotassignuntil'] = $this->model->getOptions()['slotassign'];
+						$this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
+						$this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
+
 						$template = $this->getDashboardName();
 					}
 					else {//which other usertypes are there?
@@ -176,7 +185,9 @@ class Controller
 					//teacher logged in
 					self::$user = new Teacher(null,null,null,null,null,$_SESSION['user']['name']);
 					$this->infoToView['missing_slots'] = self::$user->getMissingSlots();
-					$this->infoToView['slotassignuntil'] = $this->model->getOptions()['slotassign'];
+					$this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
+					$this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
+
 					$this->display($this->getDashBoardName());		
 					}
 				else {
