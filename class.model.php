@@ -159,8 +159,8 @@
             if (isset($data[0]))
                 $data = $data[0];
 
-            $surname = $data[0]["name"];
-			$name = $data[0]["vorname"];
+            $surname = $data["name"];
+			$name = $data["vorname"];
 
             return array("name" => $name, "surname" => $surname);
         }
@@ -285,6 +285,24 @@
             return $this->getUserById($usrId);
         }
 		
+		
+		/**
+		*returns if slot already assigned - reloading
+		*@param int slotId
+		*@param int teacherId
+		*@return bool
+		*/
+		private function checkAssignedSlot($slotId, $teacherId){
+			$data = self::$connection->selectvalues("SELECT slotid FROM bookable_slot WHERE slotid=$slotId AND lid=$teacherId");
+			if(isset($data)){
+				return true;
+				}
+			else {
+				return false;
+				}
+				
+			} 
+
 		/**
 		*get existing slots for parent-teacher meeting
 		* @return array(array("id","start","ende"))
@@ -307,8 +325,20 @@
 		*@param int teacherId
 		*/
 		public function setAssignedSlot($slot,$teacherId){
-			self::$connection->straightQuery("INSERT INTO bookable_slot (`id`,`slotid`,`lid`) VALUES ('','$slot','$teacherId')");
+			if(!$this->checkAssignedSlot($slot,$teacherId)){
+				self::$connection->straightQuery("INSERT INTO bookable_slot (`id`,`slotid`,`lid`) VALUES ('','$slot','$teacherId')");
+				}
 		}
+
+		/**
+		*deletes an assigned Slot from DB
+		*@param slotId
+		*@param teacherId
+		*/
+		public function deleteAssignedSlot($slotId,$teacherId){
+			self::$connection->straightQuery("DELETE FROM bookable_slot WHERE slotid=$slotId AND lid=$teacherId");
+			}
+	
 		
 		/**
 		*returns assigned slots of a teacher

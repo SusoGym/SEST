@@ -5,11 +5,15 @@ $slotlink = true;
 $slotcolor = "teal";
 $slotdue = null;
 $data = $this->getDataForView();
-$today = date("Ymd");   
-if(isset($data['slotassignuntil']) > $today) { 
-	$slotlink = false;
-	$slotcolor = "grey";
-	}
+$today = date("Ymd"); 
+
+if(isset($data['assign_end'])){
+		if ( $data['assign_end'] < $today || $data['assign_start'] > $today) {
+			$slotlink = false;
+			$slotcolor = "grey";
+		} 
+	} 
+	
 if(isset($data['missing_slots']) >0){
 	$slotdue = $data['missing_slots'];
 	}
@@ -32,7 +36,7 @@ if(isset($data['missing_slots']) >0){
 					<p class="hide-on-med-and-down promo-caption red-text " style="font-size: 14px;"><b>
 						<?php 
 						if (isset($slotdue)) {
-							echo  $slotdue. " Termine festlegen!!!";
+							echo  $slotdue. " Termine festlegen!";
 							} 
 						else { ?>
 								&nbsp;
