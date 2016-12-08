@@ -54,12 +54,12 @@ include "header.php";
                                             $status = "";
 
                                             if (isset($data['teachersOfForm'][$data['currentForm']])) {
-                                                in_array($t->getTeacherId(), $data['teachersOfForm'][$data['currentForm']]) ? $status = "selected" : $status = "";
+                                                in_array($t->getId(), $data['teachersOfForm'][$data['currentForm']]) ? $status = "selected" : $status = "";
                                             }
 
                                             ?>
                                             <option <?php echo $status; ?>
-                                                value="<?php echo $t->getTeacherId(); ?>"><?php echo $t->getFullname(); ?></option>
+                                                value="<?php echo $t->getId(); ?>"><?php echo $t->getFullname(); ?></option>
                                         <?php } ?>
                                     </select>
                                     <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">
