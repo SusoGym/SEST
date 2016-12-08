@@ -67,7 +67,7 @@
                 }
 
             }
-            if(self::getUser() instanceof Admin) // Admin has no actual use of the normal view does he?
+            if (self::getUser() instanceof Admin) // Admin has no actual use of the normal view does he?
                 header("Location: /administrator");
 
             if (isset($this->input['type']))

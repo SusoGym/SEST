@@ -23,12 +23,12 @@
             <?php if ($usr->getMissingSlots() > 0): ?>
                 <div class="row red-text">
                     <b><?php
-                        $required = $data['missing_slots'];
+                            $required = $data['missing_slots'];
 
-                        if($required > 1)
-                            echo "$required Termine müssen noch festgelegt werden!";
-                        else
-                            echo "$required Termin muss noch festgelegt werden!";
+                            if ($required > 1)
+                                echo "$required Termine müssen noch festgelegt werden!";
+                            else
+                                echo "$required Termin muss noch festgelegt werden!";
 
                         ?></b>
                 </div>

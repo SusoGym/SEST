@@ -1,6 +1,6 @@
 <?php namespace administrator;
 include("header.php");
-$data = \View::getInstance()->getDataForView();
+    $data = \View::getInstance()->getDataForView();
 ?>
 
 

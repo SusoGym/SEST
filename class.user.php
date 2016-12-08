@@ -273,8 +273,8 @@
 
 
         /**
-        * @var int lessonAmount (Deputat)
-        */
+         * @var int lessonAmount (Deputat)
+         */
         protected $lessonAmount;
 
         /**

@@ -29,7 +29,7 @@
                         </div>
                         <div class="row" style="margin-bottom: 0;">
                             <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
-                                    class="material-icons right">send</i></button>
+                                        class="material-icons right">send</i></button>
                         </div>
                     </form>
                 </div>
@@ -55,7 +55,7 @@
                         </div>
                         <div class="row" style="margin-bottom: 0;">
                             <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
-                                    class="material-icons right">send</i></button>
+                                        class="material-icons right">send</i></button>
                         </div>
                     </form>
                 </div>
@@ -75,7 +75,8 @@
 <script>
     <?php
     if (isset($data['notifications']))
-        foreach ($data['notifications'] as $not) {
+        foreach ($data['notifications'] as $not)
+        {
             echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
         }
 
@@ -107,8 +108,6 @@
     }
 
 
-
-
     function submitLogin() {
         var pwd = $('#pwd_login').val();
         var usr = $('#usr_login').val();
@@ -118,7 +117,7 @@
         $.get(url, function (data) {
             if (data == "true") {
                 location.reload();
-            } else if(data == "false"){
+            } else if (data == "false") {
                 Materialize.toast("Email-Addresse oder Passwort falsch", 4000);
                 $('#pwd_login').val("");
 

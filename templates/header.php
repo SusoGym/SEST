@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -32,9 +31,10 @@
     <div class="nav-wrapper teal">
         <a href="?type=main" style="margin-left: 20px" class="brand-logo">Suso-Intern</a>
         <a href="#" data-activates="mobile-nav" class="button-collapse" style="padding-left:20px;padding-right:20px;"><i
-                class="material-icons">menu</i></a>
+                    class="material-icons">menu</i></a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <?php $mobile = false; include("navbar.php"); ?>
+            <?php $mobile = false;
+                include("navbar.php"); ?>
         </ul>
     </div>
 </nav>
