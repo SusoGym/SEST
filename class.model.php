@@ -29,24 +29,28 @@
             return self::$model == null ? self::$model = new Model() : self::$model;
         }
 
-		/**
-		*getOptions
-		*returns option from DB table options 
-		*e.g. slot assignment, booking period, allowed bookings etc
-		*@return array()
-		*/
-		public function getOptions(){
-			$options=array();
-			$data = self::$connection->SelectAssociativeValues("SELECT * FROM options");
-			
-			foreach($data as $d){
-			$options[$d['type']] = $d['value'];	
-				
-			}
-			return $options;
-		}
-		
-		
+        /**
+         *getOptions
+         *returns option from DB table options
+         *e.g. slot assignment, booking period, allowed bookings etc
+         *
+         * @return array()
+         */
+        public function getOptions()
+        {
+            $options = array();
+            $data = self::$connection->SelectAssociativeValues("SELECT * FROM options");
+
+            foreach ($data as $d)
+            {
+                $options[$d['type']] = $d['value'];
+
+            }
+
+            return $options;
+        }
+
+
         /**
          * @param string $vorname Schueler Vorname
          * @param string $name Schueler Nachname
@@ -101,9 +105,8 @@
 
                     return new Guardian($data['id'], $data['username'], $data['email'], $parentId);
                 case 2:
-                    $id = self::$connection->selectAssociativeValues("SELECT id FROM lehrer WHERE userid=$uid")[0]['id'];
-
-                    return new Teacher($data['id'], $data['username'], $data['email'], $id);
+                    // non-existend
+                    die("Why are we here?!");
                 default:
                     return null;
                     break;
@@ -159,26 +162,33 @@
             if (isset($data[0]))
                 $data = $data[0];
 
-            $surname = $data["name"];
-			$name = $data["vorname"];
+            $surname = isset($data["name"]) ? $data["name"] : null;
+            $name = isset($data["vorname"]) ? $data["vorname"] : null;
 
             return array("name" => $name, "surname" => $surname);
         }
-		
-		/**
-		*getTeacherName and Id when logged in via LDAP Login
-		*@param LDAPName
-		*/
-		public function getTeacherDetailsByLDAPName($ldapName){
-			
-			$data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE lehrer.ldapname=\"$ldapName\" ");
-			$surname = $data[0]["name"];
-			$name = $data[0]["vorname"];
-			$id = $data[0]["id"];
-			$email = $data[0]["email"];
-			$deputat = $data[0]["deputat"];
-			return array("name" => $name, "surname" => $surname, "ldap" => $ldapName, "teacherId" => $id, "email" => $email, "deputat" => $deputat);
-			}	
+
+        /**
+         * getTeacherName and Id when logged in via LDAP Login
+         *
+         * @param LDAPName string
+         * @return
+         */
+        public function getTeacherDetailsByLDAPName($ldapName)
+        {
+
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE lehrer.ldapname=$ldapName;");
+
+            $surname = $data[0]["name"];
+            $name = $data[0]["vorname"];
+            $id = $data[0]["id"];
+            $email = $data[0]["email"];
+            $deputat = $data[0]["deputat"];
+
+            die(json_encode($data));
+
+            return array("name" => $name, "surname" => $surname, "ldap" => $ldapName, "teacherId" => $id, "email" => $email, "deputat" => $deputat);
+        }
 
         /**
          * @param int $usrId UserId
@@ -270,93 +280,164 @@
         {
             if ($data == null)
                 $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id=$tchrId");
-            if ($data == null)
-                return null;
 
             if (isset($data[0]))
                 $data = $data[0];
 
-            $usrId = $data['userid'];
-            if ($usrId == -1)
-            { // teacher has not registered yet...
-                return new Teacher(null, null, $data['email'], $data['id'], $data);
+
+            if ($data == null)
+                return null;
+
+            return new Teacher($data['email'], $data['id'], $data);
+        }
+
+        /**
+         * @param $teacherId
+         * @param $rawData
+         * @return string
+         */
+        public function getTeacherLdapNameByTeacherId($teacherId, $rawData = null)
+        {
+            if ($rawData == null)
+                $rawData = self::$connection->selectAssociativeValues("SELECT ldapname FROM lehrer WHERE id=$teacherId");
+
+            if ($rawData == null)
+                return null; // empty / not found
+
+            if (isset($rawData[0]))
+                $rawData = $rawData[0];
+
+            return $rawData['ldapname'];
+        }
+
+        /**
+         * @param $teacherId int
+         * @param $rawData
+         * @return int
+         */
+        public function getTeacherLessonAmountByTeacherId($teacherId, $rawData = null)
+        {
+            return 18; //TODO
+        }
+
+        /**
+         * @param $email
+         * @param $pwd
+         * @return Teacher | null
+         */
+        public function getTeacherByEmailAndLdapPwd($email, $pwd)
+        {
+
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE email='$email'");
+
+            if (isset($data[0]))
+                $data = $data[0];
+
+            if ($data == null)
+                return null;
+
+            $tId = $data['id'];
+            $ldapName = $this->getTeacherLdapNameByTeacherId($tId, $data);
+
+            if ($ldapName == null)
+                die("LDAP name not set for $email!"); // rip
+
+            $novelData = $this->checkNovellLogin($ldapName, $pwd);
+
+            if (!isset($novelData->{'code'}) || !isset($novelData->{'type'}) || $novelData->{'code'} != "200" || $novelData->{'type'} != 'Teacher')
+                return null; //Invalid / Failed login
+
+            return new Teacher($email, $tId);
+        }
+
+        /**
+         *returns if slot already assigned - reloading
+         *
+         * @param int slotId
+         * @param int teacherId
+         * @return bool
+         */
+        private function checkAssignedSlot($slotId, $teacherId)
+        {
+            $data = self::$connection->selectvalues("SELECT slotid FROM bookable_slot WHERE slotid=$slotId AND lid=$teacherId");
+            if (isset($data))
+            {
+                return true;
+            } else
+            {
+                return false;
             }
 
-            return $this->getUserById($usrId);
         }
-		
-		
-		/**
-		*returns if slot already assigned - reloading
-		*@param int slotId
-		*@param int teacherId
-		*@return bool
-		*/
-		private function checkAssignedSlot($slotId, $teacherId){
-			$data = self::$connection->selectvalues("SELECT slotid FROM bookable_slot WHERE slotid=$slotId AND lid=$teacherId");
-			if(isset($data)){
-				return true;
-				}
-			else {
-				return false;
-				}
-				
-			} 
 
-		/**
-		*get existing slots for parent-teacher meeting
-		* @return array(array("id","start","ende"))
-		*/
-		public function getSlots(){
-			$slots=array();
-			$data=$tchrs = self::$connection->selectValues("SELECT id,anfang,ende FROM time_slot Order By anfang ");
-			if(isset($data)){
-				foreach($data as $d){
-					$slots[]=array("id"=>$d[0],"anfang"=>$d[1],"ende"=>$d[2]);
-					}
-				}
-			
-			return $slots;
-		}
-		
-		/**
-		*enters a bookable Teacher Slot into DB
-		*@param int slotId
-		*@param int teacherId
-		*/
-		public function setAssignedSlot($slot,$teacherId){
-			if(!$this->checkAssignedSlot($slot,$teacherId)){
-				self::$connection->straightQuery("INSERT INTO bookable_slot (`id`,`slotid`,`lid`) VALUES ('','$slot','$teacherId')");
-				}
-		}
+        /**
+         *get existing slots for parent-teacher meeting
+         *
+         * @return array(array("id","start","ende"))
+         */
+        public function getSlots()
+        {
+            $slots = array();
+            $data = $tchrs = self::$connection->selectValues("SELECT id,anfang,ende FROM time_slot ORDER BY anfang ");
+            if (isset($data))
+            {
+                foreach ($data as $d)
+                {
+                    $slots[] = array("id" => $d[0], "anfang" => $d[1], "ende" => $d[2]);
+                }
+            }
 
-		/**
-		*deletes an assigned Slot from DB
-		*@param slotId
-		*@param teacherId
-		*/
-		public function deleteAssignedSlot($slotId,$teacherId){
-			self::$connection->straightQuery("DELETE FROM bookable_slot WHERE slotid=$slotId AND lid=$teacherId");
-			}
-	
-		
-		/**
-		*returns assigned slots of a teacher
-		*@param int teacherId
-		*@returns array(int)
-		*/
-		public function getAssignedSlots($teacher){
-			$slots = array();
-			$data = self::$connection->selectValues("SELECT slotid FROM bookable_slot WHERE lid=$teacher");
-			if (isset($data)){
-				foreach($data as $d){
-				$slots[]=$d[0];
-				}
-			}
-			return $slots;
-		}
-		
-		
+            return $slots;
+        }
+
+        /**
+         *enters a bookable Teacher Slot into DB
+         *
+         * @param int slotId
+         * @param int teacherId
+         */
+        public function setAssignedSlot($slot, $teacherId)
+        {
+            if (!$this->checkAssignedSlot($slot, $teacherId))
+            {
+                self::$connection->straightQuery("INSERT INTO bookable_slot (`slotid`,`lid`) VALUES ('$slot','$teacherId')");
+            }
+        }
+
+        /**
+         *deletes an assigned Slot from DB
+         *
+         * @param slotId
+         * @param teacherId
+         */
+        public function deleteAssignedSlot($slotId, $teacherId)
+        {
+            self::$connection->straightQuery("DELETE FROM bookable_slot WHERE slotid=$slotId AND lid=$teacherId");
+        }
+
+
+        /**
+         *returns assigned slots of a teacher
+         *
+         * @param int teacherId
+         * @returns array(int)
+         */
+        public function getAssignedSlots($teacher)
+        {
+            $slots = array();
+            $data = self::$connection->selectValues("SELECT slotid FROM bookable_slot WHERE lid=$teacher");
+            if (isset($data))
+            {
+                foreach ($data as $d)
+                {
+                    $slots[] = $d[0];
+                }
+            }
+
+            return $slots;
+        }
+
+
 
         /**
          * @param $eid int parentId
@@ -510,11 +591,17 @@
                 throw new Exception(curl_error($ch));
             }
 
-            if ($result == FALSE)
+            if ($result == false)
             {
                 throw new Exception("Response was empty!");
             }
-            return json_decode($result);
+
+            $res = json_decode($result);
+
+            ChromePhp::info("Response from ldap [$usr, $pwd]: " . json_encode($res));
+
+            return $res;
+
 
         }
 

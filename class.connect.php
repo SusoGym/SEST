@@ -90,7 +90,7 @@ class Connection
             exit();
         }
 
-        //ChromePhp::log("[SQL] Connection to database " . $this->user . "@" . $this->server . "/" . $this->database . " successful!");
+        //ChromePhp::logSQL("Connection to database " . $this->user . "@" . $this->server . "/" . $this->database . " successful!");
 
         mysqli_set_charset($mysqli, 'utf8');
     }
@@ -105,7 +105,7 @@ class Connection
      */
     public function selectValues($query)
     {
-        ChromePhp::log("[SQL] Selecting values: \"$query\" from " . $this->getCaller());
+        ChromePhp::logSQL("Selecting values: \"$query\" from " . $this->getCaller());
         $mysqli = $this->connID;
         $result = $mysqli->query($query) or die($mysqli->error . "</br></br>" . $query . "</br></br>" . $this->getCaller());
         $value = null;
@@ -127,11 +127,11 @@ class Connection
      * Gibt assoziative Arrays zurück
      * Indizes mit Feldnamen
      * @param $query String SQL Query
-     * @return array[Feldname][]
+     * @return array[Feldname][] | null
      */
     public function selectAssociativeValues($query)
     {
-        ChromePhp::log("[SQL] Selecting values:  \"$query\" from " . $this->getCaller());
+        ChromePhp::logSQL("Selecting values:  \"$query\" from " . $this->getCaller());
         $mysqli = $this->connID;
         $result = $mysqli->query($query) or die($mysqli->error);
         $assocValue = null;
@@ -158,7 +158,7 @@ class Connection
      */
     public function selectFieldNames($query)
     {
-        ChromePhp::log("[SQL] Selecting FieldNames:  \"$query\" from " . $this->getCaller());
+        ChromePhp::logSQL("Selecting FieldNames:  \"$query\" from " . $this->getCaller());
         $fieldNames = array();
         $mysqli = $this->connID;
         if ($result = $mysqli->query($query)) {
@@ -181,7 +181,7 @@ class Connection
      */
     public function insertValues($query)
     {
-        ChromePhp::log("[SQL] Inserting:  \"$query\" from " . $this->getCaller());
+        ChromePhp::logSQL("Inserting:  \"$query\" from " . $this->getCaller());
         $mysqli = $this->connID;
         $mysqli->query($query) or die($mysqli->error);
         return $mysqli->insert_id;
@@ -194,7 +194,7 @@ class Connection
      */
     function straightQuery($query)
     {
-        ChromePhp::log("[SQL] Query:  \"$query\" from " . $this->getCaller());
+        ChromePhp::logSQL("Query:  \"$query\" from " . $this->getCaller());
 
         $mysqli = $this->connID;
         $mysqli->query($query) or die($mysqli->error);

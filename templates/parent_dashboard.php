@@ -13,7 +13,7 @@ if ($user instanceof Guardian) {
     $teachers = $child->getTeachers();
     /** @var Teacher $teacher */
         foreach ($teachers as $teacher) {
-      $students[$child->getId()]['teachers'][$teacher->getTeacherId()] = array('id' => $teacher->getTeacherId(), 'name' => $teacher->getFullName());
+      $students[$child->getId()]['teachers'][$teacher->getId()] = array('id' => $teacher->getId(), 'name' => $teacher->getFullName());
     }
   }
 } else if($user instanceof Admin)
