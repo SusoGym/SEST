@@ -35,7 +35,7 @@
     <div class="nav-wrapper teal">
         <a href="?" style="margin-left: 20px" class="brand-logo">Adminpanel</a>
         <a href="#" data-activates="mobile-nav" class="button-collapse" style="padding-left:20px;padding-right:20px;"><i
-                class="material-icons">menu</i></a>
+                    class="material-icons">menu</i></a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
             <li><a id="news" href="?type=updmgt" title="Datenableich"><i class="material-icons">input</i></a></li>
             <li><a id="news" href="?type=settings" title="Einstellungen"><i class="material-icons">settings</i></a></li>

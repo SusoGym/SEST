@@ -1,6 +1,6 @@
 <?php namespace administrator;
-include("header.php");
-$data = \View::getInstance()->getDataForView();
+    include("header.php");
+    $data = \View::getInstance()->getDataForView();
 ?>
 
 
@@ -18,7 +18,8 @@ $data = \View::getInstance()->getDataForView();
                     <table width="50%" align="center">
                         <tbody>
 
-                        <?php foreach ($data['fileData'][0] as $d) { ?>
+                        <?php foreach ($data['fileData'][0] as $d)
+                            { ?>
                         <tr>
                             <td>
 
@@ -29,7 +30,8 @@ $data = \View::getInstance()->getDataForView();
                                 <select class="browser-default right" name="post_dbfield[]" title="Select a file"
                                         required>
                                     <option selected></option>
-                                    <?php foreach ($data['fileData'][1] as $f) { ?>
+                                    <?php foreach ($data['fileData'][1] as $f)
+                                    { ?>
                                         <option><?php echo $f; ?></option>
                                     <?php } ?>
                                 </select>
@@ -45,7 +47,7 @@ $data = \View::getInstance()->getDataForView();
 
 
                     <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
-                            class="material-icons right">send</i></button>
+                                class="material-icons right">send</i></button>
 
                 </div>
 

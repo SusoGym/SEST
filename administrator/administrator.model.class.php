@@ -76,7 +76,7 @@
             {
                 $key = trim($key);
                 $value = trim($value);
-				$value = addslashes($value);
+                $value = addslashes($value);
                 if (isset($string))
                 {
                     $string = $string . ",$key=\"$value\" ";
@@ -87,8 +87,8 @@
             }
             $string = $string . ",upd=1 WHERE id=$id";
             $string = "UPDATE $table SET " . $string;
-			
-			//echo $string.'<br>';
+
+            //echo $string.'<br>';
             self::$connection->straightQuery($string);
         }
 
@@ -107,7 +107,7 @@
             {
                 $key = trim($key);
                 $value = trim($value);
-				$value = addslashes($value);
+                $value = addslashes($value);
                 if (isset($fieldstring))
                 {
                     $fieldstring = $fieldstring . ",`$key`";
@@ -126,7 +126,7 @@
             $fieldstring = $fieldstring . ",`upd`";
             $valuestring = $valuestring . ",'1'";
             $string = "INSERT INTO $table (" . $fieldstring . ") VALUES (" . $valuestring . ")";
-			//echo $string.'<br>';
+            //echo $string.'<br>';
             self::$connection->insertValues($string);
 
         }
@@ -198,37 +198,38 @@
             $same = array();
             $deleted = array();
 
-            if($teacher == null)
+            if ($teacher == null)
             { // delete all teachers
 
                 self::$connection->straightQuery("DELETE FROM unterricht WHERE klasse='$form'");
+
                 return;
             } else
-            if ($data != null)
-            {
-                foreach ($data as $value)
+                if ($data != null)
                 {
-                    $id = $value['lid'];
-                    $dbIds[] = $id;
-                }
+                    foreach ($data as $value)
+                    {
+                        $id = $value['lid'];
+                        $dbIds[] = $id;
+                    }
 
-                foreach ($teacher as $id)
-                {
-                    if (in_array($id, $dbIds))
-                        $same[] = $id;
-                    else
-                        $new[] = $id;
-                }
+                    foreach ($teacher as $id)
+                    {
+                        if (in_array($id, $dbIds))
+                            $same[] = $id;
+                        else
+                            $new[] = $id;
+                    }
 
-                foreach ($dbIds as $id)
+                    foreach ($dbIds as $id)
+                    {
+                        if (!in_array($id, array_merge($new, $same)))
+                            $deleted[] = $id;
+                    }
+                } else
                 {
-                    if (!in_array($id, array_merge($new, $same)))
-                        $deleted[] = $id;
+                    $new = $teacher;
                 }
-            } else
-            {
-                $new = $teacher;
-            }
 
             $query = "";
 
@@ -269,39 +270,47 @@
 
             return $teachersOfForm;
         }
-		
-		
-		/**
-		*delete Slot from DB
-		*@param int slotId
-		*/
-		public function deleteSlot($id){
-			self::$connection->straightQuery("DELETE FROM time_slot WHERE id=$id");
-			}
-		
-		/**
-		*insert Slot into DB
-		*@param string $start
-		*@param string $end
-		*/
-		public function insertSlot($start,$end){
-			$start = $this->makeDateTime($start);
-			$end = $this->makeDateTime($end);
-			self::$connection->straightQuery("INSERT INTO time_slot (`id`,`anfang`,`ende`) VALUES ('','$start','$end') ");
-			}
-		
-		/**
-		*create DateTime Format
-		*@param string
-		*@return DateTime*/
-		private function makeDateTime($string){
-			$da = explode(" ",$string);
-			$date = $da[0];
-			$time = $da[1];
-			$dateArr = explode (".",$date);
-			$newDate = $dateArr[2]."-".$dateArr[1]."-".$dateArr[0]." ".$time;
-			return $newDate;
-		}
+
+
+        /**
+         *delete Slot from DB
+         *
+         * @param int slotId
+         */
+        public function deleteSlot($id)
+        {
+            self::$connection->straightQuery("DELETE FROM time_slot WHERE id=$id");
+        }
+
+        /**
+         *insert Slot into DB
+         *
+         * @param string $start
+         * @param string $end
+         */
+        public function insertSlot($start, $end)
+        {
+            $start = $this->makeDateTime($start);
+            $end = $this->makeDateTime($end);
+            self::$connection->straightQuery("INSERT INTO time_slot (`id`,`anfang`,`ende`) VALUES ('','$start','$end') ");
+        }
+
+        /**
+         *create DateTime Format
+         *
+         * @param string
+         * @return DateTime
+         */
+        private function makeDateTime($string)
+        {
+            $da = explode(" ", $string);
+            $date = $da[0];
+            $time = $da[1];
+            $dateArr = explode(".", $date);
+            $newDate = $dateArr[2] . "-" . $dateArr[1] . "-" . $dateArr[0] . " " . $time;
+
+            return $newDate;
+        }
 
     }
 

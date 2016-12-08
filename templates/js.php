@@ -5,12 +5,12 @@
     $(document).ready(function () {
         $('ul.teachers').tabs();
         $('ul.students').tabs();
-	      $(".button-collapse").sideNav();
+        $(".button-collapse").sideNav();
         $('.modal').modal();
         $('.datepicker').pickadate({
-          selectMonths: true, // Creates a dropdown to control month
-          selectYears: 20,
-          max: new Date()
+            selectMonths: true, // Creates a dropdown to control month
+            selectYears: 20,
+            max: new Date()
         });
     });
 
@@ -32,9 +32,9 @@
             var insertHere = document.getElementById('student_placeholder');
             insertHere.parentNode.insertBefore(clonedNode, insertHere);
             $('.datepicker').pickadate({
-              selectMonths: true, // Creates a dropdown to control month
-              selectYears: 20,
-              max: new Date()
+                selectMonths: true, // Creates a dropdown to control month
+                selectYears: 20,
+                max: new Date()
             });
         }
 
@@ -67,18 +67,18 @@
         document.forms['openLink'].submit();
     }
 
-/*
-    $('a').click(function (e) {
+    /*
+     $('a').click(function (e) {
 
-        if(!e.currentTarget.href.includes("type="))
-            return;
+     if(!e.currentTarget.href.includes("type="))
+     return;
 
-        e.preventDefault();
-        var target = e.currentTarget.href.split("?")[1].split("=")[1];
+     e.preventDefault();
+     var target = e.currentTarget.href.split("?")[1].split("=")[1];
 
-        openType(target);
+     openType(target);
 
 
-    });
-*/
+     });
+     */
 </script>

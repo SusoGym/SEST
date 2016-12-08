@@ -18,7 +18,8 @@
     $data = \View::getInstance()->getDataForView();
 
     if (isset($data['notifications']))
-        foreach ($data['notifications'] as $not) {
+        foreach ($data['notifications'] as $not)
+        {
             echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
         }
 
@@ -36,8 +37,7 @@
         var url = "?type=setclasses&form=" + form;
         this.document.location.href = url;
     }
-	
-	 
+
 
     /*$('a').click(function (e) {
 

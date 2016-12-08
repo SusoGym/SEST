@@ -150,7 +150,7 @@
 
         public static function logSQL()
         {
-            if(!defined("SQL_DEBUG") || !SQL_DEBUG)
+            if (!defined("SQL_DEBUG") || !SQL_DEBUG)
                 return;
 
             $str = "";

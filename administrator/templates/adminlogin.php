@@ -30,7 +30,7 @@
                         </div>
                         <div class="row" style="margin-bottom: 0;">
                             <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
-                                    class="material-icons right">send</i></button>
+                                        class="material-icons right">send</i></button>
                         </div>
                     </form>
                 </div>
@@ -48,7 +48,8 @@
     <?php
     $data = \View::getInstance()->getDataForView();
     if (isset($data['notifications']))
-        foreach ($data['notifications'] as $not) {
+        foreach ($data['notifications'] as $not)
+        {
             echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
         }
 

@@ -1,81 +1,89 @@
 <?php namespace administrator;
 
-$data = \View::getInstance()->getDataForView();
+    $data = \View::getInstance()->getDataForView();
 
-$teachers = $data['allteachers'];
+    $teachers = $data['allteachers'];
 
-include "header.php";
+    include "header.php";
 ?>
 
 
 <div class="container">
     <div class="card ">
         <div class="card-content">
-            <a href="<?php echo $data['backButton']; ?>" class="right" title="Back"><i class="material-icons">arrow_back</i></a>
+            <a href="<?php echo $data['backButton']; ?>" class="right" title="Back"><i
+                        class="material-icons">arrow_back</i></a>
             <div class="row">
                 <div class="col l3 hide-on-med-and-down">
                     <form>
                         <ul class="forms collection">
-                            <?php foreach ($data['allForms'] as $f) {
+                            <?php foreach ($data['allForms'] as $f)
+                            {
                                 $classes = "collection-item";
 
-                                if(isset($data['currentForm']) && $data['currentForm'] == $f)
+                                if (isset($data['currentForm']) && $data['currentForm'] == $f)
                                     $classes .= " active";
 
                                 ?>
 
-                                <li class="tab"><a class="<?php echo $classes; ?>" onClick="chooseForm('<?php echo "$f"; ?>')"
-                                                   href="#<?php echo "$f"; ?>"><?php echo "$f";?></a></li>
+                                <li class="tab"><a class="<?php echo $classes; ?>"
+                                                   onClick="chooseForm('<?php echo "$f"; ?>')"
+                                                   href="#<?php echo "$f"; ?>"><?php echo "$f"; ?></a></li>
                             <?php } ?>
                         </ul>
                     </form>
                 </div>
                 <div class="col l9 m12 s12">
                     <?php
-                    if (isset($data['currentForm'])) {
-                        $f = $data['currentForm'];
-                        ?>
-                        <div id="form<?php echo $f; ?>" class="col s12">
-                            <ul class="collection with-header">
-                                <li class="collection-header"><h4>Lehrer für <font
-                                            class="teal-text"><?php echo $f ?></font>
-                                        festlegen</h4></li>
-                            </ul>
+                        if (isset($data['currentForm']))
+                        {
+                            $f = $data['currentForm'];
+                            ?>
+                            <div id="form<?php echo $f; ?>" class="col s12">
+                                <ul class="collection with-header">
+                                    <li class="collection-header"><h4>Lehrer für <font
+                                                    class="teal-text"><?php echo $f ?></font>
+                                            festlegen</h4></li>
+                                </ul>
 
-                            <div class="input-field col s12">
-                                <form method="POST" action="?type=setclasses">
-                                    <input type="hidden" name="update"
-                                           value="<?php echo $data['currentForm']; ?>">
-                                    <select multiple name="teacher[]">
-                                        <?php
-                                        /** @var \Teacher $t */
-                                        foreach ($teachers as $t) {
+                                <div class="input-field col s12">
+                                    <form method="POST" action="?type=setclasses">
+                                        <input type="hidden" name="update"
+                                               value="<?php echo $data['currentForm']; ?>">
+                                        <select multiple name="teacher[]">
+                                            <?php
+                                                /** @var \Teacher $t */
+                                                foreach ($teachers as $t)
+                                                {
 
-                                            $status = "";
+                                                    $status = "";
 
-                                            if (isset($data['teachersOfForm'][$data['currentForm']])) {
-                                                in_array($t->getId(), $data['teachersOfForm'][$data['currentForm']]) ? $status = "selected" : $status = "";
-                                            }
+                                                    if (isset($data['teachersOfForm'][$data['currentForm']]))
+                                                    {
+                                                        in_array($t->getId(), $data['teachersOfForm'][$data['currentForm']]) ? $status = "selected" : $status = "";
+                                                    }
 
-                                            ?>
-                                            <option <?php echo $status; ?>
-                                                value="<?php echo $t->getId(); ?>"><?php echo $t->getFullname(); ?></option>
-                                        <?php } ?>
-                                    </select>
-                                    <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">
-                                        Submit<i class="material-icons right">send</i></button>
-                                </form>
+                                                    ?>
+                                                    <option <?php echo $status; ?>
+                                                            value="<?php echo $t->getId(); ?>"><?php echo $t->getFullname(); ?></option>
+                                                <?php } ?>
+                                        </select>
+                                        <button class="btn-flat right waves-effect waves-teal" id="btn_login"
+                                                type="submit">
+                                            Submit<i class="material-icons right">send</i></button>
+                                    </form>
+                                </div>
+
                             </div>
 
-                        </div>
-
-                    <?php } else {
-                        //tell user to choose form
-                        ?>
-                        <ul class="collection with-header">
-                            <li class="collection-header"><h4>Bitte Klasse wählen</h4></li>
-                        </ul>
-                    <?php }
+                        <?php } else
+                        {
+                            //tell user to choose form
+                            ?>
+                            <ul class="collection with-header">
+                                <li class="collection-header"><h4>Bitte Klasse wählen</h4></li>
+                            </ul>
+                        <?php }
 
                     ?>
                 </div>
@@ -96,12 +104,13 @@ include "header.php";
         </div>
     </li>
     <li><a class="waves-effect teal-text" href="<?php echo $data['backButton']; ?>"><i
-                class="material-icons">arrow_back</i>Zurück</a></li>
+                    class="material-icons">arrow_back</i>Zurück</a></li>
     <li>
         <div class="divider"></div>
     </li>
     <li><a class="subheader">Klassen</a></li>
-    <?php foreach ($data['allForms'] as $f) { ?>
+    <?php foreach ($data['allForms'] as $f)
+    { ?>
         <li class="tab"><a class="waves-effect"
                            onclick="$('.button-collapse').sideNav('hide');chooseForm('<?php echo $f; ?>');"><?php echo $f; ?></a>
         </li>
@@ -112,10 +121,10 @@ include "header.php";
 <?php require("js.php") ?>
 
 <script type="application/javascript">
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('select').material_select();
         $('.select-dropdown').addClass('active');
-        $('.dropdown-content').addClass('active').css({ display: "block"});
+        $('.dropdown-content').addClass('active').css({display: "block"});
     });
 
 </script>
