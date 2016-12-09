@@ -224,7 +224,7 @@
 
             $_SESSION['logout'] = true; // notify about logout after reloading the page to delete all $_POST data
 
-            header("Location: ./"); //TODO: this is hardcoded ;-;
+            header("Location: ./");
         }
 
         /**

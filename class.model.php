@@ -57,7 +57,7 @@
          * @return Student
          **/
         public function getStudentByName($name, $surname = null)
-        { //TODO -> $name und $vorname beinhalten auch zweit namen -> optional oder pflicht bei registierung bzw. muss man noch aus db löschen...?
+        {
 
             $name = self::$connection->escape_string($name);
             if ($surname != null)
@@ -127,27 +127,6 @@
                 return null;
 
             return $this->getUserById($data[0]['id']);
-        }
-
-        /**
-         * @param int $userId
-         * @return string
-         * FIXME: Never used, empty in db...
-         */
-        public function parentGetName($userId)
-        {
-            $data = self::$connection->selectAssociativeValues("SELECT eltern.* FROM eltern, user WHERE eltern.userid=user.id AND user.id=$userId AND user.user_type=1");
-
-            if (!isset($data[0]))
-                return array("name" => null, "surname" => null);
-
-            $data = $data[0];
-
-            $surname = $data["name"];
-            $name = $data["vorname"];
-
-            return array("name" => $name, "surname" => $surname);
-
         }
 
         /**
@@ -582,7 +561,7 @@
             curl_setopt($ch, CURLOPT_URL, $apiUrl);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); //fixme: ssl unsafe?
+            //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); //fixme: ssl unsafe!!! -> is certificate correctly installed @ server? if yes we can remove this file and make everything save
 
             $result = utf8_encode(curl_exec($ch));
             if (curl_errno($ch))
