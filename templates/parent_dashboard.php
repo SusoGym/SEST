@@ -12,6 +12,7 @@
     {
         $students[$child->getId()]['id'] = $child->getId();
         $students[$child->getId()]['name'] = $child->getFullName();
+        $students[$child->getId()]['class'] = $child->getClass();
         $teachers = $child->getTeachers();
         /** @var Teacher $teacher */
         foreach ($teachers as $teacher)
@@ -61,13 +62,14 @@
                             <?php foreach ($students as $student)
                             { ?>
                                 <div id='stu<?php echo $student['id']; ?>'>
-                                    <?php foreach ($student['teachers'] as $teacher)
-                                    { ?>
-                                        <li class="tab"><a class="collection-item"
-                                                           onclick="$('html, body').animate({ scrollTop: 0 }, 200);"
-                                                           href="#tchr<?php echo $teacher['id']; ?>"><?php echo $teacher['name']; ?></a>
-                                        </li>
-                                    <?php } ?>
+                                    <?php if (isset($student['teachers']))
+                                        foreach ($student['teachers'] as $teacher)
+                                        { ?>
+                                            <li class="tab"><a class="collection-item"
+                                                               onclick="$('html, body').animate({ scrollTop: 0 }, 200);"
+                                                               href="#tchr<?php echo $teacher['id']; ?>"><?php echo $teacher['name']; ?></a>
+                                            </li>
+                                        <?php } ?>
                                 </div>
                             <?php } ?>
                         </ul>
@@ -77,42 +79,49 @@
                 </div>
                 <div class="col l9 m12 s12">
                     <?php foreach ($students as $student)
-                    { ?>
-                        <?php foreach ($student['teachers'] as $teacher)
-                    { ?>
-                        <div id="tchr<?php echo $teacher['id']; ?>" class="col s12">
-                            <ul class="collection with-header">
-                                <li class="collection-header">
-                                    <h4>Termin bei <span class="teal-text"><?php echo $teacher['name']; ?></span> buchen
-                                    </h4></li>
+                    {
+                        if (isset($student['teachers']))
+                        {
+                            foreach ($student['teachers'] as $teacher)
+                            { ?>
+                                <div id="tchr<?php echo $teacher['id']; ?>" class="col s12">
+                                    <ul class="collection with-header">
+                                        <li class="collection-header">
+                                            <h4>Termin bei <span
+                                                        class="teal-text"><?php echo $teacher['name']; ?></span> buchen
+                                            </h4></li>
 
-                                <li class="collection-item">
-                                    <div>
-                                        slot
-                                        <a href class="secondary-content action"><i class="material-icons green-text">forward</i></a>
-                                        <span class="secondary-content info grey-text">jetzt buchen</span>
-                                    </div>
-                                </li>
-                                <li class="collection-item">
-                                    <div>
-                                        slot
-                                        <span class="secondary-content action"><i
-                                                    class="material-icons grey-text">check</i></span>
-                                        <span class="secondary-content info grey-text">gebucht</span>
-                                    </div>
-                                </li>
-                                <li class="collection-item">
-                                    <div>
-                                        slot
-                                        <span class="secondary-content action"><i
-                                                    class="material-icons red-text">clear</i></span>
-                                        <span class="secondary-content info grey-text">nicht verfügbar</span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    <?php } ?>
-                    <?php } ?>
+                                        <li class="collection-item">
+                                            <div>
+                                                slot
+                                                <a href class="secondary-content action"><i
+                                                            class="material-icons green-text">forward</i></a>
+                                                <span class="secondary-content info grey-text">jetzt buchen</span>
+                                            </div>
+                                        </li>
+                                        <li class="collection-item">
+                                            <div>
+                                                slot
+                                                <span class="secondary-content action"><i
+                                                            class="material-icons grey-text">check</i></span>
+                                                <span class="secondary-content info grey-text">gebucht</span>
+                                            </div>
+                                        </li>
+                                        <li class="collection-item">
+                                            <div>
+                                                slot
+                                                <span class="secondary-content action"><i
+                                                            class="material-icons red-text">clear</i></span>
+                                                <span class="secondary-content info grey-text">nicht verfügbar</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            <?php }
+                        } else {
+                            ?> <h1 class="center"><b>Da wurden wohl keine Lehrer zugeordnet.... <br>(<?php echo $student['class'] ?>)</b></h1><?php
+                        }
+                    } ?>
                 </div>
             </div>
         </div>
@@ -213,7 +222,8 @@
         $.get("index.php" + url_param, function (data) {
             try {
                 var myData = JSON.parse(data);
-                if (myData.success) { location.reload();
+                if (myData.success) {
+                    location.reload();
                 }
                 else { // oh no! ;-;
                     var notifications = myData['notifications'];
