@@ -19,7 +19,10 @@
     function addStudent() {
         counter++;
         if (counter <= 100) {
-            var clonedNode = document.getElementById('student_blueprint').cloneNode(true);
+            var parent = document.getElementById('student_blueprint');
+            if (parent == null)
+                return; // not in parent view?
+            var clonedNode = parent.cloneNode(true);
             clonedNode.id = ''; // reset id name of clone
             clonedNode.style.display = 'block'; // remove display: none; from clone
             clonedNode.className = 'student_instance';
@@ -31,14 +34,34 @@
             });
             var insertHere = document.getElementById('student_placeholder');
             insertHere.parentNode.insertBefore(clonedNode, insertHere);
-            $('.datepicker').pickadate({
-                selectMonths: true, // Creates a dropdown to control month
-                selectYears: 20,
-                max: new Date()
-            });
         }
 
         initDatepick();
+    }
+
+    function initDatepick() {
+
+        $('.datepicker').pickadate({
+            selectMonths: true,
+            selectYears: 20,
+            max: new Date(),
+            format: "dd.mm.yyyy",
+
+            labelMonthNext: 'Nächster Monat',
+            labelMonthPrev: 'Vorheriger Monat',
+            labelMonthSelect: 'Monat wählen',
+            labelYearSelect: 'Jahr wählen',
+            monthsFull: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+            monthsShort: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+            weekdaysFull: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+            weekdaysShort: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+            weekdaysLetter: ['S', 'M', 'D', 'M', 'D', 'F', 'S'],
+            today: 'Heute',
+            clear: 'Löschen',
+            close: 'Ok',
+            firstDay: 1
+
+        });
     }
 
     $(document).ready(function () {
