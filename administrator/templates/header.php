@@ -39,12 +39,10 @@
         <ul id="nav-mobile" class="right hide-on-med-and-down">
             <li><a id="news" href="?type=updmgt" title="Datenableich"><i class="material-icons">input</i></a></li>
             <li><a id="news" href="?type=settings" title="Einstellungen"><i class="material-icons">settings</i></a></li>
-            <li><a id="news" href="?type=usrmgt" title="Benutzerverwaltung"><i class="material-icons">people</i></a>
-            </li>
+            <li><a id="news" href="?type=usrmgt" title="Benutzerverwaltung"><i class="material-icons">people</i></a></li>
             <li><a id="news" href="?type=news" title="Newslettereintrag"><i class="material-icons">comment</i></a></li>
-            <li><a id="home" href="?type=home" title="Home"><i class="material-icons">home</i></a></li>
-            <li><a id="logout" href="?type=logout" title="Logout"><i class="material-icons">power_settings_new</i></a>
-            </li>
+            <li><a id="home" href="?" title="Home"><i class="material-icons">home</i></a></li>
+            <li><a id="logout" href="?type=logout" title="Logout"><i class="material-icons">power_settings_new</i></a></li>
         </ul>
     </div>
 </nav>
