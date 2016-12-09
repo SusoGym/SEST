@@ -47,14 +47,14 @@
                             {
                                 $symbol = "check";
                                 $text = "festgelegt";
-                                $href = "#";
+                                $href = "?type=lest&del=" . $slot['id'];
                                 $delete = false;
                             } else
                             {
                                 $symbol = "forward";
                                 $text = "festlegen";
                                 $delete = true;
-                                $href = "?type=lest&asgn=" . $slot['id'] . '"';
+                                $href = "?type=lest&asgn=" . $slot['id'];
                             } ?>
                             <li class="collection-item">
                                 <div>
