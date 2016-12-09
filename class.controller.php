@@ -94,19 +94,6 @@
                 case "logout":
                     $this->logout();
                     break;
-                case "changeDashboard":
-                    if (self::getUser() instanceof Admin)
-                    {
-                        $dashBoard = $_SESSION['board_type'];
-
-                        if ($dashBoard == 'parent')
-                            $dashBoard = 'teacher';
-                        else
-                            $dashBoard = 'parent';
-
-                        $_SESSION['board_type'] = $dashBoard;
-                    }
-                    break;
                 case "addStudent":
                     $this->addStudent();
                     break;

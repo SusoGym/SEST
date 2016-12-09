@@ -82,8 +82,6 @@
 
     ?>
 
-    }
-
 
     function submitLogin() {
         var pwd = $('#pwd_login').val();
