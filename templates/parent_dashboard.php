@@ -3,26 +3,23 @@
     $model = Model::getInstance();
     $teacherNames = array();
     $teacherObjs = array();
+    /** @var Guardian $user */
     $user = Controller::getUser();
-    if ($user instanceof Guardian)
+    $students = array();
+    $children = $user->getChildren();
+    /** @var Student $child */
+    foreach ($children as $child)
     {
-        $children = $user->getChildren();
-        /** @var Student $child */
-        foreach ($children as $child)
+        $students[$child->getId()]['id'] = $child->getId();
+        $students[$child->getId()]['name'] = $child->getFullName();
+        $teachers = $child->getTeachers();
+        /** @var Teacher $teacher */
+        foreach ($teachers as $teacher)
         {
-            $students[$child->getId()]['id'] = $child->getId();
-            $students[$child->getId()]['name'] = $child->getFullName();
-            $teachers = $child->getTeachers();
-            /** @var Teacher $teacher */
-            foreach ($teachers as $teacher)
-            {
-                $students[$child->getId()]['teachers'][$teacher->getId()] = array('id' => $teacher->getId(), 'name' => $teacher->getFullName());
-            }
+            $students[$child->getId()]['teachers'][$teacher->getId()] = array('id' => $teacher->getId(), 'name' => $teacher->getFullName());
         }
-    } else if ($user instanceof Admin)
-    {
-        $teacherObjs = $model->getTeachers();
     }
+
 
     include("header.php");
 
@@ -49,7 +46,7 @@
                         <?php
                             foreach ($students as $student)
                             {
-                                echo "<li class=\"tab\"><a href='#stu";
+                                echo "<li class='tab'><a href='#stu";
                                 echo $student["id"];
                                 echo "'>";
                                 echo $student["name"];
@@ -136,7 +133,7 @@
             <span class="white-text name"><?php echo $_SESSION['user']['mail']; ?></span>
         </div>
     </li>
-    <?php $mobile = true;
+    <?php
         include("navbar.php"); ?>
     <li>
         <div class="divider"></div>
@@ -151,25 +148,23 @@
 </ul>
 
 <div id="addstudent" class="modal">
-    <form action="?type=addstudent" method="post">
-        <div class="modal-content">
-            <h4>Schüler hinzufügen</h4>
-            <div class="row">
-                <span id="student_placeholder"></span>
-                <a onclick="addStudent();" class="btn-flat btn-large waves-effect waves-light teal-text col s12">Feld
-                    hinzufügen <i class="material-icons right large">add</i></a>
-            </div>
-            <a onclick="form.submit();" class="modal-action waves-effect waves-green btn-flat right teal-text"
-               style="margin-bottom: 20px;"><i class="material-icons right">send</i>Schüler hinzufügen</a>
+    <div class="modal-content">
+        <h4>Schüler hinzufügen</h4>
+        <div class="row">
+            <span id="student_placeholder"></span>
+            <a onclick="addStudent();" class="btn-flat btn-large waves-effect waves-light teal-text col s12">Feld
+                hinzufügen <i class="material-icons right large">add</i></a>
         </div>
-    </form>
+        <a onclick="submitStudentForm();" class="modal-action waves-effect waves-green btn-flat right teal-text"
+           style="margin-bottom: 20px;"><i class="material-icons right">send</i>Schüler hinzufügen</a>
+    </div>
 </div>
 
 <ul id='students' class='dropdown-content students'>
     <?php
         foreach ($students as $student)
         {
-            echo "<li class=\"tab\"><a href='#stu";
+            echo "<li class='tab'><a href='#stu";
             echo $student["id"];
             echo "'>";
             echo $student["name"];
@@ -191,6 +186,52 @@
 </div>
 
 <?php include("js.php"); ?>
+
+<script type="application/javascript">
+    function submitStudentForm() {
+        var url_param = "?console&type=addstudent";
+
+        var studentNodes = document.getElementsByClassName("student_instance");
+
+        var numValidStudents = 0;
+        for (var i = 0; i < studentNodes.length; i++) {
+            var student = studentNodes[i];
+            var name = student.childNodes[1].childNodes[1].value;
+            var bday = student.childNodes[3].childNodes[1].value;  // magic numbers op!
+            if (name == "" || bday == "")
+                continue;
+            name = name.replace(/\s/g, '');
+            numValidStudents++;
+            url_param += "&students[]=" + name + ":" + bday;
+        }
+
+        if (numValidStudents == 0) {// No valid Students...
+            Materialize.toast("Bitte geben sie mindestens einen Schüler an.");
+            return;
+        }
+
+        $.get("index.php" + url_param, function (data) {
+            try {
+                var myData = JSON.parse(data);
+                if (myData.success) { location.reload();
+                }
+                else { // oh no! ;-;
+                    var notifications = myData['notifications'];
+                    notifications.forEach(function (data) {
+                        Materialize.toast(data, 4000);
+                    });
+                }
+            } catch (e) {
+                Materialize.toast('Interner Server Fehler!');
+                console.error(e);
+                console.info('Request: ' + url_param);
+                console.info('Response: ' + data);
+            }
+        });
+
+
+    }
+</script>
 
 </body>
 </html>

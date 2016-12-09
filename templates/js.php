@@ -6,12 +6,8 @@
         $('ul.teachers').tabs();
         $('ul.students').tabs();
         $(".button-collapse").sideNav();
-        $('.modal').modal();
-        $('.datepicker').pickadate({
-            selectMonths: true, // Creates a dropdown to control month
-            selectYears: 20,
-            max: new Date()
-        });
+        initModal();
+        addStudent(); // -> create one default student field
     });
 
     var counter = 0;
@@ -59,15 +55,11 @@
             today: 'Heute',
             clear: 'Löschen',
             close: 'Ok',
-            firstDay: 1
+            firstDay: 1,
+            container: 'body'
 
         });
     }
-
-    $(document).ready(function () {
-        addStudent(); // -> create one default student field
-
-    });
 
 
     function openType(target) {
@@ -89,6 +81,19 @@
         document.getElementById("body").appendChild(form);
         document.forms['openLink'].submit();
     }
+
+    function initModal() {
+        $('.modal').modal({
+                dismissible: false, // Modal can be dismissed by clicking outside of the modal
+                opacity: .5, // Opacity of modal background
+                in_duration: 300, // Transition in duration
+                out_duration: 200, // Transition out duration
+                starting_top: '4%', // Starting top style attribute
+                ending_top: '10%' // Ending top style attribute
+            }
+        );
+    }
+
 
     /*
      $('a').click(function (e) {

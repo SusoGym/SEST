@@ -69,7 +69,7 @@
                 $wholeName = $name;
             }
 
-            $data = self::$connection->selectValues("SELECT * FROM schueler WHERE Replace(CONCAT(vorname, name), ' ', '') = '$wholeName'");
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE Replace(CONCAT(vorname, name), ' ', '') = '$wholeName'");
 
             if ($data == null)
                 return null;
@@ -514,7 +514,7 @@
          * @param $pwd string parents password
          * @return int newly created parents id
          */
-        public function registerParent($pid, $email, $pwd)
+        public function registerParent($email, $pwd)
         {
 
             $email = self::$connection->escape_string($email);
@@ -527,23 +527,6 @@
 
             $parentId = self::$connection->insertValues("INSERT INTO eltern (userid) VALUES ($usrId);");
 
-            // transform given int into array
-            if (!is_array($pid))
-            {
-                $pid = array($pid);
-            }
-
-            ChromePhp::info("New parents id is $parentId and student ids are " . json_encode($pid));
-
-            // query each given pupil and set eid (one query to spare resources)
-            $query = "";
-            foreach ($pid as $pupilId)
-            {
-                $query .= "UPDATE schueler SET eid=$parentId WHERE id=$pupilId;";
-            }
-
-            self::$connection->straightQuery($query);
-
             //return eid
             return intval($parentId);
 
@@ -552,16 +535,31 @@
         /**
          * Adds new student as child to parent
          *
-         * @param $pid int Parent ID
-         * @param $sid int Student ID
+         * @param $parentId int Parent ID
+         * @param $studentIds array Student ID
          * @return string success
          */
-        public function parentAddStudent($pid, $sid)
+        public function parentAddStudents($parentId, $studentIds)
         {
-            $parent = $this->getParentByParentId($pid);
-            $student = $this->getStudentById($sid);
-            if (($parent == null) || ($student == null)) return false;
-            $query = "UPDATE schueler SET eid=" . $pid . " WHERE id=" . $sid . ";";
+
+            if (!is_array($studentIds))
+                $studentIds = array($studentIds);
+
+            $parent = $this->getParentByParentId($parentId);
+
+            if ($parent == null)
+                return false;
+
+            $query = "";
+
+            foreach ($studentIds as $id)
+            {
+                $student = $this->getStudentById($id);
+                if ($student == null)
+                    return false;
+
+                $query = "UPDATE schueler SET eid=$parentId WHERE id=$id;";
+            }
             self::$connection->straightQuery($query);
 
             return true;
@@ -573,7 +571,8 @@
          * @returns array(string) [user => username case sensitive, type => student / teacher [, class => if student: students class]]
          * @throws Exception when error was thrown while connection to remote server or response was empty
          */
-        public function checkNovellLogin($usr, $pwd)
+        public
+        function checkNovellLogin($usr, $pwd)
         {
 
             $apiUrl = "https://intranet.suso.schulen.konstanz.de/gpuntis/est.php"; //TODO: do by config or sth

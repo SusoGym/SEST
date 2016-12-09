@@ -124,30 +124,7 @@
             return;
         }
 
-
         url_param += "&register[mail]=" + mail + "&register[pwd]=" + pwd;
-
-        var num_validStudents = 0;
-
-        var studentNotes = document.getElementsByClassName('student_instance');
-
-        for (var i = 0; i < studentNotes.length; i++) {
-            var student = studentNotes[i];
-            var name = student.childNodes[1].value;
-            var bday = student.childNodes[3].value;  // magic numbers op!
-
-            if (name == "" || bday == "")
-                continue;
-
-            num_validStudents++;
-            url_param += "&register[student][]=" + name + ":" + bday;
-
-        }
-
-        if (num_validStudents == 0) {// No valid Students...
-            Materialize.toast("Bitte geben sie mindestens einen Schüler an.");
-            return;
-        }
 
         // give request to backend and utilize response
         $.get("index.php" + url_param, function (data) {
