@@ -116,34 +116,7 @@
             switch ($this->input['type'])
             {
                 case "lest": //Teacher chooses est
-                    $_SESSION['ldap'] = null;
-
-                    if (isset($this->input['asgn']))
-                    {
-                        $this->model->setAssignedSlot($this->input['asgn'], self::$user->getId());
-                    }
-                    /** @var Teacher $teacher */
-                    $teacher = self::$user;
-                    $this->infoToView['deputat'] = $teacher->getLessonAmount();
-                    $this->infoToView['requiredSlots'] = $teacher->getRequiredSlots();
-                    $this->infoToView['user'] = $teacher;
-                    ($missingSlots = $teacher->getMissingSlots() > 0) ? $missingSlots = $missingSlots : $missingSlots = 0;
-                    $this->infoToView['missing_slots'] = $teacher->getMissingSlots();
-                    $this->infoToView['card_title'] = "Sprechzeiten am Elternsprechtag";
-                    if ($missingSlots == 0)
-                    {
-                        $this->infoToView['card_title'] = "Sprechzeiten am Elternsprechtag";
-                        $this->infoToView['slots_to_show'] = $teacher->getAssignedSlots();
-                    } else
-                    {
-                        $this->infoToView['card_title'] = "Festlegung der Sprechzeiten";
-                        $this->infoToView['slots_to_show'] = $teacher->getSlotListToAssign();
-                    }
-                    $this->infoToView['slots_to_show'] = $teacher->getSlotListToAssign();
-                    $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
-                    $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
-
-                    $template = "tchr_slots";
+                    $template = $this->teacherSlotDetermination();
                     break;
                 case "login":
                     $template = $this->login();
@@ -216,6 +189,39 @@
             return self::getUser();
         }
 
+        /**
+         * @return string template to display
+         */
+        protected function teacherSlotDetermination()
+        {
+            if(!self::$user instanceof Teacher)
+                die("Unauthorized access! User must be instance of Teacher!");
+            if (isset($this->input['asgn']))
+            {
+                $this->model->setAssignedSlot($this->input['asgn'], self::$user->getId());
+            } else if(isset($this->input['del']))
+            {
+                $this->model->deleteAssignedSlot($this->input['del'], self::$user->getId());
+            }
+            /** @var Teacher $teacher */
+            $teacher = self::$user;
+            $this->infoToView['deputat'] = $teacher->getLessonAmount();
+            $this->infoToView['requiredSlots'] = $teacher->getRequiredSlots();
+            $this->infoToView['user'] = $teacher;
+            $missingSlots = ($teacher->getMissingSlots() > 0) ? $teacher->getMissingSlots() : 0;
+            $this->infoToView['missing_slots'] = $missingSlots;
+            $this->infoToView['card_title'] = "Sprechzeiten am Elternsprechtag";
+
+            if ($missingSlots != 0)
+            {
+                $this->infoToView['card_title'] = "Festlegung der Sprechzeiten";
+            }
+            $this->infoToView['slots_to_show'] = $teacher->getSlotListToAssign();
+            $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
+            $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
+
+            return "tchr_slots";
+        }
         /**
          * Booking logic
          *
