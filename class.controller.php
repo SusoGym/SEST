@@ -54,57 +54,21 @@
         protected function handleLogic()
         {
 
-
+            // handles login verification and creation of user object
             if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd']))
-            { // Check if already logged-in and creates userobj
-                $email = $_SESSION['user']['mail'];
-                $pwd = $_SESSION['user']['pwd'];
-
-                if (!$this->checkLogin($email, $pwd))
+            {
+                if (!$this->checkLogin($_SESSION['user']['mail'], $_SESSION['user']['pwd']))
                 {
                     unset($_SESSION['user']);
-                    ChromePhp::info("Tried to log in with invalid userdata");
-                }
-
-            }
-            if (self::getUser() instanceof Admin) // Admin has no actual use of the normal view does he?
-                header("Location: /administrator");
-
-            if (isset($this->input['type']))
-            { // handle type if allowed
-                $type = $this->input['type'];
-                $template = null;
-                if ($type == 'login' || $type == 'logout' || isset(self::$user) || isset($this->input['console']))
-                    $template = $this->handleType();
-
-                if ($template != null)
-                {
-                    $this->display($template);
-
-                    return;
+                    ChromePhp::info("Tried to log in with invalid user-data");
                 }
             }
 
-            if (!isset($this->input['type']) && !isset(self::$user))
-                ChromePhp::info("No type nor userobj set!");
-            else if (!isset($this->input['type']))
-                ChromePhp::info("No type set!");
-            else if (!isset(self::$user))
-                ChromePhp::info("No userobj set!");
+            if (!isset($this->input['type']))
+                $this->input['type'] = null;
 
 
-            if (isset($_SESSION['logout']))
-            {
-                unset($_SESSION['logout']);
-                $this->notify('Erfolgreich abgemeldet');
-            }
-
-
-            if (isset(self::$user))
-                $this->display($this->getDashBoardName());
-            else
-                $this->display("login");
-
+            $this->display($this->handleType());
         }
 
         /**
@@ -129,7 +93,6 @@
                     break;
                 case "logout":
                     $this->logout();
-                    $template = "login";
                     break;
                 case "changeDashboard":
                     if (self::getUser() instanceof Admin)
@@ -155,7 +118,27 @@
                         $this->infoToView['missing_slots'] = $user->getMissingSlots();
                         $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
                         $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
+
+                    } else if (self::$user instanceof Guardian)
+                    {
+                        // Do parenting stuff
+                    } else if (self::$user instanceof Admin)
+                    {
+                        header("Location: ./administrator"); // does an admin need access to normal stuff?!
+                    } // add other user types here?
+                    else if (self::$user == null)
+                    { // not logged in
+
+                        if (isset($_SESSION['logout']))
+                        { // if just logged out display toast
+                            unset($_SESSION['logout']);
+                            $this->notify('Erfolgreich abgemeldet');
+                        }
+
+                        return "login";
                     }
+
+                    return $this->getDashBoardName();
                     break;
             }
 
@@ -194,12 +177,12 @@
          */
         protected function teacherSlotDetermination()
         {
-            if(!self::$user instanceof Teacher)
+            if (!self::$user instanceof Teacher)
                 die("Unauthorized access! User must be instance of Teacher!");
             if (isset($this->input['asgn']))
             {
                 $this->model->setAssignedSlot($this->input['asgn'], self::$user->getId());
-            } else if(isset($this->input['del']))
+            } else if (isset($this->input['del']))
             {
                 $this->model->deleteAssignedSlot($this->input['del'], self::$user->getId());
             }
@@ -222,6 +205,7 @@
 
             return "tchr_slots";
         }
+
         /**
          * Booking logic
          *
@@ -249,10 +233,12 @@
         {
             session_destroy();
             session_start();
+            ChromePhp::info("set!");
 
             $_SESSION['logout'] = true; // notify about logout after reloading the page to delete all $_POST data
 
-            header("Location: /");
+            header("Location: ./");
+            die();
         }
 
         /**

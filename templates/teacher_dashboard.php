@@ -12,8 +12,9 @@
 
     $slotdue = $usr->getMissingSlots();
 
-    if ((isset($data['assign_end']) && $data['assign_end'] > $today) || (isset($data['assign_start']) && $data['assign_start'] > $today))
+    if ((isset($data['assign_end']) && $data['assign_end'] < $today) || (isset($data['assign_start']) && $data['assign_start'] > $today))
     {
+        ChromePhp::info("Slot choice is disabled as date has expired!");
         $slotlink = false;
         $slotcolor = "grey";
     }
