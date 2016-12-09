@@ -135,8 +135,7 @@
          */
         public function __construct($id, $username, $email, $parentId)
         {
-            $nameArr = Model::getInstance()->parentGetName($id);
-            parent::__construct($id, $username, 1, $email, $nameArr['name'], $nameArr['surname']);
+            parent::__construct($id, $username, 1, $email);
 
             $this->parentId = $parentId;
             $this->children = Model::getInstance()->getChildrenByParentUserId($this->id);
