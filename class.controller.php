@@ -94,7 +94,7 @@
                 case "logout":
                     $this->logout();
                     break;
-                case "addStudent":
+                case "addstudent":
                     $this->addStudent();
                     break;
                 default:
@@ -287,7 +287,6 @@
 
             $pwd = $input['register']['pwd'];
             $mail = $input['register']['mail'];
-            $students = $input['register']['student']; // format : ["name:bday", "name:bday", ...]
 
             ChromePhp::info("Email: " . $mail);
 
@@ -299,56 +298,11 @@
                 $success = false;
             }
 
-            $wrongStudentData = false;
-            $pids = array();
-
-            foreach ($students as $student)
-            {
-                $student = explode(":", urldecode($student));
-
-                $name = $student[0];
-                $bday = $student[1];
-
-                $studentObj = $model->getStudentByName($name);
-
-                if ($studentObj == null)
-                {
-                    $wrongStudentData = true;
-                    continue;
-                }
-
-                $pid = $studentObj->getId();
-                $studentEid = $studentObj->getEid();
-                $name = $studentObj->getSurname();
-                $vorname = $studentObj->getName();
-
-                ChromePhp::info("Student: " . json_encode($name) . "($name, $vorname) born on " . $bday . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($studentEid == null ? "no parents set" : "parent with id $studentEid")));
-
-                if ($studentEid != null)
-                {
-                    array_push($notification, "Dem Schüler $vorname $name ist bereits ein Elternteil zugeordnet");
-                    $success = false;
-                } else
-                {
-                    array_push($pids, $pid);
-                }
-
-            }
-
-
-            if ($wrongStudentData)
-            {
-                array_push($notification, "Bitte überprüfen Sie die angegebenen Schülerdaten");
-                $success = false;
-            }
-
-
             ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
 
             if ($success)
             {
-                $userid = $model->registerParent($pids, $mail, $pwd);
-
+                $userid = $model->registerParent($mail, $pwd);
                 $this->checkLogin($mail, $pwd);
 
             }
@@ -365,12 +319,7 @@
 
             }
 
-            if ($success == true)
-            {
-
-                return $this->getDashBoardName();
-
-            } else
+            if ($success != true)
             {
 
                 if (sizeof($notification) != 0)
@@ -384,7 +333,7 @@
                 return "login";
             }
 
-
+            return $this->getDashBoardName();
         }
 
         /**
@@ -539,53 +488,86 @@
         /**
          * Adds new student as child to logged in parent
          *
-         * @return bool success
          */
         protected function addStudent()
         {
 
+            $success = true;
+            $notification = array();
+            $studentIds = array();
+
             if (!isset(self::$user) || !(self::$user instanceof Guardian))
-                return false;
-
-            $name = $this->input['name'];
-            $bday = strtotime($this->input['bday']);
-            /** @var Guardian $user */
-            $user = self::getUser();
-            $pid = $user->getParentId();
-            $model = Model::getInstance();
-
-            $student = $model->getStudentByName($name);
-
-            if ($student == null)
             {
-                array_push($notification, "Bitte überprüfen Sie die angegebenen Schülerdaten");
+                array_push($notification, "Du musst ein Elternteil sein um einen Schüler hinzuzufügen zu können!");
+                ChromePhp::info("User no instance of Guardian! :(");
+                $success = false;
+            } else
+            {
+                if (!isset($this->input['students']) || count($this->input['students']) == 0)
+                {
+                    ChromePhp::info("No studentdata given! :C");
+                    array_push($notification, "Es sind keine Schüler angegeben worden!");
+                    $success = false;
+                } else
+                {
+                    foreach ($this->input['students'] as $student)
+                    {
+                        $student = explode(":", urldecode($student));
+                        $name = $student[0];
+                        $bday = $student[1];
+                        $studentObj = $this->model->getStudentByName($name);
 
-                return true;
+                        if ($studentObj == null)
+                        {
+                            array_push($notification, "Bitte überpfrüfen Sie die angegebenen Schülerdaten!");
+                            ChromePhp::info("Invalid student data!");
+                            $success = false;
+                            break;
+                        }
+                        $pid = $studentObj->getId();
+                        $eid = $studentObj->getEid();
+                        $surname = $studentObj->getSurname();
+                        $name = $studentObj->getName();
+
+                        ChromePhp::info("Student: $name $surname, born on " . $bday . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($eid == null ? "no parents set" : "parent with id $eid")));
+
+                        if ($eid != null)
+                        {
+                            array_push($notification, "Dem Schüler $name $surname ist bereits ein Elternteil zugeordnet!");
+                            ChromePhp::info("Student already has parent!");
+                            $success = false;
+                        } else
+                        {
+                            array_push($studentIds, $pid);
+                        }
+
+                    }
+                }
+
             }
 
-            $sid = $student->getId();
-            $studentEid = $student->getEid();
-            $name = $student->getSurname();
-            $vorname = $student->getName();
-
-            ChromePhp::info("Student: " . json_encode($name) . "($name, $vorname) born on " . $bday . " " . ($sid == null ? "does not exist" : "with id $pid and " . ($studentEid == null ? "no parents set" : "parent with id $studentEid")));
-
-            if ($studentEid != null)
+            if($success)
             {
-                array_push($notification, "Dem Schüler " . $vorname . " " . $name . " ist bereits ein Elternteil zugeordnet");
-
-                return true;
+                /** @var Guardian $parent */
+                $parent = self::$user;
+                $success = $this->model->parentAddStudents($parent->getParentId(), $studentIds);
             }
 
-            if (Model::getInstance()->parentAddStudent($pid, $sid) == false)
-            {
-                ChromePhp::info("Unexpected database error");
+            ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
 
-                return false;
+            if (isset($this->input['console']))
+            {
+                $output = array("success" => $success);
+                if (sizeof($notification) != 0)
+                {
+                    $output["notifications"] = $notification;
+                }
+                die(json_encode($output));
             }
+
+            die("Why are you here again?");
+
         }
-
-
     }
 
 ?>
