@@ -81,29 +81,6 @@
         }
 
     ?>
-    function initDatepick() {
-
-        $('.datepicker').pickadate({
-            selectMonths: true,
-            selectYears: 20,
-            max: new Date(),
-            format: "dd.mm.yyyy",
-
-            labelMonthNext: 'Nächster Monat',
-            labelMonthPrev: 'Vorheriger Monat',
-            labelMonthSelect: 'Monat wählen',
-            labelYearSelect: 'Jahr wählen',
-            monthsFull: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-            monthsShort: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
-            weekdaysFull: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
-            weekdaysShort: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
-            weekdaysLetter: ['S', 'M', 'D', 'M', 'D', 'F', 'S'],
-            today: 'Heute',
-            clear: 'Löschen',
-            close: 'Ok',
-            firstDay: 1
-
-        });
 
     }
 
