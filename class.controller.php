@@ -82,6 +82,36 @@
                 case "lest": //Teacher chooses est
                     $template = $this->teacherSlotDetermination();
                     break;
+				case "eest": //Parent chooses est
+					if (!self::$user instanceof Guardian)
+						die("Unauthorized access! User must be instance of Guardian!");
+					/** @var Guardian $user */
+					$guardian = self::$user;
+					if(isset($this->input['bk'])){
+						//book
+						$this->model->bookingAdd($this->input['bk'],$guardian->getParentId());
+						}
+					elseif(isset($this->input['del'])){
+						//delete booking
+						$this->model->bookingDelete($this->input['del'],$guardian->getParentId());
+						}
+						
+					$students = array();
+					$children = $guardian->getChildren();
+					$teachers = $guardian->getTeachersOfAllChildren();
+					$this->infoToView['teachers'] = $teachers;
+					$this->infoToView['user'] = $guardian;
+					$this->infoToView['appointments'] = $guardian->getAppointments();
+					$template="parent_est";
+					break;
+				case "childsel":
+					if (!self::$user instanceof Guardian)
+						die("Unauthorized access! User must be instance of Guardian!");
+					/** @var Guardian $user */
+					$guardian = self::$user;
+					$this->infoToView['children'] = $guardian->getChildren();
+					$template = "parent_child_select";
+					break;
                 case "login":
                     $template = $this->login();
                     break;
@@ -105,10 +135,13 @@
                         $this->infoToView['missing_slots'] = $user->getMissingSlots();
                         $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
                         $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
-
                     } else if (self::$user instanceof Guardian)
                     {
                         // Do parenting stuff
+						$guardian = self::$user;
+						$this->infoToView['book_end'] = $this->model->getOptions()['close'];
+						$this->infoToView['book_start'] = $this->model->getOptions()['open'];
+						$this->infoToView['children'] = $guardian->getChildren();
                     } else if (self::$user instanceof Admin)
                     {
                         header("Location: ./administrator"); // does an admin need access to normal stuff?!
@@ -124,7 +157,6 @@
 
                         return "login";
                     }
-
                     return $this->getDashBoardName();
                     break;
             }
