@@ -45,7 +45,7 @@
             $exists = file_exists($templateFile);
 
 
-            ChromePhp::info("Displaying 'templates/$template.php' with data: " . json_encode($this->dataForView));
+            //ChromePhp::info("Displaying 'templates/$template.php' with data: " . json_encode($this->dataForView));
 
             if ($exists)
             {

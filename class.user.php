@@ -236,6 +236,39 @@
 
             return $teachers;
         }
+		
+		/**
+		* Get all teachers of all children 
+		* @return array(Teacher,Child)
+		*/
+		public function getTeachersOfAllChildren(){
+			$model = Model::getInstance();
+			$teacherList = array();
+			$teacherList = $model->getTeachersOfAllChildren($this->parentId);
+			$x = 0;
+			$teacherReturn=array();
+			$studentArray = array();
+			while (isset($teacherList[$x])){
+				$multiple = true;
+				if ($x == 0 ) {
+					$studentArray[] = new Student ($teacherList[$x]['studentid'],null,$teacherList[$x]['studentsurname'],$teacherList[$x]['studentname'],null);
+					}
+				elseif($x > 0 && $teacherList[$x]['teacher'] == $teacherList[$x-1]['teacher'] ){
+					$studentArray[] = new Student ($teacherList[$x]['studentid'],null,$teacherList[$x]['studentsurname'],$teacherList[$x]['studentname'],null);
+					}
+				else {
+					$multiple = false;
+					if(!isset($studentArray)) {$studentArray[] = new Student ($teacherList[$x]['studentid'],null,$teacherList[$x]['studentsurname'],$teacherList[$x]['studentname'],null);}
+					}
+				if (!$multiple || $x == count($teacherList) - 1 ) {
+					$teacher = new Teacher(null,$teacherList[$x-1]['teacher']);
+					$teacherReturn[] = array("teacher"=>$teacher,"students"=>$studentArray);
+					unset($studentArray);
+					}
+				$x++;
+				}
+			return $teacherReturn;
+		}
 
         /**
          * @return int parent ID
@@ -261,6 +294,18 @@
         {
             return "Guardian";
         }
+		
+		
+		
+		/**
+		*returns booked timeSlots
+		*@return array(Timestamp anfang)
+		*/
+		public function getAppointments(){
+			$model = Model::getInstance();
+			return $model->getAppointmentsOfParent($this->parentId);
+			}
+		
     }
 
 
@@ -406,9 +451,19 @@
         {
             $model = Model::getInstance();
             $assignedSlots = $model->getAssignedSlots($this->getId());
-
+			
             return $assignedSlots;
         }
+		
+		/**
+		*returns bookable Slots and booked Slots by a parent as array
+		*@return parentId
+		*@return array(int bookingId, Timestamp anfang, Timestamp ende, int parentId)
+		*/
+		public function getAllBookableSlots($parentId){
+			$model = Model::getInstance();
+			return $model->getAllBookableSlotsForParent($this->id,$parentId);
+		}
     }
 
     class Admin extends User
@@ -561,6 +616,8 @@
 
             return $teachers;
         }
+		
+	
     }
 
 
