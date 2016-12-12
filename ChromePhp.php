@@ -408,6 +408,8 @@
 
         protected function _writeHeader($data)
         {
+            if(headers_sent())
+                return;
             header(self::HEADER_NAME . ': ' . $this->_encode($data));
         }
 
