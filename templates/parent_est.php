@@ -18,12 +18,13 @@
                         {
                             /** @var Teacher $teacher */
                             $teacher = $teacherStudent['teacher'];
+                            $amountAvailableSlots = count($teacher->getAllBookableSlots($user->getParentId()));
                             ?>
                             <div id="tchr<?php echo $teacher->getId(); ?>" class="col s12">
                                 <ul class="collection with-header">
                                     <li class="collection-header">
-                                            <span style="font-size:22px;">Termin bei <span
-                                                        class="teal-text"><?php echo $teacher->getFullname(); ?></span> buchen
+                                            <span style="font-size:22px;"><?php if($amountAvailableSlots != 0)echo "Termin bei " ?><span
+                                                        class="teal-text"><?php echo $teacher->getFullname(); ?></span><?php if($amountAvailableSlots != 0)echo" buchen"?>
 												<span style="font-size:12px;">&nbsp;(
                                                     <?php
                                                         $students = 0;
@@ -34,52 +35,65 @@
                                                             {
                                                                 echo ' / ';
                                                             }
-                                                            echo $student->getSurname() . ", " . $student->getName();
+                                                            echo $student->getName() . " " .$student->getSurname();
                                                             $students++;
                                                         }
                                                     ?>
                                                     )</span>
-                                            </span></li>
-                                    <?php foreach ($teacher->getAllBookableSlots($user->getParentId()) as $slot)
-                                    {
-                                        $anfang = date_format(date_create($slot['anfang']), 'd.m.Y H:i');
-                                        $ende = date_format(date_create($slot['ende']), 'H:i');
-                                        if ($slot['eid'] == null)
+                                                <?php
+                                                    if ($amountAvailableSlots == 0): ?>
+
+                                                        <span class="right red-text" style="font-size: 18px">ausgebucht!</span>
+                                                        <?php //TODO: text?
+                                                    endif; ?>
+                                            </span>
+                                    </li>
+                                    <?php
+
+                                        if ($amountAvailableSlots != 0)
                                         {
-                                            //slot could be booked
-                                            $symbol = "forward";
-                                            $symbolColor = "teal-text";
-                                            $text = "jetzt buchen";
-                                            $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=book'";
-                                            if (in_array($slot['slotId'], $appointments))
+
+                                            foreach ($teacher->getAllBookableSlots($user->getParentId()) as $slot)
                                             {
-                                                //cannot book a slot at that time because already booked another
-                                                $symbol = "clear";
-                                                $symbolColor = "red-text";
-                                                $text = "anderer Termin bereits gebucht";
-                                                $link = "";
-                                            }
-                                        } else
-                                        {
-                                            //slot is booked by oneself
-                                            $symbol = "check";
-                                            $text = "gebucht";
-                                            $symbolColor = "green-text";
-                                            $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=del'";
-                                        }
-                                        ?>
-                                        <li class="collection-item">
-                                            <div><span class="teal-text ">
+                                                $anfang = date_format(date_create($slot['anfang']), 'd.m.Y H:i');
+                                                $ende = date_format(date_create($slot['ende']), 'H:i');
+                                                if ($slot['eid'] == null)
+                                                {
+                                                    //slot could be booked
+                                                    $symbol = "forward";
+                                                    $symbolColor = "teal-text";
+                                                    $text = "jetzt buchen";
+                                                    $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=book'";
+                                                    if (in_array($slot['slotId'], $appointments))
+                                                    {
+                                                        //cannot book a slot at that time because already booked another
+                                                        $symbol = "clear";
+                                                        $symbolColor = "red-text";
+                                                        $text = "anderer Termin bereits gebucht";
+                                                        $link = "";
+                                                    }
+                                                } else
+                                                {
+                                                    //slot is booked by oneself
+                                                    $symbol = "check";
+                                                    $text = "gebucht";
+                                                    $symbolColor = "green-text";
+                                                    $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=del'";
+                                                }
+                                                ?>
+                                                <li class="collection-item">
+                                                    <div><span class="teal-text ">
                                                 <?php
                                                     echo $anfang . " - " . $ende;
                                                 ?>
 												</span>
-                                                <a <?php echo $link; ?> class="secondary-content action"><i
-                                                            class="material-icons <?php echo $symbolColor; ?>"><?php echo $symbol; ?></i></a>
-                                                <span class="secondary-content info grey-text"><?php echo $text; ?></span>
-                                            </div>
-                                        </li>
-                                    <?php } ?>
+                                                        <a <?php echo $link; ?> class="secondary-content action"><i
+                                                                    class="material-icons <?php echo $symbolColor; ?>"><?php echo $symbol; ?></i></a>
+                                                        <span class="secondary-content info grey-text"><?php echo $text; ?></span>
+                                                    </div>
+                                                </li>
+                                            <?php }
+                                        } ?>
                                 </ul>
                             </div>
                         <?php } ?>

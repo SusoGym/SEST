@@ -113,6 +113,7 @@
                     }
                     $students = array();
                     $teachers = $guardian->getTeachersOfAllChildren();
+                    $this->sortByAppointment($teachers);
                     $this->infoToView['teachers'] = $teachers;
                     $this->infoToView['user'] = $guardian;
                     $this->infoToView['appointments'] = $guardian->getAppointments();
@@ -602,6 +603,40 @@
             die("Why are you here again?");
 
         }
+
+        /**
+         * Sorts array by the state if a teacher has slots available or not (/w slots first then without slots
+         * @param $teachers
+         * @return array
+         */
+        public function sortByAppointment(&$teachers)
+        {
+
+            /** @var Guardian $guardian */
+            $guardian = self::$user;
+
+            $noSlot = array();
+            $withSlot = array();
+
+            foreach ($teachers as $data)
+            {
+                /** @var Teacher $teacher */
+                $teacher = $data['teacher'];
+                $avSlots = $teacher->getAllBookableSlots($guardian->getParentId());
+                $amountSlots = count($avSlots);
+
+                if($amountSlots == 0)
+                    array_push($noSlot, $data);
+                else
+                    array_push($withSlot, $data);
+
+            }
+
+            return $teachers = array_merge($withSlot, $noSlot);
+
+
+        }
+
     }
 
 ?>
