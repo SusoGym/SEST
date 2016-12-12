@@ -124,7 +124,7 @@
             return;
         }
 
-        url_param += "&register[mail]=" + mail + "&register[pwd]=" + pwd;
+        url_param += "&register[mail]=" + mail + "&register[pwd]=" + pwd.val();
 
         // give request to backend and utilize response
         $.get("index.php" + url_param, function (data) {

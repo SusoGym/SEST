@@ -140,6 +140,7 @@
                     } else if (self::$user instanceof Guardian)
                     {
                         // Do parenting stuff
+                        /** @var Guardian $guardian */
 						$guardian = self::$user;
 						$this->infoToView['book_end'] = $this->model->getOptions()['close'];
 						$this->infoToView['book_start'] = $this->model->getOptions()['open'];
@@ -336,7 +337,8 @@
 
             if ($success)
             {
-                $userid = $model->registerParent($mail, $pwd);
+                $ids = $model->registerParent($mail, $pwd);
+                ChromePhp::info("Registered parent with user-ids " . json_encode($ids));
                 $this->checkLogin($mail, $pwd);
 
             }
