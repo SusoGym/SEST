@@ -121,12 +121,12 @@
         public function getUserByMail($email)
         {
             $email = self::$connection->escape_string($email);
-            $data = self::$connection->selectAssociativeValues("SELECT id FROM user WHERE email='$email'");
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM user WHERE email='$email'");
 
             if ($data == null)
                 return null;
 
-            return $this->getUserById($data[0]['id']);
+            return $this->getUserById($data[0]['id'], $data);
         }
 
         /**
@@ -328,30 +328,6 @@
 
             return new Teacher($email, $tId);
         }
-		
-		/**
-		* get allteachers of kids of a parent 
-		* returns an array with teacherId, childrenId
-		* @return guardianID
-		* @return array(int, int)
-		*/
-		public function getTeachersOfAllChildren($eid){
-				$data = self::$connection->selectValues("SELECT lehrer.id,schueler.id,schueler.name,schueler.vorname FROM lehrer,unterricht,schueler 
-				WHERE lehrer.id=unterricht.lid 
-				AND unterricht.klasse=schueler.klasse 
-				AND schueler.eid = $eid ORDER BY lehrer.id");
-				
-				$teacherArray=array();
-				if(isset($data)) {
-					foreach($data as $d)
-					{
-							$teacherArray[]=array("teacher"=>$d[0],"studentid"=>$d[1],"studentsurname"=>$d[2],"studentname"=>$d[3]);
-					}
-					
-				}
-			return $teacherArray;	
-		}
-		
 
         /**
          *returns if slot already assigned - reloading
@@ -375,6 +351,7 @@
 
         /**
          *get existing slots for parent-teacher meeting
+         *
          * @return array(array("id","start","ende"))
          */
         public function getSlots()
@@ -420,6 +397,7 @@
 
         /**
          *returns assigned slots of a teacher
+         *
          * @param int teacherId
          * @returns array(int)
          */
@@ -460,17 +438,32 @@
          * @param int $teacherId
          * @return int appointmentId
          */
-        public function bookingAdd($slotId, $userId, $teacherId = null)
+        public function bookingAdd($slotId, $userId)
         {
-            self::$connection->straightQuery("UPDATE bookable_slot SET eid=$userId WHERE id=$slotId");
-		}
+            return self::$connection->insertValues("UPDATE bookable_slot SET eid=$userId WHERE id=$slotId");
+        }
 
         /**
          * @param int $appointment
          */
         public function bookingDelete($appointment)
         {
-			self::$connection->straightQuery("UPDATE bookable_slot SET eid=0 WHERE id=$appointment");
+            self::$connection->straightQuery("UPDATE bookable_slot SET eid=NULL WHERE id=$appointment");
+        }
+
+        /**
+         * @param $parentId int
+         * @param $appointment int
+         * @return boolean
+         */
+        public function parentOwnsAppointment($parentId, $appointment)
+        {
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM bookable_slot WHERE id=$appointment");
+            if(isset($data[0]))
+                $data = $data[0];
+            if(!isset($data) || $data['eid'] == null)
+                return true; //throw exception?
+            return $data['eid'] == $parentId;
         }
 
         /**
@@ -482,47 +475,57 @@
         {
             return -1;
         }
-		
-		/**
-		*/
-		
-		/**
-		* returns all bookable or booked slots of a teacher for a parent
-		* @param teacherId
-		* @return array
-		*/
-		public function getAllBookableSlotsForParent($teacherId,$parentId){
-			$slots = array();
-			$data = self::$connection->selectValues("SELECT bookable_slot.id,anfang,ende,eid,time_slot.id FROM bookable_slot,time_slot 
+
+        /**
+         */
+
+        /**
+         * returns all bookable or booked slots of a teacher for a parent
+         *
+         * @param teacherId
+         * @return array
+         */
+        public function getAllBookableSlotsForParent($teacherId, $parentId)
+        {
+            $slots = array();
+            $data = self::$connection->selectValues("SELECT bookable_slot.id,anfang,ende,eid,time_slot.id FROM bookable_slot,time_slot 
 			WHERE lid=$teacherId
 			AND bookable_slot.slotid=time_slot.id
-			AND (eid=0 OR eid=$parentId)
+			AND (eid IS NULL OR eid=$parentId)
 			ORDER BY anfang");
-			if(isset($data)){
-				foreach($data as $d){
-						$slots[] = array("bookingId"=>$d[0],"anfang"=>$d[1],"ende"=>$d[2],"eid"=>$d[3],"slotId"=>$d[4]);
-				}
-			}
-			return $slots;
-		}	
-	
-		/**
-		*returns appointments of parent
-		*@param int parentId
-		*@return array(Timestamp anfang)
-		*/
-		public function getAppointmentsOfParent($parentId){
-			$appointments = array();
-			$data = self::$connection->selectValues("SELECT time_slot.id FROM time_slot,bookable_slot
+            if (isset($data))
+            {
+                foreach ($data as $d)
+                {
+                    $slots[] = array("bookingId" => $d[0], "anfang" => $d[1], "ende" => $d[2], "eid" => $d[3], "slotId" => $d[4]);
+                }
+            }
+
+            return $slots;
+        }
+
+        /**
+         *returns appointments of parent
+         *
+         * @param int parentId
+         * @return array(Timestamp anfang)
+         */
+        public function getAppointmentsOfParent($parentId)
+        {
+            $appointments = array();
+            $data = self::$connection->selectValues("SELECT time_slot.id FROM time_slot,bookable_slot
 			WHERE time_slot.id=bookable_slot.slotid
 			AND bookable_slot.eid=$parentId ORDER BY anfang");
-			if(isset($data)){
-				foreach($data as $d){
-					$appointments[] = $d[0];
-				}
-			}
-			return $appointments;
-		}
+            if (isset($data))
+            {
+                foreach ($data as $d)
+                {
+                    $appointments[] = $d[0];
+                }
+            }
+
+            return $appointments;
+        }
 
         /**
          * @param $email
@@ -536,7 +539,7 @@
             //$password = self::$connection->escape_string($userName);
 
             $data = self::$connection->selectAssociativeValues("SELECT password_hash from user WHERE email='$email'");
-			
+
             if ($data == null)
                 return false;
 
@@ -544,7 +547,7 @@
             $data = $data[0];
 
             $pwd_hash = $data['password_hash'];
-			
+
 
             return password_verify($password, $pwd_hash);
         }

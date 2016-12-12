@@ -1,80 +1,89 @@
 <?php
 
-    //$model = Model::getInstance();
-	$data = $this->getDataForView();
+    $data = $this->getDataForView();
+    /** @var Guardian $user */
+    $user = $data['user'];
     $teachers = $data['teachers'];
-	$appointments = $data['appointments'];
-	include("header.php");
+    $appointments = $data['appointments'];
+    include("header.php");
 ?>
 
 <div class="container col s4 m4 l4">
-
-    <pre><?php //echo json_encode($students, JSON_PRETTY_PRINT); ?></pre>
-
     <div class="card ">
         <div class="card-content">
             <div class="row">
                 <div class="col l12 m12 s12">
                     <?php
-                        foreach ($teachers as $teacher)
-                            { ?>
-                                <div id="tchr<?php echo $teacher['id']; ?>" class="col s12">
-                                    <ul class="collection with-header">
-                                        <li class="collection-header">
-                                            <span style="font-size:22px;">Termin bei <span class="teal-text"><?php echo $teacher['teacher']->getFullname(); ?></span> buchen
-												<span style="font-size:12px;">&nbsp;( 
-												<?php 
-													$c = 0;
-													foreach($teacher['students'] as $student) {
-														if ($c > 0) { echo ' / ';}
-														echo $student->getSurname().", ".$student->getName();
-													$c++;
-													}
-												?>	
-												)</span>
+                        foreach ($teachers as $teacherStudent)
+                        {
+                            /** @var Teacher $teacher */
+                            $teacher = $teacherStudent['teacher'];
+                            ?>
+                            <div id="tchr<?php echo $teacher->getId(); ?>" class="col s12">
+                                <ul class="collection with-header">
+                                    <li class="collection-header">
+                                            <span style="font-size:22px;">Termin bei <span
+                                                        class="teal-text"><?php echo $teacher->getFullname(); ?></span> buchen
+												<span style="font-size:12px;">&nbsp;(
+                                                    <?php
+                                                        $students = 0;
+                                                        /** @var Student $student */
+                                                        foreach ($teacherStudent['students'] as $student)
+                                                        {
+                                                            if ($students > 0)
+                                                            {
+                                                                echo ' / ';
+                                                            }
+                                                            echo $student->getSurname() . ", " . $student->getName();
+                                                            $students++;
+                                                        }
+                                                    ?>
+                                                    )</span>
                                             </span></li>
-										<?php foreach($teacher['teacher']->getAllBookableSlots($data['user']->getParentId()) as $slot){ 
-										$anfang = date_format(date_create($slot['anfang']), 'd.m.Y H:i');
-										$ende = date_format(date_create($slot['ende']), 'H:i');
-										if($slot['eid'] == 0) {
-											//slot could be booked
-											$symbol = "forward";
-											$symbolColor = "teal-text";
-											$text = "jetzt buchen";
-											$link = 'href="'."?type=eest&bk=".$slot['bookingId'].'"';
-											if(in_array($slot['slotId'],$appointments)){
-												//cannot book a slot at that time because already booked another
-												$symbol = "clear";
-												$symbolColor = "red-text";
-												$text = "anderer Termin bereits gebucht";
-												$link = "";
-												}
-											}
-										
-										else{
-											//slot is booked by oneself
-											$symbol = "check";
-											$text = "gebucht";
-											$symbolColor = "green-text";
-											$link = 'href="'."?type=eest&del=".$slot['bookingId'].'"';
-										}
-										?>
+                                    <?php foreach ($teacher->getAllBookableSlots($user->getParentId()) as $slot)
+                                    {
+                                        $anfang = date_format(date_create($slot['anfang']), 'd.m.Y H:i');
+                                        $ende = date_format(date_create($slot['ende']), 'H:i');
+                                        if ($slot['eid'] == null)
+                                        {
+                                            //slot could be booked
+                                            $symbol = "forward";
+                                            $symbolColor = "teal-text";
+                                            $text = "jetzt buchen";
+                                            $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=book'";
+                                            if (in_array($slot['slotId'], $appointments))
+                                            {
+                                                //cannot book a slot at that time because already booked another
+                                                $symbol = "clear";
+                                                $symbolColor = "red-text";
+                                                $text = "anderer Termin bereits gebucht";
+                                                $link = "";
+                                            }
+                                        } else
+                                        {
+                                            //slot is booked by oneself
+                                            $symbol = "check";
+                                            $text = "gebucht";
+                                            $symbolColor = "green-text";
+                                            $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=del'";
+                                        }
+                                        ?>
                                         <li class="collection-item">
                                             <div><span class="teal-text ">
-                                                <?php 
-												echo $anfang." - ".$ende;
-												?>
+                                                <?php
+                                                    echo $anfang . " - " . $ende;
+                                                ?>
 												</span>
                                                 <a <?php echo $link; ?> class="secondary-content action"><i
                                                             class="material-icons <?php echo $symbolColor; ?>"><?php echo $symbol; ?></i></a>
                                                 <span class="secondary-content info grey-text"><?php echo $text; ?></span>
                                             </div>
                                         </li>
-                                        <?php } ?>
-                                    </ul>
-                                </div>
-                            <?php } ?>
-                        
+                                    <?php } ?>
+                                </ul>
+                            </div>
+                        <?php } ?>
+
                 </div>
             </div>
         </div>
@@ -101,7 +110,7 @@
         <div class="divider"></div>
     </li>
     <li><a class="subheader">Missing</a></li>
-    
+
 </ul>
 
 <div id="addstudent" class="modal">
