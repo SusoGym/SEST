@@ -47,9 +47,8 @@
             $this->infoToView = array();
 
             $this->handleLogic();
-		
-		
-			
+
+
 
         }
 
@@ -84,36 +83,49 @@
                 case "lest": //Teacher chooses est
                     $template = $this->teacherSlotDetermination();
                     break;
-				case "eest": //Parent chooses est
-					if (!self::$user instanceof Guardian)
-						die("Unauthorized access! User must be instance of Guardian!");
-					/** @var Guardian $user */
-					$guardian = self::$user;
-					if(isset($this->input['bk'])){
-						//book
-						$this->model->bookingAdd($this->input['bk'],$guardian->getParentId());
-						}
-					elseif(isset($this->input['del'])){
-						//delete booking
-						$this->model->bookingDelete($this->input['del'],$guardian->getParentId());
-						}
-						
-					$students = array();
-					$children = $guardian->getChildren();
-					$teachers = $guardian->getTeachersOfAllChildren();
-					$this->infoToView['teachers'] = $teachers;
-					$this->infoToView['user'] = $guardian;
-					$this->infoToView['appointments'] = $guardian->getAppointments();
-					$template="parent_est";
-					break;
-				case "childsel":
-					if (!self::$user instanceof Guardian)
-						die("Unauthorized access! User must be instance of Guardian!");
-					/** @var Guardian $user */
-					$guardian = self::$user;
-					$this->infoToView['children'] = $guardian->getChildren();
-					$template = "parent_child_select";
-					break;
+                case "eest": //Parent chooses est
+                    if (!self::$user instanceof Guardian)
+                        die("Unauthorized access! User must be instance of Guardian!");
+
+                    /** @var Guardian $guardian */
+                    $guardian = self::$user;
+                    if (isset($this->input['slot']) && isset($this->input['action']))
+                    { //TODO: maybe do this with js?
+                        $slot = $this->input['slot'];
+                        $action = $this->input['action'];
+
+                        if ($this->model->parentOwnsAppointment($guardian->getParentId(), $slot))
+                        {
+                            if ($action == 'book')
+                            {
+                                //book
+                                $this->model->bookingAdd($slot, $guardian->getParentId());
+                            } elseif ($action == 'del')
+                            {
+                                //delete booking
+                                $this->model->bookingDelete($slot);
+                            }
+                            header("Location: .?type=eest"); //resets the get parameters
+                        } else
+                        {
+                            die("Why are you trying to break me?! :( -> this slot is already booked by other user!");
+                        }
+                    }
+                    $students = array();
+                    $teachers = $guardian->getTeachersOfAllChildren();
+                    $this->infoToView['teachers'] = $teachers;
+                    $this->infoToView['user'] = $guardian;
+                    $this->infoToView['appointments'] = $guardian->getAppointments();
+                    $template = "parent_est";
+                    break;
+                case "childsel":
+                    if (!self::$user instanceof Guardian)
+                        die("Unauthorized access! User must be instance of Guardian!");
+                    /** @var Guardian $guardian */
+                    $guardian = self::$user;
+                    $this->infoToView['children'] = $guardian->getChildren();
+                    $template = "parent_child_select";
+                    break;
                 case "login":
                     $template = $this->login();
                     break;
@@ -141,10 +153,10 @@
                     {
                         // Do parenting stuff
                         /** @var Guardian $guardian */
-						$guardian = self::$user;
-						$this->infoToView['book_end'] = $this->model->getOptions()['close'];
-						$this->infoToView['book_start'] = $this->model->getOptions()['open'];
-						$this->infoToView['children'] = $guardian->getChildren();
+                        $guardian = self::$user;
+                        $this->infoToView['book_end'] = $this->model->getOptions()['close'];
+                        $this->infoToView['book_start'] = $this->model->getOptions()['open'];
+                        $this->infoToView['children'] = $guardian->getChildren();
                     } else if (self::$user instanceof Admin)
                     {
                         header("Location: ./administrator"); // does an admin need access to normal stuff?!
@@ -160,6 +172,7 @@
 
                         return "login";
                     }
+
                     return $this->getDashBoardName();
                     break;
             }
@@ -228,23 +241,6 @@
             return "tchr_slots";
         }
 
-        /**
-         * Booking logic
-         *
-         * @return string the template to be displayed
-         */
-        protected function booking()
-        {
-            if ($this->input['booking']['action'] == "add")
-            {
-                $this->model->bookingAdd($this->input['booking']['slot'], self::$user->getId(), $this->input['booking']['teacher']);
-            } elseif ($this->input['booking']['action'] == "delete")
-            {
-                $this->model->bookingDelete($this->model->getAppointment($this->input['booking']['slot'], self::$user->getId()));
-            }
-
-            return $this->getDashBoardName();
-        }
 
         /**
          * Logout logic
@@ -410,8 +406,8 @@
         {
             $view = View::getInstance();
             $this->infoToView['usr'] = self::$user;
-		//set Module activity
-		$this->infoToView['modules'] = array("vplan"=>false,"events"=>false,"news"=>false);
+            //set Module activity
+            $this->infoToView['modules'] = array("vplan" => false, "events" => false, "news" => false);
             $view->setDataForView($this->infoToView);
             $view->loadTemplate($template);
         }
@@ -584,7 +580,7 @@
 
             }
 
-            if($success)
+            if ($success)
             {
                 /** @var Guardian $parent */
                 $parent = self::$user;

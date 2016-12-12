@@ -197,78 +197,32 @@
 
             sort($teachers);
 
-            $tchrs_f = array();
-
-            for ($i = 1; $i < sizeof($teachers); $i++)
-            {
-                if ($teachers[$i] != $teachers[$i - 1])
-                { // check duplicate
-                    $tchrs_f[] = $teachers[$i];
-                }
-            }
-
-            return $tchrs_f;
+            return $teachers;
         }
 
         /**
-         * Returns all teachers for the children ordered by class
+         * Get all teachers of all children
          *
-         * @return array[String => array(Teacher)]
+         * @return array(Teacher,Child)
          */
-        public function getTeachersByClass()
+        public function getTeachersOfAllChildren()
         {
-            if ($this->getChildren() == null)
-                return array();
-
-            $model = Model::getInstance();
-            $classes = $this->getClasses();
-
-            $teachers = array();
-            foreach ($classes as $class)
+            $children = $this->getChildren();
+            $myArr = array();
+            /** @var Student $child */
+            foreach ($children as $child)
             {
-                $teacher = $model->getTeachersByClass($class);
-                if ($teacher == null)
-                    continue;
-
-                $teachers[$class] = $teacher;
-
+                /** @var Teacher $teacher */
+                foreach ($child->getTeachers() as $teacher)
+                {
+                    if (!isset($myArr[$teacher->getId()]))
+                        $myArr[$teacher->getId()] = array("teacher" => $teacher, "students" => array());
+                    array_push($myArr[$teacher->getId()]["students"], $child);
+                }
             }
 
-            return $teachers;
+            return $myArr;
         }
-		
-		/**
-		* Get all teachers of all children 
-		* @return array(Teacher,Child)
-		*/
-		public function getTeachersOfAllChildren(){
-			$model = Model::getInstance();
-			$teacherList = array();
-			$teacherList = $model->getTeachersOfAllChildren($this->parentId);
-			$x = 0;
-			$teacherReturn=array();
-			$studentArray = array();
-			while (isset($teacherList[$x])){
-				$multiple = true;
-				if ($x == 0 ) {
-					$studentArray[] = new Student ($teacherList[$x]['studentid'],null,$teacherList[$x]['studentsurname'],$teacherList[$x]['studentname'],null);
-					}
-				elseif($x > 0 && $teacherList[$x]['teacher'] == $teacherList[$x-1]['teacher'] ){
-					$studentArray[] = new Student ($teacherList[$x]['studentid'],null,$teacherList[$x]['studentsurname'],$teacherList[$x]['studentname'],null);
-					}
-				else {
-					$multiple = false;
-					if(!isset($studentArray)) {$studentArray[] = new Student ($teacherList[$x]['studentid'],null,$teacherList[$x]['studentsurname'],$teacherList[$x]['studentname'],null);}
-					}
-				if (!$multiple || $x == count($teacherList) - 1 ) {
-					$teacher = new Teacher(null,$teacherList[$x-1]['teacher']);
-					$teacherReturn[] = array("teacher"=>$teacher,"students"=>$studentArray);
-					unset($studentArray);
-					}
-				$x++;
-				}
-			return $teacherReturn;
-		}
 
         /**
          * @return int parent ID
@@ -294,18 +248,19 @@
         {
             return "Guardian";
         }
-		
-		
-		
-		/**
-		*returns booked timeSlots
-		*@return array(Timestamp anfang)
-		*/
-		public function getAppointments(){
-			$model = Model::getInstance();
-			return $model->getAppointmentsOfParent($this->parentId);
-			}
-		
+
+        /**
+         *returns booked timeSlots
+         *
+         * @return array(Timestamp anfang)
+         */
+        public function getAppointments()
+        {
+            $model = Model::getInstance();
+
+            return $model->getAppointmentsOfParent($this->parentId);
+        }
+
     }
 
 
@@ -451,19 +406,21 @@
         {
             $model = Model::getInstance();
             $assignedSlots = $model->getAssignedSlots($this->getId());
-			
+
             return $assignedSlots;
         }
-		
-		/**
-		*returns bookable Slots and booked Slots by a parent as array
-		*@return parentId
-		*@return array(int bookingId, Timestamp anfang, Timestamp ende, int parentId)
-		*/
-		public function getAllBookableSlots($parentId){
-			$model = Model::getInstance();
-			return $model->getAllBookableSlotsForParent($this->id,$parentId);
-		}
+
+        /**
+         *returns bookable Slots and booked Slots by a parent as array
+         *
+         * @return array(int bookingId, Timestamp anfang, Timestamp ende, int parentId)
+         */
+        public function getAllBookableSlots($parentId)
+        {
+            $model = Model::getInstance();
+
+            return $model->getAllBookableSlotsForParent($this->id, $parentId);
+        }
     }
 
     class Admin extends User
@@ -616,8 +573,8 @@
 
             return $teachers;
         }
-		
-	
+
+
     }
 
 
