@@ -47,7 +47,9 @@
             $this->infoToView = array();
 
             $this->handleLogic();
-
+		
+		
+			
 
         }
 
@@ -406,6 +408,8 @@
         {
             $view = View::getInstance();
             $this->infoToView['usr'] = self::$user;
+		//set Module activity
+		$this->infoToView['modules'] = array("vplan"=>false,"events"=>false,"news"=>false);
             $view->setDataForView($this->infoToView);
             $view->loadTemplate($template);
         }

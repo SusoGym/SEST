@@ -19,8 +19,33 @@
 		}
 	if(count($children) == 0){
 		$selectionActive = false;
-		$selectionColor = "grey";
-	}
+		}
+	
+	if(isset($data['modules']) ){
+		$modules = $data['modules'];
+		if(!$modules['vplan'] || !$selectionActive){
+				$vplanColor  = "grey";
+				$vplanLink = "";
+		} else {
+				$vplanColor  = "teal";
+				$vplanLink = 'href="'."?type=vplan";
+		}
+		if(!$modules['events'] || !$selectionActive){
+				$eventsColor  = "grey";
+				$eventsLink = "";
+		} else {
+				$eventsColor  = "teal";
+				$eventsLink = 'href="'."?type=events";
+		}
+		if(!$modules['news'] || !$selectionActive){
+				$newsColor  = "grey";
+				$newsLink = "";
+		} else {
+				$newsColor  = "teal";
+				$newsLink = 'href="'."?type=news";
+			
+		}
+	} 
 
  ?>
 <div class="container">
@@ -68,9 +93,9 @@
 				
 				<div class="col s4 m4 l4">
                     <?php if ($selectionActive)
-                        { ?> <a id="home" href="?home" title="Vertretungsplan"> <?php } ?>
-                        <div class="center promo <?php echo $selectionColor; ?>"
-                             style="border:solid; border-color:<?php echo $selectionColor; ?>; border-style: outset; border-radius:5px;">
+                        { ?> <a id="vplan" <?php echo $vplanLink; ?> title="Vertretungsplan"> <?php } ?>
+                        <div class="center promo <?php echo $vplanColor; ?>"
+                             style="border:solid; border-color:<?php echo $vplanColor; ?>; border-style: outset; border-radius:5px;">
                             <i class="material-icons  white-text " style="font-size: 96px;">business</i></li>
                             <p class="hide-on-med-and-down promo-caption white-text " style="font-size: 36px;">
                                 Vertretungsplan</p>
@@ -87,9 +112,9 @@
                 </div>
                 <div class="col s4 m4 l4">
                     <?php if ($selectionActive)
-                        { ?> <a id="home" href="?home" title="Termine"> <?php } ?>
-                        <div class="center promo <?php echo $selectionColor; ?>"
-                             style="border:solid; border-color:<?php echo $selectionColor; ?>; border-style: outset; border-radius:5px;">
+                        { ?> <a id="events" <?php echo $eventsLink; ?> title="Termine"> <?php } ?>
+                        <div class="center promo <?php echo $eventsColor; ?>"
+                             style="border:solid; border-color:<?php echo $eventsColor; ?>; border-style: outset; border-radius:5px;">
                             <i class="material-icons  white-text " style="font-size: 96px;">today</i></li>
                             <p class="hide-on-med-and-down promo-caption white-text " style="font-size: 36px;">
                                 Termine</p>
@@ -100,9 +125,9 @@
 
                 <div class="col s4 m4 l4">
                     <?php if ($selectionActive)
-                        { ?> <a id="home" href="?home" title="Newsletter"> <?php } ?>
-                        <div class="center promo <?php echo $selectionColor; ?>"
-                             style="border:solid; border-color:<?php echo $selectionColor; ?>; border-style: outset; border-radius:5px;">
+                        { ?> <a id="home" <?php echo $newsLink; ?> title="Newsletter"> <?php } ?>
+                        <div class="center promo <?php echo $newsColor; ?>"
+                             style="border:solid; border-color:<?php echo $newsColor; ?>; border-style: outset; border-radius:5px;">
                             <i class="material-icons  white-text " style="font-size: 96px;">library_books</i></li>
                             <p class="hide-on-med-and-down promo-caption white-text " style="font-size: 36px;">
                                 Newsletter</p>
