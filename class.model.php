@@ -554,13 +554,14 @@
          * @param $pid array or int parents children ids (array[int] || int)
          * @param $email string parents email
          * @param $pwd string parents password
-         * @return int newly created parents id
+         * @return array newly created ids of parent (userid and parentid)
          */
         public function registerParent($email, $pwd)
         {
 
             $email = self::$connection->escape_string($email);
-           
+            $pwd = password_hash($pwd, PASSWORD_DEFAULT);
+
             $query = "INSERT INTO user (user_type, password_hash, email) VALUES (1,'$pwd', '$email');";
 
             //Create parent in database and return eid
@@ -569,7 +570,7 @@
             $parentId = self::$connection->insertValues("INSERT INTO eltern (userid) VALUES ($usrId);");
 
             //return eid
-            return intval($parentId);
+            return array("uid" => $usrId, "pid" => $parentId);
 
         }
 
