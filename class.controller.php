@@ -463,7 +463,7 @@
             $type = null;
 
             if ($email == 'teacher@teacher' && DEBUG) // test account
-                $email = 'test@suso.schulen.konstanz.de';
+                $email = 'muster@suso.schulen.konstanz.de';
 
             if ($model->passwordValidate($email, $pwd) && !$inTime)
             {

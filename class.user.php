@@ -11,10 +11,6 @@
          */
         protected $type;
         /**
-         * @var string username
-         */
-        protected $username;
-        /**
          * @var int userId
          */
         protected $id;
@@ -36,10 +32,9 @@
          *
          * @param int $id userId
          */
-        public function __construct($id, $username, $type, $email, $name = null, $surname = null)
+        public function __construct($id, $type, $email, $name = null, $surname = null)
         {
             $this->id = $id;
-            $this->username = $username;
             $this->type = $type;
             $this->email = $email;
             $this->name = $name;
@@ -54,16 +49,6 @@
         public function getId()
         {
             return $this->id;
-        }
-
-        /**
-         *Returns username
-         *
-         * @return string name
-         */
-        public function getUsername()
-        {
-            return $this->username;
         }
 
         /**
@@ -97,7 +82,7 @@
          */
         public function getData()
         {
-            return array("userid" => $this->id, "username" => $this->username, "type" => $this->type, "name" => $this->name, "surname" => $this->surname, "email" => $this->email);
+            return array("userid" => $this->id, "type" => $this->type, "name" => $this->name, "surname" => $this->surname, "email" => $this->email);
         }
 
         /** Returns class type
@@ -130,12 +115,11 @@
          * Contructor of Parent class
          *
          * @param int $id userId
-         * @param string $username
          * @param string $email
          */
-        public function __construct($id, $username, $email, $parentId)
+        public function __construct($id, $email, $parentId)
         {
-            parent::__construct($id, $username, 1, $email);
+            parent::__construct($id, 1, $email);
 
             $this->parentId = $parentId;
             $this->children = Model::getInstance()->getChildrenByParentUserId($this->id);
@@ -285,7 +269,6 @@
          * Contructor of Teacher class
          *
          * @param int $id userId
-         * @param string $username
          * @param string $email
          */
         public function __construct($email, $teacherId, $rawData = null)
@@ -293,7 +276,7 @@
 
             $nameData = Model::getInstance()->getTeacherNameByTeacherId($teacherId, $rawData);
 
-            parent::__construct($teacherId, null, 2, $email, $nameData['name'], $nameData['surname']);
+            parent::__construct($teacherId, 2, $email, $nameData['name'], $nameData['surname']);
 
             $this->ldapName = Model::getInstance()->getTeacherLdapNameByTeacherId($teacherId, $rawData);
             $this->lessonAmount = Model::getInstance()->getTeacherLessonAmountByTeacherId($teacherId, $rawData);
@@ -305,7 +288,6 @@
         public function getData()
         {
             $parentData = parent::getData();
-            unset($parentData['username']);
 
             return array_merge($parentData, array("lessonAmount" => $this->lessonAmount, "ldapName" => $this->ldapName));
         }
@@ -426,9 +408,9 @@
     class Admin extends User
     {
 
-        function __construct($id, $username, $email)
+        function __construct($id, $email)
         {
-            parent::__construct($id, $username, 0, $email);
+            parent::__construct($id, 0, $email);
         }
 
         /** Returns class type

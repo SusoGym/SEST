@@ -98,12 +98,12 @@
             switch ($type)
             {
                 case 0: // Admin
-                    return new Admin($data['id'], $data['username'], $data['email']);
+                    return new Admin($data['id'], $data['email']);
                     break;
                 case 1: // Parent / Guardian
                     $parentId = self::$connection->selectAssociativeValues("SELECT id FROM eltern WHERE userid=$uid")[0]['id'];
 
-                    return new Guardian($data['id'], $data['username'], $data['email'], $parentId);
+                    return new Guardian($data['id'], $data['email'], $parentId);
                 case 2:
                     // non-existend
                     die("Why are we here?!");
