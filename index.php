@@ -1,7 +1,7 @@
 <?php
 
     const DEBUG = true;
-    const SQL_DEBUG = false;
+    const SQL_DEBUG = true;
 
     /* Debug Classes */
     require "ChromePhp.php"; // debugging
@@ -32,7 +32,7 @@
     if (isset($input['destroy']))
     {
         session_destroy();
-        header("Location: /");
+        header("Location: .");
     }
 
 
