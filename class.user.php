@@ -264,7 +264,8 @@
          * @var string $ldapName
          */
         protected $ldapName;
-
+		
+				
         /**
          * Contructor of Teacher class
          *
@@ -318,11 +319,15 @@
          */
         public function getRequiredSlots()
         {
-            $MINAMOUNT = 12.5;
-            $FULL = 10;
-            $HALF = 5;
-
-            return ($this->getLessonAmount() < $MINAMOUNT) ? $HALF : $FULL;
+            $HALFAMOUNT = 13.5;
+			$MINAMOUNT = 12.5;
+			$FULL = 10;
+			$HALF = 5;
+			$REDUCTION = 4;
+			$amount = $FULL;
+			if ($this->getLessonAmount() < $HALFAMOUNT) { $amount = $HALF;}
+			if ($this->getLessonAmount() < $MINAMOUNT) { $amount = $FULL - $REDUCTION;}	
+            return $amount;
         }
 
         /**
