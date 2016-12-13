@@ -2,56 +2,36 @@
 
     //$model = Model::getInstance();
 	$data = $this->getDataForView();
-   	$students = $data['children'];
+  $students = $data['children'];
 	include("header.php");
 
 ?>
 
 <div class="container">
 
-    <pre><?php //echo json_encode($students, JSON_PRETTY_PRINT); ?></pre>
-
-    <div class="card ">
-        <div class="card-content">
-            <div class="row">
-                <div class="col l12 row">
-					<?php if (count($students) == 0) {?>
-						<p class="teal-text" style="font-size: 36px;"><span style="font-size: 18px;"><b>Bitte Kinder angeben</b>
-						<br><span style="font-size: 18px;">(Vorname Nachname & Geburtsdatum)</span></span></p>
-					<?php } 
-					else { ?>
-						<p class="teal-text" style="font-size: 36px;"><b>Ihre Kinder:</b></p>
+    <div class="card">
+      <div class="card-content">
+				<?php if (count($students) == 0) {?>
+				<span class="card-title">Bitte Kinder angeben</span>
+				<?php }
+				else { ?>
+				<span class="card-title">Ihre Kinder:</span>
+					<div class="row">
+					<ul class="collection col s12">
 					<?php foreach ($students as $child) { ?>
-							<p class="teal-text" style="font-size: 18px;">
-							<?php echo $child->getSurname().", ".$child->getName()." (Klasse ".$child->getClass().")"; ?>
-							</p>
-						<?php }
-						}?>
-                    <a class='dropdown-button  col s10 left' href='#' data-activates='students'><br/></a>
-                    <a class='dropdown-button fab teal-text col s10 left' style="margin-top: 8px;" href='#addstudent'><i
-                                class="material-icons" style="font-size: 48px;">add</i></a>
-                    <div class="col s12">
-                        &nbsp;
-                    </div>
-
-                   
-
-
-                   
-
-
-                </div>
-               
-            </div>
-        </div>
-        <div class="card-action center">
-            
-            <br/>
-            &copy; <?php echo date("Y"); ?> Heinrich-Suso-Gymnasium Konstanz
-        </div>
-    </div>
-
-</div>
+						<li class="collection-item">
+						<?php echo $child->getSurname().", ".$child->getName()." (Klasse ".$child->getClass().")"; ?>
+						</li>
+						<?php } ?>
+					</ul>
+					<?php } ?>
+		    	<a class='btn-floating btn-large teal' style="position: absolute; bottom:80px; right:20px;" href='#addstudent'><i class="material-icons">add</i></a>
+				</div>
+			</div>
+	  	<div class="card-action center">
+				&copy; <?php echo date("Y"); ?> Heinrich-Suso-Gymnasium Konstanz
+      </div>
+		</div>
 <ul id="mobile-nav" class="side-nav">
     <li>
         <div class="userView">

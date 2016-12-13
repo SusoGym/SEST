@@ -10,7 +10,7 @@
     /** @var Guardian $usr */
     $usr = $data['usr'];
 	$children = $data['children'];
-	
+
 	if ((isset($data['book_end']) && $data['book_end'] < $today) || (isset($data['book_start']) && $data['book_start'] > $today) || count($children) == 0)
 		{
         ChromePhp::info("No children selected by guardian or booking time expired");
@@ -20,7 +20,7 @@
 	if(count($children) == 0){
 		$selectionActive = false;
 		}
-	
+
 	if(isset($data['modules']) ){
 		$modules = $data['modules'];
 		if(!$modules['vplan'] || !$selectionActive){
@@ -43,105 +43,92 @@
 		} else {
 				$newsColor  = "teal";
 				$newsLink = 'href="'."?type=news";
-			
+
 		}
-	} 
+	}
 
  ?>
-<div class="container">
-
-    <div class="card ">
-        <div class="card-content ">
-            <div class="row hide-on-med-and-down teal-text" style="font-size: 36px;">
-                <b>Folgende Funktionen stehen zur Verfügung</b>
+ <div class="container">
+   <div class="card white">
+     <div class="card-content">
+       <span class="card-title">Folgende Optionen stehen zur Auswahl:</span>
+       <div class="row">
+         <div class="col s4 m4 l4">
+           <div class="card hoverable teal" style="padding:20px;">
+             <a id="home" href="?type=childsel" title="Kinder">
+               <div class="center promo">
+                 <i class="material-icons large white-text ">face</i>
+                 <div class="hide-on-med-and-down center white-text" style="font-size: 36px;" style="margin:0px;">
+                   Kinder
+                 </div>
+                 <?php if (count($children) == 0) { ?>
+                   <span class="hide-on-med-and-down center red-text" style="font-size: 14px;">
+                     Bitte Kinder angeben!
+                   </span>
+                 <?php } ?>
+               </div>
+             </a>
+           </div>
+         </div>
+        <?php if ($estActive) { ?>
+          <div class=" col s4 m4 l4">
+            <div class="card hoverable teal" style="padding:20px;">
+              <a id="est" href="?type=eest" title="Elternsprechtag">
+                <div class="center promo" >
+                  <i class="material-icons large white-text ">supervisor_account</i>
+                  <div class="hide-on-med-and-down center white-text" style="font-size: 36px;">
+                    Elternsprechtag
+                  </div>
+                </div>
+              </a>
             </div>
-			<div class="row">
-				<div class="col s4 m4 l4">
-                    <a id="home" href="?type=childsel" title="Kinder">
-                        <div class="center promo teal"
-                             style="border:solid; border-color:teal; border-style: outset; border-radius:5px;">
-                            <i class="material-icons  white-text " style="font-size: 96px;">face</i></li>
-                            <p class="hide-on-med-and-down promo-caption white-text " style="font-size: 36px;">
-                                Kinder</p>
-							<p class="hide-on-med-and-down promo-caption <?php if (count($children) == 0) echo "red-text"; else echo "white-text" ?>"
-                               style="font-size: 14px;"><b>
-                                    <?php
-                                        if (count($children) == 0)
-                                            echo "Bitte Kinder angeben!";
-										else
-											echo "&nbsp;";
-                                        
-                                    ?>
-                                </b></p>
-                        </div>
-                    </a>
+          </div>
+        <?php } ?>
+        <?php if ($selectionActive) { ?>
+          <div class=" col s4 m4 l4">
+            <div class="card hoverable <?php echo $vplanColor; ?>" style="padding:20px;">
+              <a id="vplan" <?php echo $vplanLink; ?> title="Elternsprechtag">
+                <div class="center promo" >
+                  <i class="material-icons large white-text ">business</i>
+                  <div class="hide-on-med-and-down center white-text" style="font-size: 36px;">
+                    Vertretungsplan
+                  </div>
                 </div>
-				<div class="col s4 m4 l4">
-					<?php if ($estActive)
-                        { ?> <a id="home" href="?type=eest" title="Elternsprechtag"> <?php } ?>
-                        <div class="center promo <?php echo $estColor; ?>"
-                             style="border:solid; border-color:<?php echo $estColor; ?>; border-style: outset; border-radius:5px;">
-                            <i class="material-icons  white-text" style="font-size: 96px;">supervisor_account</i></li>
-                            <p class="hide-on-med-and-down promo-caption white-text " style="font-size: 36px;">
-                                Elternsprechtag</p>
-                            <p class="hide-on-med-and-down promo-caption style="font-size: 14px;"><b>&nbsp;</b></p>
-                        </div>
-                        <?php if ($estActive)
-                            { ?>
-                    </a> <?php } ?>
-				</div>
-				
-				<div class="col s4 m4 l4">
-                    <?php if ($selectionActive)
-                        { ?> <a id="vplan" <?php echo $vplanLink; ?> title="Vertretungsplan"> <?php } ?>
-                        <div class="center promo <?php echo $vplanColor; ?>"
-                             style="border:solid; border-color:<?php echo $vplanColor; ?>; border-style: outset; border-radius:5px;">
-                            <i class="material-icons  white-text " style="font-size: 96px;">business</i></li>
-                            <p class="hide-on-med-and-down promo-caption white-text " style="font-size: 36px;">
-                                Vertretungsplan</p>
-							<p class="hide-on-med-and-down promo-caption style="font-size: 14px;"><b>&nbsp;</b></p>
-                        </div>
-                    </a>
-                </div>
-				
-			</div>
-            <div class="row">
-
-                <div class="row">
-
-                </div>
-                <div class="col s4 m4 l4">
-                    <?php if ($selectionActive)
-                        { ?> <a id="events" <?php echo $eventsLink; ?> title="Termine"> <?php } ?>
-                        <div class="center promo <?php echo $eventsColor; ?>"
-                             style="border:solid; border-color:<?php echo $eventsColor; ?>; border-style: outset; border-radius:5px;">
-                            <i class="material-icons  white-text " style="font-size: 96px;">today</i></li>
-                            <p class="hide-on-med-and-down promo-caption white-text " style="font-size: 36px;">
-                                Termine</p>
-							<p class="hide-on-med-and-down promo-caption style="font-size: 14px;"><b>&nbsp;</b></p>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col s4 m4 l4">
-                    <?php if ($selectionActive)
-                        { ?> <a id="home" <?php echo $newsLink; ?> title="Newsletter"> <?php } ?>
-                        <div class="center promo <?php echo $newsColor; ?>"
-                             style="border:solid; border-color:<?php echo $newsColor; ?>; border-style: outset; border-radius:5px;">
-                            <i class="material-icons  white-text " style="font-size: 96px;">library_books</i></li>
-                            <p class="hide-on-med-and-down promo-caption white-text " style="font-size: 36px;">
-                                Newsletter</p>
-                            <p class="hide-on-med-and-down promo-caption style="font-size: 14px;"><b>&nbsp;</b></p>
-                        </div>
-                    </a>
-                </div>
-
+              </a>
             </div>
-
-
+          </div>
         </div>
+        <div class="row">
+          <div class=" col s4 m4 l4">
+            <div class="card hoverable <?php echo $eventsColor; ?>" style="padding:20px;">
+              <a id="events" <?php echo $eventsLink; ?> title="Elternsprechtag">
+                <div class="center promo" >
+                  <i class="material-icons large white-text">today</i>
+                  <div class="hide-on-med-and-down center white-text" style="font-size: 36px;">
+                    Termine
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+          <div class=" col s4 m4 l4">
+            <div class="card hoverable <?php echo $newsColor; ?>" style="padding:20px;">
+              <a id="events" <?php echo $newsLink; ?> title="Elternsprechtag">
+                <div class="center promo" >
+                  <i class="material-icons large white-text ">library_books</i>
+                  <div class="hide-on-med-and-down center white-text" style="font-size: 36px;">
+                    Newsletter
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+        <?php } ?>
+      </div>
     </div>
+  </div>
 </div>
+
 
 <ul id="mobile-nav" class="side-nav">
     <li>
@@ -161,14 +148,14 @@
    <?php if($vplanLink <>"") { ?>
 	<li><a class="waves-effect" href="<?php echo $vplanLink; ?>"><i class="material-icons">business</i>Vertretungsplan</a></li>
    <?php }
-	if($eventsLink <> "") { ?>	   
+	if($eventsLink <> "") { ?>
 	<li><a class="waves-effect" href="<?php echo $eventsLink; ?>"><i class="material-icons">today</i>Termine</a></li>
    <?php }
 	if ($newsLink <>"") { ?>
    <li><a class="waves-effect" href="<?php echo $newsLink; ?>"><i class="material-icons">library_books</i>newsletter</a></li>
    <?php } ?>
 
-    
+
 </ul>
 
 
