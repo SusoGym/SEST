@@ -325,8 +325,9 @@
 			$HALF = 5;
 			$REDUCTION = 4;
 			$amount = $FULL;
-			if ($this->getLessonAmount() < $HALFAMOUNT) { $amount = $HALF;}
-			if ($this->getLessonAmount() < $MINAMOUNT) { $amount = $FULL - $REDUCTION;}	
+			$lessons = $this->getLessonAmount();
+			if ($lessons < $HALFAMOUNT) { $amount = $FULL - $REDUCTION;}
+			if ($lessons < $MINAMOUNT) { $amount = $HALF;}	
             return $amount;
         }
 
