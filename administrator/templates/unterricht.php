@@ -11,8 +11,15 @@
 <div class="container">
     <div class="card ">
         <div class="card-content">
-            <a href="<?php echo $data['backButton']; ?>" class="right" title="Back"><i
-                        class="material-icons">arrow_back</i></a>
+          <span class="card-title">
+            <?php if (isset($data["backButton"]))
+            { ?>
+                <a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text"
+                   href="<?php echo $data["backButton"]; ?>"><i
+                            class="material-icons">chevron_left</i></a>
+            <?php } ?>
+            <?php echo \View::getInstance()->getTitle(); ?>
+          </span>
             <div class="row">
                 <div class="col l3 hide-on-med-and-down">
                     <form>
@@ -40,11 +47,9 @@
                             $f = $data['currentForm'];
                             ?>
                             <div id="form<?php echo $f; ?>" class="col s12">
-                                <ul class="collection with-header">
-                                    <li class="collection-header"><h4>Lehrer für <font
-                                                    class="teal-text"><?php echo $f ?></font>
-                                            festlegen</h4></li>
-                                </ul>
+                                <h4>Lehrer für
+                                  <font class="teal-text"><?php echo $f ?></font>
+                                            festlegen</h4>
 
                                 <div class="input-field col s12">
                                     <form method="POST" action="?type=setclasses">
@@ -80,9 +85,7 @@
                         {
                             //tell user to choose form
                             ?>
-                            <ul class="collection with-header">
-                                <li class="collection-header"><h4>Bitte Klasse wählen</h4></li>
-                            </ul>
+                            <h4>Bitte Klasse wählen</h4>
                         <?php }
 
                     ?>

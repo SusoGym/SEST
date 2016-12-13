@@ -8,12 +8,19 @@
 
     <div class="card ">
         <div class="card-content">
-
+          <span class="card-title">
+            <?php if (isset($data["backButton"]))
+            { ?>
+                <a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text"
+                   href="<?php echo $data["backButton"]; ?>"><i
+                            class="material-icons">chevron_left</i></a>
+            <?php } ?>
+            <?php echo \View::getInstance()->getTitle(); ?>
+          </span>
             <form action="?type=<?php echo $data['action']; ?>" method="POST">
-                <div class="row">
-                    <b><?php echo $data['title']; ?></b>
-                    <br><b>Wählen Sie eine Zuordnung der Quelldaten zu den Zieldatenfeldern in der Datenbank</b>
-                </div>
+                <p>
+                    Wählen Sie eine Zuordnung der Quelldaten zu den Zieldatenfeldern in der Datenbank
+                </p>
                 <div class="row">
                     <table width="50%" align="center">
                         <tbody>
@@ -26,13 +33,13 @@
 
                                 <?php echo $d ?>
                             </td>
-                            <td>
+                            <td class="input-field">
                                 <select class="browser-default right" name="post_dbfield[]" title="Select a file"
                                         required>
                                     <option selected></option>
                                     <?php foreach ($data['fileData'][1] as $f)
                                     { ?>
-                                        <option><?php echo $f; ?></option>
+                                        <option value="<?php echo $f; ?>"><?php echo $f; ?></option>
                                     <?php } ?>
                                 </select>
                             </td>
@@ -43,7 +50,6 @@
 
                 </div>
                 <div class="row">
-                    <input type="hidden" name="file" value="<?php echo $data['fileName'] ?>">
 
 
                     <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
@@ -51,6 +57,7 @@
 
                 </div>
 
+                    <input type="hidden" name="file" value="<?php echo $data['fileName'] ?>"></input>
             </form>
         </div>
 

@@ -5,17 +5,10 @@
 
     <div class="card ">
         <div class="card-content">
-            <div class="row">
 
-                <b><?php echo \View::getInstance()->getDataForView()['action']; ?></b>
-
-            </div>
-            <div class="row">
-                <ul><a id="home" href="?type=sestconfig">Elternsprechtag konfigurieren</a></ul>
-            </div>
-            <div class="row">
-                <ul><a id="home" href="?type=newsconfig">Newsletter konfigurieren</a></ul>
-            </div>
+            <span class="card-title"><?php echo \View::getInstance()->getDataForView()['action']; ?></span>
+            <a class="btn-flat" id="home" href="?type=sestconfig">Elternsprechtag konfigurieren</a>
+            <a class="btn-flat" id="home" href="?type=newsconfig">Newsletter konfigurieren</a>
         </div>
 
     </div>
