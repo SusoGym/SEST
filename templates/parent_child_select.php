@@ -2,30 +2,7 @@
 
     //$model = Model::getInstance();
 	$data = $this->getDataForView();
-    $teacherNames = array();
-    $teacherObjs = array();
-	
-    /*
-	/** @var Guardian $user */
-//    $user = Controller::getUser();
-//    $students = array();
-//    $children = $user->getChildren();
-    /** @var Student $child */
-    /*
-	foreach ($children as $child)
-    {
-        $students[$child->getId()]['id'] = $child->getId();
-        $students[$child->getId()]['name'] = $child->getFullName();
-        $students[$child->getId()]['class'] = $child->getClass();
-        $teachers = $child->getTeachers();
-        /** @var Teacher $teacher */
-//        foreach ($teachers as $teacher)
-//        {
-//            $students[$child->getId()]['teachers'][$teacher->getId()] = array('id' => $teacher->getId(), 'name' => $teacher->getFullName());
-//        }
-//    }
-//	*/
-	$students = $data['children'];
+   	$students = $data['children'];
 	include("header.php");
 
 ?>
@@ -37,12 +14,13 @@
     <div class="card ">
         <div class="card-content">
             <div class="row">
-                <div class="col l12 hide-on-med-and-down row">
+                <div class="col l12 row">
 					<?php if (count($students) == 0) {?>
-						<p class="teal-text" style="font-size: 36px;"><span style="font-size: 18px;"><b>Bitte Kinder angeben (Vorname Nachname & Geburtsdatum)</b></span></p>
+						<p class="teal-text" style="font-size: 36px;"><span style="font-size: 18px;"><b>Bitte Kinder angeben</b>
+						<br><span style="font-size: 18px;">(Vorname Nachname & Geburtsdatum)</span></span></p>
 					<?php } 
 					else { ?>
-						<p class="teal-text" style="font-size: 36px;"><b>Sie haben folgende Kinder angegeben</b></p>
+						<p class="teal-text" style="font-size: 36px;"><b>Ihre Kinder:</b></p>
 					<?php foreach ($students as $child) { ?>
 							<p class="teal-text" style="font-size: 18px;">
 							<?php echo $child->getSurname().", ".$child->getName()." (Klasse ".$child->getClass().")"; ?>
@@ -85,7 +63,6 @@
     </li>
     <?php
         include("navbar.php"); ?>
-    
 </ul>
 
 <div id="addstudent" class="modal">
