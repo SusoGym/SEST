@@ -1,7 +1,7 @@
 <?php namespace administrator;
     include("header.php");
     $data = \View::getInstance()->getDataForView();
-
+    date_default_timezone_set('Europe/Berlin');
 ?>
 
 <div class="container">
@@ -9,13 +9,15 @@
     <div class="card">
         <div class="card-content ">
             <div class="row">
-                <b><?php echo \View::getInstance()->getTitle(); ?></b>
+              <span class="card-title">
                 <?php if (isset($data["backButton"]))
                 { ?>
-                    <a id="backButton" class="mdl-navigation__link right teal-text"
+                    <a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text"
                        href="<?php echo $data["backButton"]; ?>"><i
-                                class="material-icons">arrow_back</i></a>
+                                class="material-icons">chevron_left</i></a>
                 <?php } ?>
+                <?php echo \View::getInstance()->getTitle(); ?>
+              </span>
 
 
             </div>
@@ -39,19 +41,20 @@
             <?php
                 if (isset($data["slots"]))
                 { ?>
-                    <div class="row col s6">
+                    <ul class="collection">
                         <?php
                             foreach ($data["slots"] as $s)
                             { ?>
 
                                 <?php
                                 $anfang = date_format(date_create($s['anfang']), 'd.m.Y H:i');
-                                $ende = date_format(date_create($s['ende']), 'd.m.Y H:i');
+                                $ende = (date_format(date_create($s['anfang']), 'd.m.Y') == date_format(date_create($s['ende']), 'd.m.Y')) ? date_format(date_create($s['ende']), 'H:i') : date_format(date_create($s['ende']), 'd.m.Y H:i');
                                 ?>
-                                <ul class="teal-text"><?php echo $anfang . " bis " . $ende; ?>
-                                    <a id="slot" href="?type=setslots&del=<?php echo $s['id']; ?> " class="teal-text"><i
-                                                class="material-icons">delete</i></a>
-                                </ul>
+                                <li class="collection-item"><?php echo $anfang . " bis " . $ende; ?>
+                                    <a id="slot" href="?type=setslots&del=<?php echo $s['id']; ?> " class="secondary-content teal-text">
+                                      <i class="material-icons">delete</i>
+                                    </a>
+                                </li>
                                 <?php
                             } ?>
                     </div>

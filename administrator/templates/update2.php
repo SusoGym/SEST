@@ -8,16 +8,18 @@
 
     <div class="card ">
         <div class="card-content">
+            <span class="card-title">
+                Daten wurden gelesen
+            </span>
+          <p>
+              überprüfte Datensätze: <?php echo $data['fileData'][0]; ?><br>
+              eingefügte Datensätze: <?php echo $data['fileData'][1]; ?><br>
+              gelöschte Datensätze: <?php echo $data['fileData'][2]; ?>
+          </p>
 
-
-            <div class="row">
-                <b><?php echo $this->action ?></b>
-                <br><b>Daten wurden gelesen</b><br>
-                überprüfte Datensätze: <?php echo $data['fileData'][0] ?><br>
-                eingefügte Datensätze: <?php echo $data['fileData'][1] ?><br>
-                gelöschte Datensätze: <?php echo $data['fileData'][2] ?>
-
-            </div>
+            <p>
+                <?php echo $this->action; ?></br />
+            </p>
 
 
         </div>

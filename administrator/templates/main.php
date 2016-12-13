@@ -6,9 +6,8 @@
 
     <div class="card">
         <div class="card-content">
-            <div class="row">
-                <b><?php echo \View::getInstance()->getTitle(); ?></b>
-            </div>
+
+            <span class="card-title"><?php echo \View::getInstance()->getTitle(); ?></span>
 
         </div>
 

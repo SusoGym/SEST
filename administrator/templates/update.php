@@ -8,21 +8,32 @@ include("header.php");
 
     <div class="card ">
         <div class="card-content">
-            <div class="row">
-                <b><?php echo $data['title']; ?></b>
-                <br>Bitte wählen Sie eine Quelldatei
-            </div>
-            <form enctype="multipart/form-data"  target="myTarget" method="post"
-                  action="?console&type=<?php echo $data['action']; ?>">
-                <div class="row">
-                    <input type="file" class="btn-flat left waves-effect waves-teal" name="file" id="file" required>
-                    <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
-                            class="material-icons right">send</i></button>
-
+          <span class="card-title">
+            <?php if (isset($data["backButton"]))
+            { ?>
+                <a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text"
+                   href="<?php echo $data["backButton"]; ?>"><i
+                            class="material-icons">chevron_left</i></a>
+            <?php } ?>
+            <?php echo \View::getInstance()->getTitle(); ?>
+          </span>
+          <form enctype="multipart/form-data" class="row" target="myTarget" method="post"
+                action="?console&type=<?php echo $data['action']; ?>">
+              <div class="file-field input-field col l12">
+                <div class="btn">
+                  <span>Datei</span>
+                  <input type="file" name="file" id="file" required>
                 </div>
-
-                <iframe id="myTarget" style="display: none;" name="myTarget"></iframe>
-            </form>
+                <div class="file-path-wrapper">
+                  <input class="file-path validate" type="text" placeholder="Bitte wählen Sie eine Quelldatei">
+                </div>
+              </div>
+                <button class="btn-flat btn-large waves-effect waves-teal col l12" type="submit">
+                  Submit
+                  <i class="material-icons right">send</i>
+                </button>
+          </form>
+          <iframe id="myTarget" style="display: none;" name="myTarget"></iframe>
         </div>
 
     </div>
