@@ -74,6 +74,21 @@
     </div>
 </div>
 
+<ul id="mobile-nav" class="side-nav">
+    <li>
+        <div class="userView">
+            <img class="background grey" src="http://materializecss.com/images/office.jpg">
+            <img class="circle"
+                 src="http://www.motormasters.info/wp-content/uploads/2015/02/dummy-profile-pic-male1.jpg">
+            <span class="white-text name"><?php echo $_SESSION['user']['mail']; ?></span>
+        </div>
+    </li>
+    <?php
+        include("navbar.php"); ?>
+</ul>
+
+
+
 <?php include("js.php"); ?>
 
 </body>
