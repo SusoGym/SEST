@@ -296,7 +296,11 @@
          */
         public function getTeacherLessonAmountByTeacherId($teacherId, $rawData = null)
         {
-            return 18; //TODO
+            $data = self::$connection->selectValues("SELECT deputat FROM lehrer WHERE id=$teacherId");
+			if(isset($data)){
+				$lessons = $data[0][0];
+			}
+			return $lessons;
         }
 
         /**
