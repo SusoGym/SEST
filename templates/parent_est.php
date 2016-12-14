@@ -5,6 +5,8 @@
     $user = $data['user'];
     $teachers = $data['teachers'];
     $appointments = $data['appointments'];
+    $maxAppointments = $data['maxAppointments'];
+    $maxedOutAppointments = count($appointments) >= $maxAppointments;
     include("header.php");
 ?>
 
@@ -23,9 +25,10 @@
                             <div id="tchr<?php echo $teacher->getId(); ?>" class="col s12">
                                 <ul class="collection with-header">
                                     <li class="collection-header">
-                                            <span style="font-size:22px;"><?php if($amountAvailableSlots != 0)echo "Termin bei " ?><span
-                                                        class="teal-text"><?php echo $teacher->getFullname(); ?></span><?php if($amountAvailableSlots != 0)echo" buchen"?>
-												<span style="font-size:12px;">&nbsp;(
+                                            <span style="font-size:22px;"><?php if ($amountAvailableSlots != 0) echo "Termin bei " ?>
+                                                <span
+                                                        class="teal-text"><?php echo $teacher->getFullname(); ?></span><?php if ($amountAvailableSlots != 0) echo " buchen" ?>
+                                                <span style="font-size:12px;">&nbsp;(
                                                     <?php
                                                         $students = 0;
                                                         /** @var Student $student */
@@ -35,7 +38,7 @@
                                                             {
                                                                 echo ' / ';
                                                             }
-                                                            echo $student->getName() . " " .$student->getSurname();
+                                                            echo $student->getName() . " " . $student->getSurname();
                                                             $students++;
                                                         }
                                                     ?>
@@ -43,8 +46,9 @@
                                                 <?php
                                                     if ($amountAvailableSlots == 0): ?>
 
-                                                        <span class="right red-text" style="font-size: 18px">ausgebucht!</span>
-                                                        <?php //TODO: text?
+                                                        <span class="right red-text"
+                                                              style="font-size: 18px">ausgebucht!</span>
+                                                    <?php //TODO: text?
                                                     endif; ?>
                                             </span>
                                     </li>
@@ -59,11 +63,6 @@
                                                 $ende = date_format(date_create($slot['ende']), 'H:i');
                                                 if ($slot['eid'] == null)
                                                 {
-                                                    //slot could be booked
-                                                    $symbol = "forward";
-                                                    $symbolColor = "teal-text";
-                                                    $text = "jetzt buchen";
-                                                    $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=book'";
                                                     if (in_array($slot['slotId'], $appointments))
                                                     {
                                                         //cannot book a slot at that time because already booked another
@@ -71,7 +70,22 @@
                                                         $symbolColor = "red-text";
                                                         $text = "anderer Termin bereits gebucht";
                                                         $link = "";
+                                                    } else if ($maxedOutAppointments)
+                                                    {
+                                                        $symbol = "clear";
+                                                        $symbolColor = "orange-text";
+                                                        $link = "";
+                                                        $text = "maximale Anzahl von Terminen gebucht!";
+                                                    } else
+                                                    {
+                                                        //slot could be booked
+                                                        $symbol = "forward";
+                                                        $symbolColor = "teal-text";
+                                                        $text = "jetzt buchen";
+                                                        $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=book'";
                                                     }
+
+
                                                 } else
                                                 {
                                                     //slot is booked by oneself
