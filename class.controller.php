@@ -84,40 +84,7 @@
                     $template = $this->teacherSlotDetermination();
                     break;
                 case "eest": //Parent chooses est
-                    if (!self::$user instanceof Guardian)
-                        die("Unauthorized access! User must be instance of Guardian!");
-
-                    /** @var Guardian $guardian */
-                    $guardian = self::$user;
-                    if (isset($this->input['slot']) && isset($this->input['action']))
-                    { //TODO: maybe do this with js?
-                        $slot = $this->input['slot'];
-                        $action = $this->input['action'];
-
-                        if ($this->model->parentOwnsAppointment($guardian->getParentId(), $slot))
-                        {
-                            if ($action == 'book')
-                            {
-                                //book
-                                $this->model->bookingAdd($slot, $guardian->getParentId());
-                            } elseif ($action == 'del')
-                            {
-                                //delete booking
-                                $this->model->bookingDelete($slot);
-                            }
-                            header("Location: .?type=eest"); //resets the get parameters
-                        } else
-                        {
-                            die("Why are you trying to break me?! :( -> this slot is already booked by other user!");
-                        }
-                    }
-                    $students = array();
-                    $teachers = $guardian->getTeachersOfAllChildren();
-                    $this->sortByAppointment($teachers);
-                    $this->infoToView['teachers'] = $teachers;
-                    $this->infoToView['user'] = $guardian;
-                    $this->infoToView['appointments'] = $guardian->getAppointments();
-                    $template = "parent_est";
+                    $template = $this->handleParentEst();
                     break;
                 case "childsel":
                     if (!self::$user instanceof Guardian)
@@ -129,9 +96,6 @@
                     break;
                 case "login":
                     $template = $this->login();
-                    break;
-                case "booking":
-                    $template = $this->booking();
                     break;
                 case "register":
                     $template = $this->register();
@@ -297,6 +261,49 @@
 
                 return "login";
             }
+        }
+
+        /**
+         * Handles parent's est logic
+         * @return string template to be displayed
+         */
+        protected function handleParentEst()
+        {
+            if (!self::$user instanceof Guardian)
+                die("Unauthorized access! User must be instance of Guardian!");
+
+            /** @var Guardian $guardian */
+            $guardian = self::$user;
+            if (isset($this->input['slot']) && isset($this->input['action']))
+            { //TODO: maybe do this with js?
+                $slot = $this->input['slot'];
+                $action = $this->input['action'];
+
+                if ($this->model->parentOwnsAppointment($guardian->getParentId(), $slot))
+                {
+                    if ($action == 'book')
+                    {
+                        //book
+                        $this->model->bookingAdd($slot, $guardian->getParentId());
+                    } elseif ($action == 'del')
+                    {
+                        //delete booking
+                        $this->model->bookingDelete($slot);
+                    }
+                    header("Location: .?type=eest"); //resets the get parameters
+                } else
+                {
+                    die("Why are you trying to break me?! :( -> this slot is already booked by other user!");
+                }
+            }
+            $students = array();
+            $teachers = $guardian->getTeachersOfAllChildren();
+            $this->sortByAppointment($teachers);
+            $this->infoToView['teachers'] = $teachers;
+            $this->infoToView['user'] = $guardian;
+            $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'];
+            $this->infoToView['appointments'] = $guardian->getAppointments();
+            return "parent_est";
         }
 
         /**
