@@ -241,9 +241,44 @@
         public function getAppointments()
         {
             $model = Model::getInstance();
-
-            return $model->getAppointmentsOfParent($this->parentId);
+		$appointments = array();
+            $appointmentData =  $model->getAppointmentsOfParent($this->parentId);
+		foreach ($appointmentData as $a) {
+		$appointments[] = $a['slotId'];
+		}
+		return $appointments;
         }
+
+	/**
+         *returns TeacherIds of booked timeSlots
+         *
+         * @return array(Timestamp anfang)
+         */
+        public function getAppointmentTeachers()
+        {
+            $model = Model::getInstance();
+		$appointments = array();
+            $appointmentData =  $model->getAppointmentsOfParent($this->parentId);
+		foreach ($appointmentData as $a) {
+		$appointments[] = array("teacherId"=>$a['teacherId']);
+		}
+		return $appointments;
+        }
+
+
+	/**
+	*finds bookedTeacher Ids
+	*
+	*@return array(int)
+	*/
+	public function getBookedTeachers(){
+		$bookedTeachers = array();
+		$appointments = $this->getAppointmentTeachers();
+		foreach ($appointments as $appointment) {
+			$teachers[] = $appointment['teacherId'];
+		}
+       return $teachers;
+	}
 
     }
 
