@@ -53,6 +53,16 @@
                             <input id="pwdrep_register" name="pwdrep" type="password" required>
                             <label for="pwdrep_register">Passwort wiederholen</label>
                         </div>
+                        <div class="input-field ">
+                            <i class="material-icons prefix">account_circle</i>
+                            <input id="name_register" name="name" type="text" required>
+                            <label for="name_register">Vorname</label>
+                        </div>
+                        <div class="input-field "> <!-- TODO: one column pls -->
+                            <i class="material-icons prefix">supervisor_account</i>
+                            <input id="surname_register" name="surname" type="text" required>
+                            <label for="surname_register">Nachname</label>
+                        </div>
                         <div class="row" style="margin-bottom: 0;">
                             <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
                                         class="material-icons right">send</i></button>
@@ -115,6 +125,8 @@
         var mail = $('#mail_register').val();
         var pwd = $('#pwd_register');
         var pwdrep = $('#pwdrep_register');
+        var nameVal = $('#name_register').val();
+        var surnameVal = $('#surname_register').val();
 
         if (pwd.val() != pwdrep.val()) {
             pwd.val("");
@@ -124,7 +136,7 @@
             return;
         }
 
-        url_param += "&register[mail]=" + mail + "&register[pwd]=" + pwd.val();
+        url_param += "&register[mail]=" + mail + "&register[pwd]=" + pwd.val() + "&register[name]=" + nameVal + "&register[surname]=" + surnameVal;
 
         // give request to backend and utilize response
         $.get("index.php" + url_param, function (data) {
