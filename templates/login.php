@@ -15,14 +15,14 @@
         <ul class="collapsible white" data-collapsible="accordion">
             <li>
                 <div class="collapsible-header active"><i class="material-icons">person</i>Anmelden</div>
-                <div class="collapsible-body" style="padding: 20px;">
-                    <form autocomplete="off" onsubmit="submitLogin()" action="javascript:void(0);">
-                        <div class="input-field">
+                <div class="collapsible-body">
+                    <form autocomplete="off" onsubmit="submitLogin()" action="javascript:void(0);" class="row" style="margin: 20px;">
+                        <div class="input-field col s12">
                             <i class="material-icons prefix">person</i>
                             <input id="usr_login" type="email" class="validate" required>
                             <label for="usr_login">Email-Addresse</label>
                         </div>
-                        <div class="input-field ">
+                        <div class="input-field col s12">
                             <i class="material-icons prefix">vpn_key</i>
                             <input id="pwd_login" type="password" required>
                             <label for="pwd_login">Passwort</label>
@@ -36,32 +36,31 @@
             </li>
             <li>
                 <div class="collapsible-header"><i class="material-icons">person_add</i>Registrieren</div>
-                <div class="collapsible-body" style="padding: 20px;">
-                    <form method="post" onsubmit="submitRegister()" action="javascript:void(0);" autocomplete="off">
-                        <div class="input-field">
+                <div class="collapsible-body">
+                    <form method="post" onsubmit="submitRegister()" action="javascript:void(0);" autocomplete="off" class="row" style="margin: 20px;">
+                      <div class="input-field col s6">
+                          <i class="material-icons prefix">account_circle</i>
+                          <input id="name_register" name="name" type="text" required>
+                          <label for="name_register">Vorname</label>
+                      </div>
+                      <div class="input-field col s6">
+                          <input id="surname_register" name="surname" type="text" required>
+                          <label for="surname_register">Nachname</label>
+                      </div>
+                        <div class="input-field col s12">
                             <i class="material-icons prefix">mail</i>
                             <input id="mail_register" name="mail" type="email" required="required" class="validate">
                             <label for="mail_register">Email-Addresse</label>
                         </div>
-                        <div class="input-field ">
+                        <div class="input-field col s12">
                             <i class="material-icons prefix">vpn_key</i>
                             <input id="pwd_register" name="pwd" type="password" required>
                             <label for="pwd_register">Passwort</label>
                         </div>
-                        <div class="input-field ">
+                        <div class="input-field col s12">
                             <i class="material-icons prefix">cached</i>
                             <input id="pwdrep_register" name="pwdrep" type="password" required>
                             <label for="pwdrep_register">Passwort wiederholen</label>
-                        </div>
-                        <div class="input-field ">
-                            <i class="material-icons prefix">account_circle</i>
-                            <input id="name_register" name="name" type="text" required>
-                            <label for="name_register">Vorname</label>
-                        </div>
-                        <div class="input-field "> <!-- TODO: one column pls -->
-                            <i class="material-icons prefix">supervisor_account</i>
-                            <input id="surname_register" name="surname" type="text" required>
-                            <label for="surname_register">Nachname</label>
                         </div>
                         <div class="row" style="margin-bottom: 0;">
                             <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
