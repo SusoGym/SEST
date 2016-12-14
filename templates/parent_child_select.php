@@ -12,10 +12,22 @@
     <div class="card">
       <div class="card-content">
 				<?php if (count($students) == 0) {?>
-				<span class="card-title">Bitte Kinder angeben: </span><a style="position: absolute; bottom:20px; right:20px;" class="btn-floating btn-large teal" href="#addstudent"><i class="material-icons">add</i></a>
+				<span class="card-title">
+					<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href=".">
+						 <i class="material-icons">chevron_left</i>
+					</a>
+					Bitte Kinder angeben:
+				</span>
+				<a style="position: absolute; bottom:20px; right:20px;" class="btn-floating btn-large teal" href="#addstudent"><i class="material-icons">add</i></a>
 				<?php }
 				else { ?>
-				<span class="card-title">Ihre Kinder:</span>
+				<span class="card-title">
+					<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href=".">
+						 <i class="material-icons">chevron_left</i>
+					</a>
+					Ihre Kinder:
+				</span>
+				<a class='btn-floating btn-large teal' style="position: absolute; bottom:80px; right:20px;" href='#addstudent'><i class="material-icons">add</i></a>
 					<div class="row">
 					<ul class="collection col s12">
 					<?php foreach ($students as $child) { ?>
@@ -24,7 +36,6 @@
 						</li>
 						<?php } ?>
 					</ul>
-					<a class='btn-floating btn-large teal' style="position: absolute; bottom:80px; right:20px;" href='#addstudent'><i class="material-icons">add</i></a>
 					<?php } ?>
 
 				</div>

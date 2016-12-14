@@ -6,6 +6,7 @@
         $('ul.teachers').tabs();
         $('ul.students').tabs();
         $(".button-collapse").sideNav();
+        $('ul.collapsible').collapsible();
         initModal();
         addStudent(); // -> create one default student field
     });
