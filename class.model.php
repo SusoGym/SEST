@@ -239,7 +239,7 @@
          */
         public function getTeachers()
         {
-            $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer"); // returns data[n][data]
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer ORDER BY name,vorname"); // returns data[n][data]
 
             $teachers = array();
             foreach ($data as $item)
