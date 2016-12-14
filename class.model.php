@@ -297,10 +297,12 @@
         public function getTeacherLessonAmountByTeacherId($teacherId, $rawData = null)
         {
             $data = self::$connection->selectValues("SELECT deputat FROM lehrer WHERE id=$teacherId");
-			if(isset($data)){
-				$lessons = $data[0][0];
-			}
-			return $lessons;
+            if (isset($data))
+            {
+                $lessons = $data[0][0];
+            }
+
+            return $lessons;
         }
 
         /**
@@ -463,9 +465,9 @@
         public function parentOwnsAppointment($parentId, $appointment)
         {
             $data = self::$connection->selectAssociativeValues("SELECT * FROM bookable_slot WHERE id=$appointment");
-            if(isset($data[0]))
+            if (isset($data[0]))
                 $data = $data[0];
-            if(!isset($data) || $data['eid'] == null)
+            if (!isset($data) || $data['eid'] == null)
                 return true; //throw exception?
             return $data['eid'] == $parentId;
         }
@@ -561,9 +563,11 @@
          * @param $pid array or int parents children ids (array[int] || int)
          * @param $email string parents email
          * @param $pwd string parents password
+         * @param $name string parent name
+         * @param $surname string parent surname
          * @return array newly created ids of parent (userid and parentid)
          */
-        public function registerParent($email, $pwd)
+        public function registerParent($email, $pwd, $name, $surname)
         {
 
             $email = self::$connection->escape_string($email);
@@ -574,7 +578,7 @@
             //Create parent in database and return eid
             $usrId = self::$connection->insertValues($query);
 
-            $parentId = self::$connection->insertValues("INSERT INTO eltern (userid) VALUES ($usrId);");
+            $parentId = self::$connection->insertValues("INSERT INTO eltern (userid, vorname, name) VALUES ($usrId, '$name', '$surname');");
 
             //return eid
             return array("uid" => $usrId, "pid" => $parentId);

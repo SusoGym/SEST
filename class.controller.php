@@ -319,6 +319,8 @@
 
             $pwd = $input['register']['pwd'];
             $mail = $input['register']['mail'];
+            $name = $input['register']['name'];
+            $surname = $input['register']['surname'];
 
             ChromePhp::info("Email: " . $mail);
 
@@ -334,7 +336,7 @@
 
             if ($success)
             {
-                $ids = $model->registerParent($mail, $pwd);
+                $ids = $model->registerParent($mail, $pwd, $name, $surname);
                 ChromePhp::info("Registered parent with user-ids " . json_encode($ids));
                 $this->checkLogin($mail, $pwd);
 
@@ -606,6 +608,7 @@
 
         /**
          * Sorts array by the state if a teacher has slots available or not (/w slots first then without slots
+         *
          * @param $teachers
          * @return array
          */
@@ -625,7 +628,7 @@
                 $avSlots = $teacher->getAllBookableSlots($guardian->getParentId());
                 $amountSlots = count($avSlots);
 
-                if($amountSlots == 0)
+                if ($amountSlots == 0)
                     array_push($noSlot, $data);
                 else
                     array_push($withSlot, $data);
