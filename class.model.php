@@ -519,14 +519,14 @@
         public function getAppointmentsOfParent($parentId)
         {
             $appointments = array();
-            $data = self::$connection->selectValues("SELECT time_slot.id FROM time_slot,bookable_slot
+            $data = self::$connection->selectValues("SELECT time_slot.id,bookable_slot.id,bookable_slot.lid FROM time_slot,bookable_slot
 			WHERE time_slot.id=bookable_slot.slotid
 			AND bookable_slot.eid=$parentId ORDER BY anfang");
             if (isset($data))
             {
                 foreach ($data as $d)
                 {
-                    $appointments[] = $d[0];
+                    $appointments[] = array("slotId"=>$d[0],"bookingId"=>$d[1],"teacherId"=>$d[2]);
                 }
             }
 

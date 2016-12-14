@@ -301,8 +301,9 @@
             $this->sortByAppointment($teachers);
             $this->infoToView['teachers'] = $teachers;
             $this->infoToView['user'] = $guardian;
-            $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'];
-            $this->infoToView['appointments'] = $guardian->getAppointments();
+            $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count($guardian->getChildren());
+            $this->infoToView['appointments'] =  $guardian->getAppointments();
+	     $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
             return "parent_est";
         }
 
