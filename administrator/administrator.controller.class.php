@@ -423,10 +423,12 @@
                     if (isset($input['del']))
                     {
                         $this->model->deleteSlot($input['del']);
+		          //this->model->deleteBookableSlots($input['del']) - does not exist yet in model	
                     }
                     if (isset($input['start']))
                     {
-                        $this->model->insertSlot($input['start'], $input['end']);
+                        $slotId = $this->model->insertSlot($input['start'], $input['end']);
+			   $this->model->createBookableSlots($slotId);
                     }
                     $this->existingSlots = $this->model->getSlots();
                     $this->display("slot_mgt");

@@ -292,8 +292,22 @@
         {
             $start = $this->makeDateTime($start);
             $end = $this->makeDateTime($end);
-            self::$connection->straightQuery("INSERT INTO time_slot (`id`,`anfang`,`ende`) VALUES ('','$start','$end') ");
+            return self::$connection->insertValues("INSERT INTO time_slot (`id`,`anfang`,`ende`) VALUES ('','$start','$end') ");
         }
+
+
+	/**
+	*create bookable appointments according to lessonVolume of teacher
+	*hardCoded - to be adapted to option Data
+	*@param int slotId
+	*/
+	public function createBookableSlots($slotId){
+		$FULL = 13;
+		$data = self::$connection->selectValues("SELECT id FROM lehrer WHERE deputat>$FULL");
+		foreach($data as $d) {
+			self::$connection->straightQuery("INSERT INTO bookable_slot (`id`,`slotid`,`lid`,`eid`) VALUES ('','$slotId','$d[0]',NULL)" );
+		}
+	}
 
         /**
          *create DateTime Format
