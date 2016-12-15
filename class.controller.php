@@ -297,13 +297,24 @@
                 }
             }
             $students = array();
-            $teachers = $guardian->getTeachersOfAllChildren();
-            $this->sortByAppointment($teachers);
-            $this->infoToView['teachers'] = $teachers;
-            $this->infoToView['user'] = $guardian;
-            $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count($guardian->getChildren());
-            $this->infoToView['appointments'] =  $guardian->getAppointments();
-	     $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
+	     $today = date("Ymd");
+	     $this->infoToView['book_end'] = $this->model->getOptions()['close']; 
+	     $this->infoToView['user'] = $guardian;
+	
+    	     ($today >  $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
+	     if(!$bookingTimeIsOver)  {
+		 $teachers = $guardian->getTeachersOfAllChildren();
+           	 $this->sortByAppointment($teachers);
+           	 $this->infoToView['teachers'] = $teachers;
+           	 
+           	 $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count($guardian->getChildren());
+		 $this->infoToView['appointments'] =  $guardian->getAppointments();
+	        $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
+		} else {
+		  $this->infoToView['bookingDetails'] = $this->model->getBookingDetails($guardian->getParentId() ); 	
+		}
+            
+         	
             return "parent_est";
         }
 

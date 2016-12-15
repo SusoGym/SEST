@@ -533,6 +533,29 @@
             return $appointments;
         }
 
+	/**
+	*retrieve all relevant booking Data 
+	*@param int parentId
+	*@return array("anfang","ende","teacher");
+	*/
+	public function getBookingDetails($parentId){
+		$bookingDetails = array();
+		$data = self::$connection->selectValues("SELECT anfang,ende,lid 
+		FROM bookable_slot,time_slot
+		WHERE bookable_slot.slotid = time_slot.id
+		AND eid = $parentId
+		ORDER BY anfang");
+		if(isset($data) ){
+		foreach($data as $d){
+			$teacher = new Teacher(null,$d[2]);
+			$bookingDetails[] = array("anfang"=>$d[0],"ende"=>$d[1],"teacher"=>$teacher);
+			unset($teacher);
+			}
+		}
+		
+		return $bookingDetails;
+	}
+
         /**
          * @param $email
          * @param $password
