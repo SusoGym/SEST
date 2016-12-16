@@ -42,7 +42,6 @@ if(isset($data['modules']) ){
   } else {
     $newsColor  = "teal";
     $newsLink = 'href="'."?type=news";
-
   }
 }
 include("header.php");
