@@ -1,62 +1,56 @@
 <?php
 
     //$model = Model::getInstance();
-	$data = $this->getDataForView();
-  $students = $data['children'];
-	include("header.php");
+    $data = $this->getDataForView();
+    $students = $data['children'];
+    include("header.php");
 
 ?>
 
 <div class="container">
 
     <div class="card">
-      <div class="card-content">
-				<?php if (count($students) == 0) {?>
-				<span class="card-title">
+        <div class="card-content">
+            <?php if (count($students) == 0)
+                { ?>
+                    <span class="card-title">
 					<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href=".">
 						 <i class="material-icons">chevron_left</i>
 					</a>
 					Bitte Kinder angeben:
 				</span>
-				<a style="position: absolute; bottom:20px; right:20px;" class="btn-floating btn-large teal" href="#addstudent"><i class="material-icons">add</i></a>
-				<?php }
-				else { ?>
-				<span class="card-title">
+                    <a style="position: absolute; bottom:20px; right:20px;" class="btn-floating btn-large teal"
+                       href="#addstudent"><i class="material-icons">add</i></a>
+                <?php }
+                else
+                { ?>
+            <span class="card-title">
 					<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href=".">
 						 <i class="material-icons">chevron_left</i>
 					</a>
 					Ihre Kinder:
 				</span>
-				<a class='btn-floating btn-large teal' style="position: absolute; bottom:80px; right:20px;" href='#addstudent'><i class="material-icons">add</i></a>
-					<div class="row">
-					<ul class="collection col s12">
-					<?php foreach ($students as $child) { ?>
-						<li class="collection-item">
-						<?php echo $child->getSurname().", ".$child->getName()." (Klasse ".$child->getClass().")"; ?>
-						</li>
-						<?php } ?>
-					</ul>
-					<?php } ?>
+            <a class='btn-floating btn-large teal' style="position: absolute; bottom:80px; right:20px;"
+               href='#addstudent'><i class="material-icons">add</i></a>
+            <div class="row">
+                <ul class="collection col s12">
+                    <?php foreach ($students as $child)
+                    { ?>
+                        <li class="collection-item">
+                            <?php echo $child->getSurname() . ", " . $child->getName() . " (Klasse " . $child->getClass() . ")"; ?>
+                        </li>
+                    <?php } ?>
+                </ul>
+                <?php } ?>
 
-				</div>
-			</div>
-	  	<div class="card-action center">
-				&copy; <?php echo date("Y"); ?> Heinrich-Suso-Gymnasium Konstanz
-      </div>
-		</div>
-<ul id="mobile-nav" class="side-nav">
-    <li>
-        <div class="userView">
-            <img class="background grey" src="http://materializecss.com/images/office.jpg">
-            <img class="circle"
-                 src="http://www.motormasters.info/wp-content/uploads/2015/02/dummy-profile-pic-male1.jpg">
-            <span class="white-text name"><?php echo $_SESSION['user']['mail']; ?></span>
+            </div>
         </div>
-    </li>
-    <?php
-        include("navbar.php"); ?>
-</ul>
+        <div class="card-action center">
+            &copy; <?php echo date("Y"); ?> Heinrich-Suso-Gymnasium Konstanz
+        </div>
+    </div>
 
+</div>
 <div id="addstudent" class="modal">
     <div class="modal-content">
         <h4>Schüler hinzufügen</h4>
@@ -69,8 +63,6 @@
            style="margin-bottom: 20px;"><i class="material-icons right">send</i>Schüler hinzufügen</a>
     </div>
 </div>
-
-
 
 
 <div id="student_blueprint" style="display:none;">

@@ -78,8 +78,9 @@
         protected function handleType()
         {
             $template = null;
-            if (self::$user instanceof Guardian) {
-              $this->infoToView['children'] = self::$user->getChildren();
+            if (self::$user instanceof Guardian)
+            {
+                $this->infoToView['children'] = self::$user->getChildren();
             }
             switch ($this->input['type'])
             {
@@ -264,6 +265,7 @@
 
         /**
          * Handles parent's est logic
+         *
          * @return string template to be displayed
          */
         protected function handleParentEst()
@@ -296,22 +298,24 @@
                 }
             }
             $students = array();
-	     $today = date("Ymd");
-	     $this->infoToView['book_end'] = $this->model->getOptions()['close'];
-	     $this->infoToView['user'] = $guardian;
+            $today = date("Ymd");
+            $this->infoToView['book_end'] = $this->model->getOptions()['close'];
+            $this->infoToView['user'] = $guardian;
 
-    	     ($today >  $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
-	     if(!$bookingTimeIsOver)  {
-		 $teachers = $guardian->getTeachersOfAllChildren();
-           	 $this->sortByAppointment($teachers);
-           	 $this->infoToView['teachers'] = $teachers;
+            ($today > $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
+            if (!$bookingTimeIsOver)
+            {
+                $teachers = $guardian->getTeachersOfAllChildren();
+                $this->sortByAppointment($teachers);
+                $this->infoToView['teachers'] = $teachers;
 
-           	 $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count($guardian->getChildren());
-		 $this->infoToView['appointments'] =  $guardian->getAppointments();
-	        $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
-		} else {
-		  $this->infoToView['bookingDetails'] = $this->model->getBookingDetails($guardian->getParentId() );
-		}
+                $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count($guardian->getChildren());
+                $this->infoToView['appointments'] = $guardian->getAppointments();
+                $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
+            } else
+            {
+                $this->infoToView['bookingDetails'] = $this->model->getBookingDetails($guardian->getParentId());
+            }
 
 
             return "parent_est";
