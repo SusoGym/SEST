@@ -488,39 +488,41 @@
 
             if ($email == 'teacher@teacher' && DEBUG) // test account
                 $email = 'muster@suso.schulen.konstanz.de';
-
-            if ($model->passwordValidate($email, $pwd) && !$inTime)
-            {
-                $userObj = $model->getUserByMail($email);
-                if ($userObj != null)
-                {
-                    $type = $userObj->getType();
-                    $uid = $_SESSION['user']['id'] = $userObj->getId();
-                    $time = $_SESSION['user']['logintime'] = time();
-
-                    $success = true;
-                }
-            } else if (explode('@', $email)[1] == "suso.schulen.konstanz.de" && !$inTime)
-            {
-                $userObj = $model->getTeacherByEmailAndLdapPwd($email, $pwd);
-                if ($userObj == null)
-                {
-                    // nope
-                    $success = false;
-                } else
-                {
-                    $type = $userObj->getType();
-                    $uid = $_SESSION['user']['id'] = $userObj->getId();
-                    $_SESSION['user']['isTeacher'] = true;
-                    $success = true;
-                }
-
-            } else if ($inTime)
+            if ($inTime)
             {
                 $this->createUserObject();
                 $type = self::getUser()->getType();
                 $id = self::getUser()->getId();
-            }
+            } else
+                if ($model->passwordValidate($email, $pwd) && !$inTime)
+                {
+                    $userObj = $model->getUserByMail($email);
+                    if ($userObj != null)
+                    {
+                        $type = $userObj->getType();
+                        $uid = $_SESSION['user']['id'] = $userObj->getId();
+                        $time = $_SESSION['user']['logintime'] = time();
+
+                        $success = true;
+                    }
+                } else
+                {
+                    $schoolMail = strpos($email, '@suso.schulen.konstanz.de') !== false;
+
+                    $userObj = $schoolMail ? $model->getTeacherByEmailAndLdapPwd($email, $pwd) : $model->getTeacherByLdapNameAndPwd($email, $pwd);
+                    if ($userObj == null)
+                    {
+                        // nope
+                        $success = false;
+                    } else
+                    {
+                        $type = $userObj->getType();
+                        $uid = $_SESSION['user']['id'] = $userObj->getId();
+                        $_SESSION['user']['isTeacher'] = true;
+                        $success = true;
+                    }
+
+                }
 
             if (!$success)
             {
@@ -571,7 +573,7 @@
                 {
                     foreach ($this->input['students'] as $student)
                     {
-                        $student = explode(":", urldecode($student));
+                        $student = explode(":", $student);
                         $name = $student[0];
                         $bday = $student[1];
                         $studentObj = $this->model->getStudentByName($name);

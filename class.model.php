@@ -327,10 +327,44 @@
             if ($ldapName == null)
                 die("LDAP name not set for $email!"); // rip
 
-            $novelData = $this->checkNovellLogin($ldapName, $pwd);
+            return $this->getTeacherByLdapNameAndPwd($ldapName, $pwd);
+        }
 
-            if (!isset($novelData->{'code'}) || !isset($novelData->{'type'}) || $novelData->{'code'} != "200" || $novelData->{'type'} != 'Teacher')
-                return null; //Invalid / Failed login
+
+        /**
+         * @param $ldapName
+         * @param $pwd
+         * @param $data
+         * @return null|Teacher
+         */
+        public function getTeacherByLdapNameAndPwd($ldapName, $pwd, $data = null)
+        {
+            if ($data == null)
+            {
+                $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE ldapname='$ldapName'");
+
+
+                $novelData = $this->checkNovellLogin($ldapName, $pwd);
+
+                if (!isset($novelData->{'code'}) || !isset($novelData->{'type'}) || $novelData->{'code'} != "200" || $novelData->{'type'} != 'Teacher')
+                {
+                    ChromePhp::info(json_encode($novelData));
+                    if (isset($novelData->{'type'}) && $novelData->{'type'} == "student")
+                        die("Student accounts are not supported yet...");
+                    else
+                        return null;
+                }
+            }
+
+
+            if (isset($data[0]))
+                $data = $data[0];
+
+            if ($data == null)
+                return null;
+
+            $tId = $data['id'];
+            $email = $data['email'];
 
             return new Teacher($email, $tId);
         }
@@ -526,35 +560,39 @@
             {
                 foreach ($data as $d)
                 {
-                    $appointments[] = array("slotId"=>$d[0],"bookingId"=>$d[1],"teacherId"=>$d[2]);
+                    $appointments[] = array("slotId" => $d[0], "bookingId" => $d[1], "teacherId" => $d[2]);
                 }
             }
 
             return $appointments;
         }
 
-	/**
-	*retrieve all relevant booking Data 
-	*@param int parentId
-	*@return array("anfang","ende","teacher");
-	*/
-	public function getBookingDetails($parentId){
-		$bookingDetails = array();
-		$data = self::$connection->selectValues("SELECT anfang,ende,lid 
+        /**
+         *retrieve all relevant booking Data
+         *
+         * @param int parentId
+         * @return array("anfang","ende","teacher");
+         */
+        public function getBookingDetails($parentId)
+        {
+            $bookingDetails = array();
+            $data = self::$connection->selectValues("SELECT anfang,ende,lid 
 		FROM bookable_slot,time_slot
 		WHERE bookable_slot.slotid = time_slot.id
 		AND eid = $parentId
 		ORDER BY anfang");
-		if(isset($data) ){
-		foreach($data as $d){
-			$teacher = new Teacher(null,$d[2]);
-			$bookingDetails[] = array("anfang"=>$d[0],"ende"=>$d[1],"teacher"=>$teacher);
-			unset($teacher);
-			}
-		}
-		
-		return $bookingDetails;
-	}
+            if (isset($data))
+            {
+                foreach ($data as $d)
+                {
+                    $teacher = new Teacher(null, $d[2]);
+                    $bookingDetails[] = array("anfang" => $d[0], "ende" => $d[1], "teacher" => $teacher);
+                    unset($teacher);
+                }
+            }
+
+            return $bookingDetails;
+        }
 
         /**
          * @param $email
