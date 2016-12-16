@@ -16,10 +16,11 @@
             <li>
                 <div class="collapsible-header active"><i class="material-icons">person</i>Anmelden</div>
                 <div class="collapsible-body">
-                    <form autocomplete="off" onsubmit="submitLogin()" action="javascript:void(0);" class="row" style="margin: 20px;">
+                    <form autocomplete="off" onsubmit="submitLogin()" action="javascript:void(0);" class="row"
+                          style="margin: 20px;">
                         <div class="input-field col s12">
                             <i class="material-icons prefix">person</i>
-                            <input id="usr_login" type="email" class="validate" required>
+                            <input id="usr_login" type="text" class="" required>
                             <label for="usr_login">Email-Addresse</label>
                         </div>
                         <div class="input-field col s12">
@@ -37,16 +38,17 @@
             <li>
                 <div class="collapsible-header"><i class="material-icons">person_add</i>Registrieren</div>
                 <div class="collapsible-body">
-                    <form method="post" onsubmit="submitRegister()" action="javascript:void(0);" autocomplete="off" class="row" style="margin: 20px;">
-                      <div class="input-field col s6">
-                          <i class="material-icons prefix">account_circle</i>
-                          <input id="name_register" name="name" type="text" required>
-                          <label for="name_register">Vorname</label>
-                      </div>
-                      <div class="input-field col s6">
-                          <input id="surname_register" name="surname" type="text" required>
-                          <label for="surname_register">Nachname</label>
-                      </div>
+                    <form method="post" onsubmit="submitRegister()" action="javascript:void(0);" autocomplete="off"
+                          class="row" style="margin: 20px;">
+                        <div class="input-field col s6">
+                            <i class="material-icons prefix">account_circle</i>
+                            <input id="name_register" name="name" type="text" required>
+                            <label for="name_register">Vorname</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input id="surname_register" name="surname" type="text" required>
+                            <label for="surname_register">Nachname</label>
+                        </div>
                         <div class="input-field col s12">
                             <i class="material-icons prefix">mail</i>
                             <input id="mail_register" name="mail" type="email" required="required" class="validate">
@@ -95,10 +97,8 @@
     function submitLogin() {
         var pwd = $('#pwd_login').val();
         var usr = $('#usr_login').val();
-        var url = "index.php?console&type=login&login[password]=" + pwd + "&login[mail]=" + usr;
 
-
-        $.get(url, function (data) {
+        $.post("", {'type': 'login', 'console': '', 'login[password]': pwd, 'login[mail]': usr}, function (data) {
             if (data == "true") {
                 location.reload();
             } else if (data == "false") {
@@ -137,8 +137,9 @@
 
         url_param += "&register[mail]=" + mail + "&register[pwd]=" + pwd.val() + "&register[name]=" + nameVal + "&register[surname]=" + surnameVal;
 
+
         // give request to backend and utilize response
-        $.get("index.php" + url_param, function (data) {
+        $.post("", {'type': 'register', 'console': '', 'register[password]': pwd.val(), 'register[mail]': mail, 'register[name]': nameVal, 'register[surname]': surnameVal}, function (data) {
 
             try {
                 var myData = JSON.parse(data);
