@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,7 +35,26 @@
             <?php include("navbar.php"); ?>
         </ul>
         <ul class="right hide-on-med-and-down">
-          <li><a id="logout" href="?type=logout" title="Logout"><i class="material-icons right">power_settings_new</i>Log Out</a></li>
+            <li><a id="logout" href="?type=logout" title="Logout"><i class="material-icons right">power_settings_new</i>Log
+                    Out</a></li>
         </ul>
     </div>
 </nav>
+
+<ul id="mobile-nav" class="side-nav">
+    <li>
+        <div class="userView">
+            <img class="background grey" src="http://materializecss.com/images/office.jpg">
+            <img class="circle"
+                 src="http://www.motormasters.info/wp-content/uploads/2015/02/dummy-profile-pic-male1.jpg">
+            <span class="white-text name"><?php echo $_SESSION['user']['mail']; ?></span>
+        </div>
+    </li>
+    <?php
+        include("navbar.php"); ?>
+    <li><a id="logout" href="?type=logout" title="Logout"><i class="material-icons left">power_settings_new</i>Log
+            Out</a></li>
+    <li>
+        <div class="divider"></div>
+    </li>
+</ul>
