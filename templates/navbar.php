@@ -73,7 +73,7 @@
         $classes = (isset($module['classes'])) ? $module['classes'] : "";
 
         ?>
-        <li><a id="<?php echo $id ?>" href="<?php echo $link ?>" title="<?php echo $title ?>"
+        <li><a id="<?php echo $id ?>" <?php if($link != "") echo "href='$link'" ?> title="<?php echo $title ?>"
                class="<?php echo $classes ?>"><i
                         class="material-icons left"><?php echo $icon ?></i><?php echo $inner ?></a></li>
         <?php
