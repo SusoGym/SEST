@@ -33,8 +33,7 @@
         <a href="#" data-activates="mobile-nav" class="button-collapse" style="padding-left:20px;padding-right:20px;"><i
                     class="material-icons">menu</i></a>
         <ul class="left hide-on-med-and-down">
-            <?php $mobile = false;
-                include("navbar.php"); ?>
+            <?php include("navbar.php"); ?>
         </ul>
         <ul class="right hide-on-med-and-down">
           <li><a id="logout" href="?type=logout" title="Logout"><i class="material-icons right">power_settings_new</i>Log Out</a></li>
