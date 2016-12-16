@@ -23,7 +23,7 @@
     }
 
 
-    $color = array(true => 'white-text', false => 'teal-text text-lighten-3');
+    $color = array(true => '', false => 'teal-text text-lighten-3');
 
     if (isset($data['modules']))
     {
@@ -49,7 +49,7 @@
 
     if ($userObj instanceof Guardian)
     {
-
+        array_push($modules, array("id" => "childsel", "href" => "?type=childsel", "title" => "Kinder verwalten", "icon" => "face"));
         array_push($modules, array("id" => "est", "href" => $est ? "?type=eest" : "", "title" => "Elternsprechtag", "icon" => "supervisor_account", "classes" => $color[$est]));
 
     } else
@@ -73,7 +73,7 @@
         $classes = (isset($module['classes'])) ? $module['classes'] : "";
 
         ?>
-        <li><a id="<?php echo $id ?>" <?php if($link != "") echo "href='$link'" ?> title="<?php echo $title ?>"
+        <li><a id="<?php echo $id ?>" <?php if ($link != "") echo "href='$link'" ?> title="<?php echo $title ?>"
                class="<?php echo $classes ?>"><i
                         class="material-icons left"><?php echo $icon ?></i><?php echo $inner ?></a></li>
         <?php
