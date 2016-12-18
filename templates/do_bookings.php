@@ -57,6 +57,11 @@
 
                             if ($slot['eid'] == null)
                             {
+
+
+                                if($bookedThisTeacher)
+                                    continue;
+
                                 if (in_array($slot['slotId'], $appointments))
                                 {
                                     //cannot book a slot at that time because already booked another
