@@ -77,7 +77,7 @@
          */
         protected function handleType()
         {
-            $template = null;
+            $template = "login";
 
             $this->sendOptions();
 
@@ -94,6 +94,8 @@
                     $template = $this->handleParentEst();
                     break;
                 case "childsel":
+                    if(self::$user == null)
+                        break;
                     if (!self::$user instanceof Guardian)
                         die("Unauthorized access! User must be instance of Guardian!");
                     $template = "parent_child_select";
@@ -198,6 +200,8 @@
          */
         protected function teacherSlotDetermination()
         {
+            if(self::$user == null)
+                return "login";
             if (!self::$user instanceof Teacher)
                 die("Unauthorized access! User must be instance of Teacher!");
             if (isset($this->input['asgn']))
@@ -289,6 +293,8 @@
          */
         protected function handleParentEst()
         {
+            if(self::$user == null)
+                return "login";
             if (!self::$user instanceof Guardian)
                 die("Unauthorized access! User must be instance of Guardian!");
 
