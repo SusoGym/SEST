@@ -274,6 +274,7 @@
 	public function getBookedTeachers(){
 		$bookedTeachers = array();
 		$appointments = $this->getAppointmentTeachers();
+        $teachers = array();
 		foreach ($appointments as $appointment) {
 			$teachers[] = $appointment['teacherId'];
 		}

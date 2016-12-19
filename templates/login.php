@@ -139,7 +139,7 @@
 
 
         // give request to backend and utilize response
-        $.post("", {'type': 'register', 'console': '', 'register[password]': pwd.val(), 'register[mail]': mail, 'register[name]': nameVal, 'register[surname]': surnameVal}, function (data) {
+        $.post("", {'type': 'register', 'console': '', 'register[pwd]': pwd.val(), 'register[mail]': mail, 'register[name]': nameVal, 'register[surname]': surnameVal}, function (data) {
 
             try {
                 var myData = JSON.parse(data);
