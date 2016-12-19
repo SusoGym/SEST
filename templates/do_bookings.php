@@ -59,7 +59,7 @@
                             {
 
 
-                                if($bookedThisTeacher)
+                                if($bookedThisTeacher || $maxedOutAppointments)
                                     continue;
 
                                 if (in_array($slot['slotId'], $appointments))
