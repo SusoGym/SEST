@@ -78,6 +78,9 @@
         protected function handleType()
         {
             $template = null;
+
+            $this->sendOptions();
+
             if (self::$user instanceof Guardian)
             {
                 $this->infoToView['children'] = self::$user->getChildren();
@@ -113,15 +116,11 @@
                         /** @var Teacher $user */
                         $user = self::$user;
                         $this->infoToView['missing_slots'] = $user->getMissingSlots();
-                        $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
-                        $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
                     } else if (self::$user instanceof Guardian)
                     {
                         // Do parenting stuff
                         /** @var Guardian $guardian */
                         $guardian = self::$user;
-                        $this->infoToView['book_end'] = $this->model->getOptions()['close'];
-                        $this->infoToView['book_start'] = $this->model->getOptions()['open'];
                     } else if (self::$user instanceof Admin)
                     {
                         header("Location: ./administrator"); // does an admin need access to normal stuff?!
@@ -143,6 +142,28 @@
             }
 
             return $template;
+        }
+
+
+        /**
+         * Send all options to view
+         */
+        protected function sendOptions()
+        {
+
+            $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
+            $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
+            $this->infoToView['book_end'] = $this->model->getOptions()['close'];
+            $this->infoToView['book_start'] = $this->model->getOptions()['open'];
+
+            if (self::$user instanceof Guardian)
+            {
+
+                $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count(self::$user->getChildren());
+            } else if (self::$user instanceof Teacher)
+            {
+            }
+
         }
 
         /**
@@ -200,8 +221,6 @@
                 $this->infoToView['card_title'] = "Festlegung der Sprechzeiten";
             }
             $this->infoToView['slots_to_show'] = $teacher->getSlotListToAssign();
-            $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
-            $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
 
             return "tchr_slots";
         }
@@ -299,7 +318,6 @@
             }
             $students = array();
             $today = date("Ymd");
-            $this->infoToView['book_end'] = $this->model->getOptions()['close'];
             $this->infoToView['user'] = $guardian;
 
             ($today > $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
@@ -308,8 +326,6 @@
                 $teachers = $guardian->getTeachersOfAllChildren();
                 $this->sortByAppointment($teachers);
                 $this->infoToView['teachers'] = $teachers;
-
-                $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count($guardian->getChildren());
                 $this->infoToView['appointments'] = $guardian->getAppointments();
                 $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
             } else
