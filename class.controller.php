@@ -157,6 +157,8 @@
             $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
             $this->infoToView['book_end'] = $this->model->getOptions()['close'];
             $this->infoToView['book_start'] = $this->model->getOptions()['open'];
+	     $this->infoToView['est_date'] = $this->model->getOptions()['date'];
+
 
             if (self::$user instanceof Guardian)
             {
