@@ -16,7 +16,7 @@
         }
     }
 
-    if ($est && (isset($data['book_end']) && $data['book_end'] < $today) || (isset($data['book_start']) && $data['book_start'] > $today))
+    if ($est && (isset($data['est_date']) && $data['est_date'] < $today) || (isset($data['book_start']) && $data['book_start'] > $today))
     {
         ChromePhp::info("No children selected by guardian or booking time expired");
         $est = false;
