@@ -173,9 +173,15 @@
          * @param int $usrId UserId
          * @return array[Student] array[childrenId]
          */
-        public function getChildrenByParentUserId($usrId)
+        public function getChildrenByParentUserId($usrId, $limit = null)
         {
-            $data = self::$connection->selectAssociativeValues("SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId");
+            if(isset($limit)) {
+			$query = "SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId AND schueler.klasse < $limit"; //a bit crude, isn't it
+		} else {
+			$query = "SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId";
+		}
+
+		$data = self::$connection->selectAssociativeValues($query);
 
             if ($data == null)
                 return array();
