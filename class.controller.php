@@ -162,8 +162,8 @@
 
             if (self::$user instanceof Guardian)
             {
-
-                $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count(self::$user->getChildren());
+		//nothing happening here ???
+               
             } else if (self::$user instanceof Teacher)
             {
             }
@@ -336,6 +336,7 @@
 		  $teachers = $guardian->getTeachersOfAllChildren( $this->model->getOptions()['limit'] );
                 $this->sortByAppointment($teachers);
                 $this->infoToView['teachers'] = $teachers;
+		  $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count(self::$user->getChildren());
                 $this->infoToView['appointments'] = $guardian->getAppointments();
                 $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
             } else
