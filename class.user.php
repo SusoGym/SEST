@@ -1,11 +1,9 @@
 <?php
-
     /**
      * User class used to get user related data easily
      */
     class User extends Printable
     {
-
         /**
          * @var int 0 -> Admin, 1 -> Parent/Guardian, 2 -> Teacher
          */
@@ -26,7 +24,6 @@
          * @var $surname string Name name of the user
          */
         protected $name;
-
         /**
          *Construct method of User class
          *
@@ -40,7 +37,6 @@
             $this->name = $name;
             $this->surname = $surname;
         }
-
         /**
          *Returns user ID
          *
@@ -50,7 +46,6 @@
         {
             return $this->id;
         }
-
         /**
          *Returns user type (0 for admin, 1 for parent, 2 for teacher)
          *
@@ -60,7 +55,6 @@
         {
             return $this->type;
         }
-
         /**
          * @return string
          */
@@ -68,7 +62,6 @@
         {
             return $this->name . ' ' . $this->surname;
         }
-
         /**
          * @return User
          */
@@ -76,7 +69,6 @@
         {
             return $this->email;
         }
-
         /**
          * @return array[String => Data] used for creating __toString and jsonSerialize
          */
@@ -84,7 +76,6 @@
         {
             return array("userid" => $this->id, "type" => $this->type, "name" => $this->name, "surname" => $this->surname, "email" => $this->email);
         }
-
         /** Returns class type
          *
          * @return string
@@ -94,14 +85,11 @@
             return "Student";
         }
     }
-
-
     /**
      * Guardian class as subclass of User class representing parents
      */
     class Guardian extends User
     {
-
         /**
          * @var array
          */
@@ -110,7 +98,6 @@
          * @var int
          */
         private $parentId;
-
         /**
          * Contructor of Parent class
          *
@@ -120,12 +107,9 @@
         public function __construct($id, $email, $parentId)
         {
             parent::__construct($id, 1, $email);
-
             $this->parentId = $parentId;
             $this->children = Model::getInstance()->getChildrenByParentUserId($this->id);
-
         }
-
         /**
          *Returns child(ren)'s id(s)
          *
@@ -134,6 +118,16 @@
         public function getChildren()
         {
             return $this->children;
+        }
+
+	 /**
+         *Returns child(ren)'s id(s) of EST relevant children only
+         * @param int limit (most senior year group for EST plus one)
+         * @return array[Student] children
+         */
+        public function getESTChildren($limit)
+        {
+         return Model::getInstance()->getChildrenByParentUserId($this->id,$limit);
         }
 
         /**
@@ -145,17 +139,14 @@
         {
             if ($this->getChildren() == null)
                 return array();
-
             $model = Model::getInstance();
             $classes = array();
             foreach ($this->getChildren() as $student/** @var $student Student */)
             {
                 $classes[] = $student->getClass();
             }
-
             return $classes;
         }
-
         /**
          * Returns all teachers that teach any of the parents children
          *
@@ -163,13 +154,10 @@
          */
         public function getTeachers()
         {
-
             if ($this->getChildren() == null)
                 return array();
-
             $model = Model::getInstance();
             $classes = $this->getClasses();
-
             $teachers = array();
             foreach ($classes as $class)
             {
@@ -178,20 +166,17 @@
                     continue;
                 $teachers = array_merge($teachers, $teacher);
             }
-
             sort($teachers);
-
             return $teachers;
         }
-
         /**
          * Get all teachers of all children
          *
          * @return array(Teacher,Child)
          */
-        public function getTeachersOfAllChildren()
+        public function getTeachersOfAllChildren($limit)
         {
-            $children = $this->getChildren();
+            $children = $this->getESTChildren($limit);
             $myArr = array();
             /** @var Student $child */
             foreach ($children as $child)
@@ -204,10 +189,8 @@
                     array_push($myArr[$teacher->getId()]["students"], $child);
                 }
             }
-
             return $myArr;
         }
-
         /**
          * @return int parent ID
          */
@@ -215,7 +198,6 @@
         {
             return $this->parentId;
         }
-
         /**
          * @return array[String => mixed] returns all data of this class as array
          */
@@ -223,7 +205,6 @@
         {
             return array_merge(parent::getData(), array("parentId" => $this->parentId, "children" => $this->children));
         }
-
         /** Returns class type
          *
          * @return string
@@ -232,7 +213,6 @@
         {
             return "Guardian";
         }
-
         /**
          *returns booked timeSlots
          *
@@ -248,7 +228,6 @@
 		}
 		return $appointments;
         }
-
 	/**
          *returns TeacherIds of booked timeSlots
          *
@@ -264,8 +243,6 @@
 		}
 		return $appointments;
         }
-
-
 	/**
 	*finds bookedTeacher Ids
 	*
@@ -280,26 +257,18 @@
 		}
        return $teachers;
 	}
-
 	
-
 	
-
     }
-
-
     /**
      *Teacher class as subclass of User class
      */
     class Teacher extends User
     {
-
-
         /**
          * @var int lessonAmount (Deputat)
          */
         protected $lessonAmount;
-
         /**
          * @var string $ldapName
          */
@@ -314,25 +283,19 @@
          */
         public function __construct($email, $teacherId, $rawData = null)
         {
-
             $nameData = Model::getInstance()->getTeacherNameByTeacherId($teacherId, $rawData);
-
             parent::__construct($teacherId, 2, $email, $nameData['name'], $nameData['surname']);
-
             $this->ldapName = Model::getInstance()->getTeacherLdapNameByTeacherId($teacherId, $rawData);
             $this->lessonAmount = Model::getInstance()->getTeacherLessonAmountByTeacherId($teacherId, $rawData);
         }
-
         /**
          * @return array[String => mixed] returns all data of this class as array
          */
         public function getData()
         {
             $parentData = parent::getData();
-
             return array_merge($parentData, array("lessonAmount" => $this->lessonAmount, "ldapName" => $this->ldapName));
         }
-
         /** Returns class type
          *
          * @return string
@@ -341,7 +304,6 @@
         {
             return "Teacher";
         }
-
         /**
          *Returns lesson amount of teacher (Deputat)
          *
@@ -351,7 +313,6 @@
         {
             return $this->lessonAmount;
         }
-
         /**
          *Returns required slots according to lessonAmount
          *
@@ -370,7 +331,6 @@
 			if ($lessons < $MINAMOUNT) { $amount = $HALF;}	
             return $amount;
         }
-
         /**
          *returns missing slots for openday
          *
@@ -380,12 +340,9 @@
         {
             $required = $this->getRequiredSlots();
             $model = Model::getInstance();
-
             $doneyet = count($this->getAssignedSlots());
-
             return $required - $doneyet;
         }
-
         /**
          *creates and returns an array with all slots included the ones assigned by Teacher
          *
@@ -406,14 +363,11 @@
                         //this slot is assigned by Teacher
                         $slot['assigned'] = true;
                     }
-
                 }
                 $slotList[] = $slot;
             }
-
             return $slotList;
         }
-
         /**
          *Enters a teacher slot into DB
          *
@@ -424,7 +378,6 @@
             $model = Model::getInstance();
             $model->setAssignedSlot($slotId, $this->id);
         }
-
         /**
          *returns AssignedSlots
          *
@@ -434,10 +387,8 @@
         {
             $model = Model::getInstance();
             $assignedSlots = $model->getAssignedSlots($this->getId());
-
             return $assignedSlots;
         }
-
         /**
          *returns bookable Slots and booked Slots by a parent as array
          *
@@ -446,19 +397,15 @@
         public function getAllBookableSlots($parentId)
         {
             $model = Model::getInstance();
-
             return $model->getAllBookableSlotsForParent($this->id, $parentId);
         }
     }
-
     class Admin extends User
     {
-
         function __construct($id, $email)
         {
             parent::__construct($id, 0, $email);
         }
-
         /** Returns class type
          *
          * @return string
@@ -467,15 +414,12 @@
         {
             return "Admin";
         }
-
     }
-
     /**
      * Class Student
      */
     class Student extends Printable
     {
-
         /**
          * @var int student ID
          */
@@ -500,7 +444,6 @@
          * @var string student's birthday
          */
         protected $bday;
-
         public function __construct($id, $class, $surname, $name, $bday, $eid = null)
         {
             $this->id = $id;
@@ -510,8 +453,6 @@
             $this->bday = $bday;
             $this->eid = $eid;
         }
-
-
         /**
          * Returns student id
          *
@@ -521,7 +462,6 @@
         {
             return $this->id;
         }
-
         /**
          * @return string
          */
@@ -529,7 +469,6 @@
         {
             return $this->class;
         }
-
         /**
          * @return string
          */
@@ -537,7 +476,6 @@
         {
             return $this->surname;
         }
-
         /**
          * @return string
          */
@@ -545,7 +483,6 @@
         {
             return $this->name;
         }
-
         /**
          * @return int
          */
@@ -553,12 +490,10 @@
         {
             return $this->eid;
         }
-
         public function getFullName()
         {
             return $this->getName() . " " . $this->getSurname();
         }
-
         /**
          * @return string
          */
@@ -566,7 +501,6 @@
         {
             return $this->bday;
         }
-
         /**
          * @return array[String => Data] used for creating __toString and jsonSerialize
          */
@@ -574,7 +508,6 @@
         {
             return array("id" => $this->id, "class" => $this->class, "surname" => $this->surname, "name" => $this->name, "eid" => $this->eid, "bday" => $this->bday);
         }
-
         /** Returns class type
          *
          * @return string
@@ -583,7 +516,6 @@
         {
             return "Student";
         }
-
         /**
          * Get all teachers teaching this student
          *
@@ -592,18 +524,11 @@
         public function getTeachers()
         {
             $model = Model::getInstance();
-
             $teachers = $model->getTeachersByClass($this->getClass());
             if ($teachers == null)
                 return array();
-
             sort($teachers);
-
             return $teachers;
         }
-
-
     }
-
-
 ?>

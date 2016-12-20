@@ -327,11 +327,13 @@
             $students = array();
             $today = date("Ymd");
             $this->infoToView['user'] = $guardian;
+	    
+
 
             ($today > $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
             if (!$bookingTimeIsOver)
             {
-                $teachers = $guardian->getTeachersOfAllChildren();
+		  $teachers = $guardian->getTeachersOfAllChildren( $this->model->getOptions()['limit'] );
                 $this->sortByAppointment($teachers);
                 $this->infoToView['teachers'] = $teachers;
                 $this->infoToView['appointments'] = $guardian->getAppointments();
@@ -340,7 +342,7 @@
             {
                 $this->infoToView['bookingDetails'] = $this->model->getBookingDetails($guardian->getParentId());
             }
-
+ 		
 
             return "parent_est";
         }
