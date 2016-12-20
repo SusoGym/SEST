@@ -127,7 +127,8 @@
          */
         public function getESTChildren($limit)
         {
-         return Model::getInstance()->getChildrenByParentUserId($this->id,$limit);
+         $this->children = Model::getInstance()->getChildrenByParentUserId($this->id,$limit);
+	  return $this->getChildren();
         }
 
         /**
