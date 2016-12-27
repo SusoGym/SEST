@@ -300,6 +300,7 @@
                     $this->title = "Einstellungen";
                     $this->addMenueItem("?type=sestconfig", "Elternsprechtag konfigurieren");
                     $this->addMenueItem("?type=newsconfig", "Newsletter konfigurieren");
+	             $this->addMenueItem("?type=options", "Optionen");
                     $this->display("simple_menue");
                     break;
                 //Enter Newsletter
@@ -404,6 +405,13 @@
                     $this->backButton = "?type=settings";
                     $this->display("simple_menue");
                     break;
+		  //Configure Options
+		  case "options":
+		      $this->title = "Konfiguration Optionen";
+                    $this->backButton = "?type=settings";
+			$this->infoToView['options'] = $this->model->getOptionsForAdmin();
+		      $this->display("options");
+		      break;
                 //Set SEST classes/teachers
                 case "setclasses":
                     $this->allTeachers = $this->model->getTeachers();

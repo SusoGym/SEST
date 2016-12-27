@@ -326,6 +326,22 @@
             return $newDate;
         }
 
+
+	/**
+	*returns options for admin purpose
+	*@return array(string)
+	*/
+	public function getOptionsForAdmin(){
+		$options = array();
+		$data = self::$connection->selectValues("SELECT kommentar, type, value FROM options ORDER BY ordinal");
+			if(isset($data)) {
+				foreach ($data as $d){
+				
+				}
+			}
+		return $options;
+	}
+
     }
 
 
