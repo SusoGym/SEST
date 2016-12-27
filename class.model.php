@@ -554,7 +554,7 @@
          *returns appointments of parent
          *
          * @param int parentId
-         * @return array(Timestamp anfang)
+         * @return array(slotId, bookingId, teacherId)
          */
         public function getAppointmentsOfParent($parentId)
         {
@@ -572,9 +572,58 @@
 
             return $appointments;
         }
+	
+	/**
+	* returns taught classes of teacher
+	* @param int teacherId
+	* @return array(string)
+	*/
+	public function getTaughtClasses($teacherId) {
+		$data = self::$connection->selectValues("SELECT klasse FROM unterricht WHERE lid = $teacherId ORDER BY klasse");
+		$classes = array();
+		if (isset($data)){
+                foreach ($data as $d){
+			$classes[] = $d[0];
+			}
+			}
+	return $classes;
+	}
+	
+        /**
+         *returns appointments of teacher
+         *
+         * @param int teacherId
+         * @return array(slotId, bookingId, Guardian)
+         */
+        public function getAppointmentsOfTeacher($teacherId)
+        {
+            $appointments = array();
+            $data = self::$connection->selectValues("SELECT time_slot.id,bookable_slot.id,bookable_slot.eid,eltern.userid,eltern.name,eltern.vorname,user.email
+			FROM time_slot,bookable_slot,eltern,user
+			WHERE time_slot.id=bookable_slot.slotid
+			AND bookable_slot.eid=eltern.id
+			AND eltern.userid=user.id
+			AND bookable_slot.lid=$teacherId ORDER BY anfang");
+            if (isset($data))
+            {
+                foreach ($data as $d)
+                {
+			$parentId = $d[2];
+			$userId = $d[3];
+			$surname = $d[4];
+			$name = $d[5];
+			$email = $d[6];
+			$parent = new Guardian($userId,$email,$parentId,$surname,$name);
+			$parent->getESTChildren($this->getOptions()['limit']);
+                    $appointments[] = array("slotId" => $d[0], "bookingId" => $d[1], "parent" => $parent);
+                }
+            }
+            return $appointments;
+        }
+
 
         /**
-         *retrieve all relevant booking Data
+         *retrieve all relevant booking Data for parent
          *
          * @param int parentId
          * @return array("anfang","ende","teacher");
@@ -599,6 +648,8 @@
 
             return $bookingDetails;
         }
+
+			
 
         /**
          * @param $email
