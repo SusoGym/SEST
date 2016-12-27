@@ -228,6 +228,12 @@
             }
             $this->infoToView['slots_to_show'] = $teacher->getSlotListToAssign();
 
+	     //To show final bookings appointments of teacher must be read
+	      if (date('Ymd') > $this->infoToView['assign_end']) {
+		$this->infoToView['teacher_classes'] = $teacher->getTaughtClasses();
+	       $this->infoToView['teacher_appointments'] = $teacher->getAppointmentsOfTeacher();
+		}
+
             return "tchr_slots";
         }
 

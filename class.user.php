@@ -103,12 +103,13 @@
          *
          * @param int $id userId
          * @param string $email
+	  * @param int parentId
          */
-        public function __construct($id, $email, $parentId)
+        public function __construct($id, $email, $parentId, $surname = null, $name = null)
         {
-            parent::__construct($id, 1, $email);
+            parent::__construct($id, 1, $email, $surname, $name);
             $this->parentId = $parentId;
-            $this->children = Model::getInstance()->getChildrenByParentUserId($this->id);
+	      $this->children = Model::getInstance()->getChildrenByParentUserId($this->id);
         }
         /**
          *Returns child(ren)'s id(s)
@@ -400,6 +401,25 @@
             $model = Model::getInstance();
             return $model->getAllBookableSlotsForParent($this->id, $parentId);
         }
+	/**
+	* returns taught classes of teacher
+	* @return array(string)
+	*/
+	public function getTaughtClasses(){
+		$model = Model::getInstance();
+		return $model->getTaughtClasses($this->id);
+	}
+
+	/**
+	* returns appointments of teacher
+	* @return array(int);
+	*/
+	public function getAppointmentsOfTeacher(){
+		$model = Model::getInstance();
+		return $model->getAppointmentsOfTeacher($this->id);
+
+	}
+	
     }
     class Admin extends User
     {
