@@ -83,7 +83,8 @@
 
             if (self::$user instanceof Guardian)
             {
-                $this->infoToView['children'] = self::$user->getChildren();
+                	$this->infoToView['welcomeText'] = $this->model->getOptions()['welcomeparent'];  
+			$this->infoToView['children'] = self::$user->getChildren();
             }
             switch ($this->input['type'])
             {
@@ -93,6 +94,10 @@
                 case "eest": //Parent chooses est
                     $template = $this->handleParentEst();
                     break;
+		  case "events":
+			//Modul Termine
+			$template = $this->handleEvents();
+			break;
                 case "childsel":
                     if(self::$user == null)
                         break;
@@ -334,8 +339,6 @@
             $today = date("Ymd");
             $this->infoToView['user'] = $guardian;
 	    
-
-
             ($today > $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
             if (!$bookingTimeIsOver)
             {
@@ -353,6 +356,21 @@
 
             return "parent_est";
         }
+
+	/**
+	* Events Logic
+	* @return string template to be displayed
+	*/
+	private function handleEvents(){
+		if (self::$user instanceof Guardian || self::$user instanceof Student){
+                	$this->infoToView['events'] = $this->model->getEvents(); 
+           		}
+		elseif(self::$user instanceof Teacher){
+			$this->infoToView['events'] = $this->model->getEvents(true); 
+			}
+		$this->infoToView['months'] = $this->model->getMonths();
+		return "events";
+		}
 
         /**
          * Register logic
@@ -447,7 +465,7 @@
                 return $_SESSION['board_type'] . '_dashboard';
             } else if ($user instanceof Teacher)
             {
-                return "teacher_dashboard";
+              return "teacher_dashboard";
             } else
             {
                 return "parent_dashboard";
@@ -465,7 +483,7 @@
             $view = View::getInstance();
             $this->infoToView['usr'] = self::$user;
             //set Module activity
-            $this->infoToView['modules'] = array("vplan" => false, "events" => false, "news" => false);
+            $this->infoToView['modules'] = array("vplan" => false, "events" => true, "news" => false);
             $view->setDataForView($this->infoToView);
             $view->loadTemplate($template);
         }
