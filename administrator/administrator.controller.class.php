@@ -407,6 +407,10 @@
                     break;
 		  //Configure Options
 		  case "options":
+		      if(isset($input['sbm']) ) {
+				
+				$this->model->updateOptions($_POST);	
+				}
 		      $this->title = "Konfiguration Optionen";
                     $this->backButton = "?type=settings";
 			$this->infoToView['options'] = $this->model->getOptionsForAdmin();
