@@ -333,14 +333,24 @@
 	*/
 	public function getOptionsForAdmin(){
 		$options = array();
-		$data = self::$connection->selectValues("SELECT kommentar, type, value FROM options ORDER BY ordinal");
+		$data = self::$connection->selectValues("SELECT kommentar, type, value, field FROM options ORDER BY ordinal");
 			if(isset($data)) {
 				foreach ($data as $d){
-				
+				$options[]=array("kommentar"=>$d[0],"type"=>$d[1],"value"=>$d[2],"field"=>$d[3]);
 				}
 			}
 		return $options;
 	}
+
+	/**
+	*updates options after changes
+	*@param array POST 
+	*/
+	public function updateOptions($data){
+		foreach($data as $key=>$value){
+			self::$connection->straightQuery("UPDATE options SET value =\"$value\" WHERE type=\"$key\" ");
+			}
+		}
 
     }
 
