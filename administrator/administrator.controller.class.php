@@ -297,7 +297,7 @@
                     break;
                 //Settings
                 case "settings":
-                    $this->title = "Einstellungen";
+		      $this->title = "Einstellungen";
                     $this->addMenueItem("?type=sestconfig", "Elternsprechtag konfigurieren");
                     $this->addMenueItem("?type=newsconfig", "Newsletter konfigurieren");
 	             $this->addMenueItem("?type=options", "Optionen");
@@ -393,9 +393,11 @@
                     break;
                 //SEST configuration
                 case "sestconfig":
-                    $this->title = "Konfiguration Elternsprechtag";
-                    $this->addMenueItem("?type=setclasses", "Unterrichtszuordnung einrichten");
-                    $this->addMenueItem("?type=setslots", "Sprechzeiten einrichten");
+		      $this->title = "Konfiguration Elternsprechtag";
+		      $this->addMenueItem("?type=setclasses", "Unterrichtszuordnung einrichten");
+                    if(date('Ymd') <=  $this->model->getOptions()['assignstart'] ){
+				$this->addMenueItem("?type=setslots", "Sprechzeiten einrichten");
+				}
                     $this->backButton = "?type=settings";
                     $this->display("simple_menue");
                     break;
