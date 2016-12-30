@@ -17,7 +17,7 @@
 	/** 
 	*@var monate
 	*/
-	private $monate=array();//Array("mnum"=>string,"mstring"=>string,"jahr"=>int) der Monate mit Terminen 
+	private $monate=null;//Array("mnum"=>string,"mstring"=>string,"jahr"=>int) der Monate mit Terminen 
 
 
         /**
@@ -791,10 +791,10 @@
 	isset($isTeacher) ? $query="SELECT typ,start,ende,staff FROM termine ORDER BY start" : $query="SELECT typ,start,ende,staff FROM termine WHERE staff=0 ORDER BY start" ;
 	$data=self::$connection->selectValues($query);
 	foreach ($data as $d){
-		$termin=new Termin();
+		$termin = new Termin();
 		$termin->createFromDB($d);
 		$this->makeMonthsArray($termin->monatNum,$termin->monat,$termin->jahr);
-		$termine[]=$termin->createFromDB($d);
+		$termine[] =$termin->createFromDB($d);
 		}
 	return $termine;
 	}
@@ -809,7 +809,7 @@
 	$noAdd=false;
 	if(isset($this->monate)){
 		 foreach ($this->monate as $m){
-		 if($m["mnum"]==$monatZahl) {
+		 if($m["mnum"] == $monatZahl) {
 				$noAdd=true;
 			}
 		}
