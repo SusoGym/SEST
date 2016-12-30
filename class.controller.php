@@ -96,6 +96,7 @@
                     break;
 		  case "events":
 			//Modul Termine
+			if(isset($this->input['all'])) $this->infoToView['showAllEvents'] = true;
 			$template = $this->handleEvents();
 			break;
                 case "childsel":
