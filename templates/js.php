@@ -11,7 +11,6 @@
     });
 
 
-
     function initDatepick() {
 
         $('.datepicker').pickadate({

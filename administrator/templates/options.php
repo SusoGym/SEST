@@ -3,8 +3,8 @@
 
     $data = \View::getInstance()->getDataForView();
 	$isText = false;
-	foreach ($data["options"] as $o){
-		if($o['field']){
+	foreach ($data["options"] as $options){
+		if($options['field']){
 			$isText = true;
 			break;
 			}
@@ -29,11 +29,11 @@
           </span>
           <p  style="margin-top: 20px;">
 	   <?php
-                foreach ($data["options"] as $o){ 
-			if(!$o['field']) {?>
+                foreach ($data["options"] as $options){
+			if(!$options['field']) {?>
                     		<div class="input-field col s12 l4 m6">
-                            	<input name="<?php echo $o["type"]; ?>" type="text" class="" value="<?php echo $o['value']; ?>"required>
-                            	<label for=?php echo $o["type"]; ?>  <?php echo $o['kommentar']; ?> </label>
+                            	<input name="<?php echo $options["type"]; ?>" type="text" class="" value="<?php echo $options['value']; ?>" required>
+                            	<label for=<?php echo $options["type"]; ?>  <?php echo $options['kommentar']; ?> </label>
                         	</div>
                   <?php
                   		}
@@ -41,13 +41,13 @@
 
             </p>
 		<?php if($isText){
-			foreach ($data["options"] as $o){ 
-                    		if($o['field']){?>
+			foreach ($data["options"] as $options){
+                    		if($options['field']){?>
 					<div class="row"></div>
 					<div class="row" >
-					<p><span class="teal-text"><?php echo $o['kommentar']; ?></span></p> 
-                            	<textarea wrap="soft" name="<?php echo $o["type"]; ?>" row="5">
-                            	<?php echo $o['value']; ?>
+					<p><span class="teal-text"><?php echo $options['kommentar']; ?></span></p>
+                            	<textarea wrap="soft" name="<?php echo $options["type"]; ?>" row="5">
+                            	<?php echo $options['value']; ?>
 					</textarea>
                         		</div>
                <?php			}

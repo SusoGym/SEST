@@ -297,10 +297,10 @@
                     break;
                 //Settings
                 case "settings":
-		      $this->title = "Einstellungen";
+                    $this->title = "Einstellungen";
                     $this->addMenueItem("?type=sestconfig", "Elternsprechtag konfigurieren");
                     $this->addMenueItem("?type=newsconfig", "Newsletter konfigurieren");
-	             $this->addMenueItem("?type=options", "Optionen");
+                    $this->addMenueItem("?type=options", "Optionen");
                     $this->display("simple_menue");
                     break;
                 //Enter Newsletter
@@ -393,11 +393,12 @@
                     break;
                 //SEST configuration
                 case "sestconfig":
-		      $this->title = "Konfiguration Elternsprechtag";
-		      $this->addMenueItem("?type=setclasses", "Unterrichtszuordnung einrichten");
-                    if(date('Ymd') <=  $this->model->getOptions()['assignstart'] ){
-				$this->addMenueItem("?type=setslots", "Sprechzeiten einrichten");
-				}
+                    $this->title = "Konfiguration Elternsprechtag";
+                    $this->addMenueItem("?type=setclasses", "Unterrichtszuordnung einrichten");
+                    if (date('Ymd') <= $this->model->getOptions()['assignstart'])
+                    {
+                        $this->addMenueItem("?type=setslots", "Sprechzeiten einrichten");
+                    }
                     $this->backButton = "?type=settings";
                     $this->display("simple_menue");
                     break;
@@ -407,17 +408,18 @@
                     $this->backButton = "?type=settings";
                     $this->display("simple_menue");
                     break;
-		  //Configure Options
-		  case "options":
-		      if(isset($input['sbm']) ) {
-				
-				$this->model->updateOptions($_POST);	
-				}
-		      $this->title = "Konfiguration Optionen";
+                //Configure Options
+                case "options":
+                    if (isset($input['sbm']))
+                    {
+
+                        $this->model->updateOptions($_POST);
+                    }
+                    $this->title = "Konfiguration Optionen";
                     $this->backButton = "?type=settings";
-			$this->infoToView['options'] = $this->model->getOptionsForAdmin();
-		      $this->display("options");
-		      break;
+                    $this->infoToView['options'] = $this->model->getOptionsForAdmin();
+                    $this->display("options");
+                    break;
                 //Set SEST classes/teachers
                 case "setclasses":
                     $this->allTeachers = $this->model->getTeachers();
@@ -437,12 +439,12 @@
                     if (isset($input['del']))
                     {
                         $this->model->deleteSlot($input['del']);
-		          //this->model->deleteBookableSlots($input['del']) - does not exist yet in model
+                        //this->model->deleteBookableSlots($input['del']) - does not exist yet in model
                     }
                     if (isset($input['start']))
                     {
                         $slotId = $this->model->insertSlot($input['start'], $input['end']);
-			   $this->model->createBookableSlots($slotId);
+                        $this->model->createBookableSlots($slotId);
                     }
                     $this->existingSlots = $this->model->getSlots();
                     $this->display("slot_mgt");

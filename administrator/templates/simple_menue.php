@@ -16,20 +16,21 @@
                    href="<?php echo $data["backButton"]; ?>"><i
                             class="material-icons">chevron_left</i></a>
             <?php } ?>
-            <?php echo \View::getInstance()->getTitle(); ?>
+              <?php echo \View::getInstance()->getTitle(); ?>
           </span>
-          <p  style="margin-top: 20px;">
-            <?php
-              if (isset($data["menueItems"])) {
-                foreach ($data["menueItems"] as $m)
-                  { ?>
-                    <div class="row">
-                      <a class="mdl-navigation__link teal-text btn-flat" id="menueItem"
-                          href="<?php echo $m['link']; ?>"><?php echo $m['entry']; ?></a>
-                    </div>
+            <p style="margin-top: 20px;">
+                <?php
+                    if (isset($data["menueItems"]))
+                    {
+                    foreach ($data["menueItems"] as $m)
+                    { ?>
+            <div class="row">
+                <a class="mdl-navigation__link teal-text btn-flat" id="menueItem"
+                   href="<?php echo $m['link']; ?>"><?php echo $m['entry']; ?></a>
+            </div>
 
-                  <?php
-                  }
+            <?php
+                }
                 } ?>
 
             </p>

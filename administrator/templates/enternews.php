@@ -6,7 +6,7 @@
 
     <div class="card ">
         <div class="card-content">
-          <span class="card-title"><?php echo \View::getInstance()->getTitle(); ?></span>
+            <span class="card-title"><?php echo \View::getInstance()->getTitle(); ?></span>
 
         </div>
 

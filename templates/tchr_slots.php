@@ -5,12 +5,14 @@
     /** @var Teacher $usr */
     $usr = $data['usr'];
     $today = date("Ymd");
-    if ($today > $data['assign_end']) {
-	 $enabled = false;
-	} else {
-	$enabled = true;
-	}
-    
+    if ($today > $data['assign_end'])
+    {
+        $enabled = false;
+    } else
+    {
+        $enabled = true;
+    }
+
 
 ?>
 <div class="container">
@@ -21,14 +23,15 @@
                 <b><?php echo $data['card_title']; ?></b>
             </div>
 
-	     <?php if ($enabled) { ?>
-		<div class="row teal-text">
-              Aktuelles Deputat: <?php echo $data['deputat']; ?> Stunden
-              <br>
-              <b>Sie müssen <?php echo $data['requiredSlots']; ?> Termine angeben!</b>
-            	</div>
-		
-            <?php if ($usr->getMissingSlots() > 0): ?>
+            <?php if ($enabled)
+            { ?>
+                <div class="row teal-text">
+                    Aktuelles Deputat: <?php echo $data['deputat']; ?> Stunden
+                    <br>
+                    <b>Sie müssen <?php echo $data['requiredSlots']; ?> Termine angeben!</b>
+                </div>
+
+                <?php if ($usr->getMissingSlots() > 0): ?>
                 <div class="row red-text">
                     <b><?php
                             $required = $data['missing_slots'];
@@ -45,7 +48,7 @@
                     <b>Es wurden <?php echo count($usr->getAssignedSlots()) ?> Termine bestimmt!</b>
                 </div>
             <?php endif; ?>
-		<?php } ?>
+            <?php } ?>
             <div class="col l9 m12 s 12">
                 <ul class="collection with-header">
 
@@ -67,40 +70,47 @@
                             } ?>
                             <li class="collection-item">
                                 <div>
-                                    
-                                    <?php if ($enabled) { ?>
-						<?php echo date_format(date_create($slot['anfang']), 'd.m.Y H:i') . " - " . date_format(date_create($slot['ende']), 'H:i'); ?>
-						<a href="<?php echo $href; ?> " class="secondary-content action"><i
-                                                class="material-icons green-text"><?php echo $symbol; ?></i></a>
-                                   	 <span class="secondary-content info grey-text"><?php echo $text; ?></span>
-					 <?php } else { //Booking period is over - appointments are displayed  
-							echo date_format(date_create($slot['anfang']), 'd.m.Y H:i') . " - " . date_format(date_create($slot['ende']), 'H:i'); 
-							if(!isset($slot['assigned'])) { ?>
-								<a  class="secondary-content action"><i
-                                                	class="material-icons red-text">not_interested</i></a>
-								<?php 
-								}
 
-							foreach($data['teacher_appointments'] as $bookedSlot) {
-							if($bookedSlot['slotId'] == $slot['id']) {?>
-								<span class="secondary-content info grey-text">
+                                    <?php if ($enabled)
+                                    { ?>
+                                        <?php echo date_format(date_create($slot['anfang']), 'd.m.Y H:i') . " - " . date_format(date_create($slot['ende']), 'H:i'); ?>
+                                        <a href="<?php echo $href; ?> " class="secondary-content action"><i
+                                                    class="material-icons green-text"><?php echo $symbol; ?></i></a>
+                                        <span class="secondary-content info grey-text"><?php echo $text; ?></span>
+                                    <?php } else
+                                    { //Booking period is over - appointments are displayed
+                                        echo date_format(date_create($slot['anfang']), 'd.m.Y H:i') . " - " . date_format(date_create($slot['ende']), 'H:i');
+                                        if (!isset($slot['assigned']))
+                                        { ?>
+                                            <a class="secondary-content action"><i
+                                                        class="material-icons red-text">not_interested</i></a>
+                                            <?php
+                                        }
+
+                                        foreach ($data['teacher_appointments'] as $bookedSlot)
+                                        {
+                                            if ($bookedSlot['slotId'] == $slot['id'])
+                                            { ?>
+                                                <span class="secondary-content info grey-text">
 									<?php echo $bookedSlot['parent']->getFullName(); ?>
-									<?php //prepare Children display
-									$childrenList = null;
-									foreach($bookedSlot['parent']->getChildren() as $child){
-										if(in_array($child->getClass(),$data['teacher_classes'])) {
-										(isset($childrenList)) ? $separator = "/" : $separator = "";
-										$childrenList = $childrenList.$separator.$child->getFullName().','.$child->getClass();
-										}
-										
-									}
-									echo ' ('.$childrenList.')'; ?>
-								</span>
-					<?php		}
-						}
-						
+                                    <?php //prepare Children display
+                                        $childrenList = null;
+                                        foreach ($bookedSlot['parent']->getChildren() as $child)
+                                        {
+                                            if (in_array($child->getClass(), $data['teacher_classes']))
+                                            {
+                                                (isset($childrenList)) ? $separator = "/" : $separator = "";
+                                                $childrenList = $childrenList . $separator . $child->getFullName() . ',' . $child->getClass();
+                                            }
 
-					 	 } ?>
+                                        }
+                                        echo ' (' . $childrenList . ')'; ?>
+								</span>
+                                            <?php }
+                                        }
+
+
+                                    } ?>
                                 </div>
                             </li>
 
@@ -125,7 +135,6 @@
     <?php
         include("navbar.php"); ?>
 </ul>
-
 
 
 <?php include("js.php"); ?>
