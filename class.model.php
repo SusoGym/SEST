@@ -14,10 +14,10 @@
          */
         protected static $model;
 
-        /**
-         * @var monate
-         */
-        private $monate = array();//Array("mnum"=>string,"mstring"=>string,"jahr"=>int) der Monate mit Terminen
+	/** 
+	*@var monate
+	*/
+	private $monate=null;//Array("mnum"=>string,"mstring"=>string,"jahr"=>int) der Monate mit Terminen 
 
 
         /**
@@ -181,15 +181,13 @@
          */
         public function getChildrenByParentUserId($usrId, $limit = null)
         {
-            if (isset($limit))
-            {
-                $query = "SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId AND schueler.klasse < $limit"; //a bit crude, isn't it
-            } else
-            {
-                $query = "SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId";
-            }
+            if(isset($limit)) {
+			$query = "SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId AND schueler.klasse < $limit"; //a bit crude, isn't it
+		} else {
+			$query = "SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId";
+		}
 
-            $data = self::$connection->selectAssociativeValues($query);
+		$data = self::$connection->selectAssociativeValues($query);
 
             if ($data == null)
                 return array();
@@ -580,28 +578,23 @@
 
             return $appointments;
         }
-
-        /**
-         * returns taught classes of teacher
-         *
-         * @param int teacherId
-         * @return array(string)
-         */
-        public function getTaughtClasses($teacherId)
-        {
-            $data = self::$connection->selectValues("SELECT klasse FROM unterricht WHERE lid = $teacherId ORDER BY klasse");
-            $classes = array();
-            if (isset($data))
-            {
-                foreach ($data as $d)
-                {
-                    $classes[] = $d[0];
-                }
-            }
-
-            return $classes;
-        }
-
+	
+	/**
+	* returns taught classes of teacher
+	* @param int teacherId
+	* @return array(string)
+	*/
+	public function getTaughtClasses($teacherId) {
+		$data = self::$connection->selectValues("SELECT klasse FROM unterricht WHERE lid = $teacherId ORDER BY klasse");
+		$classes = array();
+		if (isset($data)){
+                foreach ($data as $d){
+			$classes[] = $d[0];
+			}
+			}
+	return $classes;
+	}
+	
         /**
          *returns appointments of teacher
          *
@@ -621,17 +614,16 @@
             {
                 foreach ($data as $d)
                 {
-                    $parentId = $d[2];
-                    $userId = $d[3];
-                    $surname = $d[4];
-                    $name = $d[5];
-                    $email = $d[6];
-                    $parent = new Guardian($userId, $email, $parentId, $surname, $name);
-                    $parent->getESTChildren($this->getOptions()['limit']);
+			$parentId = $d[2];
+			$userId = $d[3];
+			$surname = $d[4];
+			$name = $d[5];
+			$email = $d[6];
+			$parent = new Guardian($userId,$email,$parentId,$surname,$name);
+			$parent->getESTChildren($this->getOptions()['limit']);
                     $appointments[] = array("slotId" => $d[0], "bookingId" => $d[1], "parent" => $parent);
                 }
             }
-
             return $appointments;
         }
 
@@ -663,7 +655,7 @@
             return $bookingDetails;
         }
 
-
+			
 
         /**
          * @param $email
@@ -790,60 +782,49 @@
         }
 
 
-        /**
-         *Termine aus Datenbank auslesen
-         *
-         * @param $includeStaff Boolean
-         * @return Array(Terminobjekt)
-         */
-        public function getEvents($isTeacher = null)
-        {
-            isset($isTeacher) ? $query = "SELECT typ,start,ende,staff FROM termine ORDER BY start" : $query = "SELECT typ,start,ende,staff FROM termine WHERE staff=0 ORDER BY start";
-            $data = self::$connection->selectValues($query);
-            foreach ($data as $d)
-            {
-                $termin = new Termin();
-                $termin->createFromDB($d);
-                $this->makeMonthsArray($termin->monatNum, $termin->monat, $termin->jahr);
-                $termine[] = $termin->createFromDB($d);
-            }
+	/**
+	*Termine aus Datenbank auslesen
+	*@param $includeStaff Boolean
+	*@return Array(Terminobjekt)
+	*/	
+	public function getEvents($isTeacher = null){
+	isset($isTeacher) ? $query="SELECT typ,start,ende,staff FROM termine ORDER BY start" : $query="SELECT typ,start,ende,staff FROM termine WHERE staff=0 ORDER BY start" ;
+	$data=self::$connection->selectValues($query);
+	foreach ($data as $d){
+		$termin = new Termin();
+		$termin->createFromDB($d);
+		$this->makeMonthsArray($termin->monatNum,$termin->monat,$termin->jahr);
+		$termine[] =$termin->createFromDB($d);
+		}
+	return $termine;
+	}
 
-            return $termine;
-        }
+	/**
+	*Monatsarray mit Terminen erstellen
+	*@param string Monat als Zahl
+	*@param string Monat als Text
+	*@param string jahr
+	*/
+	private function makeMonthsArray($monatZahl,$monat,$jahr){
+	$noAdd=false;
+	if(isset($this->monate)){
+		 foreach ($this->monate as $m){
+		 if($m["mnum"] == $monatZahl) {
+				$noAdd=true;
+			}
+		}
+	}
+	if(!$noAdd) $this->monate[]=array("mnum"=>$monatZahl,"mstring"=>$monat,"jahr"=>$jahr);
+	}
 
-        /**
-         *Monatsarray mit Terminen erstellen
-         *
-         * @param string Monat als Zahl
-         * @param string Monat als Text
-         * @param string jahr
-         */
-        private function makeMonthsArray($monatZahl, $monat, $jahr)
-        {
-            $noAdd = false;
-            if (isset($this->monate))
-            {
-                foreach ($this->monate as $m)
-                {
-                    if ($m["mnum"] == $monatZahl)
-                    {
-                        $noAdd = true;
-                    }
-                }
-            }
-            if (!$noAdd) $this->monate[] = array("mnum" => $monatZahl, "mstring" => $monat, "jahr" => $jahr);
-        }
-
-        /**
-         *Monatarray abrufen
-         *
-         * @return array(string) monate
-         */
-        public function getMonths()
-        {
-            return $this->monate;
-        }
-
+	/**
+	*Monatarray abrufen
+	*@return array(string) monate
+	*/
+	public function getMonths(){
+	return $this->monate;
+	}
+	
 
 
     }
