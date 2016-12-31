@@ -83,8 +83,8 @@
 
             if (self::$user instanceof Guardian)
             {
-                	$this->infoToView['welcomeText'] = $this->model->getOptions()['welcomeparent'];  
-			$this->infoToView['children'] = self::$user->getChildren();
+                $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomeparent');
+                $this->infoToView['children'] = self::$user->getChildren();
             }
             switch ($this->input['type'])
             {
@@ -94,13 +94,13 @@
                 case "eest": //Parent chooses est
                     $template = $this->handleParentEst();
                     break;
-		  case "events":
-			//Modul Termine
-			if(isset($this->input['all'])) $this->infoToView['showAllEvents'] = true;
-			$template = $this->handleEvents();
-			break;
+                case "events":
+                    //Modul Termine
+                    if (isset($this->input['all'])) $this->infoToView['showAllEvents'] = true;
+                    $template = $this->handleEvents();
+                    break;
                 case "childsel":
-                    if(self::$user == null)
+                    if (self::$user == null)
                         break;
                     if (!self::$user instanceof Guardian)
                         die("Unauthorized access! User must be instance of Guardian!");
@@ -163,13 +163,13 @@
             $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
             $this->infoToView['book_end'] = $this->model->getOptions()['close'];
             $this->infoToView['book_start'] = $this->model->getOptions()['open'];
-	     $this->infoToView['est_date'] = $this->model->getOptions()['date'];
+            $this->infoToView['est_date'] = $this->model->getOptions()['date'];
 
 
             if (self::$user instanceof Guardian)
             {
-		//nothing happening here ???
-               
+                //nothing happening here ???
+
             } else if (self::$user instanceof Teacher)
             {
             }
@@ -208,7 +208,7 @@
          */
         protected function teacherSlotDetermination()
         {
-            if(self::$user == null)
+            if (self::$user == null)
                 return "login";
             if (!self::$user instanceof Teacher)
                 die("Unauthorized access! User must be instance of Teacher!");
@@ -234,11 +234,12 @@
             }
             $this->infoToView['slots_to_show'] = $teacher->getSlotListToAssign();
 
-	     //To show final bookings appointments of teacher must be read
-	      if (date('Ymd') > $this->infoToView['assign_end']) {
-		$this->infoToView['teacher_classes'] = $teacher->getTaughtClasses();
-	       $this->infoToView['teacher_appointments'] = $teacher->getAppointmentsOfTeacher();
-		}
+            //To show final bookings appointments of teacher must be read
+            if (date('Ymd') > $this->infoToView['assign_end'])
+            {
+                $this->infoToView['teacher_classes'] = $teacher->getTaughtClasses();
+                $this->infoToView['teacher_appointments'] = $teacher->getAppointmentsOfTeacher();
+            }
 
             return "tchr_slots";
         }
@@ -307,7 +308,7 @@
          */
         protected function handleParentEst()
         {
-            if(self::$user == null)
+            if (self::$user == null)
                 return "login";
             if (!self::$user instanceof Guardian)
                 die("Unauthorized access! User must be instance of Guardian!");
@@ -339,39 +340,43 @@
             $students = array();
             $today = date("Ymd");
             $this->infoToView['user'] = $guardian;
-	    
+
             ($today > $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
             if (!$bookingTimeIsOver)
             {
-		  $teachers = $guardian->getTeachersOfAllChildren( $this->model->getOptions()['limit'] );
+                $teachers = $guardian->getTeachersOfAllChildren($this->model->getOptions()['limit']);
                 $this->sortByAppointment($teachers);
                 $this->infoToView['teachers'] = $teachers;
-		  $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count(self::$user->getChildren());
+                $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count(self::$user->getChildren());
                 $this->infoToView['appointments'] = $guardian->getAppointments();
                 $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
             } else
             {
                 $this->infoToView['bookingDetails'] = $this->model->getBookingDetails($guardian->getParentId());
             }
- 		
+
 
             return "parent_est";
         }
 
-	/**
-	* Events Logic
-	* @return string template to be displayed
-	*/
-	private function handleEvents(){
-		if (self::$user instanceof Guardian || self::$user instanceof Student){
-                	$this->infoToView['events'] = $this->model->getEvents(); 
-           		}
-		elseif(self::$user instanceof Teacher){
-			$this->infoToView['events'] = $this->model->getEvents(true); 
-			}
-		$this->infoToView['months'] = $this->model->getMonths();
-		return "events";
-		}
+        /**
+         * Events Logic
+         *
+         * @return string template to be displayed
+         */
+        private function handleEvents()
+        {
+            if (self::$user instanceof Guardian || self::$user instanceof Student)
+            {
+                $this->infoToView['events'] = $this->model->getEvents();
+            } elseif (self::$user instanceof Teacher)
+            {
+                $this->infoToView['events'] = $this->model->getEvents(true);
+            }
+            $this->infoToView['months'] = $this->model->getMonths();
+
+            return "events";
+        }
 
         /**
          * Register logic
@@ -466,7 +471,7 @@
                 return $_SESSION['board_type'] . '_dashboard';
             } else if ($user instanceof Teacher)
             {
-              return "teacher_dashboard";
+                return "teacher_dashboard";
             } else
             {
                 return "parent_dashboard";
@@ -716,6 +721,15 @@
 
         }
 
+        public final function getEmptyIfNull($string)
+        {
+            return $string == null ? "" : $string;
+        }
+
+        public final function getEmptyIfNotExistent($arr, $key)
+        {
+            return isset($arr[$key]) ? $key : "";
+        }
     }
 
 ?>
