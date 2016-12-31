@@ -8,33 +8,9 @@
         $(".button-collapse").sideNav();
         $('ul.collapsible').collapsible();
         initModal();
-        addStudent(); // -> create one default student field
     });
 
-    var counter = 0;
 
-    function addStudent() {
-        counter++;
-        if (counter <= 100) {
-            var parent = document.getElementById('student_blueprint');
-            if (parent == null)
-                return; // not in parent view?
-            var clonedNode = parent.cloneNode(true);
-            clonedNode.id = ''; // reset id name of clone
-            clonedNode.style.display = 'block'; // remove display: none; from clone
-            clonedNode.className = 'student_instance';
-            var childNodes = clonedNode.childNodes;
-            childNodes.forEach(function (childNode) {
-                var nodeName = childNode.name;
-                if (nodeName)
-                    childNode.name = nodeName + "[" + counter + "]";
-            });
-            var insertHere = document.getElementById('student_placeholder');
-            insertHere.parentNode.insertBefore(clonedNode, insertHere);
-        }
-
-        initDatepick();
-    }
 
     function initDatepick() {
 

@@ -123,6 +123,43 @@
 
 
     }
+
+    var counter = 0;
+
+    function addStudent() {
+        counter++;
+        if (counter <= 100) {
+            var parent = document.getElementById('student_blueprint');
+            if (parent == null)
+                return; // not in parent view?
+            var clonedNode = parent.cloneNode(true);
+            clonedNode.id = ''; // reset id name of clone
+            clonedNode.style.display = 'block'; // remove display: none; from clone
+            clonedNode.className = 'student_instance';
+            var childNodes = clonedNode.childNodes;
+
+            for(var i = 0; i < childNodes.length; i++)
+            {
+                var childNode = childNodes[i];
+
+                var nodeName = childNode.name;
+                if (nodeName)
+                    childNode.name = nodeName + "[" + counter + "]";
+            }
+
+
+            var insertHere = document.getElementById('student_placeholder');
+            insertHere.parentNode.insertBefore(clonedNode, insertHere);
+        }
+
+        initDatepick();
+    }
+
+    $(document).ready(function () {
+
+        addStudent(); // -> create one default student field
+    });
+
 </script>
 
 </body>
