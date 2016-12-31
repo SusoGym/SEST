@@ -1,5 +1,5 @@
 <?php
-	 
+
     const DEBUG = false;
     const SQL_DEBUG = false;
 

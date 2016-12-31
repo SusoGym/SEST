@@ -292,22 +292,26 @@
         {
             $start = $this->makeDateTime($start);
             $end = $this->makeDateTime($end);
+
             return self::$connection->insertValues("INSERT INTO time_slot (`id`,`anfang`,`ende`) VALUES ('','$start','$end') ");
         }
 
 
-	/**
-	*create bookable appointments according to lessonVolume of teacher
-	*hardCoded - to be adapted to option Data
-	*@param int slotId
-	*/
-	public function createBookableSlots($slotId){
-		$FULL = 13;
-		$data = self::$connection->selectValues("SELECT id FROM lehrer WHERE deputat>$FULL");
-		foreach($data as $d) {
-			self::$connection->straightQuery("INSERT INTO bookable_slot (`id`,`slotid`,`lid`,`eid`) VALUES ('','$slotId','$d[0]',NULL)" );
-		}
-	}
+        /**
+         *create bookable appointments according to lessonVolume of teacher
+         *hardCoded - to be adapted to option Data
+         *
+         * @param int slotId
+         */
+        public function createBookableSlots($slotId)
+        {
+            $FULL = 13;
+            $data = self::$connection->selectValues("SELECT id FROM lehrer WHERE deputat>$FULL");
+            foreach ($data as $d)
+            {
+                self::$connection->straightQuery("INSERT INTO bookable_slot (`id`,`slotid`,`lid`,`eid`) VALUES ('','$slotId','$d[0]',NULL)");
+            }
+        }
 
         /**
          *create DateTime Format
@@ -327,30 +331,38 @@
         }
 
 
-	/**
-	*returns options for admin purpose
-	*@return array(string)
-	*/
-	public function getOptionsForAdmin(){
-		$options = array();
-		$data = self::$connection->selectValues("SELECT kommentar, type, value, field FROM options ORDER BY ordinal");
-			if(isset($data)) {
-				foreach ($data as $d){
-				$options[]=array("kommentar"=>$d[0],"type"=>$d[1],"value"=>$d[2],"field"=>$d[3]);
-				}
-			}
-		return $options;
-	}
+        /**
+         *returns options for admin purpose
+         *
+         * @return array(string)
+         */
+        public function getOptionsForAdmin()
+        {
+            $options = array();
+            $data = self::$connection->selectValues("SELECT kommentar, type, value, field FROM options ORDER BY ordinal");
+            if (isset($data))
+            {
+                foreach ($data as $d)
+                {
+                    $options[] = array("kommentar" => $d[0], "type" => $d[1], "value" => $d[2], "field" => $d[3]);
+                }
+            }
 
-	/**
-	*updates options after changes
-	*@param array POST 
-	*/
-	public function updateOptions($data){
-		foreach($data as $key=>$value){
-			self::$connection->straightQuery("UPDATE options SET value =\"$value\" WHERE type=\"$key\" ");
-			}
-		}
+            return $options;
+        }
+
+        /**
+         *updates options after changes
+         *
+         * @param array POST
+         */
+        public function updateOptions($data)
+        {
+            foreach ($data as $key => $value)
+            {
+                self::$connection->straightQuery("UPDATE options SET value =\"$value\" WHERE type=\"$key\" ");
+            }
+        }
 
     }
 

@@ -18,7 +18,7 @@
                    href="<?php echo $data["backButton"]; ?>"><i
                             class="material-icons">chevron_left</i></a>
             <?php } ?>
-            <?php echo \View::getInstance()->getTitle(); ?>
+              <?php echo \View::getInstance()->getTitle(); ?>
           </span>
             <div class="row">
                 <div class="col l3 hide-on-med-and-down">
@@ -48,8 +48,8 @@
                             ?>
                             <div id="form<?php echo $f; ?>" class="col s12">
                                 <h4>Lehrer für
-                                  <font class="teal-text"><?php echo $f ?></font>
-                                            festlegen</h4>
+                                    <font class="teal-text"><?php echo $f ?></font>
+                                    festlegen</h4>
 
                                 <div class="input-field col s12">
                                     <form method="POST" action="?type=setclasses">

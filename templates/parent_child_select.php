@@ -138,8 +138,7 @@
             clonedNode.className = 'student_instance';
             var childNodes = clonedNode.childNodes;
 
-            for(var i = 0; i < childNodes.length; i++)
-            {
+            for (var i = 0; i < childNodes.length; i++) {
                 var childNode = childNodes[i];
 
                 var nodeName = childNode.name;

@@ -18,32 +18,39 @@
         $slotlink = false;
         $slotcolor = "grey";
     }
-	
-	if(isset($data['modules']) ){
-		$modules = $data['modules'];
-		if(!$modules['vplan']){
-				$vplanColor  = "grey";
-				$vplanLink = "";
-		} else {
-				$vplanColor  = "teal";
-				$vplanLink = 'href="'."?type=vplan";
-		}
-		if(!$modules['events']){
-				$eventsColor  = "grey";
-				$eventsLink = "";
-		} else {
-				$eventsColor  = "teal";
-				$eventsLink = 'href="'."?type=events";
-		}
-		if(!$modules['news']){
-				$newsColor  = "grey";
-				$newsLink = "";
-		} else {
-				$newsColor  = "teal";
-				$newsLink = 'href="'."?type=news";
-			
-		}
-	} 
+
+    if (isset($data['modules']))
+    {
+        $modules = $data['modules'];
+        if (!$modules['vplan'])
+        {
+            $vplanColor = "grey";
+            $vplanLink = "";
+        } else
+        {
+            $vplanColor = "teal";
+            $vplanLink = 'href="' . "?type=vplan";
+        }
+        if (!$modules['events'])
+        {
+            $eventsColor = "grey";
+            $eventsLink = "";
+        } else
+        {
+            $eventsColor = "teal";
+            $eventsLink = 'href="' . "?type=events";
+        }
+        if (!$modules['news'])
+        {
+            $newsColor = "grey";
+            $newsLink = "";
+        } else
+        {
+            $newsColor = "teal";
+            $newsLink = 'href="' . "?type=news";
+
+        }
+    }
 
 ?>
 <div class="container">
@@ -149,18 +156,25 @@
     </li>
     <?php
         include("navbar.php"); ?>
-   <li><a class="waves-effect" href="?type=lest"><i class="material-icons">supervisor_account</i>Elternsprechtag</a></li>
-   <?php if($vplanLink <>"") { ?>
-	<li><a class="waves-effect" href="<?php echo $vplanLink; ?>"><i class="material-icons">business</i>Vertretungsplan</a></li>
-   <?php }
-	if($eventsLink <> "") { ?>	   
-	<li><a class="waves-effect" href="<?php echo $eventsLink; ?>"><i class="material-icons">today</i>Termine</a></li>
-   <?php }
-	if ($newsLink <>"") { ?>
-   <li><a class="waves-effect" href="<?php echo $newsLink; ?>"><i class="material-icons">library_books</i>newsletter</a></li>
-   <?php } ?>
+    <li><a class="waves-effect" href="?type=lest"><i class="material-icons">supervisor_account</i>Elternsprechtag</a>
+    </li>
+    <?php if ($vplanLink <> "")
+    { ?>
+        <li><a class="waves-effect" href="<?php echo $vplanLink; ?>"><i class="material-icons">business</i>Vertretungsplan</a>
+        </li>
+    <?php }
+        if ($eventsLink <> "")
+        { ?>
+            <li><a class="waves-effect" href="<?php echo $eventsLink; ?>"><i class="material-icons">today</i>Termine</a>
+            </li>
+        <?php }
+        if ($newsLink <> "")
+        { ?>
+            <li><a class="waves-effect" href="<?php echo $newsLink; ?>"><i class="material-icons">library_books</i>newsletter</a>
+            </li>
+        <?php } ?>
 
-    
+
 </ul>
 
 <?php include("js.php"); ?>

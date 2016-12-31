@@ -16,7 +16,7 @@
                        href="<?php echo $data["backButton"]; ?>"><i
                                 class="material-icons">chevron_left</i></a>
                 <?php } ?>
-                <?php echo \View::getInstance()->getTitle(); ?>
+                  <?php echo \View::getInstance()->getTitle(); ?>
               </span>
 
 
@@ -41,29 +41,30 @@
             <?php
                 if (isset($data["slots"]))
                 { ?>
-                    <ul class="collection">
+            <ul class="collection">
+                <?php
+                    foreach ($data["slots"] as $s)
+                    { ?>
+
                         <?php
-                            foreach ($data["slots"] as $s)
-                            { ?>
-
-                                <?php
-                                $anfang = date_format(date_create($s['anfang']), 'd.m.Y H:i');
-                                $ende = (date_format(date_create($s['anfang']), 'd.m.Y') == date_format(date_create($s['ende']), 'd.m.Y')) ? date_format(date_create($s['ende']), 'H:i') : date_format(date_create($s['ende']), 'd.m.Y H:i');
-                                ?>
-                                <li class="collection-item"><?php echo $anfang . " bis " . $ende; ?>
-                                    <a id="slot" href="?type=setslots&del=<?php echo $s['id']; ?> " class="secondary-content teal-text">
-                                      <i class="material-icons">delete</i>
-                                    </a>
-                                </li>
-                                <?php
-                            } ?>
-                    </div>
-                <?php } ?>
-
-
+                        $anfang = date_format(date_create($s['anfang']), 'd.m.Y H:i');
+                        $ende = (date_format(date_create($s['anfang']), 'd.m.Y') == date_format(date_create($s['ende']), 'd.m.Y')) ? date_format(date_create($s['ende']), 'H:i') : date_format(date_create($s['ende']), 'd.m.Y H:i');
+                        ?>
+                        <li class="collection-item"><?php echo $anfang . " bis " . $ende; ?>
+                            <a id="slot" href="?type=setslots&del=<?php echo $s['id']; ?> "
+                               class="secondary-content teal-text">
+                                <i class="material-icons">delete</i>
+                            </a>
+                        </li>
+                        <?php
+                    } ?>
         </div>
+        <?php } ?>
+
 
     </div>
+
+</div>
 
 
 </div>

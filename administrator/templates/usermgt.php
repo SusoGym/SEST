@@ -13,7 +13,7 @@
                    href="<?php echo $data["backButton"]; ?>"><i
                             class="material-icons">chevron_left</i></a>
             <?php } ?>
-            <?php echo \View::getInstance()->getTitle(); ?>
+              <?php echo \View::getInstance()->getTitle(); ?>
           </span>
         </div>
 
