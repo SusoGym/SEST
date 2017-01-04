@@ -78,7 +78,20 @@ class FileHandler
     }
 
 
+       /**
 	*Quelldatei mit Termindaten auslesen
+	* @ return array(Termine)
+	*/	
+	public function readEventSourceFile(){
+	$events = array();
+	$fh = fopen($this->file,"r");
+	$x = 0;
+	while(!feof($fh)){
+		$line = trim(fgets($fh));
+		$lineArr = explode(";",$line);
+		$event = new \Termin();
+		$events[$x] = $event->createFromCSV($lineArr);$x++;
+		}
 	fclose($fh);
 	return $events;
 	}	
