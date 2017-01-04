@@ -6,6 +6,9 @@
     $today = date("Ymd");
     include("header.php");
 
+    
+   
+
 ?>
 
 <div class="container col s4 m4 l4">
@@ -40,6 +43,15 @@
 
 
 <?php include("js.php"); ?>
+<script>
+    <?php
+    if (isset($data['notifications']))
+        foreach ($data['notifications'] as $not)
+        {
+            echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
+        }
 
+    ?>
+</script>
 </body>
 </html>

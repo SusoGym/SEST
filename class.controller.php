@@ -334,7 +334,7 @@
                     header("Location: .?type=eest"); //resets the get parameters
                 } else
                 {
-                    die("Why are you trying to break me?! :( -> this slot is already booked by other user!");
+                    $this->notify("Dieser Termin ist mittlerweile vergeben!");//die("Why are you trying to break me?! :( -> this slot is already booked by other user!");
                 }
             }
             $students = array();
@@ -728,7 +728,7 @@
 
         public final function getEmptyIfNotExistent($arr, $key)
         {
-            return isset($arr[$key]) ? $key : "";
+             return isset($arr[$key]) ? $arr[$key] : "";
         }
     }
 
