@@ -3,7 +3,7 @@
 
     session_start();
 
-    const DEBUG = true;
+    const DEBUG = false;
     const SQL_DEBUG = false;
 
 
@@ -14,12 +14,17 @@
     require "../class.controller.php";
     require "../class.model.php";
     require "../class.view.php";
+    require "../class.termin.php";
+
+
 
     \Connection::$configFile = "../cfg.ini";
 
     require "administrator.controller.class.php";
     require "administrator.model.class.php";
     require "administrator.filehandler.class.php";
+    require "administrator.tmanager.class.php";
+
 
     \ChromePhp::setEnabled(DEBUG);
 

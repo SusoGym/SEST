@@ -313,6 +313,7 @@
                     $this->title = "Datenabgleich";
                     $this->addMenueItem("?type=update_s", "Ableich Schülerdaten");
                     $this->addMenueItem("?type=update_t", "Abgleich Lehrerdaten");
+		      $this->addMenueItem("?type=upload_e", "Upload Terminedatei");
                     $this->display("simple_menue");
                     break;
                 //Update teacher data
@@ -328,24 +329,30 @@
                     $this->actionType = "uschoose";
                     $this->display("update");
                     break;
+		  //events file upload
+		  case "upload_e":
+		      $this->title = "Upload Terminedatei";
+                    $this->actionType = "eventchoose";
+                    $this->display("update");
+                    break;
+		 
+		 
                 //student file upload
-                case "utchoose":
+		  case "utchoose":
                 case "uschoose":
-                    $student = $input['type'] == "uschoose";
+		  case "eventchoose":
+		       $student = $input['type'] == "uschoose";
                     //von mir hinzugefügt
                     $input['type'] == "uschoose" ? $student = true : $student = false;
 
                     $upload = $this->fileUpload();
-
-
                     $success = $upload['success'];
                     $written = $success ? "true" : "false";
-
                     \ChromePhp::info($student ? "Student" : "Teacher" . " upload: $written");
 
                     if ($success)
                     {
-                        $_SESSION['file'] = $upload['location'];
+                       echo  $_SESSION['file'] = $upload['location'];
                     }
 
                     if (isset($input['console']))
@@ -357,18 +364,20 @@
 
                     if ($success)
                     {
-                        echo "<script> alert($student);   </script>  ";
-                        $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
-                        $this->prepareDataUpdate($student);
-                        $this->actionType = $student ? "usstart" : "utstart";
-                        $student ? $this->actionType = "usstart" : $this->actionType = "utstart";
-                        echo $this->actionType;
-                        $this->display("update1");
+                       
+				echo "<script> alert($student);   </script>  ";
+                       	 $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
+                       	 $this->prepareDataUpdate($student);
+                        	$this->actionType = $student ? "usstart" : "utstart";
+                        	$student ? $this->actionType = "usstart" : $this->actionType = "utstart";
+                       	 echo $this->actionType;
+                       	 $this->display("update1");
+			 	  
                     } else
                     {
                         $this->display("update");
                     }
-
+		  
                     break;
                 case "dispsupdate1":
                 case "disptupdate1":
@@ -391,6 +400,13 @@
                     $this->performDataUpdate($student, $input);
                     $this->display("update2");
                     break;
+
+		 //
+		case "dispupdateevents":
+			$this->manageEvents();
+			$this->title ="Termine";
+			$this->display("events");
+			break;	
                 //SEST configuration
                 case "sestconfig":
                     $this->title = "Konfiguration Elternsprechtag";
@@ -477,13 +493,15 @@
 
             $ret = array("success" => false);
             $success = false;
+var_dump($_FILES);
             try
             {
                 /*
-                if(is_uploaded_file($_FILES['Datei']['tmp_name']) &&
                 move_uploaded_file($_FILES['Datei']['tmp_name'], '/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['Datei']['name'])    )
+                if(is_uploaded_file($_FILES['file']['tmp_name']) &&
+                move_uploaded_file($_FILES['file']['tmp_name'], '/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['file']['name'])    )
                 {
-                  $this->file='/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['Datei']['name'];
+                  $this->file='/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['file']['name'];
                 }*/
 
                 $file = $_FILES['file'];
@@ -501,7 +519,7 @@
                 $ret['error'] = $e->getMessage();
             } finally
             {
-                return $ret;
+		return $ret;
             }
         }
 
@@ -553,6 +571,19 @@
             $this->fileData[1] = $updateResults[1];
             $this->fileData[2] = $fileHandler->deleteDataFromDB($student);
         }
+
+	/**
+	* Make Events and write ICS file
+	*/
+	private function manageEvents(){
+	$filehandler = new FileHandler($_SESSION['file']);
+	$events = $filehandler->readEventSourceFile();
+	$tmanager = new TManager();	
+	$tmanager->addToDB($events);
+	//TO DO make ICS Files for staff and others
+	//$tmanager->createICS(<FILENAME>,$events);
+	//include filenames in cfg.ini
+	}
 
         /**
          * Adds Menu Item
