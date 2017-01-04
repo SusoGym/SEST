@@ -77,6 +77,12 @@ class FileHandler
         return $sourceData;
     }
 
+
+	*Quelldatei mit Termindaten auslesen
+	fclose($fh);
+	return $events;
+	}	
+
     /**
      *updateData aktualisiert Datenbank auf Basis einer csv datei
      *

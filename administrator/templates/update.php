@@ -64,8 +64,11 @@ include("header.php");
         else
         {
             var student = <?php echo (\View::getInstance()->getDataForView()['action'] == "uschoose") ? "true" : "false"; ?>;
+	     var teacher = <?php echo (\View::getInstance()->getDataForView()['action'] == "utchoose") ? "true" : "false"; ?>;
 
-            var type = student ? "dispsupdate1" : "disptupdate1";
+            //var type = student ? "dispsupdate1" : "disptupdate1";
+		var type;
+		if(student) {type = "dispsupdate1";} else if(teacher) {type = "disptupdate1";} else {type = "dispupdateevents";}
 
             window.location = "?type=" + type;
         }
