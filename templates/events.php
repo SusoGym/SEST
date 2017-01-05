@@ -4,7 +4,6 @@
     $user = $data['user'];
     $today = date("Ymd");
     include("header.php");
-
     $today = date('d.m.Y');
     $todayMonth = date('Ym');
     //$today="12.10.2016";//Nur zum Debugging

@@ -35,8 +35,6 @@
          * @var string ics filename
         */
         private $icsfile;
-
-
         /**
          * @var \mysqli database connection instance
          */
