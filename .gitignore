@@ -117,3 +117,5 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 *.ftpconfig
+class.connect.php
+templates/events.php

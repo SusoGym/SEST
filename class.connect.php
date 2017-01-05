@@ -23,6 +23,20 @@
          * @var string database password
          */
         private $pass;
+	 /**
+         * @var string filesystem path
+         */
+        private $basepath;
+	 /**
+         * @var string download folder
+         */
+        private $download;
+	 /**
+         * @var string ics filename
+        */
+        private $icsfile;
+
+
         /**
          * @var \mysqli database connection instance
          */
@@ -68,11 +82,30 @@
                     case "DB":
                         $this->database = trim($larr[1]);
                         break;
+			case "DOWNLOAD":
+                        $this->download = trim($larr[1]);
+                        break;
+			case "FILEBASE":
+                        $this->basepath = trim($larr[1]);
+                        break;
+			case "ICS":
+                        $this->icsfile = trim($larr[1]);
+                        break;
+
+
                 }
             }
 
             fclose($f);
         }
+
+	/**
+	* returns values from ini
+	* @return array(string)
+	*/
+	public function getIniParams(){
+		return  array("download"=>$this->download,"basepath"=>$this->basepath,"icsfile"=>$this->icsfile);  // could be much more versatile
+		}
 
 
         /**
@@ -278,5 +311,6 @@
 
 
     }
+
 
 ?>

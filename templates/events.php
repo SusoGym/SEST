@@ -2,7 +2,6 @@
     $data = $this->getDataForView();
     /** @var Guardian $user */
     $user = $data['user'];
-
     $today = date("Ymd");
     include("header.php");
 
@@ -10,14 +9,14 @@
     $todayMonth = date('Ym');
     //$today="12.10.2016";//Nur zum Debugging
     $todayTimestamp = strtotime($today);
-    $modeLink = '<a href="?type=events&all" class="teal-text right"><i class="material-icons right">select_all</i><span style="font-size:10px;" >alle anzeigen</span></a>';
+    $modeLink = '<a href="?type=events&all" class="teal-text right"><i class="material-icons left">select_all</i><span style="font-size:10px;" >alle anzeigen</span></a>';
     //Für Anzeige des kompletten Jahres wird todayTimestamp auf das Datum des ersten Termins gesetzt.
     if (isset($data['showAllEvents']))
     {
         $first = $data['events'][0]->sday;
         $todayTimestamp = strtotime($first);
         $todayMonth = $data['events'][0]->jahr . $data['events'][0]->monatNum;
-        $modeLink = '<a href="?type=events" class="teal-text right"><i class="material-icons right">filter_list</i><span style="font-size:10px;" >aktuelle anzeigen</span></a>';
+        $modeLink = '<a href="?type=events" class="teal-text right"><i class="material-icons left">filter_list</i><span style="font-size:10px;" >aktuelle anzeigen</span></a>';
     }
 ?>
 
@@ -34,7 +33,9 @@
                         <div class="col l12 m12 s12">
                             <ul class="collection with-header teal-text ">
                                 <li class="collection-header"><i class="material-icons left ">today</i>
-                                    <span style="font-size:16px;font-weight:bold;"><?php echo $month['mstring'] . " " . $month['jahr']; ?></span><?php echo $modeLink; ?>
+                                    <span style="font-size:16px;font-weight:bold;"><?php echo $month['mstring'] . " " . $month['jahr']; ?></span>
+					 <?php echo $modeLink; ?>
+					 <a href="<?php echo $data['icsPath']; ?>" class="teal-text right"><i class="material-icons left">file_download</i><span style="font-size:10px;" >download</span></a>
                                 <li>
                                     <?php foreach ($data['events'] as $t)
                                         {

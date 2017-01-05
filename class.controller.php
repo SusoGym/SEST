@@ -366,15 +366,19 @@
          */
         private function handleEvents()
         {
-            if (self::$user instanceof Guardian || self::$user instanceof Student)
+            $path = $this->model->getIniParams();
+	     $filePathBase = './'.$path['download'].'/'.$path['icsfile'];
+	     if (self::$user instanceof Guardian || self::$user instanceof Student)
             {
                 $this->infoToView['events'] = $this->model->getEvents();
+		  $icsfile = $filePathBase."Public.ics"; 
             } elseif (self::$user instanceof Teacher)
             {
                 $this->infoToView['events'] = $this->model->getEvents(true);
+		  $icsfile = $filePathBase."Staff.ics"; 
             }
             $this->infoToView['months'] = $this->model->getMonths();
-
+	     $this->infoToView['icsPath'] = $icsfile;
             return "events";
         }
 
