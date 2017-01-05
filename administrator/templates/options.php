@@ -32,8 +32,8 @@
                 foreach ($data["options"] as $options){
 			if(!$options['field']) {?>
                     		<div class="input-field col s12 l4 m6">
-                            	<input name="<?php echo $options["type"]; ?>" type="text" class="" value="<?php echo $options['value']; ?>" required>
-                            	<label for=<?php echo $options["type"]; ?>  <?php echo $options['kommentar']; ?> </label>
+                            	<input id="<?php echo $options["type"]; ?>" name="<?php echo $options["type"]; ?>" type="text" class="" value="<?php echo $options['value']; ?>" required>
+                            	<label for="<?php echo $options["type"]; ?>">  <?php echo $options['kommentar']; ?> </label>
                         	</div>
                   <?php
                   		}
