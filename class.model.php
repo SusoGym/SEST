@@ -55,6 +55,15 @@
 
             return $options;
         }
+	 
+	
+	/**
+	* get values from ini-file
+	* @return string
+	*/
+	public function getIniParams(){
+		return self::$connection->getIniParams();
+		}	
 
 
         /**

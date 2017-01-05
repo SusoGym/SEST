@@ -377,11 +377,11 @@
                     {
                         $this->display("update");
                     }
-		  
+
                     break;
                 case "dispsupdate1":
                 case "disptupdate1":
-
+		  
                     $student = $input['type'] == "dispsupdate1";
                     //von mir hinzugefügt
                     $input['type'] == "dispsupdate1" ? $student = true : $student = false;
@@ -405,6 +405,7 @@
 		case "dispupdateevents":
 			$this->manageEvents();
 			$this->title ="Termine";
+			$this->infoToView['cardtext'] = "Termine aktualisiert und ics-Dateien erzeugt";
 			$this->display("events");
 			break;	
                 //SEST configuration
@@ -493,11 +494,9 @@
 
             $ret = array("success" => false);
             $success = false;
-var_dump($_FILES);
             try
             {
                 /*
-                move_uploaded_file($_FILES['Datei']['tmp_name'], '/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['Datei']['name'])    )
                 if(is_uploaded_file($_FILES['file']['tmp_name']) &&
                 move_uploaded_file($_FILES['file']['tmp_name'], '/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['file']['name'])    )
                 {
@@ -519,6 +518,7 @@ var_dump($_FILES);
                 $ret['error'] = $e->getMessage();
             } finally
             {
+             
 		return $ret;
             }
         }
@@ -579,10 +579,11 @@ var_dump($_FILES);
 	$filehandler = new FileHandler($_SESSION['file']);
 	$events = $filehandler->readEventSourceFile();
 	$tmanager = new TManager();	
-	$tmanager->addToDB($events);
+	$tmanager->addEventsToDB($events);
 	//TO DO make ICS Files for staff and others
-	//$tmanager->createICS(<FILENAME>,$events);
-	//include filenames in cfg.ini
+	$tmanager->createICS($events);
+	$tmanager->createICS($events,true); //create StaffVersion
+	
 	}
 
         /**

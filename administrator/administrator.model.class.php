@@ -364,6 +364,26 @@
             }
         }
 
+	/**
+	*Eintrag aller Termine in die Datenbank
+	*@param $termine Array(Terminobjekt)
+	*/
+	public function addEventsToDB($termine){
+	//Tabelle leeren
+	self::$connection->straightQuery("TRUNCATE termine");
+	foreach($termine as $t){
+			$query="INSERT INTO termine (`tNr`,`typ`,`start`,`ende`,`staff`) VALUES ('','$t->typ','$t->start','$t->ende','$t->staff')	";
+			self::$connection->insertValues($query);
+			}
+		}
+
+	/**
+	* get values from ini-file
+	* @return string
+	*/
+	public function getIniParams(){
+		return self::$connection->getIniParams();
+		}	
     }
 
 
