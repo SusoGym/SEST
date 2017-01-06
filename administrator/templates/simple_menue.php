@@ -2,6 +2,7 @@
     include("header.php");
 
     $data = \View::getInstance()->getDataForView();
+   
 ?>
 
 

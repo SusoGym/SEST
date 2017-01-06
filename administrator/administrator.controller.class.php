@@ -410,12 +410,18 @@
 			break;	
                 //SEST configuration
                 case "sestconfig":
+				case "clrslts":
+				case "chkass":
                     $this->title = "Konfiguration Elternsprechtag";
                     $this->addMenueItem("?type=setclasses", "Unterrichtszuordnung einrichten");
                     if (date('Ymd') <= $this->model->getOptions()['assignstart'])
                     {
                         $this->addMenueItem("?type=setslots", "Sprechzeiten einrichten");
+						$this->addMenueItem("?type=clrslts", "buchbare Termine zurücksetzen");
                     }
+					$this->addMenueItem("?type=chkass", "Lehrertermine prüfen");
+					if($this->input['type'] == "clrslts") $this->clearSlots();
+					if($this->input['type'] == "chkass") $this->checkteacherAssignments();
                     $this->backButton = "?type=settings";
                     $this->display("simple_menue");
                     break;
@@ -619,6 +625,47 @@
             }
 
         }
+		
+		/**
+		* clears bookable_slots and sets news	
+		*/
+		private function clearSlots(){
+			$this->model->clearBookableSlots();
+			foreach ($this->model->getSlots() as $slot){
+				$this->model->createBookableSlots($slot['id']);
+				}
+			$this->notify("Buchbare Termine zurückgesetzt und aktualisiert");
+			}
+			
+		/**
+		* checks assigned slots of Teachers
+		*/
+		private function checkTeacherAssignments(){
+			$params = $this->model->getIniParams();
+			$fileName = "teacherassignments.csv";
+			$path = $params['basepath'].'\\'.$params['download'].'\\'.$fileName;
+			$teachers = $this->model->getTeachers();
+			$data = array();
+			$line = "Lehrer;Deputat;Anzahl zu vergebender Termine;Anzahl noch zu vergebender Termine;Vergebene Termine\n";
+			array_push($data,$line);
+			foreach ($teachers as $teacher){
+				$deputat = $teacher->getLessonAmount();
+				$requiredSlots = $teacher->getRequiredSlots();
+				$missingSlots = $teacher->getMissingSlots();
+				$assignedSlots = $teacher->getAssignedSlots(); //array()
+				$x = 0;
+				foreach($assignedSlots as $as){
+					$asString = $x == 0 ? $as : $asString."/".$as;
+					$x++;
+					}
+				$line = $teacher->getFullName().";".$deputat.";".$requiredSlots.";".$missingSlots.";".$asString."\r\n";
+				array_push($data,$line);
+				}
+			$filehandler = new Filehandler($path);
+			$filehandler->createCSV($data);
+			$this->notify("Datei ".$fileName." erzeugt");
+		}
+		
     }
 
 ?>

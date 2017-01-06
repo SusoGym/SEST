@@ -296,6 +296,14 @@
             return self::$connection->insertValues("INSERT INTO time_slot (`id`,`anfang`,`ende`) VALUES ('','$start','$end') ");
         }
 
+	  
+	/**
+	* reset all bookable slots
+	*/
+	public function clearBookableSlots(){
+		self::$connection->straightQuery("TRUNCATE TABLE bookable_slot");
+		}		
+
 
         /**
          *create bookable appointments according to lessonVolume of teacher

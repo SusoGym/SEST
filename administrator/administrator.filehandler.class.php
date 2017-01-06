@@ -158,6 +158,19 @@ class FileHandler
 
     }
 
+    /**
+    * create csv-file
+    * @param string filename
+    * @param array(array(string)) data
+    */
+    public function createCSV($data){
+	$f = fopen($this->file,"w");
+	foreach($data as $line) {
+		fwrite($f,$line);
+		}
+	fclose($f);
+	}
+
 }
 
 ?>
