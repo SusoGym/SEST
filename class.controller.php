@@ -86,6 +86,11 @@
                 $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomeparent');
                 $this->infoToView['children'] = self::$user->getChildren();
             }
+	     if (self::$user instanceof Teacher)
+            {
+                $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcometeacher');
+                
+            }
             switch ($this->input['type'])
             {
                 case "lest": //Teacher chooses est
@@ -340,7 +345,7 @@
             $students = array();
             $today = date("Ymd");
             $this->infoToView['user'] = $guardian;
-
+			$this->infoToView['estdate'] =  $this->model->getOptions()['date'];
             ($today > $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
             if (!$bookingTimeIsOver)
             {
@@ -350,6 +355,7 @@
                 $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count(self::$user->getChildren());
                 $this->infoToView['appointments'] = $guardian->getAppointments();
                 $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
+				
             } else
             {
                 $this->infoToView['bookingDetails'] = $this->model->getBookingDetails($guardian->getParentId());
