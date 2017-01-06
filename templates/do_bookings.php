@@ -1,3 +1,4 @@
+<div class="header teal-text">Buchen Sie Ihre Termine hier:</div>
 <?php
 
     foreach ($teachers as $teacherStudent)
@@ -8,13 +9,13 @@
         (in_array($teacher->getId(), $data['bookedTeachers'])) ? $bookedThisTeacher = true : $bookedThisTeacher = false;
         $amountAvailableSlots = count($teacher->getAllBookableSlots($user->getParentId()));
         ?>
-        <div id="tchr<?php echo $teacher->getId(); ?>" class="col s12">
-            <ul class="collection with-header">
-                <li class="collection-header">
-					<span style="font-size:22px;"><?php if ($amountAvailableSlots != 0) echo "Termin bei " ?>
-                        <span
-                                class="teal-text"><?php echo $teacher->getFullname(); ?></span><?php if ($amountAvailableSlots != 0) echo " buchen" ?>
-                        <span style="font-size:12px;">&nbsp;(
+		<div class="cols s12 m12 l12">
+		
+		 <ul class="collapsible white" data-collapsible="accordion">
+            
+			<li>
+                <div class="collapsible-header"><span class="teal-text"><?php echo $teacher->getFullname(); ?></span>
+				<span style="font-size:12px;">&nbsp;(
                             <?php
                                 $students = 0;
                                 /** @var Student $student */
@@ -29,28 +30,37 @@
                                 }
                             ?>
                             )</span>
-                        <?php
-                            if ($amountAvailableSlots == 0)
+				<?php 
+							if($bookedThisTeacher){ ?>
+								<span class="right green-text"
+                                      style="font-size: 14px">gebucht!</span>
+							<?php } elseif($amountAvailableSlots == 0)
                             { ?>
 
                                 <span class="right red-text"
-                                      style="font-size: 18px">ausgebucht!</span>
+                                      style="font-size: 14px">ausgebucht!</span>
                             <?php } elseif ($maxedOutAppointments)
                             { ?>
                                 <span class="right orange-text"
-                                      style="font-size: 18px">Maximum gebucht!</span>
+                                      style="font-size: 14px">Maximum gebucht!</span>
 
-                            <?php } ?>
-					</span>
-                </li>
-                <?php
+                            <?php } else {?>
+								<span class="right orange-text"
+                                      style="font-size: 14px">möglich</span>
+							<?php } ?>
+				
+				</div>
+                <div class="collapsible-body">
+						 <?php
 
                     if ($amountAvailableSlots != 0)
                     {
-
+						?>
+						<ul class="collection">
+						<?php
                         foreach ($teacher->getAllBookableSlots($user->getParentId()) as $slot)
                         {
-                            $anfang = date_format(date_create($slot['anfang']), 'd.m.Y H:i');
+                            $anfang = date_format(date_create($slot['anfang']), 'H:i');
                             $ende = date_format(date_create($slot['ende']), 'H:i');
 
                             $symbol = $symbolColor = $text = $link = "";
@@ -71,7 +81,6 @@
                                     $link = "";
                                 } else if ($bookedThisTeacher)
                                 {
-
                                     $symbol = "clear";
                                     $symbolColor = "blue-text";
                                     $text = "es kann nur ein Termin pro Lehrer gebucht werden";
@@ -103,7 +112,7 @@
                                 $showSlot = true;
                             }
                             ?>
-                            <li class="collection-item">
+                            <li class="collection-item" >
                                 <div><span class="teal-text ">
 						<?php
                             echo $anfang . " - " . $ende;
@@ -116,8 +125,13 @@
                             </li>
                             <?php
                             ?>
-                        <?php }
-                    } ?>
-            </ul>
-        </div>
+                        <?php } ?>
+						</ul>
+                 <?php   } ?>
+				</div>
+			</li>
+		</ul>
+		</div>
+		
+        
     <?php } ?>
