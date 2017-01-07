@@ -19,8 +19,9 @@
 
     <div class="card ">
         <div class="card-content ">
-            <div class="row hide-on-med-and-down teal-text" style="font-size: 36px;">
-                <b><?php echo $data['card_title']; ?></b>
+            <div class="row hide-on-med-and-down " >
+			<span class="card-title"><?php echo $data['card_title']; ?></span>
+                
             </div>
 
             <?php if ($enabled)
@@ -79,7 +80,7 @@
                                         <span class="secondary-content info grey-text"><?php echo $text; ?></span>
                                     <?php } else
                                     { //Booking period is over - appointments are displayed
-                                        echo date_format(date_create($slot['anfang']), 'd.m.Y H:i') . " - " . date_format(date_create($slot['ende']), 'H:i');
+                                        echo date_format(date_create($slot['anfang']), 'H:i') . " - " . date_format(date_create($slot['ende']), 'H:i');
                                         if (!isset($slot['assigned']))
                                         { ?>
                                             <a class="secondary-content action"><i
