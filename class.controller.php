@@ -244,6 +244,7 @@
             {
                 $this->infoToView['teacher_classes'] = $teacher->getTaughtClasses();
                 $this->infoToView['teacher_appointments'] = $teacher->getAppointmentsOfTeacher();
+				$this->infoToView['card_title'] = "Ihre Termine am Elternsprechtag";
             }
 
             return "tchr_slots";
