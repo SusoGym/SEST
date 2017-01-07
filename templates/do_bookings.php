@@ -1,4 +1,3 @@
-<div class="header teal-text">Buchen Sie Ihre Termine hier:</div>
 <?php
 
     foreach ($teachers as $teacherStudent)

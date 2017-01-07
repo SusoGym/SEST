@@ -31,7 +31,7 @@
                             $maxAppointments = $data['maxAppointments'];
                             $maxedOutAppointments = count($appointments) >= $maxAppointments;
                             include("do_bookings.php");
-							$title = "Ihre Termine für den Elternsprechtag";
+							
                         }
                     ?>
 			
