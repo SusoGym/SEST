@@ -135,14 +135,21 @@
         /**
          *Returns child(ren)'s id(s) of EST relevant children only
          *
-         * @param int limit (most senior year group for EST plus one)
+         * @param limit int (most senior year group for EST plus one)
          * @return array[Student] children
          */
         public function getESTChildren($limit)
         {
-            $this->children = Model::getInstance()->getChildrenByParentUserId($this->id, $limit);
+            $arr = array();
 
-            return $this->getChildren();
+            /** @var Student $child */
+            foreach ($this->children as $child)
+            {
+                if($child->getClass()<$limit)
+                    array_push($arr, $child);
+            }
+
+            return $arr;
         }
 
         /**
@@ -190,7 +197,7 @@
 
         /**
          * Get all teachers of all children
-         *
+         * @param limit int (most senior year group for EST plus one)
          * @return array(Teacher,Child)
          */
         public function getTeachersOfAllChildren($limit)

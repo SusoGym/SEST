@@ -65,7 +65,7 @@
                             <label for="pwdrep_register">Passwort wiederholen</label>
                         </div>
                         <div class="row" style="margin-bottom: 0;">
-                            <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
+                            <button class="btn-flat right waves-effect waves-teal" id="btn_register" type="submit">Submit<i
                                         class="material-icons right">send</i></button>
                         </div>
                     </form>
