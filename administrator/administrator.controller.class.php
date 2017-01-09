@@ -643,7 +643,7 @@
 		private function checkTeacherAssignments(){
 			$params = $this->model->getIniParams();
 			$fileName = "teacherassignments.csv";
-			$path = $params['basepath'].'\\'.$params['download'].'\\'.$fileName;
+			$path = $params['basepath'].'/'.$params['download'].'/'.$fileName;
 			$teachers = $this->model->getTeachers();
 			$data = array();
 			$line = "Lehrer;Deputat;Anzahl zu vergebender Termine;Anzahl noch zu vergebender Termine;Vergebene Termine\n";
