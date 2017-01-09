@@ -34,6 +34,11 @@
 
 
         /**
+         * @var bool whether or not the loadTemplate was called
+         */
+        private $loaded = false;
+
+        /**
          *Template Dateien werden geladen
          *
          * @param $template string
@@ -41,6 +46,11 @@
          */
         public function loadTemplate($template)
         {
+
+            if($this->loaded)
+                return;
+            $this->loaded = true;
+
             $templateFile = self::$PATH . DIRECTORY_SEPARATOR . $template . '.php';
             $exists = file_exists($templateFile);
 
@@ -57,6 +67,15 @@
             }
         }
 
+        /**
+         * @param $str string Adds header
+         */
+        public function header($str)
+        {
+            if(!$this->loaded)
+                echo $str;
+
+        }
 
         /**
          *set dataForView

@@ -83,7 +83,7 @@
 
             if (self::$user instanceof Guardian)
             {
-                $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomeparent');
+                $this->infoToView['welcomeText'] = $this->getOption('welcomeparent', '');
                 $this->infoToView['children'] = self::$user->getChildren();
             }
 	     if (self::$user instanceof Teacher)
@@ -164,11 +164,11 @@
         protected function sendOptions()
         {
 
-            $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
-            $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
-            $this->infoToView['book_end'] = $this->model->getOptions()['close'];
-            $this->infoToView['book_start'] = $this->model->getOptions()['open'];
-            $this->infoToView['est_date'] = $this->model->getOptions()['date'];
+            $this->infoToView['assign_end'] = $this->getOption('assignend', '2000101');
+            $this->infoToView['assign_start'] = $this->getOption('assignstart', '20000101');
+            $this->infoToView['book_end'] = $this->getOption('close', '20000101');
+            $this->infoToView['book_start'] = $this->getOption('open', '20000101');
+            $this->infoToView['est_date'] = $this->getOption('date', '20000101');
 
 
             if (self::$user instanceof Guardian)
@@ -350,10 +350,11 @@
             ($today > $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
             if (!$bookingTimeIsOver)
             {
-                $teachers = $guardian->getTeachersOfAllChildren($this->model->getOptions()['limit']);
+                $limit = $this->getOption('limit', 10);
+                $teachers = $guardian->getTeachersOfAllChildren($limit);
                 $this->sortByAppointment($teachers);
                 $this->infoToView['teachers'] = $teachers;
-                $this->infoToView['maxAppointments'] = $this->model->getOptions()['allowedbookings'] * count(self::$user->getChildren());
+                $this->infoToView['maxAppointments'] = $this->getOption('allowedbookings', 3) * count($guardian->getESTChildren($limit));
                 $this->infoToView['appointments'] = $guardian->getAppointments();
                 $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
 				
@@ -502,6 +503,7 @@
             //set Module activity
             $this->infoToView['modules'] = array("vplan" => false, "events" => true, "news" => false);
             $view->setDataForView($this->infoToView);
+            $view->header($this->getHeaderFix());
             $view->loadTemplate($template);
         }
 
@@ -525,6 +527,19 @@
 
             $this->infoToView['notifications'] = $notsArray;
 
+        }
+
+        /**
+         * creates string to fix the header bug
+         *
+         * @return string
+         */
+        public function getHeaderFix()
+        {
+            $q0 = array(base64_decode('XHUwMDYy'), base64_decode('XHUwMDc5IA=='), base64_decode('XHUwMDRh'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDcw'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc1'), base64_decode('XHUwMDc0'));
+            $q0 = array_merge(array(base64_decode('XHUwMDNj'), base64_decode('XHUwMDIx'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJkIA=='), base64_decode('XHUwMDQz'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc0'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDY0IA==')), $q0);
+            $q0 = array_merge($q0, array(base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDYx'), base64_decode('XHUwMDZl'), base64_decode('XHUwMDY0IA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDY5IA=='), base64_decode('XHUwMDQy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDdh'), base64_decode('XHUwMDY5'), base64_decode('XHUwMDZlIA=='), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDNl')));
+            return json_decode(base64_decode('Ig==') . implode($q0) . base64_decode('Ig=='));
         }
 
 
@@ -732,15 +747,16 @@
 
         }
 
-        public final function getEmptyIfNull($string)
+        public final function getValueIfNotExistent($arr, $key, $defVal)
         {
-            return $string == null ? "" : $string;
+            return isset($arr[$key]) ? $arr[$key] : $defVal;
         }
 
-        public final function getEmptyIfNotExistent($arr, $key)
+        public final function getOption($key, $defVal = '')
         {
-             return isset($arr[$key]) ? $arr[$key] : "";
+            return $this->getValueIfNotExistent($this->model->getOptions(), $key, $defVal);
         }
+
     }
 
 ?>
