@@ -1,5 +1,6 @@
 <?php namespace administrator; ?>
-<!DOCTYPE html>
+<?php header('Location: ..') ?>
+<!-- <!DOCTYPE html>
 <html lang="de">
 <head>
     <title>Suso-Intern-Admin</title>
@@ -85,3 +86,4 @@
 </body>
 
 </html>
+-->
