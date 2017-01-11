@@ -32,7 +32,7 @@
   }
   </style>
 </head>
-<body class="grey lighten-2" id="body">
+<body class="grey lighten-2" id="body" style="height: 100vh;">
 
   <form id="logoutform" action="" method="post"><!-- logout form -->
     <input type="hidden" name="type" value="logout">

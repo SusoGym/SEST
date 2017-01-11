@@ -38,7 +38,7 @@
     }
   </style>
 </head>
-<body class="grey lighten-2">
+<body class="grey lighten-2" style="height: 100vh;">
   <div id="insert"></div>
 
   <nav>
