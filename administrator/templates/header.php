@@ -2,70 +2,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>Adminpanel</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="icon" type="image/ico" href="../favicon.ico">
-    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="http://materializecss.com/bin/materialize.css"
-          media="screen,projection"/>
+  <meta charset="utf-8">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <title>Adminpanel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/ico" href="../favicon.ico">
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link type="text/css" rel="stylesheet" href="http://materializecss.com/bin/materialize.css"
+  media="screen,projection"/>
 
-    <script type="application/javascript"> // not that nice here but where else?
+  <script type="application/javascript"> // not that nice here but where else?
 
 
-    </script>
+  </script>
 
-    <style>
-        .action {
-            margin-left: 10px;
-        }
+  <style>
+  .action {
+    margin-left: 10px;
+  }
 
-        .info {
-            margin-left: 10px;
-            font-style: italic;
-        }
-    </style>
+  .info {
+    margin-left: 10px;
+    font-style: italic;
+  }
+
+    .logo-mobile {
+      width: 80%;
+      margin: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto
+    }
+    .name {
+      margin:20px;
+    }
+  </style>
 </head>
 <body class="grey lighten-2">
-<div id="insert"></div>
+  <div id="insert"></div>
 
-
-<nav>
+  <nav>
     <div class="nav-wrapper teal">
-        <a href="?" style="margin-left: 20px" class="brand-logo">Adminpanel</a>
-        <a href="#" data-activates="mobile-nav" class="button-collapse" style="padding-left:20px;padding-right:20px;"><i
-                    class="material-icons">menu</i></a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a id="news" href="?type=updmgt" title="Datenableich"><i class="material-icons">input</i></a></li>
-            <li><a id="news" href="?type=settings" title="Einstellungen"><i class="material-icons">settings</i></a></li>
-            <li><a id="news" href="?type=usrmgt" title="Benutzerverwaltung"><i class="material-icons">people</i></a>
-            </li>
-            <li><a id="news" href="?type=news" title="Newslettereintrag"><i class="material-icons">comment</i></a></li>
-            <li><a id="home" href="?" title="Home"><i class="material-icons">home</i></a></li>
-            <li><a id="logout" href="?type=logout" title="Logout"><i class="material-icons">power_settings_new</i></a>
-            </li>
-        </ul>
+      <a href="#" data-activates="slide-out" class="button-collapse hide-on-large-only"><i class="material-icons">menu</i></a>
+      <ul class="left hide-on-med-and-down">
+        <li><a href="." title="Startseite" class="waves-effect"><i class="material-icons left">home</i><font style="font-size: 24px;">Suso-Intern: Admin</font></a></li>
+        <li><a href="?type=updmgt" title="Datenabgleich" class="waves-effect"><i class="material-icons left">input</i>Datenabgleich</a></li>
+        <li><a href="?type=settings" title="Einstellungen" class="waves-effect"><i class="material-icons left">settings</i>Einstellungen</a></li>
+        <li><a href="?type=usrmgt" title="Benutzerverwaltung" class="waves-effect"><i class="material-icons left">people</i>Benutzerverwaltung</a></li>
+        <li><a href="?type=news" title="Newslettereintrag" class="waves-effect"><i class="material-icons left">comment</i>Newslettereintrag</a></li>
+      </ul>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="?type=logout" title="Logout"><i class="material-icons right">power_settings_new</i>Logout</a>
+        </li>
+      </ul>
     </div>
-</nav>
+  </nav>
 
-<ul id="mobile-nav" class="side-nav">
+  <ul id="slide-out" class="side-nav">
     <li>
-        <div class="userView">
-            <img class="background grey" src="http://materializecss.com/images/office.jpg">
-            <a href="#!user"><img class="circle"
-                                  src="http://www.motormasters.info/wp-content/uploads/2015/02/dummy-profile-pic-male1.jpg"></a>
-            <a href="#!name"><span class="white-text name"><?php echo $_SESSION['user']['mail']; ?></span></a>
-        </div>
+      <img class="logo-mobile" src="/assets/logo.png">
     </li>
+    <li><a class="waves-effect" href="."><i class="material-icons">home</i><font style="font-size: 24px;">Suso-Intern: Admin</font></a></li>
     <li><a class="waves-effect" href="?type=updmgt"><i class="material-icons">input</i>Datenabgleich</a></li>
     <li><a class="waves-effect" href="?type=settings"><i class="material-icons">settings</i>Einstellungen</a></li>
     <li><a class="waves-effect" href="?type=usrmgt"><i class="material-icons">people</i>Benutzerverwaltung</a></li>
     <li><a class="waves-effect" href="?type=news"><i class="material-icons">comment</i>Newslettereintrag</a></li>
     <li><a class="waves-effect" href="?type=home"><i class="material-icons">home</i>Home</a></li>
+    <div class="divider"></div>
     <li><a class="waves-effect" href="?type=logout"><i class="material-icons">power_settings_new</i>Logout</a></li>
-    <li>
-        <div class="divider"></div>
-    </li>
 
-</ul>
+  </ul>

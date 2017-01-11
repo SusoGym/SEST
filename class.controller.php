@@ -72,6 +72,10 @@
             $this->display($this->handleType());
         }
 
+        protected function getEmptyIfNotExistent($array, $key) {
+          return (isset($array[$key])) ? $array[$key] : "";
+        }
+
         /**
          * @return string
          */
@@ -89,7 +93,7 @@
 	     if (self::$user instanceof Teacher)
             {
                 $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcometeacher');
-                
+
             }
             switch ($this->input['type'])
             {
@@ -357,7 +361,7 @@
                 $this->infoToView['maxAppointments'] = $this->getOption('allowedbookings', 3) * count($guardian->getESTChildren($limit));
                 $this->infoToView['appointments'] = $guardian->getAppointments();
                 $this->infoToView['bookedTeachers'] = $guardian->getBookedTeachers();
-				
+
             } else
             {
                 $this->infoToView['bookingDetails'] = $this->model->getBookingDetails($guardian->getParentId());
@@ -379,11 +383,11 @@
 	     if (self::$user instanceof Guardian || self::$user instanceof Student)
             {
                 $this->infoToView['events'] = $this->model->getEvents();
-		  $icsfile = $filePathBase."Public.ics"; 
+		  $icsfile = $filePathBase."Public.ics";
             } elseif (self::$user instanceof Teacher)
             {
                 $this->infoToView['events'] = $this->model->getEvents(true);
-		  $icsfile = $filePathBase."Staff.ics"; 
+		  $icsfile = $filePathBase."Staff.ics";
             }
             $this->infoToView['months'] = $this->model->getMonths();
 	     $this->infoToView['icsPath'] = $icsfile;
