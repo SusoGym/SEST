@@ -113,7 +113,10 @@
                     if (self::$user == null)
                         break;
                     if (!self::$user instanceof Guardian)
-                        die("Unauthorized access! User must be instance of Guardian!");
+                    {
+                        $this->notify("Sie müssen ein Elternteil sein, um auf diese Seite zugreifen zu können!");
+                        return $this->getDashBoardName();
+                    }
                     $template = "parent_child_select";
                     break;
                 case "login":
@@ -221,7 +224,10 @@
             if (self::$user == null)
                 return "login";
             if (!self::$user instanceof Teacher)
-                die("Unauthorized access! User must be instance of Teacher!");
+            {
+                $this->notify("Sie müssen ein Lehrer sein, um auf diese Seite zugreifen zu können!");
+                return $this->getDashBoardName();
+            }
             if (isset($this->input['asgn']))
             {
                 $this->model->setAssignedSlot($this->input['asgn'], self::$user->getId());
@@ -270,7 +276,7 @@
             $_SESSION['logout'] = true; // notify about logout after reloading the page to delete all $_POST data
 
             header("Location: ./");
-            die();
+            die(); // should not be needed
         }
 
         /**
@@ -735,7 +741,7 @@
                 die(json_encode($output));
             }
 
-            die("Why are you here again?");
+            die("Why are you here again? I think you don't like javascript, do you?");
 
         }
 

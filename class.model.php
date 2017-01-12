@@ -162,27 +162,6 @@
             return array("name" => $name, "surname" => $surname);
         }
 
-        /**
-         * getTeacherName and Id when logged in via LDAP Login
-         *
-         * @param LDAPName string
-         * @return
-         */
-        public function getTeacherDetailsByLDAPName($ldapName)
-        {
-
-            $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE lehrer.ldapname=$ldapName;");
-
-            $surname = $data[0]["name"];
-            $name = $data[0]["vorname"];
-            $id = $data[0]["id"];
-            $email = $data[0]["email"];
-            $deputat = $data[0]["deputat"];
-
-            die(json_encode($data));
-
-            return array("name" => $name, "surname" => $surname, "ldap" => $ldapName, "teacherId" => $id, "email" => $email, "deputat" => $deputat);
-        }
 
         /**
          * @param int $usrId UserId
@@ -348,7 +327,7 @@
             $ldapName = $this->getTeacherLdapNameByTeacherId($tId, $data);
 
             if ($ldapName == null)
-                die("LDAP name not set for $email!"); // rip
+                die("LDAP name not set for $email! If you are 1000% sure this is your real suso email, please contact you system admin of choice."); // rip
 
             return $this->getTeacherByLdapNameAndPwd($ldapName, $pwd);
         }
@@ -373,7 +352,7 @@
                 {
                     ChromePhp::info(json_encode($novelData));
                     if (isset($novelData->{'type'}) && $novelData->{'type'} == "student")
-                        die("Student accounts are not supported yet...");
+                        die("Schüler werden noch nicht unterstützt.");
                     else
                         return null;
                 }
