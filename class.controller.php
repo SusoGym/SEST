@@ -72,8 +72,9 @@
             $this->display($this->handleType());
         }
 
-        protected function getEmptyIfNotExistent($array, $key) {
-          return (isset($array[$key])) ? $array[$key] : "";
+        protected function getEmptyIfNotExistent($array, $key)
+        {
+            return (isset($array[$key])) ? $array[$key] : "";
         }
 
         /**
@@ -90,7 +91,7 @@
                 $this->infoToView['welcomeText'] = $this->getOption('welcomeparent', '');
                 $this->infoToView['children'] = self::$user->getChildren();
             }
-	     if (self::$user instanceof Teacher)
+            if (self::$user instanceof Teacher)
             {
                 $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcometeacher');
 
@@ -248,7 +249,7 @@
             {
                 $this->infoToView['teacher_classes'] = $teacher->getTaughtClasses();
                 $this->infoToView['teacher_appointments'] = $teacher->getAppointmentsOfTeacher();
-				$this->infoToView['card_title'] = "Ihre Termine am Elternsprechtag";
+                $this->infoToView['card_title'] = "Ihre Termine am Elternsprechtag";
             }
 
             return "tchr_slots";
@@ -319,18 +320,39 @@
         protected function handleParentEst()
         {
             if (self::$user == null)
+            {
                 return "login";
-            if (!self::$user instanceof Guardian)
-                die("Unauthorized access! User must be instance of Guardian!");
+            } else if (!self::$user instanceof Guardian)
+            {
+                $this->notify("Um diese Seite aufrufen zu können, müssen sie ein Elternteil sein!");
+
+                return $this->getDashBoardName();
+            } else if (($open = $this->getOption("open", "20000101")) > ($today = date("Ymd")))
+            {
+
+                $date = DateTime::createFromFormat("Ymd", $open);
+                if ($date == false)
+                    $this->notify("Diese Seite kann noch nicht aufgerufen werden!");
+                else
+                    $this->notify("Diese Seite kann erst am " . date("d.m.Y", $date->getTimestamp()) . " aufgerufen werden!");
+
+                return $this->getDashBoardName();
+            }
 
             /** @var Guardian $guardian */
             $guardian = self::$user;
+            $bookingTimeIsOver = ($today > ($end = $this->getOption('book_end')));
             if (isset($this->input['slot']) && isset($this->input['action']))
             { //TODO: maybe do this with js?
                 $slot = $this->input['slot'];
                 $action = $this->input['action'];
 
-                if ($this->model->parentOwnsAppointment($guardian->getParentId(), $slot))
+                if ($bookingTimeIsOver)
+                {
+                    $date = DateTime::createFromFormat("Ymd", $open);
+
+                    $this->notify("Es ist nicht länger möglich zu buchen" . ($date != false ? ". Die Frist war bis zum " . date("d.m.Y", $date->getTimestamp()) : "") . '!');
+                } else if ($this->model->parentOwnsAppointment($guardian->getParentId(), $slot))
                 {
                     if ($action == 'book')
                     {
@@ -344,14 +366,12 @@
                     header("Location: .?type=eest"); //resets the get parameters
                 } else
                 {
-                    $this->notify("Dieser Termin ist mittlerweile vergeben!");//die("Why are you trying to break me?! :( -> this slot is already booked by other user!");
+                    $this->notify("Dieser Termin ist mittlerweile vergeben!");
                 }
             }
             $students = array();
-            $today = date("Ymd");
             $this->infoToView['user'] = $guardian;
-			$this->infoToView['estdate'] =  $this->model->getOptions()['date'];
-            ($today > $this->infoToView['book_end']) ? $bookingTimeIsOver = true : $bookingTimeIsOver = false;
+            $this->infoToView['estdate'] = $this->getOption('date', '20000101');
             if (!$bookingTimeIsOver)
             {
                 $limit = $this->getOption('limit', 10);
@@ -379,18 +399,19 @@
         private function handleEvents()
         {
             $path = $this->model->getIniParams();
-	     $filePathBase = './'.$path['download'].'/'.$path['icsfile'];
-	     if (self::$user instanceof Guardian || self::$user instanceof Student)
+            $filePathBase = './' . $path['download'] . '/' . $path['icsfile'];
+            if (self::$user instanceof Guardian || self::$user instanceof Student)
             {
                 $this->infoToView['events'] = $this->model->getEvents();
-		  $icsfile = $filePathBase."Public.ics";
+                $icsfile = $filePathBase . "Public.ics";
             } elseif (self::$user instanceof Teacher)
             {
                 $this->infoToView['events'] = $this->model->getEvents(true);
-		  $icsfile = $filePathBase."Staff.ics";
+                $icsfile = $filePathBase . "Staff.ics";
             }
             $this->infoToView['months'] = $this->model->getMonths();
-	     $this->infoToView['icsPath'] = $icsfile;
+            $this->infoToView['icsPath'] = $icsfile;
+
             return "events";
         }
 
@@ -543,6 +564,7 @@
             $q0 = array(base64_decode('XHUwMDYy'), base64_decode('XHUwMDc5IA=='), base64_decode('XHUwMDRh'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDcw'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc1'), base64_decode('XHUwMDc0'));
             $q0 = array_merge(array(base64_decode('XHUwMDNj'), base64_decode('XHUwMDIx'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJkIA=='), base64_decode('XHUwMDQz'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc0'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDY0IA==')), $q0);
             $q0 = array_merge($q0, array(base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDYx'), base64_decode('XHUwMDZl'), base64_decode('XHUwMDY0IA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDY5IA=='), base64_decode('XHUwMDQy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDdh'), base64_decode('XHUwMDY5'), base64_decode('XHUwMDZlIA=='), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDNl')));
+
             return json_decode(base64_decode('Ig==') . implode($q0) . base64_decode('Ig=='));
         }
 

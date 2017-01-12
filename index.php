@@ -1,7 +1,8 @@
 <?php
 
-    const DEBUG = false;
-    const SQL_DEBUG = false;
+    $input = array_merge($_GET, $_POST);
+    $DEBUG = false || isset($input['debug']);
+    $SQL_DEBUG = false || isset($input['sqldebug']);
 
     /* Debug Classes */
     require "ChromePhp.php"; // debugging
@@ -17,9 +18,9 @@
 
     /* Settings */
 
-    \ChromePhp::setEnabled(DEBUG);
+    \ChromePhp::setEnabled($DEBUG);
 
-    if (DEBUG)
+    if ($DEBUG)
     {
         ini_set("display_errors", true);
         enableCustomErrorHandler();
@@ -29,7 +30,6 @@
 
     /* Let's go! */
     session_start();
-    $input = array_merge($_GET, $_POST);
 
     if (isset($input['destroy']))
     {
