@@ -2,6 +2,17 @@
         integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="http://materializecss.com/bin/materialize.js"></script>
 <script>
+
+
+    <?php
+    if (isset($data['notifications']))
+        foreach ($data['notifications'] as $not)
+        {
+            echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
+        }
+
+    ?>
+
     $(document).ready(function () {
         $('ul.teachers').tabs();
         $('ul.students').tabs();
