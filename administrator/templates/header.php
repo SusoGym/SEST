@@ -43,6 +43,7 @@
 
   <nav>
     <div class="nav-wrapper teal">
+      <span class="hide-on-large-only brand-logo">Suso-Intern</span>
       <a href="#" data-activates="slide-out" class="button-collapse hide-on-large-only"><i class="material-icons">menu</i></a>
       <ul class="left hide-on-med-and-down">
         <li><a href="." title="Startseite" class="waves-effect"><i class="material-icons left">home</i><font style="font-size: 24px;">Suso-Intern: Admin</font></a></li>

@@ -66,14 +66,14 @@
 
 
 <div id="student_blueprint" style="display:none;">
-    <div class="input-field col s6">
-        <input id="name" name="name" type="text" class="validate">
-        <label for="name">Name des Schülers</label>
-    </div>
-    <div class="input-field col s6">
-        <input type="date" name="bday" class="datepicker">
-        <label for="date">Geburtstag</label>
-    </div>
+  <div class="input-field col l6 m6 s6">
+      <input id="name" name="name" type="text" class="validate">
+      <label for="name" class="truncate">Name des Schülers</label>
+  </div>
+  <div class="input-field col l6 m6 s6">
+      <input type="date" name="bday" class="datepicker">
+      <label for="date" class="truncate">Geburtstag</label>
+  </div>
 </div>
 
 <?php include("js.php"); ?>
