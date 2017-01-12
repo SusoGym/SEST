@@ -40,9 +40,7 @@ if ($today > $data['assign_end'])
             ?></b>
           </div>
         <?php else: ?>
-          <div class="row">
-            <b>Es wurden <?php echo count($usr->getAssignedSlots()) ?> Termine bestimmt!</b>
-          </div>
+        <b>Es wurden <?php echo count($usr->getAssignedSlots()) ?> Termine bestimmt!</b>
         <?php endif; ?>
         <?php } ?>
         <div class="col l9 m12 s 12">
