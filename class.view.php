@@ -63,7 +63,7 @@
                 include($templateFile);
             } else
             {
-                die('could not find template');
+                die('Could not find template. Please tell your system admin of choice.');
             }
         }
 
