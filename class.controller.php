@@ -172,11 +172,11 @@
         protected function sendOptions()
         {
 
-            $this->infoToView['assignend'] = $this->getOption('assignend', '2000101');
-            $this->infoToView['assignstart'] = $this->getOption('assignstart', '20000101');
-            $this->infoToView['close'] = $this->getOption('close', '20000101');
-            $this->infoToView['open'] = $this->getOption('open', '20000101');
-            $this->infoToView['date'] = $this->getOption('date', '20000101');
+            $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
+            $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
+            $this->infoToView['book_end'] = $this->model->getOptions()['close'];
+            $this->infoToView['book_start'] = $this->model->getOptions()['open'];
+            $this->infoToView['est_date'] = $this->model->getOptions()['date'];
 
 
             if (self::$user instanceof Guardian)
