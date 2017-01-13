@@ -7,20 +7,24 @@ $today = date("Ymd");
 $userObj = Controller::getUser();
 
 if ($userObj instanceof Guardian)
-{
-  $children = $data['children'];
-  if (count($children) == 0)
-  {
-    $est = false;
-    $selectionActive = false;
-  }
-}
+    {
+        $children = $data['children'];
+        if (count($children) == 0)
+        {
+            $est = false;
+            $selectionActive = false;
+        }
+ 	if ( $est && (isset($data['est_date']) && $data['est_date'] < $today) ||  (isset($data['book_start']) && $data['book_start'] > $today) ){
+		ChromePhp::info("No children selected by guardian or booking time expired");
+       	$est = false;
+    		}
+	}
+     elseif($userObj instanceof Teacher){
+	    if ( $est && $data['est_date'] < $today &&  $data['assign_end'] < $today ){
+	    $est = false;
+ 	    }
+	}
 
-if ($est && (isset($data['est_date']) && $data['est_date'] < $today) || (isset($data['book_start']) && $data['book_start'] > $today))
-{
-  ChromePhp::info("No children selected by guardian or booking time expired");
-  $est = false;
-}
 
 
 $color = array(true => '', false => 'teal-text text-lighten-3');
