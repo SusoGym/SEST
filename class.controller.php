@@ -88,7 +88,7 @@
 
             if (self::$user instanceof Guardian)
             {
-                $this->infoToView['welcomeText'] = $this->getOption('welcomeparent', '');
+                $this->infoToView['welcomeText'] = str_replace("\\n", "<br>", str_replace("\\r\\n", "<br>", $this->getOption('welcomeparent', '')));
                 $this->infoToView['children'] = self::$user->getChildren();
             }
             if (self::$user instanceof Teacher)
@@ -172,11 +172,11 @@
         protected function sendOptions()
         {
 
-            $this->infoToView['assign_end'] = $this->getOption('assignend', '2000101');
-            $this->infoToView['assign_start'] = $this->getOption('assignstart', '20000101');
-            $this->infoToView['book_end'] = $this->getOption('close', '20000101');
-            $this->infoToView['book_start'] = $this->getOption('open', '20000101');
-            $this->infoToView['est_date'] = $this->getOption('date', '20000101');
+            $this->infoToView['assignend'] = $this->getOption('assignend', '2000101');
+            $this->infoToView['assignstart'] = $this->getOption('assignstart', '20000101');
+            $this->infoToView['close'] = $this->getOption('close', '20000101');
+            $this->infoToView['open'] = $this->getOption('open', '20000101');
+            $this->infoToView['date'] = $this->getOption('date', '20000101');
 
 
             if (self::$user instanceof Guardian)
@@ -347,7 +347,7 @@
 
             /** @var Guardian $guardian */
             $guardian = self::$user;
-            $bookingTimeIsOver = ($today > ($end = $this->getOption('book_end')));
+            $bookingTimeIsOver = ($today > ($end = $this->getOption('close')));
             if (isset($this->input['slot']) && isset($this->input['action']))
             { //TODO: maybe do this with js?
                 $slot = $this->input['slot'];
@@ -390,6 +390,7 @@
 
             } else
             {
+
                 $this->infoToView['bookingDetails'] = $this->model->getBookingDetails($guardian->getParentId());
             }
 
