@@ -421,7 +421,7 @@
                     }
 					$this->addMenueItem("?type=chkass", "Lehrertermine prüfen");
 					if($this->input['type'] == "clrslts") $this->clearSlots();
-					if($this->input['type'] == "chkass") $this->checkteacherAssignments();
+					if($this->input['type'] == "chkass") $this->checkTeacherAssignments();
                     $this->backButton = "?type=settings";
                     $this->display("simple_menue");
                     break;
@@ -649,6 +649,7 @@
 			$line = "Lehrer;Deputat;Anzahl zu vergebender Termine;Anzahl noch zu vergebender Termine;Vergebene Termine\n";
 			array_push($data,$line);
 			foreach ($teachers as $teacher){
+				$asString=null;
 				$deputat = $teacher->getLessonAmount();
 				$requiredSlots = $teacher->getRequiredSlots();
 				$missingSlots = $teacher->getMissingSlots();
@@ -660,6 +661,7 @@
 					}
 				$line = $teacher->getFullName().";".$deputat.";".$requiredSlots.";".$missingSlots.";".$asString."\r\n";
 				array_push($data,$line);
+				
 				}
 			$filehandler = new Filehandler($path);
 			$filehandler->createCSV($data);
