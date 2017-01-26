@@ -4,9 +4,8 @@
     <title>Suso-Elternsprechtag</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="http://materializecss.com/bin/materialize.css"
-          media="screen,projection"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
 <body class="container teal">
 <div class="row">
     <div class="col s12 m8 l4 offset-m2 offset-l4" style="margin-top: 100px;">
@@ -65,7 +64,8 @@
                             <label for="pwdrep_register">Passwort wiederholen</label>
                         </div>
                         <div class="row" style="margin-bottom: 0;">
-                            <button class="btn-flat right waves-effect waves-teal" id="btn_register" type="submit">Submit<i
+                            <button class="btn-flat right waves-effect waves-teal" id="btn_register" type="submit">
+                                Submit<i
                                         class="material-icons right">send</i></button>
                         </div>
                     </form>
@@ -82,7 +82,7 @@
 
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"
         integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="http://materializecss.com/bin/materialize.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script>
     <?php
     if (isset($data['notifications']))
