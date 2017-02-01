@@ -20,7 +20,7 @@
                         <div class="input-field col s12">
                             <i class="material-icons prefix">person</i>
                             <input id="usr_login" type="text" class="" required>
-                            <label for="usr_login">Email-Addresse</label>
+                            <label for="usr_login">Email-Adresse</label>
                         </div>
                         <div class="input-field col s12">
                             <i class="material-icons prefix">vpn_key</i>
@@ -51,7 +51,7 @@
                         <div class="input-field col s12">
                             <i class="material-icons prefix">mail</i>
                             <input id="mail_register" name="mail" type="email" required="required" class="validate">
-                            <label for="mail_register">Email-Addresse</label>
+                            <label for="mail_register">Email-Adresse</label>
                         </div>
                         <div class="input-field col s12">
                             <i class="material-icons prefix">vpn_key</i>
