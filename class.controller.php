@@ -447,7 +447,13 @@
 
             ChromePhp::info("Email: " . $mail);
 
-            if (($userObj = $model->getUserByMail($mail)) != null)
+            if(!filter_var($mail, FILTER_VALIDATE_EMAIL))
+            {
+                array_push($notification, "Bitte geben Sie eine valide Email-Addresse an.");
+                ChromePhp::info("Invalid email");
+                $success = false;
+            }
+            if ($success && ($userObj = $model->getUserByMail($mail)) != null)
             {
                 $id = $userObj->getId();
                 array_push($notification, "Diese Email-Addresse ist bereits registriert.");
