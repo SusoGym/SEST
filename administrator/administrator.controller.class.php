@@ -275,9 +275,39 @@
                     break;
                 case "usredit":
                     $usr = $input['name'];
-                    $this->title = "Edit: $usr";
+                    $usr = $this->model->getUserByMail($usr);
+                    if ($usr == null) {
+                        $this->notify("Error: Invalid user to be edited!");
+                        $this->title = "Startseite";
+                        $this->display("main");
+
+                        return;
+                    }
+                    if (isset($input['edit'])) {
+                        $mail = $input['f_email'];
+                        $surname = $input['f_surname'];
+                        $name = $input['f_name'];
+
+                        $pwd = isset($input['f_pwd']) ? $input['f_pwd'] : null;
+                        $pwd_rep = isset($input['f_pwd_repeat']) ? $input['f_pwd_repeat'] : null;
+
+                        if ($pwd != $pwd_rep) {
+                            $this->notify("Die eingegbenen Passwörter stimmen nicht überein!");
+                        } else {
+                            if ($pwd != "" && $pwd_rep != "") {
+                                $this->model->changePwd($usr->getId(), $pwd);
+                            }
+                            if($usr->getEmail() != $mail || $usr->getName() != $name || $usr->getSurname() != $surname)
+                            {
+                                $this->model->updateUserData($usr->getId(), $name, $surname, $mail);
+                            }
+                        }
+
+                        header("Location: ?type=usredit&name=$mail");
+                    }
+                    $this->title = "Edit: " . $usr->getEmail();
                     $this->backButton = "?type=usrmgt";
-                    $this->infoToView['user'] = $this->model->getUserByMail($usr);
+                    $this->infoToView['user'] = $usr;
                     $this->display("usredit");
                     break;
                 //Settings
