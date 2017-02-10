@@ -352,6 +352,23 @@
         public function getIniParams() {
             return self::$connection->getIniParams();
         }
+
+        /**
+         * Returns all users which email are starting with $startingWith
+         *
+         * @param string $startingWith
+         * @return array
+         */
+        public function getUsers($startingWith) {
+            $arr = array();
+            $data = self::$connection->selectAssociativeValues("SELECT email FROM user WHERE email LIKE '$startingWith%'");
+            if($data != null && !empty($data))
+            foreach ($data as $d)
+                array_push($arr, $d['email']);
+
+            return $arr;
+        }
+
     }
 
 
