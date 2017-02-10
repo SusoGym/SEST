@@ -1,3 +1,4 @@
+<?php $data = $this->getDataForView(); ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>

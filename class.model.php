@@ -107,9 +107,8 @@
                     return new Admin($data['id'], $data['email']);
                     break;
                 case 1: // Parent / Guardian
-                    $parentId = self::$connection->selectAssociativeValues("SELECT id FROM eltern WHERE userid=$uid")[0]['id'];
-
-                    return new Guardian($data['id'], $data['email'], $parentId);
+                    $data2 = self::$connection->selectAssociativeValues("SELECT * FROM eltern WHERE userid=$uid")[0];
+                    return new Guardian($data['id'], $data['email'], $data2['id'], $data2['name'], $data2['vorname']);
                 case 2:
                     // non-existend
                     die("Why are we here?!");
