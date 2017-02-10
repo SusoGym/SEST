@@ -12,6 +12,11 @@
         private static $instance;
 
         /**
+         * @var bool
+         */
+        public static $DEBUG = false;
+
+        /**
          * @return View
          */
         public static function getInstance() {
@@ -51,7 +56,7 @@
             $templateFile = self::$PATH . DIRECTORY_SEPARATOR . $template . '.php';
             $exists = file_exists($templateFile);
 
-            if (\administrator\DEBUG)
+            if (self::$DEBUG)
                 ChromePhp::info("Displaying 'templates/$template.php' with data: " . json_encode($this->dataForView));
 
             if ($exists) {

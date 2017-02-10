@@ -30,6 +30,7 @@
 
     if (DEBUG) {
         ini_set("display_errors", true);
+        \View::$DEBUG = true;
         enableCustomErrorHandler();
     }
 
