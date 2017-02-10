@@ -28,8 +28,7 @@
 
     \ChromePhp::setEnabled(DEBUG);
 
-    if (DEBUG)
-    {
+    if (DEBUG) {
         ini_set("display_errors", true);
         enableCustomErrorHandler();
     }
@@ -42,13 +41,10 @@
     /**
      * This function will throw Exceptions instead of warnings (better to debug)
      */
-    function enableCustomErrorHandler()
-    {
-        set_error_handler(function ($errno, $errstr, $errfile, $errline)
-        {
+    function enableCustomErrorHandler() {
+        set_error_handler(function ($errno, $errstr, $errfile, $errline) {
             // error was suppressed with the @-operator
-            if (0 === error_reporting())
-            {
+            if (0 === error_reporting()) {
                 return false;
             }
 

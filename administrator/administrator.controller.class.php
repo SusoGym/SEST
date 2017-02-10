@@ -3,8 +3,7 @@
     /**
      *Controller class handles input and other data
      */
-    class Controller extends \Controller
-    {
+    class Controller extends \Controller {
         /**
          * @var string file name
          */
@@ -65,10 +64,8 @@
          *
          * @param array
          */
-        function __construct($input)
-        {
-            if (!isset($input['type']))
-            {
+        function __construct($input) {
+            if (!isset($input['type'])) {
                 $input['type'] = "default";
             }
 
@@ -85,31 +82,26 @@
         /**
          * Handles logic
          */
-        protected function handleLogic()
-        {
+        protected function handleLogic() {
 
 
             $input = $this->input;
 
             $loggedIn = isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd']) && $this->checkLogin($_SESSION['user']['mail'], $_SESSION['user']['pwd']) == 1;
 
-            switch ($input['type'])
-            {
+            switch ($input['type']) {
                 case 'logout':
                     $this->logout();
                     break;
                 case 'login':
-                    if (!$loggedIn)
-                    {
+                    if (!$loggedIn) {
                         $this->login();
                         break;
                     }
                 default:
-                    if ($loggedIn)
-                    { // a.k.a logged in
+                    if ($loggedIn) { // a.k.a logged in
                         $this->handleInput();
-                    } else
-                    {
+                    } else {
                         $this->display("adminlogin");
                     }
                     break;
@@ -122,12 +114,10 @@
          * @param $input array input data
          * @return string template to be displayed
          */
-        protected function login()
-        {
+        protected function login() {
             $input = $this->input;
 
-            if (!isset($input['login']['mail']) || !isset($input['login']['password']))
-            {
+            if (!isset($input['login']['mail']) || !isset($input['login']['password'])) {
                 \ChromePhp::info("No username || pwd in input[]");
                 $this->notify('Kein Benutzername oder Passwort angegeben');
 
@@ -142,25 +132,21 @@
 
             \ChromePhp::info("Login Success: $state");
 
-            if (isset($input['console']))
-            { // used to only get raw login state -> can be used in js
+            if (isset($input['console'])) { // used to only get raw login state -> can be used in js
                 die(strval($state));
             }
 
             // things after here should not naturally happen
 
-            if ($state == 1)
-            {
+            if ($state == 1) {
 
                 $this->title = "Startseite";
 
                 return "main";
-            } else if ($state == 2)
-            {
+            } else if ($state == 2) {
                 \ChromePhp::info("No Admin Permission");
                 $this->notify('Ungenügende Berechtigung!');
-            } else
-            {
+            } else {
                 $this->notify("Falsche Benutzername Passwort Kombination!");
             }
 
@@ -172,15 +158,12 @@
          *
          * @param $template string
          */
-        function display($template)
-        {
+        function display($template) {
             $view = \View::getInstance();
             $data = array();
 
-            if (isset($_SESSION['dataForView']['notifications']))
-            {
-                foreach ($_SESSION['dataForView']['notifications'] as $not)
-                {
+            if (isset($_SESSION['dataForView']['notifications'])) {
+                foreach ($_SESSION['dataForView']['notifications'] as $not) {
                     $this->notify($not['msg'], $not['time']);
                 }
                 unset($_SESSION['dataForView']['notifications']);
@@ -200,8 +183,7 @@
                       "slots"          => $this->existingSlots
                 );
 
-            foreach ($myDataForView as $key => $value)
-            {
+            foreach ($myDataForView as $key => $value) {
                 if ($value != null)
                     $data[$key] = $value;
             }
@@ -217,8 +199,7 @@
          *
          * @return void
          */
-        protected function logout()
-        {
+        protected function logout() {
             session_destroy();
             session_start();
 
@@ -234,15 +215,12 @@
          * @param string $pwd
          * @return int 1 => success, 2 => no permission, 0 => invalid login data
          */
-        protected function checkLogin($mail, $pwd)
-        {
+        protected function checkLogin($mail, $pwd) {
             $model = Model::getInstance();
-            if ($model->passwordValidate($mail, $pwd))
-            {
+            if ($model->passwordValidate($mail, $pwd)) {
 
                 $usr = $model->getUserByMail($mail);
-                if (($uid = $usr->getId()) == null)
-                {
+                if (($uid = $usr->getId()) == null) {
                     $this->notify("Database error!");
                     $this->display("adminlogin");
 
@@ -252,8 +230,7 @@
                 $type = $usr->getType();
 
                 //admin login MUST be type 0
-                if ($type == 0)
-                {
+                if ($type == 0) {
 
                     $_SESSION['user']['id'] = $uid;
                     $time = $_SESSION['user']['logintime'] = time();
@@ -266,8 +243,7 @@
                     unset($_SESSION['logout']);
 
                     return 1;
-                } else
-                {
+                } else {
                     return 2;
                 }
             }
@@ -284,12 +260,10 @@
          *
          * @param array $input
          */
-        private function handleInput()
-        {
+        private function handleInput() {
             $input = $this->input;
             //Handle input
-            switch ($input['type'])
-            {
+            switch ($input['type']) {
                 //User Management
                 case "usrmgt":
                     $this->title = "Benutzerverwaltung";
@@ -313,7 +287,7 @@
                     $this->title = "Datenabgleich";
                     $this->addMenueItem("?type=update_s", "Ableich Schülerdaten");
                     $this->addMenueItem("?type=update_t", "Abgleich Lehrerdaten");
-		      $this->addMenueItem("?type=upload_e", "Upload Terminedatei");
+                    $this->addMenueItem("?type=upload_e", "Upload Terminedatei");
                     $this->display("simple_menue");
                     break;
                 //Update teacher data
@@ -329,19 +303,19 @@
                     $this->actionType = "uschoose";
                     $this->display("update");
                     break;
-		  //events file upload
-		  case "upload_e":
-		      $this->title = "Upload Terminedatei";
+                //events file upload
+                case "upload_e":
+                    $this->title = "Upload Terminedatei";
                     $this->actionType = "eventchoose";
                     $this->display("update");
                     break;
-		 
-		 
+
+
                 //student file upload
-		  case "utchoose":
+                case "utchoose":
                 case "uschoose":
-		  case "eventchoose":
-		       $student = $input['type'] == "uschoose";
+                case "eventchoose":
+                    $student = $input['type'] == "uschoose";
                     //von mir hinzugefügt
                     $input['type'] == "uschoose" ? $student = true : $student = false;
 
@@ -350,38 +324,34 @@
                     $written = $success ? "true" : "false";
                     \ChromePhp::info($student ? "Student" : "Teacher" . " upload: $written");
 
-                    if ($success)
-                    {
-                       echo  $_SESSION['file'] = $upload['location'];
+                    if ($success) {
+                        echo $_SESSION['file'] = $upload['location'];
                     }
 
-                    if (isset($input['console']))
-                    {
+                    if (isset($input['console'])) {
                         $error = (isset($upload['error']) ? $upload['error'] : "");
 
                         die("<script type='text/javascript'>window.top.window.uploadComplete($written, '$error');</script>");
                     }
 
-                    if ($success)
-                    {
-                       
-				echo "<script> alert($student);   </script>  ";
-                       	 $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
-                       	 $this->prepareDataUpdate($student);
-                        	$this->actionType = $student ? "usstart" : "utstart";
-                        	$student ? $this->actionType = "usstart" : $this->actionType = "utstart";
-                       	 echo $this->actionType;
-                       	 $this->display("update1");
-			 	  
-                    } else
-                    {
+                    if ($success) {
+
+                        echo "<script> alert($student);   </script>  ";
+                        $this->title = "Datei upload zur Aktualisierung der " . $student ? "Schülerdaten" : "Lehrerdaten";
+                        $this->prepareDataUpdate($student);
+                        $this->actionType = $student ? "usstart" : "utstart";
+                        $student ? $this->actionType = "usstart" : $this->actionType = "utstart";
+                        echo $this->actionType;
+                        $this->display("update1");
+
+                    } else {
                         $this->display("update");
                     }
 
                     break;
                 case "dispsupdate1":
                 case "disptupdate1":
-		  
+
                     $student = $input['type'] == "dispsupdate1";
                     //von mir hinzugefügt
                     $input['type'] == "dispsupdate1" ? $student = true : $student = false;
@@ -401,27 +371,26 @@
                     $this->display("update2");
                     break;
 
-		 //
-		case "dispupdateevents":
-			$this->manageEvents();
-			$this->title ="Termine";
-			$this->infoToView['cardtext'] = "Termine aktualisiert und ics-Dateien erzeugt";
-			$this->display("events");
-			break;	
+                //
+                case "dispupdateevents":
+                    $this->manageEvents();
+                    $this->title = "Termine";
+                    $this->infoToView['cardtext'] = "Termine aktualisiert und ics-Dateien erzeugt";
+                    $this->display("events");
+                    break;
                 //SEST configuration
                 case "sestconfig":
-				case "clrslts":
-				case "chkass":
+                case "clrslts":
+                case "chkass":
                     $this->title = "Konfiguration Elternsprechtag";
                     $this->addMenueItem("?type=setclasses", "Unterrichtszuordnung einrichten");
-                    if (date('Ymd') <= $this->model->getOptions()['assignstart'])
-                    {
+                    if (date('Ymd') <= $this->model->getOptions()['assignstart']) {
                         $this->addMenueItem("?type=setslots", "Sprechzeiten einrichten");
-						$this->addMenueItem("?type=clrslts", "buchbare Termine zurücksetzen");
+                        $this->addMenueItem("?type=clrslts", "buchbare Termine zurücksetzen");
                     }
-					$this->addMenueItem("?type=chkass", "Lehrertermine prüfen");
-					if($this->input['type'] == "clrslts") $this->clearSlots();
-					if($this->input['type'] == "chkass") $this->checkTeacherAssignments();
+                    $this->addMenueItem("?type=chkass", "Lehrertermine prüfen");
+                    if ($this->input['type'] == "clrslts") $this->clearSlots();
+                    if ($this->input['type'] == "chkass") $this->checkTeacherAssignments();
                     $this->backButton = "?type=settings";
                     $this->display("simple_menue");
                     break;
@@ -433,8 +402,7 @@
                     break;
                 //Configure Options
                 case "options":
-                    if (isset($input['sbm']))
-                    {
+                    if (isset($input['sbm'])) {
 
                         $this->model->updateOptions($_POST);
                     }
@@ -459,13 +427,11 @@
                 case "setslots":
                     $this->title = "Sprechzeiten einrichten";
                     $this->backButton = "?type=sestconfig";
-                    if (isset($input['del']))
-                    {
+                    if (isset($input['del'])) {
                         $this->model->deleteSlot($input['del']);
                         //this->model->deleteBookableSlots($input['del']) - does not exist yet in model
                     }
-                    if (isset($input['start']))
-                    {
+                    if (isset($input['start'])) {
                         $slotId = $this->model->insertSlot($input['start'], $input['end']);
                         $this->model->createBookableSlots($slotId);
                     }
@@ -495,13 +461,11 @@
          *
          * @return array[]
          */
-        private function fileUpload()
-        {
+        private function fileUpload() {
 
             $ret = array("success" => false);
             $success = false;
-            try
-            {
+            try {
                 /*
                 if(is_uploaded_file($_FILES['file']['tmp_name']) &&
                 move_uploaded_file($_FILES['file']['tmp_name'], '/var/www/vhosts/suso.schulen.konstanz.de/httpdocs/_SusoIntern/uploadtemp/'.$_FILES['file']['name'])    )
@@ -513,19 +477,16 @@
 
                 if (isset($file['tmp_name']) && is_uploaded_file($file['tmp_name']) &&
                     move_uploaded_file($file['tmp_name'], './tmp/' . $file['name'])
-                )
-                {
+                ) {
                     $this->file = './tmp/' . $file['name'];
                     $ret['success'] = true;
                     $ret['location'] = './tmp/' . $file['name'];
                 }
-            } catch (\Exception $e)
-            {
+            } catch (\Exception $e) {
                 $ret['error'] = $e->getMessage();
-            } finally
-            {
-             
-		return $ret;
+            } finally {
+
+                return $ret;
             }
         }
 
@@ -534,14 +495,11 @@
          *
          * @param bool
          */
-        private function prepareDataUpdate($student)
-        {
+        private function prepareDataUpdate($student) {
 
-            if (!isset($_SESSION['file']))
-            {
+            if (!isset($_SESSION['file'])) {
                 header("Location: /administrator"); //TODO: hardcoded ;-;
-            } else if (!file_exists($_SESSION['file']))
-            {
+            } else if (!file_exists($_SESSION['file'])) {
                 $_SESSION['dataForView']['notifications'][] = array("msg" => "Invalid File Target!", "time" => 4000);
                 header("Location: /administrator");
             }
@@ -556,10 +514,8 @@
          * @param bool
          * @param array $input (GET/POST Data)
          */
-        private function performDataUpdate($student, $input)
-        {
-            if (!isset($_SESSION['file']))
-            {
+        private function performDataUpdate($student, $input) {
+            if (!isset($_SESSION['file'])) {
                 header("Location: /administrator"); //TODO: hardcoded ;-;
             }
 
@@ -567,8 +523,7 @@
             $fileHandler = new FileHandler($_SESSION['file']);
             $sourceHeads = $fileHandler->readHead();
             $x = 0;
-            foreach ($sourceHeads as $h)
-            {
+            foreach ($sourceHeads as $h) {
                 $updateData[] = array("source" => $h, "target" => $input['post_dbfield'][$x]);
                 $x++;
             }
@@ -578,19 +533,19 @@
             $this->fileData[2] = $fileHandler->deleteDataFromDB($student);
         }
 
-	/**
-	* Make Events and write ICS file
-	*/
-	private function manageEvents(){
-	$filehandler = new FileHandler($_SESSION['file']);
-	$events = $filehandler->readEventSourceFile();
-	$tmanager = new TManager();	
-	$tmanager->addEventsToDB($events);
-	//TO DO make ICS Files for staff and others
-	$tmanager->createICS($events);
-	$tmanager->createICS($events,true); //create StaffVersion
-	
-	}
+        /**
+         * Make Events and write ICS file
+         */
+        private function manageEvents() {
+            $filehandler = new FileHandler($_SESSION['file']);
+            $events = $filehandler->readEventSourceFile();
+            $tmanager = new TManager();
+            $tmanager->addEventsToDB($events);
+            //TO DO make ICS Files for staff and others
+            $tmanager->createICS($events);
+            $tmanager->createICS($events, true); //create StaffVersion
+
+        }
 
         /**
          * Adds Menu Item
@@ -599,8 +554,7 @@
          * @param $name string
          * @return void
          */
-        private function addMenueItem($link, $name)
-        {
+        private function addMenueItem($link, $name) {
             array_push($this->menueItems, array("link" => $link, "entry" => $name));
         }
 
@@ -610,64 +564,61 @@
          * @param string $form
          * @param array(int) teacherIds
          */
-        private function classOperations($form, $update, $teacher)
-        {
-            if (isset($update))
-            {
+        private function classOperations($form, $update, $teacher) {
+            if (isset($update)) {
                 $this->model->setTeacherToForm($teacher, $update);
                 $form = $update;
             }
             //read teachers in forms
-            if (isset($form))
-            {
+            if (isset($form)) {
                 $this->currentForm = $form;
                 $this->teachersOfForm = $this->model->getTeachersOfForm($form);
             }
 
         }
-		
-		/**
-		* clears bookable_slots and sets news	
-		*/
-		private function clearSlots(){
-			$this->model->clearBookableSlots();
-			foreach ($this->model->getSlots() as $slot){
-				$this->model->createBookableSlots($slot['id']);
-				}
-			$this->notify("Buchbare Termine zurückgesetzt und aktualisiert");
-			}
-			
-		/**
-		* checks assigned slots of Teachers
-		*/
-		private function checkTeacherAssignments(){
-			$params = $this->model->getIniParams();
-			$fileName = "teacherassignments.csv";
-			$path = $params['basepath'].'/'.$params['download'].'/'.$fileName;
-			$teachers = $this->model->getTeachers();
-			$data = array();
-			$line = "Lehrer;Deputat;Anzahl zu vergebender Termine;Anzahl noch zu vergebender Termine;Vergebene Termine\n";
-			array_push($data,$line);
-			foreach ($teachers as $teacher){
-				$asString=null;
-				$deputat = $teacher->getLessonAmount();
-				$requiredSlots = $teacher->getRequiredSlots();
-				$missingSlots = $teacher->getMissingSlots();
-				$assignedSlots = $teacher->getAssignedSlots(); //array()
-				$x = 0;
-				foreach($assignedSlots as $as){
-					$asString = $x == 0 ? $as : $asString."/".$as;
-					$x++;
-					}
-				$line = $teacher->getFullName().";".$deputat.";".$requiredSlots.";".$missingSlots.";".$asString."\r\n";
-				array_push($data,$line);
-				
-				}
-			$filehandler = new Filehandler($path);
-			$filehandler->createCSV($data);
-			$this->notify("Datei ".$fileName." erzeugt");
-		}
-		
+
+        /**
+         * clears bookable_slots and sets news
+         */
+        private function clearSlots() {
+            $this->model->clearBookableSlots();
+            foreach ($this->model->getSlots() as $slot) {
+                $this->model->createBookableSlots($slot['id']);
+            }
+            $this->notify("Buchbare Termine zurückgesetzt und aktualisiert");
+        }
+
+        /**
+         * checks assigned slots of Teachers
+         */
+        private function checkTeacherAssignments() {
+            $params = $this->model->getIniParams();
+            $fileName = "teacherassignments.csv";
+            $path = $params['basepath'] . '/' . $params['download'] . '/' . $fileName;
+            $teachers = $this->model->getTeachers();
+            $data = array();
+            $line = "Lehrer;Deputat;Anzahl zu vergebender Termine;Anzahl noch zu vergebender Termine;Vergebene Termine\n";
+            array_push($data, $line);
+            foreach ($teachers as $teacher) {
+                $asString = null;
+                $deputat = $teacher->getLessonAmount();
+                $requiredSlots = $teacher->getRequiredSlots();
+                $missingSlots = $teacher->getMissingSlots();
+                $assignedSlots = $teacher->getAssignedSlots(); //array()
+                $x = 0;
+                foreach ($assignedSlots as $as) {
+                    $asString = $x == 0 ? $as : $asString . "/" . $as;
+                    $x++;
+                }
+                $line = $teacher->getFullName() . ";" . $deputat . ";" . $requiredSlots . ";" . $missingSlots . ";" . $asString . "\r\n";
+                array_push($data, $line);
+
+            }
+            $filehandler = new Filehandler($path);
+            $filehandler->createCSV($data);
+            $this->notify("Datei " . $fileName . " erzeugt");
+        }
+
     }
 
 ?>

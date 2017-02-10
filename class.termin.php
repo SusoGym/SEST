@@ -4,8 +4,7 @@
     *Klasse Termine
     */
 
-    class Termin
-    {
+    class Termin {
 
         public $typ;
         public $start;
@@ -32,36 +31,29 @@
          * @param $data Array
          */
 
-        public function createFromCSV($data)
-        {
-            if ($data[8] == "L")
-            {
+        public function createFromCSV($data) {
+            if ($data[8] == "L") {
                 $this->staff = true;
             }
             $this->typ = $data[0];
             $this->start = $this->makeDate($data[2]);
-            if ($data[4])
-            {
+            if ($data[4]) {
                 //mehrtägig
                 $this->start = $this->start;//."T000000";
                 $this->ende = $this->makeDate($data[4]);
                 $this->ende = $this->ende;//."T235959";
-            } else
-            {
+            } else {
                 //eintägiger Termine
                 $this->ende = $this->start;
-                if ($data[7])
-                {
+                if ($data[7]) {
                     //Endzeit angegeben
                     $this->start = $this->start . $this->makeTime($data[5]);
                     $this->ende = $this->ende . $this->makeTime($data[7]);
-                } elseif ($data[5])
-                {
+                } elseif ($data[5]) {
                     //nur Startzeit angegeben
                     $this->start = $this->start . $this->makeTime($data[5]);
                     $this->ende = $this->ende . $this->makeTime($data[5]);
-                } else
-                {
+                } else {
                     //ganztägig
 
                     $this->start = $this->start;//."T000000";
@@ -77,8 +69,7 @@
          *
          * @param $d Array
          */
-        public function createFromDB($d)
-        {
+        public function createFromDB($d) {
             //var_dump($d);
             $this->typ = $d[0];
             $this->start = $d[1];
@@ -88,18 +79,15 @@
             $this->jahr = $this->start[0] . $this->start[1] . $this->start[2] . $this->start[3];
             $this->findMonth($mt);
 
-            if (strlen($this->start) < 9)
-            {
+            if (strlen($this->start) < 9) {
                 //ganztägiger Termin
-                if ($this->start == $this->ende)
-                {
+                if ($this->start == $this->ende) {
                     //eintägiger Termin
                     $this->sTimeStamp = $this->start;
                     $this->sday = $this->reverseDate($this->start);
                     $this->sweekday = $this->getWeekday($this->start);
 
-                } else
-                {
+                } else {
                     //mehrtägig
                     $this->sTimeStamp = $this->start;
                     $this->sday = $this->reverseDate($this->start);
@@ -107,11 +95,9 @@
                     $this->sweekday = $this->getWeekday($this->start);
                     $this->eweekday = $this->getWeekday($this->ende);
                 }
-            } else
-            {
+            } else {
                 //Start und Endzeiten angegeben
-                if ($this->start == $this->ende)
-                {
+                if ($this->start == $this->ende) {
                     //nur Startzeitangegeben
                     $arr = explode("T", $this->start);
                     $tag = $arr[0];
@@ -120,8 +106,7 @@
                     $this->sday = $this->reverseDate($tag);
                     $this->stime = $this->reverseTime($zeit);
                     $this->sweekday = $this->getWeekday($tag);
-                } else
-                {
+                } else {
                     //Start und Endzeit angegeben
                     $arr = explode("T", $this->start);
                     $stag = $arr[0];
@@ -130,14 +115,12 @@
                     $arr = explode("T", $this->ende);
                     $etag = $arr[0];
                     $ezeit = $arr[1];
-                    if ($stag == $etag)
-                    {
+                    if ($stag == $etag) {
                         //eintägiger Termin
                         $this->sday = $this->reverseDate($stag);
                         $this->stime = $this->reverseTime($szeit) . "-" . $this->reverseTime($ezeit);
                         $this->sweekday = $this->getWeekday($stag);
-                    } else
-                    {
+                    } else {
                         //mehrtägiger Termin
                         $this->sday = $this->reverseDate($stag);
                         $this->stime = $this->reverseTime($szeit);
@@ -158,8 +141,7 @@
         *@param $datum String
         *@return String
         */
-        private function makeDate($datum)
-        {
+        private function makeDate($datum) {
             $dA = explode(".", $datum);
             $datum = $dA[2] . $dA[1] . $dA[0];
 
@@ -172,8 +154,7 @@
          * @param string Datum im YYYYMMDD Format
          * @return String
          */
-        private function reverseDate($datum)
-        {
+        private function reverseDate($datum) {
             return $datum[6] . $datum[7] . "." . $datum[4] . $datum[5] . "." . $datum[0] . $datum[1] . $datum[2] . $datum[3];
         }
 
@@ -185,11 +166,9 @@
          * @param $time string
          * @return String
          */
-        private function makeTime($time)
-        {
+        private function makeTime($time) {
             $zeit = "T000000";
-            if (strlen($time) == 5)
-            {
+            if (strlen($time) == 5) {
                 $tA = explode(":", $time);
                 $zeit = "T" . $tA[0] . $tA[1] . "00";
             }
@@ -203,8 +182,7 @@
          * @param string Zeit im hhmmss Format
          * @return String
          */
-        private function reverseTime($time)
-        {
+        private function reverseTime($time) {
             return $time[0] . $time[1] . ":" . $time[2] . $time[3];
         }
 
@@ -215,8 +193,7 @@
          * @param String Datum im Format YYYMMDD
          * @return String
          */
-        private function getWeekday($datum)
-        {
+        private function getWeekday($datum) {
             $wochentage = array('So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa');
             $monat = $datum[4] . $datum[5];
             $tag = $datum[6] . $datum[7];
@@ -234,11 +211,9 @@
          *
          * @param $mt String Monat
          */
-        private function findMonth($mt)
-        {
+        private function findMonth($mt) {
             $this->monatNum = $mt;
-            switch ($mt)
-            {
+            switch ($mt) {
                 case "01":
                     $month = "Januar";
                     break;

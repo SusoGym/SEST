@@ -4,8 +4,7 @@
      * Database Connection Klasse
      * erstellt die Verbindung zur Datenbank
      */
-    class Connection
-    {
+    class Connection {
 
         /**
          * @var string configuration file
@@ -23,17 +22,17 @@
          * @var string database password
          */
         private $pass;
-	 /**
+        /**
          * @var string filesystem path
          */
         private $basepath;
-	 /**
+        /**
          * @var string download folder
          */
         private $download;
-	 /**
+        /**
          * @var string ics filename
-        */
+         */
         private $icsfile;
         /**
          * @var \mysqli database connection instance
@@ -49,8 +48,7 @@
          * Konstruktor der automatisch die Datenbankverbindung
          * bei Instanzierung aufbaut
          */
-        public function __construct()
-        {
+        public function __construct() {
             $this->getCredentials();
             $this->connect();
         }
@@ -59,15 +57,12 @@
         /**
          * Ermittelt die Serververbindung, benutzer und Passwort zur Basisdatenbank
          */
-        private function getCredentials()
-        {
+        private function getCredentials() {
             $f = fopen(self::$configFile, "r");
-            while (!feof($f))
-            {
+            while (!feof($f)) {
                 $line = fgets($f);
                 $larr = explode("=", $line);
-                switch ($larr[0])
-                {
+                switch ($larr[0]) {
                     case "SERVER":
                         $this->server = trim($larr[1]);
                         break;
@@ -80,13 +75,13 @@
                     case "DB":
                         $this->database = trim($larr[1]);
                         break;
-			case "DOWNLOAD":
+                    case "DOWNLOAD":
                         $this->download = trim($larr[1]);
                         break;
-			case "FILEBASE":
+                    case "FILEBASE":
                         $this->basepath = trim($larr[1]);
                         break;
-			case "ICS":
+                    case "ICS":
                         $this->icsfile = trim($larr[1]);
                         break;
 
@@ -97,28 +92,27 @@
             fclose($f);
         }
 
-	/**
-	* returns values from ini
-	* @return array(string)
-	*/
-	public function getIniParams(){
-		return  array("download"=>$this->download,"basepath"=>$this->basepath,"icsfile"=>$this->icsfile);  // could be much more versatile
-		}
+        /**
+         * returns values from ini
+         *
+         * @return array(string)
+         */
+        public function getIniParams() {
+            return array("download" => $this->download, "basepath" => $this->basepath, "icsfile" => $this->icsfile);  // could be much more versatile
+        }
 
 
         /**
          * Verbindet mit der jeweils benutzten Datenbank
          */
-        private function connect()
-        {
+        private function connect() {
 
             $reporting = error_reporting(0);
             ChromePhp::info("Connecting to " . $this->user . "@" . $this->server . ":" . $this->database);
             $mysqli = $this->connID = new \mysqli($this->server, $this->user, $this->pass, $this->database);
             error_reporting($reporting);
 
-            if ($mysqli->connect_errno)
-            {
+            if ($mysqli->connect_errno) {
                 printf("Connection to database failed: %s\n", $mysqli->connect_error);
                 ChromePhp::error("Connection to database failed: " . $mysqli->connect_error);
                 exit();
@@ -138,8 +132,7 @@
          *  zur Abfrage kann also jeweils im zweiten Index auf die einzelnen Ergebnisse in angegebener
          *  Reihenfolge zurückgegriffen werden
          */
-        public function selectValues($query)
-        {
+        public function selectValues($query) {
             ChromePhp::logSQL("Selecting values: \"$query\" from " . $this->getCaller());
             $mysqli = $this->connID;
             $result = $mysqli->query($query) or die($mysqli->error . "</br></br>" . $query . "</br></br>" . $this->getCaller());
@@ -147,10 +140,8 @@
             $anz = $result->field_count;
             $valCount = 0;
 
-            while ($row = $result->fetch_array(MYSQLI_NUM))
-            {
-                for ($x = 0; $x < $anz; $x++)
-                {
+            while ($row = $result->fetch_array(MYSQLI_NUM)) {
+                for ($x = 0; $x < $anz; $x++) {
                     $value[$valCount][$x] = $row[$x];
                 }
                 $valCount++;
@@ -168,8 +159,7 @@
          * @param $query String SQL Query
          * @return array[Feldname][] | null
          */
-        public function selectAssociativeValues($query)
-        {
+        public function selectAssociativeValues($query) {
             ChromePhp::logSQL("Selecting values:  \"$query\" from " . $this->getCaller());
             $mysqli = $this->connID;
             $result = $mysqli->query($query) or die($mysqli->error);
@@ -178,10 +168,8 @@
             $anz = $result->field_count;
             $valCount = 0;
 
-            while ($row = $result->fetch_array(MYSQLI_NUM))
-            {
-                for ($x = 0; $x < $anz; $x++)
-                {
+            while ($row = $result->fetch_array(MYSQLI_NUM)) {
+                for ($x = 0; $x < $anz; $x++) {
                     $fieldInfo = $result->fetch_field_direct($x);
                     $assocValue[$valCount][$fieldInfo->name] = $row[$x];
                 }
@@ -199,22 +187,18 @@
          * @param string $query
          * @return array
          */
-        public function selectFieldNames($query)
-        {
+        public function selectFieldNames($query) {
             ChromePhp::logSQL("Selecting FieldNames:  \"$query\" from " . $this->getCaller());
             $fieldNames = array();
             $mysqli = $this->connID;
-            if ($result = $mysqli->query($query))
-            {
+            if ($result = $mysqli->query($query)) {
                 $finfo = $result->fetch_fields();
-                foreach ($finfo as $f)
-                {
+                foreach ($finfo as $f) {
                     $fieldNames[] = $f->name;
                 }
 
                 return $fieldNames;
-            } else
-            {
+            } else {
                 return null;
             }
         }
@@ -227,8 +211,7 @@
          * @return int Insert ID
          *
          */
-        public function insertValues($query)
-        {
+        public function insertValues($query) {
             ChromePhp::logSQL("Inserting:  \"$query\" from " . $this->getCaller());
             $mysqli = $this->connID;
             $mysqli->query($query) or die($mysqli->error);
@@ -242,8 +225,7 @@
          *
          * @param $query String SQL Query
          */
-        function straightQuery($query)
-        {
+        function straightQuery($query) {
             ChromePhp::logSQL("Query:  \"$query\" from " . $this->getCaller());
 
             $mysqli = $this->connID;
@@ -255,8 +237,7 @@
          *
          * @param $query
          */
-        function straightMultiQuery($query)
-        {
+        function straightMultiQuery($query) {
             $mysqli = $this->connID;
             $mysqli->multi_query($query) or die($mysqli->error);
             while ($mysqli->more_results() && $mysqli->next_result()) ;
@@ -265,8 +246,7 @@
         /**
          * Schließt die Datenbank Verbindung
          */
-        public function close()
-        {
+        public function close() {
             mysqli_close($this->connID);
         }
 
@@ -276,8 +256,7 @@
          *
          * @return \mysqli
          */
-        public function getConnection()
-        {
+        public function getConnection() {
             return $this->connID;
         }
 
@@ -288,16 +267,14 @@
          * @param $string
          * @return string
          */
-        function escape_string($string)
-        {
+        function escape_string($string) {
             return $this->connID->real_escape_string($string);
         }
 
         /**
          * @return string location the caller method was called from
          */
-        function getCaller()
-        {
+        function getCaller() {
             $info = debug_backtrace();
             $file = $info[1]['file'];
             $line = $info[1]['line'];

@@ -3,8 +3,7 @@
     /**
      * The model class
      */
-    class Model extends \Model
-    {
+    class Model extends \Model {
 
         /**
          * @var Model
@@ -14,14 +13,12 @@
         /**
          *Konstruktor
          */
-        protected function __construct()
-        {
+        protected function __construct() {
             parent::__construct();
 
         }
 
-        static function getInstance()
-        {
+        static function getInstance() {
             return (self::$model == null || !(self::$model instanceof Model)) ? self::$model = new Model() : self::$model;
         }
 
@@ -31,8 +28,7 @@
          * @param bool $student
          * @return array datafield names
          */
-        public function readDBFields($student)
-        {
+        public function readDBFields($student) {
             ($student) ? $table = "schueler" : $table = "lehrer";
             $data = self::$connection->selectFieldNames("SELECT * FROM " . $table);
 
@@ -47,15 +43,12 @@
          * @param bool $student
          * @return bool existence
          */
-        public function checkDBData($student, $id)
-        {
+        public function checkDBData($student, $id) {
             ($student) ? $table = "schueler" : $table = "lehrer";
             $data = self::$connection->selectValues("SELECT id FROM $table where id=$id");
-            if (count($data) > 0)
-            {
+            if (count($data) > 0) {
                 return true;
-            } else
-            {
+            } else {
                 return false;
             }
         }
@@ -68,20 +61,16 @@
          * @param int
          * @param array
          */
-        public function updateData($student, $id, $line)
-        {
+        public function updateData($student, $id, $line) {
             ($student) ? $table = "schueler" : $table = "lehrer";
             $string = null;
-            foreach ($line as $key => $value)
-            {
+            foreach ($line as $key => $value) {
                 $key = trim($key);
                 $value = trim($value);
                 $value = addslashes($value);
-                if (isset($string))
-                {
+                if (isset($string)) {
                     $string = $string . ",$key=\"$value\" ";
-                } else
-                {
+                } else {
                     $string = "$key=\"$value\" ";
                 }
             }
@@ -98,28 +87,22 @@
          * @param bool
          * @param array
          */
-        public function insertData($student, $line)
-        {
+        public function insertData($student, $line) {
             ($student) ? $table = "schueler" : $table = "lehrer";
             $fieldstring = null;
             $valuestring = null;
-            foreach ($line as $key => $value)
-            {
+            foreach ($line as $key => $value) {
                 $key = trim($key);
                 $value = trim($value);
                 $value = addslashes($value);
-                if (isset($fieldstring))
-                {
+                if (isset($fieldstring)) {
                     $fieldstring = $fieldstring . ",`$key`";
-                } else
-                {
+                } else {
                     $fieldstring = "`$key`";
                 }
-                if (isset($valuestring))
-                {
+                if (isset($valuestring)) {
                     $valuestring = $valuestring . ",'$value'";
-                } else
-                {
+                } else {
                     $valuestring = "'$value'";
                 }
             }
@@ -137,8 +120,7 @@
          * @param bool $student
          * @return int amount of deletions
          */
-        public function deleteDataFromDB($student)
-        {
+        public function deleteDataFromDB($student) {
             $toDelete = 0;
             ($student) ? $table = "schueler" : $table = "lehrer";
             $data = self::$connection->selectValues("SELECT id FROM $table WHERE upd=0");
@@ -153,8 +135,7 @@
          *
          * @param bool $student
          */
-        public function setUpdateStatusZero($student)
-        {
+        public function setUpdateStatusZero($student) {
             ($student) ? $table = "schueler" : $table = "lehrer";
             self::$connection->straightQuery("UPDATE $table SET upd=0");
         }
@@ -165,14 +146,12 @@
          *
          * @return array(string) with form names
          */
-        public function getForms()
-        {
+        public function getForms() {
             $data = self::$connection->selectValues("SELECT DISTINCT klasse FROM schueler ORDER BY klasse"); // returns data[n][data]
 
             $forms = array();
 
-            foreach ($data as $item)
-            {
+            foreach ($data as $item) {
                 array_push($forms, $item[0]);
             }
 
@@ -187,8 +166,7 @@
          * @param array(int) with teacher Ids
          * @param string $form class
          */
-        public function setTeacherToForm($teacher, $form)
-        {
+        public function setTeacherToForm($teacher, $form) {
 
             $data = self::$connection->selectAssociativeValues("SELECT * FROM unterricht WHERE klasse='$form'");
 
@@ -198,36 +176,30 @@
             $same = array();
             $deleted = array();
 
-            if ($teacher == null)
-            { // delete all teachers
+            if ($teacher == null) { // delete all teachers
 
                 self::$connection->straightQuery("DELETE FROM unterricht WHERE klasse='$form'");
 
                 return;
             } else
-                if ($data != null)
-                {
-                    foreach ($data as $value)
-                    {
+                if ($data != null) {
+                    foreach ($data as $value) {
                         $id = $value['lid'];
                         $dbIds[] = $id;
                     }
 
-                    foreach ($teacher as $id)
-                    {
+                    foreach ($teacher as $id) {
                         if (in_array($id, $dbIds))
                             $same[] = $id;
                         else
                             $new[] = $id;
                     }
 
-                    foreach ($dbIds as $id)
-                    {
+                    foreach ($dbIds as $id) {
                         if (!in_array($id, array_merge($new, $same)))
                             $deleted[] = $id;
                     }
-                } else
-                {
+                } else {
                     $new = $teacher;
                 }
 
@@ -249,19 +221,15 @@
          * @param string $form
          * @return array[teacherId](array(form) )
          */
-        public function getTeachersOfForm($form)
-        {
+        public function getTeachersOfForm($form) {
             $teachersOfForm = array();
             $teachers = array();
             $tchrs = self::$connection->selectValues("SELECT lid FROM unterricht WHERE klasse=\"$form\" ");
-            if (count($tchrs) > 0)
-            {
-                foreach ($tchrs as $t)
-                {
+            if (count($tchrs) > 0) {
+                foreach ($tchrs as $t) {
                     $teachers[] = $t[0];
                 }
-            } else
-            {
+            } else {
                 $teachers = null;
             }
 
@@ -277,8 +245,7 @@
          *
          * @param int slotId
          */
-        public function deleteSlot($id)
-        {
+        public function deleteSlot($id) {
             self::$connection->straightQuery("DELETE FROM time_slot WHERE id=$id");
         }
 
@@ -288,21 +255,20 @@
          * @param string $start
          * @param string $end
          */
-        public function insertSlot($start, $end)
-        {
+        public function insertSlot($start, $end) {
             $start = $this->makeDateTime($start);
             $end = $this->makeDateTime($end);
 
             return self::$connection->insertValues("INSERT INTO time_slot (`id`,`anfang`,`ende`) VALUES ('','$start','$end') ");
         }
 
-	  
-	/**
-	* reset all bookable slots
-	*/
-	public function clearBookableSlots(){
-		self::$connection->straightQuery("TRUNCATE TABLE bookable_slot");
-		}		
+
+        /**
+         * reset all bookable slots
+         */
+        public function clearBookableSlots() {
+            self::$connection->straightQuery("TRUNCATE TABLE bookable_slot");
+        }
 
 
         /**
@@ -311,12 +277,10 @@
          *
          * @param int slotId
          */
-        public function createBookableSlots($slotId)
-        {
+        public function createBookableSlots($slotId) {
             $FULL = 13;
             $data = self::$connection->selectValues("SELECT id FROM lehrer WHERE deputat>$FULL");
-            foreach ($data as $d)
-            {
+            foreach ($data as $d) {
                 self::$connection->straightQuery("INSERT INTO bookable_slot (`id`,`slotid`,`lid`,`eid`) VALUES ('','$slotId','$d[0]',NULL)");
             }
         }
@@ -327,8 +291,7 @@
          * @param string
          * @return DateTime
          */
-        private function makeDateTime($string)
-        {
+        private function makeDateTime($string) {
             $da = explode(" ", $string);
             $date = $da[0];
             $time = $da[1];
@@ -344,14 +307,11 @@
          *
          * @return array(string)
          */
-        public function getOptionsForAdmin()
-        {
+        public function getOptionsForAdmin() {
             $options = array();
             $data = self::$connection->selectValues("SELECT kommentar, type, value, field FROM options ORDER BY ordinal");
-            if (isset($data))
-            {
-                foreach ($data as $d)
-                {
+            if (isset($data)) {
+                foreach ($data as $d) {
                     $options[] = array("kommentar" => $d[0], "type" => $d[1], "value" => $d[2], "field" => $d[3]);
                 }
             }
@@ -364,34 +324,34 @@
          *
          * @param array POST
          */
-        public function updateOptions($data)
-        {
-            foreach ($data as $key => $value)
-            {
+        public function updateOptions($data) {
+            foreach ($data as $key => $value) {
                 self::$connection->straightQuery("UPDATE options SET value =\"$value\" WHERE type=\"$key\" ");
             }
         }
 
-	/**
-	*Eintrag aller Termine in die Datenbank
-	*@param $termine Array(Terminobjekt)
-	*/
-	public function addEventsToDB($termine){
-	//Tabelle leeren
-	self::$connection->straightQuery("TRUNCATE termine");
-	foreach($termine as $t){
-			$query="INSERT INTO termine (`tNr`,`typ`,`start`,`ende`,`staff`) VALUES ('','$t->typ','$t->start','$t->ende','$t->staff')	";
-			self::$connection->insertValues($query);
-			}
-		}
+        /**
+         *Eintrag aller Termine in die Datenbank
+         *
+         * @param $termine Array(Terminobjekt)
+         */
+        public function addEventsToDB($termine) {
+            //Tabelle leeren
+            self::$connection->straightQuery("TRUNCATE termine");
+            foreach ($termine as $t) {
+                $query = "INSERT INTO termine (`tNr`,`typ`,`start`,`ende`,`staff`) VALUES ('','$t->typ','$t->start','$t->ende','$t->staff')	";
+                self::$connection->insertValues($query);
+            }
+        }
 
-	/**
-	* get values from ini-file
-	* @return string
-	*/
-	public function getIniParams(){
-		return self::$connection->getIniParams();
-		}	
+        /**
+         * get values from ini-file
+         *
+         * @return string
+         */
+        public function getIniParams() {
+            return self::$connection->getIniParams();
+        }
     }
 
 

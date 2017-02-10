@@ -3,8 +3,7 @@
     /**
      * View Class
      */
-    class View
-    {
+    class View {
 
 
         /**
@@ -15,8 +14,7 @@
         /**
          * @return View
          */
-        public static function getInstance()
-        {
+        public static function getInstance() {
             return self::$instance == null ? (self::$instance = new View()) : self::$instance;
         }
 
@@ -44,10 +42,9 @@
          * @param $template string
          * @return void
          */
-        public function loadTemplate($template)
-        {
+        public function loadTemplate($template) {
 
-            if($this->loaded)
+            if ($this->loaded)
                 return;
             $this->loaded = true;
 
@@ -57,12 +54,10 @@
 
             //ChromePhp::info("Displaying 'templates/$template.php' with data: " . json_encode($this->dataForView));
 
-            if ($exists)
-            {
+            if ($exists) {
                 /** @noinspection PhpIncludeInspection */
                 include($templateFile);
-            } else
-            {
+            } else {
                 die('Could not find template. Please tell your system admin of choice.');
             }
         }
@@ -70,9 +65,8 @@
         /**
          * @param $str string Adds header
          */
-        public function header($str)
-        {
-            if(!$this->loaded)
+        public function header($str) {
+            if (!$this->loaded)
                 echo $str;
 
         }
@@ -82,24 +76,21 @@
          *
          * @param array
          */
-        public function setDataForView($data)
-        {
+        public function setDataForView($data) {
             $this->dataForView = $data;
         }
 
         /**
          * @return array
          */
-        public function getDataForView()
-        {
+        public function getDataForView() {
             return $this->dataForView;
         }
 
         /**
          * @return string
          */
-        public function getTitle()
-        {
+        public function getTitle() {
             return isset($this->dataForView['title']) ? $this->dataForView['title'] : "";
         }
     }

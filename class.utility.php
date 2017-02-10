@@ -1,7 +1,6 @@
 <?php
 
-    abstract class Printable implements JsonSerializable
-    {
+    abstract class Printable implements JsonSerializable {
         /**
          * @return array[String=>mixed]
          */
@@ -18,8 +17,7 @@
          *
          * @return string
          */
-        public function __toString()
-        {
+        public function __toString() {
             return $this->getClassType() . ':' . json_encode($this->getData());
         }
 
@@ -28,8 +26,7 @@
          *
          * @return array
          */
-        public function jsonSerialize()
-        {
+        public function jsonSerialize() {
             return array("type" => $this->getClassType(), "data" => $this->getData());
         }
 

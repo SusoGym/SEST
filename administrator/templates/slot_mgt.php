@@ -10,8 +10,7 @@
         <div class="card-content ">
             <div class="row">
               <span class="card-title">
-                <?php if (isset($data["backButton"]))
-                { ?>
+                <?php if (isset($data["backButton"])) { ?>
                     <a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text"
                        href="<?php echo $data["backButton"]; ?>"><i
                                 class="material-icons">chevron_left</i></a>
@@ -43,8 +42,7 @@
                 { ?>
             <ul class="collection">
                 <?php
-                    foreach ($data["slots"] as $s)
-                    { ?>
+                    foreach ($data["slots"] as $s) { ?>
 
                         <?php
                         $anfang = date_format(date_create($s['anfang']), 'd.m.Y H:i');

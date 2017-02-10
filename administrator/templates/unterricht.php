@@ -12,8 +12,7 @@
     <div class="card ">
         <div class="card-content">
           <span class="card-title">
-            <?php if (isset($data["backButton"]))
-            { ?>
+            <?php if (isset($data["backButton"])) { ?>
                 <a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text"
                    href="<?php echo $data["backButton"]; ?>"><i
                             class="material-icons">chevron_left</i></a>
@@ -24,8 +23,7 @@
                 <div class="col l3 hide-on-med-and-down">
                     <form>
                         <ul class="forms collection">
-                            <?php foreach ($data['allForms'] as $f)
-                            {
+                            <?php foreach ($data['allForms'] as $f) {
                                 $classes = "collection-item";
 
                                 if (isset($data['currentForm']) && $data['currentForm'] == $f)
@@ -42,8 +40,7 @@
                 </div>
                 <div class="col l9 m12 s12">
                     <?php
-                        if (isset($data['currentForm']))
-                        {
+                        if (isset($data['currentForm'])) {
                             $f = $data['currentForm'];
                             ?>
                             <div id="form<?php echo $f; ?>" class="col s12">
@@ -58,13 +55,11 @@
                                         <select multiple name="teacher[]">
                                             <?php
                                                 /** @var \Teacher $t */
-                                                foreach ($teachers as $t)
-                                                {
+                                                foreach ($teachers as $t) {
 
                                                     $status = "";
 
-                                                    if (isset($data['teachersOfForm'][$data['currentForm']]))
-                                                    {
+                                                    if (isset($data['teachersOfForm'][$data['currentForm']])) {
                                                         in_array($t->getId(), $data['teachersOfForm'][$data['currentForm']]) ? $status = "selected" : $status = "";
                                                     }
 
@@ -81,8 +76,7 @@
 
                             </div>
 
-                        <?php } else
-                        {
+                        <?php } else {
                             //tell user to choose form
                             ?>
                             <h4>Bitte Klasse wählen</h4>
@@ -112,8 +106,7 @@
         <div class="divider"></div>
     </li>
     <li><a class="subheader">Klassen</a></li>
-    <?php foreach ($data['allForms'] as $f)
-    { ?>
+    <?php foreach ($data['allForms'] as $f) { ?>
         <li class="tab"><a class="waves-effect"
                            onclick="$('.button-collapse').sideNav('hide');chooseForm('<?php echo $f; ?>');"><?php echo $f; ?></a>
         </li>
