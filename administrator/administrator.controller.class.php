@@ -267,7 +267,18 @@
                 //User Management
                 case "usrmgt":
                     $this->title = "Benutzerverwaltung";
+                    if (isset($input['console']) && isset($input['partname'])) {
+                        $arr = $this->model->getUsers($input['partname']);
+                        die(json_encode($arr));
+                    }
                     $this->display("usermgt");
+                    break;
+                case "usredit":
+                    $usr = $input['name'];
+                    $this->title = "Edit: $usr";
+                    $this->backButton = "?type=usrmgt";
+                    $this->infoToView['user'] = $this->model->getUserByMail($usr);
+                    $this->display("usredit");
                     break;
                 //Settings
                 case "settings":

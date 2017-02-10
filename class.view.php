@@ -51,8 +51,8 @@
             $templateFile = self::$PATH . DIRECTORY_SEPARATOR . $template . '.php';
             $exists = file_exists($templateFile);
 
-
-            //ChromePhp::info("Displaying 'templates/$template.php' with data: " . json_encode($this->dataForView));
+            if (\administrator\DEBUG)
+                ChromePhp::info("Displaying 'templates/$template.php' with data: " . json_encode($this->dataForView));
 
             if ($exists) {
                 /** @noinspection PhpIncludeInspection */

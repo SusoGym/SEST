@@ -63,6 +63,14 @@
             return $this->name . ' ' . $this->surname;
         }
 
+        public function getName() {
+            return $this->name;
+        }
+
+        public function getSurname() {
+            return $this->surname;
+        }
+
         /**
          * @return User
          */
