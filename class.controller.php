@@ -529,7 +529,7 @@
 
             $time = isset($_SESSION['user']['logintime']) ? $_SESSION['user']['logintime'] : 0;
             $timeGone = time() - $time;
-            $inTime = $timeGone <= 60; // last login check was 60 sec or less ago
+            $inTime = $timeGone <= 0; // last login check was 60 sec or less ago
 
             ChromePhp::info("Time since last login verification: $timeGone");
             if ($inTime)
@@ -578,6 +578,7 @@
 
             if (!$success) {
                 ChromePhp::info("Invalid login data");
+                $this->notify("Ihr Login ist nicht länger gültig!");
             } else {
 
                 $_SESSION['user']['mail'] = $email;
