@@ -3,8 +3,7 @@
 /**
  *Class FileHandler
  */
-class FileHandler
-{
+class FileHandler {
 
     /**
      * @var string path to file
@@ -22,8 +21,7 @@ class FileHandler
      *
      * @param string $file path to file
      */
-    public function __construct($file)
-    {
+    public function __construct($file) {
         $this->file = $file;
         $this->model = Model::getInstance();
     }
@@ -34,8 +32,7 @@ class FileHandler
      *
      * @return array(string) name of datafields in file
      */
-    public function readHead()
-    {
+    public function readHead() {
         $fh = fopen($this->file, "r");
         $line = trim(fgets($fh, "1024"));
         $sourceField = explode(";", $line);
@@ -51,8 +48,7 @@ class FileHandler
      * @param bool $student
      * @return array(string) name of datafields in database
      */
-    public function readDBFields($student)
-    {
+    public function readDBFields($student) {
         return $this->model->readDBFields($student);
     }
 
@@ -62,14 +58,12 @@ class FileHandler
      *
      * @return array zeile
      */
-    private function readSourceData()
-    {
+    private function readSourceData() {
         $fh = fopen($this->file, "r");
         $line = trim(fgets($fh, "1024"));
         $sourceField = explode(";", $line);
         $sourceData = array();
-        while (!feof($fh))
-        {
+        while (!feof($fh)) {
             $sourceData[] = fgets($fh, "1024");
         }
         fclose($fh);
@@ -78,23 +72,25 @@ class FileHandler
     }
 
 
-       /**
-	*Quelldatei mit Termindaten auslesen
-	* @ return array(Termine)
-	*/	
-	public function readEventSourceFile(){
-	$events = array();
-	$fh = fopen($this->file,"r");
-	$x = 0;
-	while(!feof($fh)){
-		$line = trim(fgets($fh));
-		$lineArr = explode(";",$line);
-		$event = new \Termin();
-		$events[$x] = $event->createFromCSV($lineArr);$x++;
-		}
-	fclose($fh);
-	return $events;
-	}	
+    /**
+     *Quelldatei mit Termindaten auslesen
+     * @ return array(Termine)
+     */
+    public function readEventSourceFile() {
+        $events = array();
+        $fh = fopen($this->file, "r");
+        $x = 0;
+        while (!feof($fh)) {
+            $line = trim(fgets($fh));
+            $lineArr = explode(";", $line);
+            $event = new \Termin();
+            $events[$x] = $event->createFromCSV($lineArr);
+            $x++;
+        }
+        fclose($fh);
+
+        return $events;
+    }
 
     /**
      *updateData aktualisiert Datenbank auf Basis einer csv datei
@@ -103,8 +99,7 @@ class FileHandler
      * @param array $data
      * @return array amount inserted and deleted datasets
      */
-    public function updateData($student, $data)
-    {
+    public function updateData($student, $data) {
         $insertCounter = 0;
         $updateCounter = 0;
         $changesApplied = array();
@@ -112,14 +107,11 @@ class FileHandler
         $sourceLines = $this->readSourceData();
         $lineFieldValue = array();
         $x = 0;
-        foreach ($sourceLines as $line)
-        {
+        foreach ($sourceLines as $line) {
             $lineArr = explode(";", $line);
             $y = 0;
-            foreach ($data as $d)
-            {
-                if (strlen($line) > 3)
-                {
+            foreach ($data as $d) {
+                if (strlen($line) > 3) {
                     $lineFieldValue[$x][$d['target']] = $lineArr[$y];
                     $y++;
                 }
@@ -127,14 +119,11 @@ class FileHandler
             $x++;
         }
 
-        foreach ($lineFieldValue as $l)
-        {
-            if ($this->model->checkDBData($student, $l["id"]))
-            {
+        foreach ($lineFieldValue as $l) {
+            if ($this->model->checkDBData($student, $l["id"])) {
                 $this->model->updateData($student, $l["id"], $l);
                 $updateCounter++;
-            } else
-            {
+            } else {
                 $this->model->insertData($student, $l);
                 $insertCounter++;
             }
@@ -152,24 +141,24 @@ class FileHandler
      * @param bool
      * @return int amount of deletions
      */
-    public function deleteDataFromDB($student)
-    {
+    public function deleteDataFromDB($student) {
         return $this->model->deleteDataFromDB($student);
 
     }
 
     /**
-    * create csv-file
-    * @param string filename
-    * @param array(array(string)) data
-    */
-    public function createCSV($data){
-	$f = fopen($this->file,"w");
-	foreach($data as $line) {
-		fwrite($f,$line);
-		}
-	fclose($f);
-	}
+     * create csv-file
+     *
+     * @param string filename
+     * @param array (array(string)) data
+     */
+    public function createCSV($data) {
+        $f = fopen($this->file, "w");
+        foreach ($data as $line) {
+            fwrite($f, $line);
+        }
+        fclose($f);
+    }
 
 }
 

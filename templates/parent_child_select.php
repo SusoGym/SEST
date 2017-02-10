@@ -34,8 +34,7 @@
                href='#addstudent'><i class="material-icons">add</i></a>
             <div class="row">
                 <ul class="collection col s12">
-                    <?php foreach ($students as $child)
-                    { ?>
+                    <?php foreach ($students as $child) { ?>
                         <li class="collection-item">
                             <?php echo $child->getSurname() . ", " . $child->getName() . " (Klasse " . $child->getClass() . ")"; ?>
                         </li>
@@ -66,14 +65,14 @@
 
 
 <div id="student_blueprint" style="display:none;">
-  <div class="input-field col l6 m6 s6">
-      <input id="name" name="name" type="text" class="validate">
-      <label for="name" class="truncate">Name des Schülers</label>
-  </div>
-  <div class="input-field col l6 m6 s6">
-      <input type="date" name="bday" class="datepicker">
-      <label for="date" class="truncate">Geburtstag</label>
-  </div>
+    <div class="input-field col l6 m6 s6">
+        <input id="name" name="name" type="text" class="validate">
+        <label for="name" class="truncate">Name des Schülers</label>
+    </div>
+    <div class="input-field col l6 m6 s6">
+        <input type="date" name="bday" class="datepicker">
+        <label for="date" class="truncate">Geburtstag</label>
+    </div>
 </div>
 
 <?php include("js.php"); ?>

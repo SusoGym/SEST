@@ -10,8 +10,7 @@
     $todayTimestamp = strtotime($today);
     $modeLink = '<a href="?type=events&all" class="teal-text right"><i class="material-icons left">select_all</i><span style="font-size:10px;" >alle anzeigen</span></a>';
     //Für Anzeige des kompletten Jahres wird todayTimestamp auf das Datum des ersten Termins gesetzt.
-    if (isset($data['showAllEvents']))
-    {
+    if (isset($data['showAllEvents'])) {
         $first = $data['events'][0]->sday;
         $todayTimestamp = strtotime($first);
         $todayMonth = $data['events'][0]->jahr . $data['events'][0]->monatNum;
@@ -19,11 +18,9 @@
     }
 ?>
 
-<?php foreach ($data['months'] as $month)
-{
+<?php foreach ($data['months'] as $month) {
     $yearmonth = $month["jahr"] . $month["mnum"];
-    if ($todayMonth <= $yearmonth)
-    { ?>
+    if ($todayMonth <= $yearmonth) { ?>
 
         <div class="container col s4 m4 l4">
             <div class="card ">
@@ -33,8 +30,10 @@
                             <ul class="collection with-header teal-text ">
                                 <li class="collection-header"><i class="material-icons left ">today</i>
                                     <span style="font-size:16px;font-weight:bold;"><?php echo $month['mstring'] . " " . $month['jahr']; ?></span>
-					 <?php echo $modeLink; ?>
-					 <a href="<?php echo $data['icsPath']; ?>" class="teal-text right"><i class="material-icons left">file_download</i><span style="font-size:10px;" >download</span></a>
+                                    <?php echo $modeLink; ?>
+                                    <a href="<?php echo $data['icsPath']; ?>" class="teal-text right"><i
+                                                class="material-icons left">file_download</i><span
+                                                style="font-size:10px;">download</span></a>
                                 <li>
                                     <?php foreach ($data['events'] as $t)
                                         {
@@ -46,23 +45,20 @@
                                     <p style="font-size:14px;font-weight:bold;"><?php echo $t->typ ?></p>
                                     <p style="font-size:10px;">
                                         <?php echo " " . $t->sweekday . " " . $t->sday . " "; ?>
-                                        <?php if (isset($t->stime))
-                                        { ?><?php echo ' (' . $t->stime . ')';
+                                        <?php if (isset($t->stime)) { ?><?php echo ' (' . $t->stime . ')';
                                         } ?>
-                                        <?php if (isset($t->eday))
-                                        { ?><?php echo "-"; ?>
+                                        <?php if (isset($t->eday)) { ?><?php echo "-"; ?>
                                             <?php echo $t->eweekday ?>
                                             <?php echo $t->eday;
-                                            if (isset($t->etime))
-                                            {
+                                            if (isset($t->etime)) {
                                                 echo ' (' . $t->etime . ')';
                                             } ?>
                                         <?php } ?>
                                     </p>
                                 </li>
-                            <?php
-                                }
-                                } ?>
+                                <?php
+                                    }
+                                    } ?>
 
                                 <ul>
                         </div>

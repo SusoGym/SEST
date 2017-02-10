@@ -9,8 +9,7 @@
     <div class="card ">
         <div class="card-content">
           <span class="card-title">
-            <?php if (isset($data["backButton"]))
-            { ?>
+            <?php if (isset($data["backButton"])) { ?>
                 <a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text"
                    href="<?php echo $data["backButton"]; ?>"><i
                             class="material-icons">chevron_left</i></a>
@@ -37,8 +36,7 @@
                                 <select class="browser-default right" name="post_dbfield[]" title="Select a file"
                                         required>
                                     <option selected></option>
-                                    <?php foreach ($data['fileData'][1] as $f)
-                                    { ?>
+                                    <?php foreach ($data['fileData'][1] as $f) { ?>
                                         <option value="<?php echo $f; ?>"><?php echo $f; ?></option>
                                     <?php } ?>
                                 </select>
