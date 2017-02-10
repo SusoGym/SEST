@@ -87,7 +87,12 @@
 
             }
             switch ($this->input['type']) {
-                case "lest": //Teacher chooses est
+                case "public":
+                    //public access to events
+                    $this->infoToView['public_access'] = true;
+                    $template = $this->handleEvents();
+                    break;
+        		case "lest": //Teacher chooses est
                     $template = $this->teacherSlotDetermination();
                     break;
                 case "eest": //Parent chooses est
@@ -354,7 +359,7 @@
             return "parent_est";
         }
 
-        /**
+       /**
          * Events Logic
          *
          * @return string template to be displayed
@@ -369,6 +374,12 @@
                 $this->infoToView['events'] = $this->model->getEvents(true);
                 $icsfile = $filePathBase . "Staff.ics";
             }
+			else
+			{
+				//no user object instantiated
+				$this->infoToView['events'] = $this->model->getEvents();
+				$icsfile = $filePathBase."Public.ics";
+			}
             $this->infoToView['months'] = $this->model->getMonths();
             $this->infoToView['icsPath'] = $icsfile;
 
