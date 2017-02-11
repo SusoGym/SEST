@@ -292,18 +292,19 @@
                         $pwd_rep = isset($input['f_pwd_repeat']) ? $input['f_pwd_repeat'] : null;
 
                         if ($pwd != $pwd_rep) {
-                            $this->notify("Die eingegbenen Passwörter stimmen nicht überein!");
+                            $_SESSION['dataForView']['notifications'][] = array("msg" => "Die eingegbenen Passwörter stimmen nicht überein!", "time" => 4000);
                         } else {
                             if ($pwd != "" && $pwd_rep != "") {
                                 $this->model->changePwd($usr->getId(), $pwd);
                             }
-                            if($usr->getEmail() != $mail || $usr->getName() != $name || $usr->getSurname() != $surname)
-                            {
+                            if ($usr->getEmail() != $mail || $usr->getName() != $name || $usr->getSurname() != $surname) {
                                 $this->model->updateUserData($usr->getId(), $name, $surname, $mail);
                             }
+                            $_SESSION['dataForView']['notifications'][] = array("msg" => "Die Nuterdaten wurden erfolgreich geändert!", "time" => 4000);
                         }
 
                         header("Location: ?type=usredit&name=$mail");
+                        die();
                     }
                     $this->title = "Edit: " . $usr->getEmail();
                     $this->backButton = "?type=usrmgt";

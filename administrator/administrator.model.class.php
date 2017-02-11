@@ -369,26 +369,6 @@
             return $arr;
         }
 
-        /** Changes the password
-         * @param $usrId
-         * @param $newPwd
-         */
-        public function changePwd($usrId, $newPwd)
-        {
-            $pwdhash = $pwd = password_hash($newPwd, PASSWORD_DEFAULT);
-            self::$connection->straightQuery("UPDATE user SET password_hash='$pwdhash' WHERE id=$usrId");
-        }
-
-        /** Change userdata
-         * @param $usrId
-         * @param $name
-         * @param $surname
-         * @param $email
-         */
-        public function updateUserData($usrId, $name, $surname, $email)
-        {
-            self::$connection->straightMultiQuery("UPDATE user SET email='$email' WHERE id=$usrId; UPDATE eltern SET vorname='$name', name='$surname' WHERE userid=$usrId");
-        }
     }
 
 

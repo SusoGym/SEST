@@ -3,7 +3,7 @@
 
     session_start();
 
-    const DEBUG = false;
+    const DEBUG = true;
     const SQL_DEBUG = false;
 
 
