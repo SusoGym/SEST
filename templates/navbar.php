@@ -49,6 +49,7 @@
         if ($est) {
             array_push($modules, array("id" => "est", "href" => "?type=eest", "title" => "Elternsprechtag", "icon" => "supervisor_account"));
         }
+        array_push($modules, array("id" => "editdata", "href" => "?type=editdata", "title" => "Account bearbeiten", "icon" => "settings"));
 
     } else {
         if ($est) {
