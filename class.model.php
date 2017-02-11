@@ -774,9 +774,18 @@
          * @param $name
          * @param $surname
          * @param $email
+         * @return bool success
          */
         public function updateUserData($usrId, $name, $surname, $email) {
+
+            $check = self::$connection->selectValues("SELECT * FROM `user` WHERE email='$email' AND NOT id = $usrId");
+
+            if(isset($check[0]))
+                return false;
+
             self::$connection->straightMultiQuery("UPDATE user SET email='$email' WHERE id=$usrId; UPDATE eltern SET vorname='$name', name='$surname' WHERE userid=$usrId");
+
+            return true;
         }
 
 

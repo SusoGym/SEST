@@ -92,7 +92,7 @@
                     $this->infoToView['public_access'] = true;
                     $template = $this->handleEvents();
                     break;
-        		case "lest": //Teacher chooses est
+                case "lest": //Teacher chooses est
                     $template = $this->teacherSlotDetermination();
                     break;
                 case "eest": //Parent chooses est
@@ -124,6 +124,9 @@
                     break;
                 case "addstudent":
                     $this->addStudent();
+                    break;
+                case "editdata":
+                    $template = $this->handleUserEditData();
                     break;
                 default:
                     if (self::$user instanceof Teacher) {
@@ -359,7 +362,7 @@
             return "parent_est";
         }
 
-       /**
+        /**
          * Events Logic
          *
          * @return string template to be displayed
@@ -373,13 +376,11 @@
             } elseif (self::$user instanceof Teacher) {
                 $this->infoToView['events'] = $this->model->getEvents(true);
                 $icsfile = $filePathBase . "Staff.ics";
+            } else {
+                //no user object instantiated
+                $this->infoToView['events'] = $this->model->getEvents();
+                $icsfile = $filePathBase . "Public.ics";
             }
-			else
-			{
-				//no user object instantiated
-				$this->infoToView['events'] = $this->model->getEvents();
-				$icsfile = $filePathBase."Public.ics";
-			}
             $this->infoToView['months'] = $this->model->getMonths();
             $this->infoToView['icsPath'] = $icsfile;
 
@@ -491,9 +492,8 @@
             //set Module activity
             $this->infoToView['modules'] = array("vplan" => false, "events" => true, "news" => false);
 
-            if(isset($_SESSION['notifications']))
-            {
-                if(!isset($this->infoToView['notifications']))
+            if (isset($_SESSION['notifications'])) {
+                if (!isset($this->infoToView['notifications']))
                     $this->infoToView['notifications'] = array();
                 foreach ($_SESSION['notifications'] as $notification)
                     array_push($this->infoToView['notifications'], $notification);
@@ -522,7 +522,7 @@
 
             array_push($notsArray, array("msg" => $message, "time" => $time));
 
-            if($session)
+            if ($session)
                 $_SESSION['notifications'] = $notsArray;
 
             $this->infoToView['notifications'] = $notsArray;
@@ -722,6 +722,46 @@
             return $teachers = array_merge($withSlot, $noSlot);
 
 
+        }
+
+        /**
+         * @return string
+         */
+        public function handleUserEditData() {
+            $input = $this->input;
+            $this->infoToView['user'] = self::getUser();
+            // $_SESSION['user']['mail'] $_SESSION['user']['pwd']
+
+            if (isset($input['console']) && isset($input['data'])) {
+                $data = $input['data'];
+                $pwd = $data['pwd'];
+                $mail = $data['mail'];
+                $name = $data['name'];
+                $surname = $data['surname'];
+
+                if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+                    die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie eine valide Emailadresse an!"))));
+                }
+
+                if ($pwd != "") {
+                    $this->model->changePwd(self::getUser()->getId(), $pwd);
+                }
+                $succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail); //TODO check duplicated email
+
+                if(!$succ)
+                {
+                    die(json_encode(array("success" => false, "notifications" => array("Die angegebene Emailadresse ist bereits mit einem anderen Account verknüpft!"))));
+                }
+
+                $_SESSION['user']['mail'] = $mail;
+                if ($pwd != "")
+                    $_SESSION['user']['pwd'] = $pwd;
+                $this->notify("Ihre Nutzerdaten wurden erfolgreich aktualisiert!", 4000, true);
+                die(json_encode(array("success" => true)));
+
+            }
+
+            return "editdata";
         }
 
         public final function getValueIfNotExistent($arr, $key, $defVal) {
