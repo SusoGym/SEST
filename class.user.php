@@ -115,7 +115,7 @@
          * @param int parentId
          */
         public function __construct($id, $email, $parentId, $surname = null, $name = null) {
-            parent::__construct($id, 1, $email, $surname, $name);
+            parent::__construct($id, 1, $email, $name, $surname);
             $this->parentId = $parentId;
             $this->children = Model::getInstance()->getChildrenByParentUserId($this->id);
         }
