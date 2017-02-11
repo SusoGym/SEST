@@ -108,6 +108,7 @@
                     break;
                 case 1: // Parent / Guardian
                     $data2 = self::$connection->selectAssociativeValues("SELECT * FROM eltern WHERE userid=$uid")[0];
+
                     return new Guardian($data['id'], $data['email'], $data2['id'], $data2['name'], $data2['vorname']);
                 case 2:
                     // non-existend
@@ -757,6 +758,26 @@
             return $this->monate;
         }
 
+        /** Changes the password
+         *
+         * @param $usrId
+         * @param $newPwd
+         */
+        public function changePwd($usrId, $newPwd) {
+            $pwdhash = $pwd = password_hash($newPwd, PASSWORD_DEFAULT);
+            self::$connection->straightQuery("UPDATE user SET password_hash='$pwdhash' WHERE id=$usrId");
+        }
+
+        /** Change userdata
+         *
+         * @param $usrId
+         * @param $name
+         * @param $surname
+         * @param $email
+         */
+        public function updateUserData($usrId, $name, $surname, $email) {
+            self::$connection->straightMultiQuery("UPDATE user SET email='$email' WHERE id=$usrId; UPDATE eltern SET vorname='$name', name='$surname' WHERE userid=$usrId");
+        }
 
 
     }

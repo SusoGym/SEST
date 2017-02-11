@@ -490,6 +490,16 @@
             $this->infoToView['usr'] = self::$user;
             //set Module activity
             $this->infoToView['modules'] = array("vplan" => false, "events" => true, "news" => false);
+
+            if(isset($_SESSION['notifications']))
+            {
+                if(!isset($this->infoToView['notifications']))
+                    $this->infoToView['notifications'] = array();
+                foreach ($_SESSION['notifications'] as $notification)
+                    array_push($this->infoToView['notifications'], $notification);
+                unset($_SESSION['notifications']);
+            }
+
             $view->setDataForView($this->infoToView);
             $view->header($this->getHeaderFix());
             $view->loadTemplate($template);
@@ -502,7 +512,7 @@
          * @param string $message the message to display
          * @param int $time time to display
          */
-        public function notify($message, $time = 4000) {
+        public function notify($message, $time = 4000, $session = false) {
             if (!isset($this->infoToView))
                 $this->infoToView = array();
             if (!isset($this->infoToView['notifications']))
@@ -511,6 +521,9 @@
             $notsArray = $this->infoToView['notifications'];
 
             array_push($notsArray, array("msg" => $message, "time" => $time));
+
+            if($session)
+                $_SESSION['notifications'] = $notsArray;
 
             $this->infoToView['notifications'] = $notsArray;
 
