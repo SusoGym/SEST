@@ -738,18 +738,24 @@
                 $mail = $data['mail'];
                 $name = $data['name'];
                 $surname = $data['surname'];
+                $oldpwd = $data['oldpwd'];
 
                 if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
                     die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie eine valide Emailadresse an!"))));
                 }
 
+                if ($oldpwd == "") {
+                    die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie ihr altes Passwort an!"))));
+                } else if (!$this->model->passwordValidate(self::getUser()->getEmail(), $oldpwd)) {
+                    die(json_encode(array("success" => false, "notifications" => array("Ihr altes Passwort ist nicht korrekt!"), "resetold" => true)));
+                }
+
                 if ($pwd != "") {
                     $this->model->changePwd(self::getUser()->getId(), $pwd);
                 }
-                $succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail); //TODO check duplicated email
+                $succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail);
 
-                if(!$succ)
-                {
+                if (!$succ) {
                     die(json_encode(array("success" => false, "notifications" => array("Die angegebene Emailadresse ist bereits mit einem anderen Account verknüpft!"))));
                 }
 

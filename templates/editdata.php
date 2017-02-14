@@ -41,16 +41,20 @@
                 </div>
                 <div class="row">
                     <div class="input-field col s6 l6 m6">
-                        <label for="f_pwd">Neues Password:</label>
+                        <label for="f_pwd">Neues Passwort:</label>
                         <input name="f_pwd" id="f_pwd" type="password">
                     </div>
                     <div class="input-field col s6 l6 m6">
-                        <label for="f_pwd_repeat">Neues Password wiederholen:</label>
+                        <label for="f_pwd_repeat">Neues Passwort wiederholen:</label>
                         <input name="f_pwd_repeat" id="f_pwd_repeat" type="password">
                     </div>
                 </div>
                 <div class="row">
-                    <div class="input-field col s2 l2 m2 offset-s10 offset-l10 offset-m10">
+                    <div class="input-field col s4 l4 m4">
+                        <label for="f_pwd_old">Altes Passwort:</label>
+                        <input name="f_pwd_old" id="f_pwd_old" type="password" required="required" class="validate">
+                    </div>
+                    <div class="input-field col s2 l2 m2 offset-s6 offset-l6 offset-m6">
                         <button class="btn waves-effect waves-light" type="submit">Update
                             <i class="material-icons right">send</i>
                         </button>
@@ -75,9 +79,16 @@
         var email = $('#f_email');
         var pwd = $('#f_pwd');
         var pwd_rep = $('#f_pwd_repeat');
+        var old_pwd = $('#f_pwd_old');
         var pwdV = pwd.val();
         var pwd_repV = pwd_rep.val();
+        var old_pwdV = old_pwd.val();
 
+        if(old_pwdV == "")
+        {
+            Materialize.toast("Bitte geben sie ihr altes Passwort an!");
+            return;
+        }
         if ((pwdV != "" || pwd_repV != "") && pwdV != pwd_repV) {
             Materialize.toast("Die eingegebenen Passwörter stimmen nicht überein!");
             pwd.val("");
@@ -91,7 +102,8 @@
             'data[pwd]': pwd.val(),
             'data[mail]': email.val(),
             'data[name]': name.val(),
-            'data[surname]': surname.val()
+            'data[surname]': surname.val(),
+            'data[oldpwd]' : old_pwd.val()
         }, function (data) {
 
             try {
@@ -104,6 +116,11 @@
                     notifications.forEach(function (data) {
                         Materialize.toast(data, 4000);
                     });
+
+                    if("resetold" in myData)
+                    {
+                        old_pwd.val("");
+                    }
                 }
             } catch (e) {
                 Materialize.toast('Interner Server Fehler!');
