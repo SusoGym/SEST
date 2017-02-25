@@ -15,6 +15,7 @@
     require "class.model.php";
     require "class.view.php";
     require "class.termin.php";
+	require "class.coverLesson.php";
 
     /* Settings */
 

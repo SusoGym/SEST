@@ -128,6 +128,10 @@
                 case "editdata":
                     $template = $this->handleUserEditData();
                     break;
+				case "vplan":
+					$this->handleCoverLessons();
+					$template="vplan";
+					break;
                 default:
                     if (self::$user instanceof Teacher) {
                         /** @var Teacher $user */
@@ -385,7 +389,38 @@
             $this->infoToView['icsPath'] = $icsfile;
 
             return "events";
-        }
+        } 
+		
+		
+		/**
+		* Coverlesson logic
+		*
+		*/
+		private function handleCoverLessons(){
+				$isStaff = false;
+				$this->infoToView["VP_showAll"] = false;
+				$this->infoToView['user'] = self::$user;
+				$this->infoToView['VP_allDays'] = $this->model->VP_getAllDays($isStaff);
+				if (self::$user instanceof Teacher) {
+						$isStaff = true;
+						(isset($this->input["all"])) ? $this->infoToView["VP_showAll"] = true : $this->infoToView["VP_showAll"] = false;
+						$this->infoToView['VP_coverLessons']=$this->model->getAllCoverLessons($this->infoToView['VP_showAll'],self::$user,$this->infoToView['VP_allDays']);
+						$this->infoToView['VP_blockedRooms']=$this->model->getBlockedRooms($this->infoToView['VP_allDays'] );
+						$this->infoToView['VP_absentTeachers']=$this->model->getAbsentTeachers($this->infoToView['VP_allDays'] );
+				} elseif (self::$user instanceOf Guardian) {
+					foreach ($this->infoToView["children"] as $child) {
+						$classes[] = $child->getClass();
+					}
+					$this->infoToView['VP_coverLessons']=$this->model->getAllCoverLessonsParents($classes,$this->infoToView['VP_allDays']);
+				}
+				
+				
+				
+										
+				$this->infoToView['VP_lastUpdate'] = $this->model->getUpdateTime();
+				$this->infoToView['VP_termine'] = $this->model->getNextDates($isStaff);
+			
+		}
 
         /**
          * Register logic
@@ -474,8 +509,10 @@
 
                 return $_SESSION['board_type'] . '_dashboard';
             } else if ($user instanceof Teacher) {
+				$this->infoToView['upcomingEvents'] = $this->model->getNextDates(true);
                 return "teacher_dashboard";
             } else {
+				$this->infoToView['upcomingEvents'] = $this->model->getNextDates(false);
                 return "parent_dashboard";
             }
 
@@ -490,7 +527,7 @@
             $view = View::getInstance();
             $this->infoToView['usr'] = self::$user;
             //set Module activity
-            $this->infoToView['modules'] = array("vplan" => false, "events" => true, "news" => false);
+            $this->infoToView['modules'] = array("vplan" => true, "events" => true, "news" => false);
 
             if (isset($_SESSION['notifications'])) {
                 if (!isset($this->infoToView['notifications']))
