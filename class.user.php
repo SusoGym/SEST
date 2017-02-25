@@ -293,8 +293,15 @@
          * @var string $ldapName
          */
         protected $ldapName;
-
-
+		/**
+		* @var string $untisName
+		*/
+		protected $untisName;
+		/**
+		* @var string $shortName
+		*/
+		protected $shortName;
+		
         /**
          * Contructor of Teacher class
          *
@@ -304,8 +311,24 @@
         public function __construct($email, $teacherId, $rawData = null) {
             $nameData = Model::getInstance()->getTeacherNameByTeacherId($teacherId, $rawData);
             parent::__construct($teacherId, 2, $email, $nameData['name'], $nameData['surname']);
-            $this->ldapName = Model::getInstance()->getTeacherLdapNameByTeacherId($teacherId, $rawData);
-            $this->lessonAmount = Model::getInstance()->getTeacherLessonAmountByTeacherId($teacherId, $rawData);
+			if (isset($teacherId)){
+				$this->ldapName = Model::getInstance()->getTeacherLdapNameByTeacherId($teacherId, $rawData);
+				$this->shortName = Model::getInstance()->getTeacherShortNameByTeacherId($teacherId, $rawData);
+				$this->untisName = Model::getInstance()->getTeacherUntisNameByTeacherId($teacherId);
+				$this->lessonAmount = Model::getInstance()->getTeacherLessonAmountByTeacherId($teacherId, $rawData);
+				}
+			//Untis name could be "---" or "selbst", i.e. no corresponding entry in database
+			if (isset($rawData["untisName"]) ) 
+				{ 
+				$this->untisName = $rawData["untisName"];
+				} 
+				
+			//Kürzelfehler abfangen (bis DB aktualisiert)
+			if (isset($rawData["shortName"]) ) 
+				{ 
+				$this->shortName = $rawData["shortName"];
+				} 
+            
         }
 
         /**
@@ -324,7 +347,24 @@
         public function getClassType() {
             return "Teacher";
         }
-
+		
+		
+		/**
+		*returns Untisname 
+		* @return String
+		*/
+		public function getUntisName() {
+			return $this->untisName;
+		}
+		
+		/**
+		*returns short Name 
+		* @return String
+		*/
+		public function getShortName() {
+			return $this->shortName;
+		}
+		
         /**
          *Returns lesson amount of teacher (Deputat)
          *
@@ -493,6 +533,10 @@
          * @var string student's birthday
          */
         protected $bday;
+		/**
+		* @var array(String) student's courses
+		*/
+		protected $courses;
 
         public function __construct($id, $class, $surname, $name, $bday, $eid = null) {
             $this->id = $id;
@@ -550,6 +594,13 @@
         public function getBday() {
             return $this->bday;
         }
+		
+		/**
+		* @return array(String)
+		*/
+		public function getCourses(){
+			return $this->courses;
+		}
 
         /**
          * @return array[String => Data] used for creating __toString and jsonSerialize
@@ -580,6 +631,14 @@
 
             return $teachers;
         }
+		
+		/**
+		* find all Courses of Student if applicable
+		* 
+		*/
+		private function getAllCourses() {
+			$this->courses = Model::getInstance()->getCoursesOfStudent($this->Id);
+			}
     }
 
 ?>

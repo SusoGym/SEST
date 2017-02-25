@@ -266,7 +266,52 @@
             if (isset($rawData[0]))
                 $rawData = $rawData[0];
 
-            return $rawData['ldapname'];
+            return $rawData;
+        }
+		
+		/**
+         * @param $teacherId
+         * @param $rawData
+         * @return string
+         */
+        public function getTeacherUntisNameByTeacherId($teacherId, $rawData = null) {
+			$returnData = null;
+            if ($rawData == null) {
+				$data = self::$connection->selectValues("SELECT untisname FROM lehrer WHERE id=$teacherId");
+				if ($data == null){
+					$returnData = null; // empty / not found
+					} 
+				else {
+					$returnData = $data[0][0];
+					}
+				}
+            if (isset($rawData["untisName"])) {
+						$returnData = $rawData["untisName"];
+						} 
+						
+            return $returnData;
+        }
+		
+		/**
+         * @param $teacherId
+         * @param $rawData
+         * @return string
+         */
+        public function getTeacherShortNameByTeacherId($teacherId, $rawData = null) {
+			$returnData = null;
+            if ($rawData == null) {
+				$data = self::$connection->selectValues("SELECT kuerzel FROM lehrer WHERE id=$teacherId");
+				if ($data == null) {
+					$returnData = null; // empty / not found
+					}
+				else {
+					$returnData = $data[0][0];
+					}
+				}
+            if (isset($rawData["shortName"]))
+                $returnData = $rawData["shortName"];
+
+            return $returnData;
         }
 
         /**
@@ -729,6 +774,42 @@
 
             return $termine;
         }
+		
+		/**
+		*Ermittelt die kommenden Termine
+		*@param $staff boolean 
+		*@return Array(Terminobjekte)
+		*/
+		public function getNextDates($staff){
+			$staff ? $query="SELECT typ,start,ende,staff FROM termine ORDER BY start" : $query="SELECT typ,start,ende,staff FROM termine WHERE staff=0 ORDER BY start" ;
+			$data=self::$connection->selectValues($query);
+			$x=0;
+			foreach ($data as $d){
+				$termin=new Termin();
+				$termine[$x]=$termin->createFromDB($d);
+				$x++;
+				}
+				
+			//Ermittle die neuesten Termine
+			$today=date('d.m.Y');
+			$added = strtotime("+21 day", strtotime($today)); 
+			$limit= date("d.m.Y", $added); 
+			$todayTimestamp = strtotime($today);
+			$limitTimestamp = strtotime($limit);
+			
+			$nextDates=array();
+			$x=0;
+			foreach ($termine as $t){
+				if(strtotime($t->sday)>=$todayTimestamp  && strtotime($t->sday)<=$limitTimestamp) {
+					$nextDates[$x]=$t;
+					$x++;
+					}
+				}
+			return $nextDates;
+			}
+
+		
+		
 
         /**
          *Monatsarray mit Terminen erstellen
@@ -787,8 +868,295 @@
 
             return true;
         }
+		
+		
+		/*************************************************
+		********methods only used in CoverLesson module***
+		*************************************************/
+		
+		/**
+		*get all relevant days for display
+		*@param bool $isTeacher
+		*/
+		public function VP_getAllDays($isTeacher){
+		(!$isTeacher) ? $add = " AND tag<3 " : $add="";
+		$alldays = array();
+		$data = self::$connection->selectValues("SELECT DISTINCT datum FROM vp_vpData WHERE tag>0 ".$add." order by datum ASC");
+		foreach($data as $d){
+			$allDays[] = array("timestamp"=>$d[0],"dateAsString"=>$this->getDateString($d[0]));
+		}
+		return $allDays;
+		}
+		
+		/**
+		*returns a date in format "<Weekday> DD.MM.YYYY "
+		*@param string $date "YYYYMMDD"
+		*@return string
+		*/
+		private function getDateString($date){
+			return $this->getWeekday($date).". ".$this->reverseDate($date);	
+		}
+		
+		/**
+		*returns day of the week for a given date
+		*@param String "YYYMMDD"
+		*@return String
+		*/
+		private function getWeekday($date){
+			$wochentage = array ('So','Mo','Di','Mi','Do','Fr','Sa');
+			$monat=$date[4].$date[5];
+			$tag=$date[6].$date[7];
+			$jahr=$date[0].$date[1].$date[2].$date[3];
+			$date = getdate(mktime ( 0,0,0, $monat, $tag, $jahr));
+			$wochentag = $date['wday'];
+			return $wochentage[$wochentag];
+			}	
+			
+		
+		/**
+		*return date in format DD.MM.YYYY
+		*@param string $date in format "YYYYMMDD"
+		*@return String
+		*/
+		private function reverseDate($date){
+			return $date[6].$date[7].".".$date[4].$date[5].".".$date[0].$date[1].$date[2].$date[3];
+			}
+		
+		/**
+		*returns date of last update
+		*@return String timestamp
+		*/
+		public function getUpdateTime(){
+		$data=self::$connection->selectValues("SELECT DISTINCT stand FROM vp_vpData WHERE tag=1");
+		if(count($data)>0){
+			return $data[0][0];
+			}
+		else{
+			return null;
+			}
+		}
+		
+		
+		/**
+		*get all current cover lessons for teachers
+		*@param boolean $showAll all coverLessons or only those of current user
+		*@param Teacher Object
+		*@param array("datumstring","timestamp") $allDays
+		*@return Array(coverLesson Object)
+		*/
+		public function getAllCoverLessons($showAll,$tchr,$allDays){
+		$vertretungen=null;
+		$untisName = $tchr->getUntisName();
+		$shortName = $tchr->getShortName(); 
+		(!$showAll)? $add=" AND (vLehrer=\"$untisName\" OR eLehrer=\"$shortName\") " : $add="";
+		foreach($allDays as $day){
+			$datum=$day['timestamp'];
+			$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpData 
+			WHERE tag>0
+			AND aktiv=true
+			AND datum=\"$datum\"
+			$add
+			ORDER BY datum,vLehrer,stunde ASC");
+
+			if(count($data)>0){
+				foreach($data as $d){
+					$coverLesson=new CoverLesson();
+					$coverLesson->constructFromDB($d);
+					$vertretungen[$day["timestamp"]][]=$coverLesson;
+					unset($coverLesson);
+					}
+				}
+			unset($data);
+			}
+			
+		return $vertretungen;
+
+		}
+		
+		
+		/*
+		*get all cover lessons for parents
+		*@param form array(String) $classes
+		*@param array("datumstring","timestamp") $allDays
+		*@return Array(coverLesson Object)
+		*/
+		public function getAllCoverLessonsParents($classes,$allDays){
+		$vertretungen=null;
+		//create query string to identify forms
+		$classQuery = null;
+		$x = 0;
+		foreach ($classes as $class){
+			if ($x == 0) {$classQuery = " AND (klassen LIKE ".'"%'.$class.'%"';}
+			else {$classQuery .= " OR klassen LIKE ".'"%'.$class.'%"';}
+			$x++;
+		}
+		$classQuery .= ")";
+		foreach($allDays as $day){
+			$datum=$day['timestamp'];
+			$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
+			WHERE tag>0
+			AND tag<3
+			AND aktiv=true
+			AND datum=\"$datum\"
+			$classQuery
+			ORDER BY datum,stunde ASC");
+			if(count($data)>0){
+				$x=0;
+				foreach($data as $d){
+					$coverLesson=new CoverLesson($this->connection);
+					$coverLesson->constructFromDB($d);
+					$vertretungen[$day["timestamp"]][]=$coverLesson;
+					unset($coverLesson);
+					}
+				}
+			unset($data);
+			}
+		return $vertretungen;
+		}
+		
+		/*
+		*get all cover lessons for students
+		* @param Student
+		* @param array("datumstring","timestamp") $allDays
+		* @return Array(coverLesson Object)
+		*/
+		public function getAllCoverLessonsStudents($student,$allDays){
+		$vertretungen=null;
+		//create query string to identify forms
+		$classQuery = null;
+		$x = 0;
+		foreach ($classes as $class){
+			if ($x == 0) {$classQuery = " AND (klassen LIKE ".'"%'.$class.'%"';}
+			else {$classQuery .= " OR klassen LIKE ".'"%'.$class.'%"';}
+			$x++;
+		}
+		$classQuery .= ")";
+		foreach($allDays as $day){
+			$datum=$day['timestamp'];
+			$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
+			WHERE tag>0
+			AND tag<3
+			AND aktiv=true
+			AND datum=\"$datum\"
+			$classQuery
+			ORDER BY datum,stunde ASC");
+			if(count($data)>0){
+				$x=0;
+				foreach($data as $d){
+					$coverLesson=new CoverLesson($this->connection);
+					$coverLesson->constructFromDB($d);
+					$vertretungen[$day["timestamp"]][]=$coverLesson;
+					unset($coverLesson);
+					}
+				}
+			unset($data);
+			}
+		return $vertretungen;
+		}
+		
+		
+		
+		/**
+		*ermittle alle blockierten Räume
+		*@param $datum array QueryResult 
+		* @return array(String,String)
+		*/
+
+		public function getBlockedRooms($datum){
+			$roomstring = "";
+			$blockedRooms = array();
+			foreach($datum as $d){
+				$dtm = $d['timestamp'];
+				$brs = self::$connection->selectValues("SELECT name FROM vp_blockierteraeume WHERE datum=\"$dtm\" ");
+				if(isset($brs)) {
+					foreach($brs as $room){
+					if($roomstring == "") {$roomstring = $room[0];} else {$roomstring = $roomstring.", ".$room[0];}
+					}
+				}
+				if($roomstring == "") {$roomstring = "keine";}
+				$roomstring = wordwrap( $roomstring, 100, "<br />\n" );
+				$blockedRooms[$d['timestamp']] = $roomstring;
+			$roomstring = "";	
+			}
+			return $blockedRooms;
+		}
 
 
+		/**
+		*ermittle alle abwesenden Lehrer
+		*@param $datum array QueryResult
+		* @return array(String,String) 
+		*/
+
+		public function getAbsentTeachers($datum){
+			$atstring = "";
+			$absentTeachers=array();
+			foreach($datum as $d){
+				$dtm = $d['timestamp'];
+				$ats=self::$connection->selectValues("SELECT name FROM vp_abwesendeLehrer WHERE datum=\"$dtm\" ");
+				if(isset($ats)) {
+					foreach($ats as $t){
+					if($atstring=="") {$atstring=$t[0];} else {$atstring=$atstring.", ".$t[0];}
+					}
+				}
+				if($atstring=="") {$atstring="keine";}
+				$atstring = wordwrap( $atstring, 150, "<br />\n" );
+				$absentTeachers[ $d['timestamp'] ]=$atstring;
+			$atstring="";	
+			}
+			return $absentTeachers;
+		}
+		
+		/*
+		*get Primary key and email by Teacher untisname
+		* @param String $untisname
+		* @return array(String, Int)
+		*/
+		public function getTeacherDataByUntisName($untisName){
+		$tchrData = array();
+		$data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE untisName=\"$untisName\" ");
+		if(count($data)>0){
+			$tchrData = array("email" => $data[0][0], "id" => $data[0][1]);
+			return $tchrData;
+			} else {
+			return null;	
+			}
+		
+		}
+		
+		/*
+		*get Primary key and email by Teacher untisname
+		* @param String $untisname
+		* @return array(String, Int)
+		*/
+		public function getTeacherDataByShortName($short){
+		$tchrData = array();
+		$data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE kuerzel=\"$short\" ");
+		if(count($data)>0){
+			$tchrData = array("email" => $data[0][0], "id" => $data[0][1]);
+			return $tchrData;
+			} else {
+			return null;	
+			}
+		
+		}
+		
+		
+		/**
+		* @param $studentId;
+		* @return array(String)
+		*/
+		public function getCoursesOfStudent($studentId){
+			//MUST be separated from student's class
+		$courses = array();
+		$data = self::$connection(""); //Query missing - new table to be created [studentID,courseName]
+		if(isset($data)) {
+				foreach($data[0] as $d){
+					$courses[] = $d[0];
+				}
+			}
+		return $courses;
+		}
     }
 
 
