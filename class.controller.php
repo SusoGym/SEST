@@ -18,6 +18,11 @@
          * @var User
          */
         protected static $user;
+		
+		/**
+		* @var logfile
+		*/
+		protected $logfile = "vpaction.log";
 
         /**
          * @return User
@@ -59,11 +64,12 @@
                 }
             }
 
-            if (!isset($this->input['type']))
-                $this->input['type'] = null;
-
-
-            $this->display($this->handleType());
+            if (!isset($this->input['type'])) 
+				$this->input['type'] = null;
+			if ($this->handleCoverLessonDataTransmission() ){
+				echo "time to die";
+				die;}
+			$this->display($this->handleType());
         }
 
         protected function getEmptyIfNotExistent($array, $key) {
@@ -132,6 +138,7 @@
 					$this->handleCoverLessons();
 					$template="vplan";
 					break;
+				
                 default:
                     if (self::$user instanceof Teacher) {
                         /** @var Teacher $user */
@@ -160,7 +167,69 @@
 
             return $template;
         }
-
+		
+		
+		/**
+		* HandleCoverLesson Module - data transmission
+		* @return Boolean
+		*/
+		private function handleCoverLessonDataTransmission(){
+			//Handle data sent per POST
+			$text=null;
+			if(isset($this->input["datum"])) {	
+				//bereite DB vor für Einlesen der aktiven Vertretungen
+				$this->model->prepareForEntry($this->input["datum"]);
+				//Debug Eintrag in Logdatei
+				$text = "heutiger Tag: ".$this->input["datum"]." prepared for entry\r\n";
+				$this->writeToVpLog($text);
+				return true;
+				}
+			elseif(isset($this->input["absT"])) {
+				//Trage abwesende Lehrer ein
+				$this->model->insertAbsentee($this->input["absT"]);
+				//Debug Eintrag in Logdatei
+				$text = "abwesender Lehrer (".$this->input["absT"].") eintragen\r\n";
+				$this->writeToVpLog($text);
+				return true;
+				}
+			elseif (isset($this->input["blockR"]) ){
+				//Trage blockierte Räume ein
+				$this->model->insertBlockedRoom($this->input["blockR"]);
+				//Debug Eintrag in Logdatei
+				$text = "blockierte Räume (".$this->input["blockR"].") eintragen\r\n";
+				$this->writeToVpLog($text);
+				return true;
+				}
+			elseif(isset($this->input["content"]) ){
+				//Trage Vertretungen ein
+				$this->model->insertCoverLesson($this->input["content"]); // TO BE THOROUGHLY TESTED 
+				$text = "Vertretungsdatensatz eintragen:".$this->input["content"]."\r\n";
+				$this->writeToVpLog($text);
+				return true;
+				}
+			elseif(isset($this->input["mail"]) ){
+				//per POST
+				//Starte Mailversand
+				//$this->sendMails($this->model->getMailList());  -- NOT YET IMPLEMENTED
+				//Lösche entfernte Zeilen
+				//$this->model->DeleteInactiveEntries();  -- NOT YET IMPLEMENTED
+				$text = "Mailversand gestartet\r\n******************************************************************\r\n";
+				$this->writeToVpLog($text);
+				return true;
+				}
+			return false;
+		
+		}
+		
+		/**
+		*Debugging LogFile Entry for CoverLessonModule
+		* @param String
+		*/
+		private function writeToVpLog($text){
+			$f=fopen($this->logfile,"a");
+			fwrite($f,$text);
+			fclose($f);	
+			}
 
         /**
          * Send all options to view
