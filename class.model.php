@@ -880,10 +880,12 @@
 		*/
 		public function VP_getAllDays($isTeacher){
 		(!$isTeacher) ? $add = " AND tag<3 " : $add="";
-		$alldays = array();
+		$allDays = array();
 		$data = self::$connection->selectValues("SELECT DISTINCT datum FROM vp_vpData WHERE tag>0 ".$add." order by datum ASC");
-		foreach($data as $d){
+		if(isset($data)) {
+			foreach($data as $d){
 			$allDays[] = array("timestamp"=>$d[0],"dateAsString"=>$this->getDateString($d[0]));
+			}
 		}
 		return $allDays;
 		}
@@ -921,6 +923,24 @@
 		private function reverseDate($date){
 			return $date[6].$date[7].".".$date[4].$date[5].".".$date[0].$date[1].$date[2].$date[3];
 			}
+		
+		
+		/*
+		*return date in Format Monday, den dd.mm.YYYY
+		* @param $date String im Format YYYYMMDD
+		* @return String
+		*/
+		public function makeCompleteDate($date){
+		$year = $date[0].$date[1].$date[2].$date[3];
+		$month = $date[4].$date[5];
+		$day = $date[6].$date[7];
+		$wochentage = array ('Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag');
+		$datum = getdate(mktime ( 0,0,0, $month, $day, $year));
+		$wochentag = $datum['wday'];
+		$completeDate = $wochentage[$wochentag].", den ".$day.".".$month.".".$year;
+		return $completeDate;
+		}
+		
 		
 		/**
 		*returns date of last update
@@ -1157,7 +1177,112 @@
 			}
 		return $courses;
 		}
-    }
+		
+		
+		/**********************************************************
+		******functions for CoverLesson Moduke in data transmission
+		***********************************************************/
+		
+		/**
+		/*Bereite DB fuer neue Eintraege vor
+		*Setze alle Eintraege des Datums der geparsten Datei auf inaktiv
+		*Setze das tag Feld auf 0, damit die nur die aktuell geparsten Dateien (Tage) eingetragen werden 
+		*@param $dat
+		*/
+		public function prepareForEntry($dat){
+		$dArr = explode(';',$dat);
+		$datum = $dArr[0];
+		$file = $dArr[1];
+		$today = date('Ymd');
+		self::$connection->straightQuery("UPDATE vp_vpData SET aktiv=false WHERE datum=$datum");
+		//Nur bei der ersten geparsten datei wird das tag feld auf Null gesetzt
+		if ($file == 1) {self::$connection->straightQuery("UPDATE vp_vpData SET tag=0 WHERE datum<$datum");}
+		}
+		
+		/**
+		*fuege abwesende lehrer in DB ein
+		*@param absT String im Format YYYYMMDD;Lehrername
+		*/
+		public function insertAbsentee($absT){
+		$arr = explode(";",$absT);
+		$datum = $arr[0];
+		$rest = $arr[1];
+		$arr = explode(",",$rest);
+		//DELETE all entries for this date in order to be renewed
+		self::$connection->straightQuery("DELETE FROM vp_abwesendeLehrer WHERE datum=\"$datum\" ");
+		foreach($arr as $r){
+				self::$connection->insertValues("INSERT INTO vp_abwesendeLehrer (`alNr`,`datum`,`name`) 
+				VALUES ('','$datum','$r')");
+				//Response Meldung an C# Programm
+				//echo "INSERT INTO abwesendeLehrer (`alNr`,`datum`,`name`) VALUES ('','$datum','$r')";
+			}
+		}
+
+
+		/**
+		*fuege blockierte Raeume in DB ein
+		*@param bR String im Format YYYYMMDD;Raumnummer
+		*/
+		public function insertBlockedRoom($bR){
+		$arr = explode(";",$bR);
+		$datum = $arr[0];
+		$rest = $arr[1];
+		//DELETE all entries for this date in order to be renewed
+		self::$connection->straightQuery("DELETE FROM vp_blockierteraeume WHERE datum=\"$datum\" ");
+		$arr = explode(",",$rest);
+		foreach($arr as $r){
+			self::$connection->insertValues("INSERT INTO vp_blockierteraeume (`brNr`,`datum`,`name`) 
+			VALUES ('','$datum','$r')");
+			//Response Meldung an C# Programm
+			//echo "INSERT INTO blockierteraeume (`brNr`,`datum`,`name`) VALUES ('','$datum','$r')";
+			}
+
+		}
+		
+		/**
+		*fuege Vertretungsstunde ein
+		 *@param String
+		*/
+		public function insertCoverLesson($content){
+		$POSTCoverL = new CoverLesson();
+		$POSTCoverL->constructFromPOST($content);
+		
+		//Prüfe ob dieser Eintrag bereits vorhanden ist
+		$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpData WHERE id=\"$POSTCoverL->id\" ");
+		if (count($data)>0){
+			$DBCoverL = new CoverLesson();
+			$DBCoverL->ConstructFromDB($data[0]);
+			$pk=$DBCoverL->primaryKey;
+			self::$connection->straightQuery("UPDATE vp_vpData SET aktiv=true,tag=$POSTCoverL->tag,stand=\"$POSTCoverL->stand\" WHERE vNr=$pk");
+			//prüfe ob nur Kommentar geaendert ist
+			if ($POSTCoverL->kommentar<>$DBCoverL->kommentar){
+				$k=$POSTCoverL->kommentar;
+				//Komentar updaten
+				self::$connection->straightQuery("UPDATE vp_vpData SET kommentar=\"$k\",aktiv=true WHERE vNr=$pk");
+				}
+			if($POSTCoverL->changedEntry==1){  
+				//emailedFlag entfernen und alle Felder Updaten
+				$POSTCoverL->emailed = "";
+				$POSTCoverL->aktiv=true;
+				self::$connection->straightQuery("UPDATE vp_vpData SET tag=$POSTCoverL->tag,datum=\"$POSTCoverL->datum\",vlehrer=\"$POSTCoverL->vTeacher\",
+				klassen=\"$POSTCoverL->klassen\",stunde=\"$POSTCoverL->stunde\",fach=\"$POSTCoverL->vFach\",raum=\"$POSTCoverL->vRaum\",
+				eLehrer=\"$POSTCoverL->eTeacherKurz\",eFach=\"$POSTCoverL->eFach\",kommentar=\"$POSTCoverL->kommentar\",id=\"$POSTCoverL->id\",aktiv=$POSTCoverL->aktiv,
+				emailed=\"$POSTCoverL->emailed\",stand=\"$POSTCoverL->stand\" WHERE vNr=$pk");	
+				
+				}	
+			}
+		else{
+			//Eintrag in Datenbank
+			$POSTCoverL->aktiv=true;
+			self::$connection->insertValues("INSERT into vp_vpData (`vNr`,`tag`,`datum`,`vLehrer`,`klassen`,`stunde`,`fach`,`raum`,`eLehrer`,`eFach`,`kommentar`,`id`,`aktiv`,`stand` )
+			VALUES ('','$POSTCoverL->tag','$POSTCoverL->datum','$POSTCoverL->vTeacher','$POSTCoverL->klassen','$POSTCoverL->stunde','$POSTCoverL->vFach','$POSTCoverL->vRaum','$POSTCoverL->eTeacherKurz','$POSTCoverL->eFach','$POSTCoverL->kommentar','$POSTCoverL->id','$POSTCoverL->aktiv','$POSTCoverL->stand')");
+		 
+			}
+		}
+		
+		
+				
+}
 
 
 ?>
