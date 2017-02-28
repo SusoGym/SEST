@@ -881,7 +881,7 @@
 		public function VP_getAllDays($isTeacher){
 		(!$isTeacher) ? $add = " AND tag<3 " : $add="";
 		$allDays = array();
-		$data = self::$connection->selectValues("SELECT DISTINCT datum FROM vp_vpData WHERE tag>0 ".$add." order by datum ASC");
+		$data = self::$connection->selectValues("SELECT DISTINCT datum FROM vp_vpdata WHERE tag>0 ".$add." order by datum ASC");
 		if(isset($data)) {
 			foreach($data as $d){
 			$allDays[] = array("timestamp"=>$d[0],"dateAsString"=>$this->getDateString($d[0]));
@@ -947,7 +947,7 @@
 		*@return String timestamp
 		*/
 		public function getUpdateTime(){
-		$data=self::$connection->selectValues("SELECT DISTINCT stand FROM vp_vpData WHERE tag=1");
+		$data=self::$connection->selectValues("SELECT DISTINCT stand FROM vp_vpdata WHERE tag=1");
 		if(count($data)>0){
 			return $data[0][0];
 			}
@@ -971,7 +971,7 @@
 		(!$showAll)? $add=" AND (vLehrer=\"$untisName\" OR eLehrer=\"$shortName\") " : $add="";
 		foreach($allDays as $day){
 			$datum = $day['timestamp'];
-			$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpData 
+			$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
 			WHERE tag>0
 			AND aktiv=true
 			AND datum=\"$datum\"
@@ -1003,7 +1003,7 @@
 		$tname=$teacher->getUntisName();
 		$tkurz=$teacher->getShortName();
 		$data=self::$connection->selectValues("SELECT datum,klassen,stunde,fach,raum,eLehrer,eFach,kommentar,vnr,vLehrer
-		FROM vp_vpData 
+		FROM vp_vpdata 
 		WHERE (vLehrer=\"$tname\" OR eLehrer=\"$tkurz\" )
 		AND aktiv=true and tag>0 ORDER by datum,stunde");
 		//echo " --- Anzahl Vertretungen: ".count($data).'<br>';
@@ -1023,7 +1023,7 @@
 		*/
 		public function getCoverLessonById($id){
 		$coverLesson = null;
-		$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpData 
+		$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
 			WHERE vNr = $id");
 		if (isset($data)) {
 				$coverLesson = $data[0];
@@ -1232,9 +1232,9 @@
 		$datum = $dArr[0];
 		$file = $dArr[1];
 		$today = date('Ymd');
-		self::$connection->straightQuery("UPDATE vp_vpData SET aktiv=false WHERE datum=$datum");
+		self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=false WHERE datum=$datum");
 		//Nur bei der ersten geparsten datei wird das tag feld auf Null gesetzt
-		if ($file == 1) {self::$connection->straightQuery("UPDATE vp_vpData SET tag=0 WHERE datum<$datum");}
+		if ($file == 1) {self::$connection->straightQuery("UPDATE vp_vpdata SET tag=0 WHERE datum<$datum");}
 		}
 		
 		/**
@@ -1286,23 +1286,23 @@
 		$POSTCoverL->constructFromPOST($content);
 		
 		//Prüfe ob dieser Eintrag bereits vorhanden ist
-		$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpData WHERE id=\"$POSTCoverL->id\" ");
+		$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata WHERE id=\"$POSTCoverL->id\" ");
 		if (count($data)>0){
 			$DBCoverL = new CoverLesson();
 			$DBCoverL->ConstructFromDB($data[0]);
 			$pk=$DBCoverL->primaryKey;
-			self::$connection->straightQuery("UPDATE vp_vpData SET aktiv=true,tag=$POSTCoverL->tag,stand=\"$POSTCoverL->stand\" WHERE vNr=$pk");
+			self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=true,tag=$POSTCoverL->tag,stand=\"$POSTCoverL->stand\" WHERE vNr=$pk");
 			//prüfe ob nur Kommentar geaendert ist
 			if (strcmp($POSTCoverL->kommentar,$DBCoverL->kommentar) !== 0 ){
 				$k = $POSTCoverL->kommentar;
 				//Komentar updaten
-				self::$connection->straightQuery("UPDATE vp_vpData SET kommentar=\"$k\",aktiv=true,changed=CURRENT_TIMESTAMP WHERE vNr=$pk");
+				self::$connection->straightQuery("UPDATE vp_vpdata SET kommentar=\"$k\",aktiv=true,changed=CURRENT_TIMESTAMP WHERE vNr=$pk");
 				}
 			if($POSTCoverL->changedEntry == 1){  
 				//update all fields except emailed - this is a change to the former version where emailed was set to 0
 				//$POSTCoverL->emailed = 0;
 				$POSTCoverL->aktiv=true;
-				self::$connection->straightQuery("UPDATE vp_vpData SET tag=$POSTCoverL->tag,datum=\"$POSTCoverL->datum\",vlehrer=\"$POSTCoverL->vTeacher\",
+				self::$connection->straightQuery("UPDATE vp_vpdata SET tag=$POSTCoverL->tag,datum=\"$POSTCoverL->datum\",vlehrer=\"$POSTCoverL->vTeacher\",
 				klassen=\"$POSTCoverL->klassen\",stunde=\"$POSTCoverL->stunde\",fach=\"$POSTCoverL->vFach\",raum=\"$POSTCoverL->vRaum\",
 				eLehrer=\"$POSTCoverL->eTeacherKurz\",eFach=\"$POSTCoverL->eFach\",kommentar=\"$POSTCoverL->kommentar\",id=\"$POSTCoverL->id\",aktiv=$POSTCoverL->aktiv,
 				stand=\"$POSTCoverL->stand\",changed=CURRENT_TIMESTAMP WHERE vNr=$pk");	
@@ -1311,7 +1311,7 @@
 		else{
 			//Eintrag in Datenbank
 			$POSTCoverL->aktiv=true;
-			self::$connection->insertValues("INSERT into vp_vpData (`vNr`,`tag`,`datum`,`vLehrer`,`klassen`,`stunde`,`fach`,`raum`,`eLehrer`,`eFach`,`kommentar`,`id`,`aktiv`,`stand`,`changed` )
+			self::$connection->insertValues("INSERT into vp_vpdata (`vNr`,`tag`,`datum`,`vLehrer`,`klassen`,`stunde`,`fach`,`raum`,`eLehrer`,`eFach`,`kommentar`,`id`,`aktiv`,`stand`,`changed` )
 			VALUES ('','$POSTCoverL->tag','$POSTCoverL->datum','$POSTCoverL->vTeacher','$POSTCoverL->klassen','$POSTCoverL->stunde','$POSTCoverL->vFach','$POSTCoverL->vRaum',
 			'$POSTCoverL->eTeacherKurz','$POSTCoverL->eFach','$POSTCoverL->kommentar','$POSTCoverL->id','$POSTCoverL->aktiv','$POSTCoverL->stand',CURRENT_TIMESTAMP)");
 			}
@@ -1339,9 +1339,9 @@
 		public function getMailList(){
 		$mailListLehrer=array();
 		//Lese Emailbedarf für Aktualisierung (neue Vertretungen )
-		$data=self::$connection->selectValues("SELECT DISTINCT lehrer.id,email FROM vp_vpData,lehrer 
+		$data=self::$connection->selectValues("SELECT DISTINCT lehrer.id,email FROM vp_vpdata,lehrer 
 		WHERE changed > emailed
-		AND vp_vpData.vLehrer=lehrer.untisName
+		AND vp_vpdata.vLehrer=lehrer.untisName
 		AND lehrer.receive_vpmail=true
 		AND aktiv=true AND vlehrer NOT LIKE '%--%' 
 		AND vlehrer NOT LIKE '%selbst%' 
@@ -1355,8 +1355,8 @@
 		}
 		//bei diesen Lehrern entfällt etwas
 		$data=self::$connection->selectValues("SELECT DISTINCT lehrer.id,email 
-		FROM vp_vpData,lehrer 
-		WHERE vp_vpData.eLehrer=lehrer.kuerzel
+		FROM vp_vpdata,lehrer 
+		WHERE vp_vpdata.eLehrer=lehrer.kuerzel
 		AND changed > emailed
 		AND lehrer.receive_vpmail=true
 		AND aktiv=true 
@@ -1370,9 +1370,9 @@
 			}
 		}
 		//bei diesen Lehrern wurde eine Vertretung gestrichen
-		$data=self::$connection->selectValues("SELECT DISTINCT lehrer.id,email FROM vp_vpData,lehrer 
+		$data=self::$connection->selectValues("SELECT DISTINCT lehrer.id,email FROM vp_vpdata,lehrer 
 		WHERE aktiv=false
-		AND vp_vpData.vLehrer=lehrer.untisName
+		AND vp_vpdata.vLehrer=lehrer.untisName
 		and lehrer.receive_vpmail=true
 		AND vlehrer NOT LIKE '%--%' 
 		AND vlehrer NOT LIKE '%selbst%' 
@@ -1430,7 +1430,7 @@
 	* delete all inactive entries in coverLessontable
 	*/
 	public function deleteInactiveEntries(){
-		self::$connection->straightQuery("DELETE FROM vp_vpData WHERE aktiv=false");
+		self::$connection->straightQuery("DELETE FROM vp_vpdata WHERE aktiv=false");
 		}
 
 	
