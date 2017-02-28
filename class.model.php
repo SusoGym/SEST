@@ -970,7 +970,7 @@
 		$shortName = $tchr->getShortName(); 
 		(!$showAll)? $add=" AND (vLehrer=\"$untisName\" OR eLehrer=\"$shortName\") " : $add="";
 		foreach($allDays as $day){
-			$datum=$day['timestamp'];
+			$datum = $day['timestamp'];
 			$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpData 
 			WHERE tag>0
 			AND aktiv=true
@@ -982,7 +982,7 @@
 				foreach($data as $d){
 					$coverLesson=new CoverLesson();
 					$coverLesson->constructFromDB($d);
-					$vertretungen[$day["timestamp"]][]=$coverLesson;
+					$vertretungen[$day["timestamp"]][] = $coverLesson;
 					unset($coverLesson);
 					}
 				}
@@ -990,7 +990,45 @@
 			}
 			
 		return $vertretungen;
-
+		}
+		
+		/**
+		* get all Cover Lessons for a teacher in Untis presented data (i.e. "--" and "selbst" will be shown)
+		* no CoverLesson Object will be instantiated
+		* @param Teacher Object
+		* @return array()
+		*/
+		public function getCoverLessonsByTeacher($teacher){
+		$coverLessons = array();
+		$tname=$teacher->getUntisName();
+		$tkurz=$teacher->getShortName();
+		$data=self::$connection->selectValues("SELECT datum,klassen,stunde,fach,raum,eLehrer,eFach,kommentar,vnr,vLehrer
+		FROM vp_vpData 
+		WHERE (vLehrer=\"$tname\" OR eLehrer=\"$tkurz\" )
+		AND aktiv=true and tag>0 ORDER by datum,stunde");
+		//echo " --- Anzahl Vertretungen: ".count($data).'<br>';
+		if(count($data)>0){
+		foreach($data as $d) {
+			$datum=$this->makeCompleteDate($d[0]);	
+			$coverLessons[]=array("vnr"=>$d[8],"Datum"=>$datum,"Vertreter"=>$d[9],"Klassen"=>$d[1],"Stunde"=>$d[2],"Fach"=>$d[3],"Raum"=>$d[4],"statt_Lehrer"=>$d[5],"statt_Fach"=>$d[6],"Kommentar"=>$d[7]);
+			}
+		}
+		return $coverLessons;
+		}
+		
+		/**
+		*get CoverLesson data by primary key
+		* @param int id
+		* @return array()
+		*/
+		public function getCoverLessonById($id){
+		$coverLesson = null;
+		$data=self::$connection->selectAssociativeValues("SELECT * FROM vp_vpData 
+			WHERE vNr = $id");
+		if (isset($data)) {
+				$coverLesson = $data[0];
+		}
+		return $coverLesson;	
 		}
 		
 		
@@ -1180,7 +1218,7 @@
 		
 		
 		/**********************************************************
-		******functions for CoverLesson Moduke in data transmission
+		******functions for CoverLesson Module in data transmission
 		***********************************************************/
 		
 		/**
@@ -1241,7 +1279,7 @@
 		
 		/**
 		*fuege Vertretungsstunde ein
-		 *@param String
+		* @param String
 		*/
 		public function insertCoverLesson($content){
 		$POSTCoverL = new CoverLesson();
@@ -1255,32 +1293,206 @@
 			$pk=$DBCoverL->primaryKey;
 			self::$connection->straightQuery("UPDATE vp_vpData SET aktiv=true,tag=$POSTCoverL->tag,stand=\"$POSTCoverL->stand\" WHERE vNr=$pk");
 			//prüfe ob nur Kommentar geaendert ist
-			if ($POSTCoverL->kommentar<>$DBCoverL->kommentar){
-				$k=$POSTCoverL->kommentar;
+			if (strcmp($POSTCoverL->kommentar,$DBCoverL->kommentar) !== 0 ){
+				$k = $POSTCoverL->kommentar;
 				//Komentar updaten
-				self::$connection->straightQuery("UPDATE vp_vpData SET kommentar=\"$k\",aktiv=true WHERE vNr=$pk");
+				self::$connection->straightQuery("UPDATE vp_vpData SET kommentar=\"$k\",aktiv=true,changed=CURRENT_TIMESTAMP WHERE vNr=$pk");
 				}
-			if($POSTCoverL->changedEntry==1){  
-				//emailedFlag entfernen und alle Felder Updaten
-				$POSTCoverL->emailed = "";
+			if($POSTCoverL->changedEntry == 1){  
+				//update all fields except emailed - this is a change to the former version where emailed was set to 0
+				//$POSTCoverL->emailed = 0;
 				$POSTCoverL->aktiv=true;
 				self::$connection->straightQuery("UPDATE vp_vpData SET tag=$POSTCoverL->tag,datum=\"$POSTCoverL->datum\",vlehrer=\"$POSTCoverL->vTeacher\",
 				klassen=\"$POSTCoverL->klassen\",stunde=\"$POSTCoverL->stunde\",fach=\"$POSTCoverL->vFach\",raum=\"$POSTCoverL->vRaum\",
 				eLehrer=\"$POSTCoverL->eTeacherKurz\",eFach=\"$POSTCoverL->eFach\",kommentar=\"$POSTCoverL->kommentar\",id=\"$POSTCoverL->id\",aktiv=$POSTCoverL->aktiv,
-				emailed=\"$POSTCoverL->emailed\",stand=\"$POSTCoverL->stand\" WHERE vNr=$pk");	
-				
+				stand=\"$POSTCoverL->stand\",changed=CURRENT_TIMESTAMP WHERE vNr=$pk");	
 				}	
 			}
 		else{
 			//Eintrag in Datenbank
 			$POSTCoverL->aktiv=true;
-			self::$connection->insertValues("INSERT into vp_vpData (`vNr`,`tag`,`datum`,`vLehrer`,`klassen`,`stunde`,`fach`,`raum`,`eLehrer`,`eFach`,`kommentar`,`id`,`aktiv`,`stand` )
-			VALUES ('','$POSTCoverL->tag','$POSTCoverL->datum','$POSTCoverL->vTeacher','$POSTCoverL->klassen','$POSTCoverL->stunde','$POSTCoverL->vFach','$POSTCoverL->vRaum','$POSTCoverL->eTeacherKurz','$POSTCoverL->eFach','$POSTCoverL->kommentar','$POSTCoverL->id','$POSTCoverL->aktiv','$POSTCoverL->stand')");
-		 
+			self::$connection->insertValues("INSERT into vp_vpData (`vNr`,`tag`,`datum`,`vLehrer`,`klassen`,`stunde`,`fach`,`raum`,`eLehrer`,`eFach`,`kommentar`,`id`,`aktiv`,`stand`,`changed` )
+			VALUES ('','$POSTCoverL->tag','$POSTCoverL->datum','$POSTCoverL->vTeacher','$POSTCoverL->klassen','$POSTCoverL->stunde','$POSTCoverL->vFach','$POSTCoverL->vRaum',
+			'$POSTCoverL->eTeacherKurz','$POSTCoverL->eFach','$POSTCoverL->kommentar','$POSTCoverL->id','$POSTCoverL->aktiv','$POSTCoverL->stand',CURRENT_TIMESTAMP)");
 			}
+			
 		}
 		
 		
+		
+		/**
+		*Debugging LogFile Entry for CoverLessonModule
+		* @param String
+		*/
+		public function writeToVpLog($text){
+			$f=fopen("vpaction.log","a");
+			fwrite($f,$text."\r\n");
+			fclose($f);	
+			}
+		
+		
+		
+		/**
+		* lese Emailbedarf aus 
+		* @return mailListLehrer Array(Teacher)
+		*/
+		public function getMailList(){
+		$mailListLehrer=array();
+		//Lese Emailbedarf für Aktualisierung (neue Vertretungen )
+		$data=self::$connection->selectValues("SELECT DISTINCT lehrer.id,email FROM vp_vpData,lehrer 
+		WHERE changed > emailed
+		AND vp_vpData.vLehrer=lehrer.untisName
+		AND lehrer.receive_vpmail=true
+		AND aktiv=true AND vlehrer NOT LIKE '%--%' 
+		AND vlehrer NOT LIKE '%selbst%' 
+		AND tag>0");
+		
+		if(count($data)>0){
+			foreach($data as $d) {
+			//Diese Lehrer müssen eine Email erhalten
+			$mailListLehrer[] = $this->addToEmailList($d[0],$d[1]);
+			}
+		}
+		//bei diesen Lehrern entfällt etwas
+		$data=self::$connection->selectValues("SELECT DISTINCT lehrer.id,email 
+		FROM vp_vpData,lehrer 
+		WHERE vp_vpData.eLehrer=lehrer.kuerzel
+		AND changed > emailed
+		AND lehrer.receive_vpmail=true
+		AND aktiv=true 
+		AND (vlehrer LIKE \"%--%\" OR vlehrer LIKE \"%selbst%\") AND tag>0 ");
+		if (count($data)>0) {
+		foreach($data as $d){
+		//Prüfe ob dieser Lehrer schon in der EmailListe ist
+		if($this->mustAddToList($mailListLehrer,$d[0])) {
+				$mailListLehrer[] = $this->addToEmailList($d[0],$d[1]);
+				}
+			}
+		}
+		//bei diesen Lehrern wurde eine Vertretung gestrichen
+		$data=self::$connection->selectValues("SELECT DISTINCT lehrer.id,email FROM vp_vpData,lehrer 
+		WHERE aktiv=false
+		AND vp_vpData.vLehrer=lehrer.untisName
+		and lehrer.receive_vpmail=true
+		AND vlehrer NOT LIKE '%--%' 
+		AND vlehrer NOT LIKE '%selbst%' 
+		AND tag>0");
+		if (count($data)>0) {
+		foreach($data as $d){
+		//Prüfe ob dieser Lehrer schon in der EmailListe ist
+		if($this->mustAddToList($mailListLehrer,$d[0])) {
+				$mailListLehrer[]=$this->addToEmailList($d[0],$d[1]);
+				}
+		}
+	}
+	return $mailListLehrer;
+	}
+	
+	/**
+	* adds a Teacher Object to the Emaillist
+	* @param int teacherId
+	* @return Teacher Object
+	*/
+	private function addToEmailList($id,$email){
+		$teacher = new Teacher($email,$id); //adapt to Teacher class constructor
+		$teacher->getData();
+		$teacher->setVpInfoDate($this->getUpdateTime() );
+		return $teacher;
+		}
+	/**
+	*
+	* check if teacher must be added to EmailList
+	* @param array()
+	* @param int 
+	* @return bool
+	*/
+	private function mustAddToList($list,$id){
+		if(count($list) == 0) {return true;}
+		foreach($list as $l){
+			if($l->getId() == $id) {
+				//already included
+				return false;
+				break;
+				}
+			}
+	return true;
+	}
+	
+		
+	/**
+	*Trage Datum des Email Versands in die Datenbank ein
+	*@param entry Id des CoverLesson Datensatzes
+	*/
+	public function updateVpMailSentDate($entry){
+		self::$connection->straightQuery("UPDATE vp_vpdata set emailed = CURRENT_TIMESTAMP WHERE vnr=$entry");
+		}
+	/**
+	* delete all inactive entries in coverLessontable
+	*/
+	public function deleteInactiveEntries(){
+		self::$connection->straightQuery("DELETE FROM vp_vpData WHERE aktiv=false");
+		}
+
+	
+	/**
+	* create mail content for automated cover lesson email
+	* @param Teacher Object
+	* Return String
+	*/
+	public function makeHTMLVpMailContent($teacher){
+	$coverLessonNrs = array();	
+	$data = $this->getCoverLessonsByTeacher($teacher);	
+	$linkStyle='style="font-family:Arial,Sans-Serif;font-size:12px;font-weight:bold;color: #86160e;font-decoration:underline;"';
+	$vnArr=array();
+	$content=mb_convert_encoding('<table><tr><td style="color:#000000;font-family:Arial,Sans-Serif;font-weight:bold;font-size:14px;">Übersicht für '.
+	$teacher->getSurname().', '.$teacher->getName().'</td><td style="color:#000000;font-family:Arial,Sans-Serif;font-weight:bold;font-size:9px;"> 
+	(Stand: '.$teacher->getVpInfoDate().')</td></tr></table><br/>','UTF-8');	
+	if(!isset($data)) {
+		$content .= "<p><b>Keine Vertretungen!</b></p>";
+		}
+	else {
+		//make headers
+		$content .= '<table>';
+		$v = $data[0];
+		$content .= '<tr style="font-family:Arial,Sans-Serif;font-size:12px;font-weight:bold;color:#ffffff; background-color: #86160e;">';
+		$colcounter = 0;
+		foreach ($v as $key => $value) {
+			if ($colcounter > 0) {
+				$content .= '<td><b>'.$key.'</b></td>';
+				}
+				$colcounter++;
+			}
+		$content .= '</tr>';
+		//lines containing cover lessons
+		$zeile = true;
+		foreach ($data as $v){
+			$colcounter = 0;
+			if($zeile) {$style='style="font-family:Arial,Sans-Serif;font-size:12px; background-color:#cccccc;';$zeile=false;}
+			else {$style='style="font-family:Arial,Sans-Serif;font-size:12px; background-color:#eeeeee;';$zeile=true;}
+			if($v["Vertreter"] == $teacher->getUntisName()) {$style=$style.'color:#ff0000;"';} else {$style=$style.'color:#000000;"';}	
+			$content .= '<tr '. $style .'>';
+			foreach ($v as $key => $value) {
+			if ($colcounter > 0){
+				$content .= '<td>'.$value.'</td>';
+				}
+			else {
+				$coverLessonNrs[] = $v["vnr"];
+				}
+			$colcounter ++;
+			}
+			$content .= '</tr>';
+			}
+		}
+	
+	$content .= '</table>';
+	$subscriptionInfo='<p style="font-family:Arial,Sans-Serif;font-size:12px; font-weight:bold;">'.mb_convert_encoding('<br><br>Diese Email wurde automatisch versendet. Die
+	Einstellung zum Emailversand können Sie jederzeit in der <a '.$linkStyle.' href="http://www.suso.schulen.konstanz.de/intern">Suso-Intern-Anwendung</a> (Login erforderlich) ändern.<br>
+	Bitte melden Sie Unregelmäßigkeiten oder Fehler im Emailversand.<br><br>Vielen Dank für Ihre Unterstützung!','UTF-8').'</p>';
+	
+	$teacher->setCurrentCoverLessonNrs($coverLessonNrs);
+	return $mailContent = $content.$subscriptionInfo.'<br>';
+	
+	}
 				
 }
 

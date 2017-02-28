@@ -301,6 +301,15 @@
 		* @var string $shortName
 		*/
 		protected $shortName;
+		/**
+		* @var string date of last update coverlessons
+		*/
+		protected $vpInfoDate;
+		/**
+		* @var array(int) primary keys of current coverLessons
+		*/
+		protected $coverLessonNrs = array();
+		
 		
         /**
          * Contructor of Teacher class
@@ -373,6 +382,31 @@
         public function getLessonAmount() {
             return $this->lessonAmount;
         }
+		
+		/**
+		* returns date of last coeverlesson update
+		* @return string
+		*/
+		public function getVpInfoDate(){
+			return $this->vpInfoDate;
+		}
+		
+		/**
+		* returns currentCoverLessonNrs
+		* @return array(int)
+		*/
+		public function getCoverLessonNrs(){
+			return $this->coverLessonNrs;
+		}
+		
+		
+		/**
+		* sets currentCoverLessonsNr
+		* @param array(int)
+		*/
+		public function setCurrentCoverLessonNrs($arr){
+		 $this->coverLessonNrs = $arr;	
+		}
 
         /**
          *Returns required slots according to lessonAmount
@@ -488,6 +522,18 @@
             return $model->getAppointmentsOfTeacher($this->id);
 
         }
+		
+		
+		/*****************************************
+		functions for CoverLessonModule in Teacher
+		*****************************************/
+		/**
+		* set date of last update in coverlessons
+		* @param string Datum
+		*/
+		public function setVpInfoDate($datum){
+		$this->vpInfoDate=$datum;
+		}
 
     }
 

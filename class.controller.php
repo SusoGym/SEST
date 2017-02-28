@@ -67,7 +67,7 @@
             if (!isset($this->input['type'])) 
 				$this->input['type'] = null;
 			if ($this->handleCoverLessonDataTransmission() ){
-				echo "time to die";
+				echo "Nothing to Do!";
 				die;}
 			$this->display($this->handleType());
         }
@@ -181,7 +181,7 @@
 				$this->model->prepareForEntry($this->input["datum"]);
 				//Debug Eintrag in Logdatei
 				$text = "heutiger Tag: ".$this->input["datum"]." prepared for entry\r\n";
-				$this->writeToVpLog($text);
+				//$this->model->writeToVpLog($text);
 				return true;
 				}
 			elseif(isset($this->input["absT"])) {
@@ -189,7 +189,7 @@
 				$this->model->insertAbsentee($this->input["absT"]);
 				//Debug Eintrag in Logdatei
 				$text = "abwesender Lehrer (".$this->input["absT"].") eintragen\r\n";
-				$this->writeToVpLog($text);
+				//$this->model->writeToVpLog($text);
 				return true;
 				}
 			elseif (isset($this->input["blockR"]) ){
@@ -197,39 +197,27 @@
 				$this->model->insertBlockedRoom($this->input["blockR"]);
 				//Debug Eintrag in Logdatei
 				$text = "blockierte Räume (".$this->input["blockR"].") eintragen\r\n";
-				$this->writeToVpLog($text);
+				//$this->model->writeToVpLog($text);
 				return true;
 				}
 			elseif(isset($this->input["content"]) ){
 				//Trage Vertretungen ein
 				$this->model->insertCoverLesson($this->input["content"]); // TO BE THOROUGHLY TESTED 
-				$text = "Vertretungsdatensatz eintragen:".$this->input["content"]."\r\n";
-				$this->writeToVpLog($text);
 				return true;
 				}
 			elseif(isset($this->input["mail"]) ){
 				//per POST
 				//Starte Mailversand
-				//$this->sendMails($this->model->getMailList());  -- NOT YET IMPLEMENTED
+				$this->sendMails($this->model->getMailList());
 				//Lösche entfernte Zeilen
-				//$this->model->DeleteInactiveEntries();  -- NOT YET IMPLEMENTED
-				$text = "Mailversand gestartet\r\n******************************************************************\r\n";
-				$this->writeToVpLog($text);
+				$this->model->DeleteInactiveEntries();
 				return true;
 				}
 			return false;
 		
 		}
 		
-		/**
-		*Debugging LogFile Entry for CoverLessonModule
-		* @param String
-		*/
-		private function writeToVpLog($text){
-			$f=fopen($this->logfile,"a");
-			fwrite($f,$text);
-			fclose($f);	
-			}
+		
 
         /**
          * Send all options to view
@@ -241,14 +229,11 @@
             $this->infoToView['book_end'] = $this->model->getOptions()['close'];
             $this->infoToView['book_start'] = $this->model->getOptions()['open'];
             $this->infoToView['est_date'] = $this->model->getOptions()['date'];
-
-
             if (self::$user instanceof Guardian) {
                 //nothing happening here ???
 
             } else if (self::$user instanceof Teacher) {
             }
-
         }
 
         /**
@@ -482,13 +467,8 @@
 					}
 					$this->infoToView['VP_coverLessons']=$this->model->getAllCoverLessonsParents($classes,$this->infoToView['VP_allDays']);
 				}
-				
-				
-				
-										
 				$this->infoToView['VP_lastUpdate'] = $this->model->getUpdateTime();
 				$this->infoToView['VP_termine'] = $this->model->getNextDates($isStaff);
-			
 		}
 
         /**
@@ -883,6 +863,75 @@
         public final function getOption($key, $defVal = '') {
             return $this->getValueIfNotExistent($this->model->getOptions(), $key, $defVal);
         }
+		
+		
+		/**
+		*
+		*triggering email via phpmailer
+		* @param array() containing list of mail recipients (User object)
+		*/
+		private function sendMails($list){
+		require("/phpmailer/class.phpmailer.php");
+		//sending emails
+		$timestamp = time();
+		$datum = date("Y-m-d  H:i:s", $timestamp);
+		$x=0;
+		foreach($list as $l){
+			$mail[$x] = new PHPMailer();
+			$mail[$x]->From = "stundenplan@suso.konstanz.de";
+			$mail[$x]->FromName = "Vertretungsplan Suso";
+			$mail[$x]->CharSet = "UTF-8";
+			$mail[$x]->IsHTML(true);
+			$time = date('d.m.Y - H:i:s');
+			$l_email = $l->getEmail();
+			$mail[$x]->AddAddress($l_email);
+			$mail[$x]->Subject = $time." aktueller Vertretungsplan";
+			$mail[$x]->Body = $this->model->makeHTMLVpMailContent($l);
+	
+			//Protokolldaten vorbereiten
+			//Mailadressen der Instanz:
+			$allmailstring="";
+			foreach($mail[$x]->to as $ema) {
+				if ($allmailstring == "") {$allmailstring = $ema[0];} else {$allmailstring = $allmailstring.';'.$ema[0];}
+				}
+			$cont = null;
+			
+						
+			//Senden
+			/*
+			$cont="";
+			foreach($l->getCoverLessonNrs() as $v) {
+			if ($cont == "") {$cont = $v;} else {$cont = $cont.';'.$v;}
+			}
+			$untisName = $l->getUntisName();
+			$this->model->writeToVpLog("Trying to execute Query: INSERT into vplanProtokoll (`pk`,`datum`,`recipient`,`mail`,`content`) VALUES ('','$datum','$untisName','$allmailstring','$cont')");
+			*/
+			if(!$mail[$x]->Send()){
+				//$mail[$x]->Send() liefert FALSE zurück: Es ist ein Fehler aufgetreten
+				//$this->model->writeToVpLog("....failed".$mail->ErrorInfo);
+				}
+			else {
+				//echo "mail gesendet an: ".$l->getEmail().'<br>';
+				//Eintrag des Sendeprotokolls
+				//Inhalt
+				//$this->model->writeToVpLog("....success");
+				}
+				
+				
+			
+			//Trage email Versanddatum in DB ein
+			foreach($l->getCoverLessonNrs() as $cl){
+				$this->model->UpdateVpMailSentDate($cl);
+				}
+			$mail[$x]=null;
+			$allmailstring=null;$cont=null;
+			$x++;
+			}
+		}
+		
+		
+		
+			
 
     }
 
