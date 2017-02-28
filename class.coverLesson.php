@@ -8,7 +8,7 @@ public $primaryKey;
 public $tag;
 public $datum;//Format Tag DD.MM.YYYY
 public $timestampDatum;// Format YYYYMMDD
-public $vTeacher;//String
+//public $vTeacher;//String
 public $vTeacherObject;//Teacher
 public $stunde;
 public $klassen;
@@ -69,7 +69,8 @@ $rawData = array("untisName" => $data['vLehrer']);
 
 $constructData = Model::getInstance()->getTeacherDataByUntisName($data['vLehrer']);
 
-$this->vTeacherObject = new Teacher($constructData['email'],$constructData['id'],$rawData);
+//$this->vTeacherObject = new Teacher($constructData['email'],$constructData['id'],$rawData);
+$this->vTeacherObject = new Teacher(null,$constructData['id'],$rawData);
 $this->vTeacherObject->getData();
 
 
@@ -87,7 +88,7 @@ $rawData = array("shortName" => $data['eLehrer']);
 $constructData = Model::getInstance()->getTeacherDataByShortName($data['eLehrer']);
 $eTeacher = new Teacher($constructData['email'],$constructData['id'],$rawData);
 $eTeacher->getData();
-$this->eTeacherObject=$eTeacher;
+$this->eTeacherObject = $eTeacher;
 }
 $this->eFach = $data['eFach'];
 $this->kommentar = $data['kommentar'];
