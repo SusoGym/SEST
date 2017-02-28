@@ -98,14 +98,17 @@ $this->id = $data['id'];
 
 
 
-/*
-*Formatierung der Daten (führende Null bei Klassennamen, Leerzeichen entfernen etc)
+/**
+* Formatierung der Daten (führende Null bei Klassennamen, Leerzeichen entfernen etc)
+* @param String
+* @return String
 */
 private function trimClassString($clStrg){
 //Klassenstring anpassen
 $kArr=explode(",",$clStrg);
 for ($x = 0;$x<count($kArr);$x++) {
 $kArr[$x] = trim($kArr[$x],$character_mask = " \t\n\r\0\x0B");
+
 if(strlen($kArr[$x])<3 && $kArr[$x][0]<>"K" && $kArr[$x][0]<>"A") {$kArr[$x]='0'.$kArr[$x];}
 }
 $klassenString = "";
@@ -113,6 +116,9 @@ for ($x = 0;$x<count($kArr);$x++) {
 if($x == 0) {$klassenstring = $kArr[$x];}
 else {$klassenstring = $klassenstring.','.$kArr[$x];}
 }
+$search = array('K1','K2');
+$replace = array('11','12');
+$klassenstring = str_replace($search,$replace,$klassenstring);
 return $klassenstring;
 }
 
