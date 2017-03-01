@@ -1,7 +1,7 @@
 <?php
 
     $input = array_merge($_GET, $_POST);
-	$DEBUG = true || isset($input['debug']);
+	$DEBUG = false || isset($input['debug']);
     $SQL_DEBUG = false || isset($input['sqldebug']);
 
     /* Debug Classes */
