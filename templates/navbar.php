@@ -45,15 +45,13 @@ if (isset($data['modules'])) {
 $modules = array();
 
 array_push($modules, array("id" => "home", "href" => ".", "title" => "Home", "icon" => "home", "inner" => "<font style='font-size: 24px;'>Suso-Intern</font>"));
-
+array_push($modules, array("id" => "editdata", "href" => "?type=editdata", "title" => "Account bearbeiten", "icon" => "settings"));
 if ($userObj instanceof Guardian) {
     array_push($modules, array("id" => "childsel", "href" => "?type=childsel", "title" => "Kinder verwalten", "icon" => "face"));
     if ($est) {
         array_push($modules, array("id" => "est", "href" => "?type=eest", "title" => "Elternsprechtag", "icon" => "supervisor_account"));
     }
-    array_push($modules, array("id" => "editdata", "href" => "?type=editdata", "title" => "Account bearbeiten", "icon" => "settings"));
-
-} else {
+    } else {
     if ($est) {
         array_push($modules, array("id" => "est", "href" => "?type=lest", "title" => "Elternsprechtag", "icon" => "supervisor_account"));
     }

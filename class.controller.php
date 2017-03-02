@@ -859,7 +859,19 @@ class Controller
             $name = $data['name'];
             $surname = $data['surname'];
             $oldpwd = $data['oldpwd'];
-
+			//Teacher AND Student handling needs to be worked on
+			if (self::$user instanceOf Teacher) {
+					$vpmail == $data['vpmail'];
+					$vpview == $data['vpview'];
+					$this->model->updateTeacherData(self::$user->getId(),$vpview,$vpmail);	
+					$this->infoToView['vpmail'] = $vpmail;
+					$this->infoToView['vpview'] = $vpview;
+					}
+			elseif (self::$user instanceOf StudentUser) {
+				$courseList = $data['courselist'];
+				$this->model->updateStudentData($courseList);
+				$this->infoToView['courselist'] = $courseList;
+			}
             if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
                 die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie eine valide Emailadresse an!"))));
             }
