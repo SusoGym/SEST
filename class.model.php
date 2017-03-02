@@ -938,6 +938,26 @@ class Model
 
         return true;
     }
+	
+	/** Change teacherData
+	 *
+	 * @param $usrId
+	 * @param bool vpview
+	 * @param bool vpmail
+	 */
+	public function updateTeachData($usrId, $vpview, $vpmail) {
+
+		$check = self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview = $vpview WHERE  id = $usrId");
+	}
+	
+	/** Change teacherData
+	 *
+	 * @param $usrId
+	 * @param string $courseList 
+	 */
+	public function updateStudentData($usrId, $courseList) {
+		$check = self::$connection->straightQuery("update schueler set courselist = $courseList WHERE  id = $usrId");
+	}
 
 
     /*************************************************
