@@ -5,13 +5,31 @@
 	$user = $data['user'];
 	$namestatus = null;
 	if($user instanceOf Teacher){
+		$vpmail = $data['vpmail'];
+		$newsmail = $data['newsmail'];
+		$vpview = $data['vpview'];
 		$namestatus = "disabled";
-		$emailStatus1 = "checked";
-		$emailStatus2 = null;
-		//USE $data['receive_vpmail'] OR field in Teacher Object $user->getReceiveVpMail() for logic
-		$startStatus1 = "checked";
-		$startStatus2 = null;
-		//USE $data['start_complete']
+		if ($vpmail) {
+			$vpmailStatus1 = "checked";
+			$vpmailStatus2 = null;
+		} else {
+			$vpmailStatus1 = null;
+			$vpmailStatus2 = "checked";
+		}
+		if ($vpview){
+			$newsmailStatus1 = "checked";
+			$newsmailStatus2 = null;
+		} else {
+			$newsmailStatus1 = null;
+			$newsmailStatus2 = "checked";
+		}
+		if ($vpview){
+			$vpviewStatus1 = "checked";
+			$vpviewStatus2 = null;
+		} else {
+			$vpviewStatus1 = null;
+			$vpviewStatus2 = "checked";
+		}
 		}
 	include("header.php");
 
@@ -71,28 +89,37 @@
 				<?php if ($user instanceOf StudentUser && $user->getClass() == "11" && $user->getClass() == 12 ) { ?>
 				<div class="row">
                     <div class="input-field col s6 l6 m6">
-                        <label for="f_courselist">Liste der Kurse (z.B. E1,M3,gk2 ...):</label>
+                        <label for="f_courselist">Liste der Kurse (z.B. E1;M3;gk2 ...):</label>
                         <input name="f_courselist" id="f_courselist" type="text" value="<?php echo $usr->getCourseList(); ?>>
                     </div>
 				</div>
 				<?php } ?>
 				<?php if ($user instanceOf Teacher) { ?>
 				 <div class="row">
-                    <div class=" col s6 l6 m6">
+                    <div class=" col s4 l4 m4">
                         <label for="f_vpmail">erhalte Email bei Änderungen im Vertretungsplan:<br></label>
-                        <input name="f_vpmail" type="radio" id="radio1" value="true"<?php echo $emailStatus1; ?> >
+                        <input name="f_vpmail" type="radio" id="radio1" value="true"<?php echo $vpmailStatus1; ?> >
 						<label for="radio1">ja</label>
-						<input name="f_vpmail" type="radio" id="radio2" value="false"<?php echo $emailStatus2; ?> >
+						<input name="f_vpmail" type="radio" id="radio2" value="false"<?php echo $vpmailStatus2; ?> >
 						<label for="radio2">nein</label>
                     </div>
-					<div class=" col s6 l6 m6">
+					<div class=" col s4 l4 m4">
                         <label for="f_vpview">Standardansicht Vertretungsplan:<br></label>
-                        <input name="f_vpview" type="radio" id="radio3" value="true" <?php echo $startStatus1; ?> >
+                        <input name="f_vpview" type="radio" id="radio3" value="true" <?php echo $vpviewStatus1; ?> >
 						<label for="radio3">nur eigene</label>
-						<input name="f_vpview" type="radio" id="radio4" value="false"<?php echo $startStatus2; ?> >
+						<input name="f_vpview" type="radio" id="radio4" value="false"<?php echo $vpviewStatus2; ?> >
 						<label for="radio4">alle</label>
                     </div>
+					<div class=" col s4 l4 m4">
+                        <label for="f_newsmail">erhalte Newsletter per Email:<br></label>
+                        <input name="f_newsmail" type="radio" id="radio5" value="true"<?php echo $newsmailStatus1; ?> >
+						<label for="radio5">ja</label>
+						<input name="f_newsmail" type="radio" id="radio6" value="false"<?php echo $newsmailStatus2; ?> >
+						<label for="radio6">nein</label>
+                    </div>
 				</div>
+				
+				<?php } ?>
 				<div class="row">
                     <div class="input-field col s2 l2 m2 offset-s6 offset-l6 offset-m6">
                         <button class="btn waves-effect waves-light" type="submit">Update
@@ -100,7 +127,6 @@
                         </button>
                     </div>
                 </div>
-				<?php } ?>
             </form>
         </div>
     </div>
@@ -115,18 +141,29 @@
 
 <script type="application/javascript">
     function submitForm() {
-        var name = $('#f_name');
-        var surname = $('#f_surname');
-        var email = $('#f_email');
-        var pwd = $('#f_pwd');
-        var pwd_rep = $('#f_pwd_repeat');
-        var old_pwd = $('#f_pwd_old');
-        var pwdV = pwd.val();
-        var pwd_repV = pwd_rep.val();
-        var old_pwdV = old_pwd.val();
-		var vpmail = $('#f_vpmail');
-		var vpiew = $('#f_vpview');
-		var courselist = $('#f_courselist');
+		var pwd = null;
+		var pwd_rep = null;
+		var old_pwd = null;
+		var name = null;
+		var surname = null;
+		var email = null;
+		var vpmail = null;
+		var vpview = null;
+		var newsmail = null;
+		var courselist = null;
+        if ($('#f_name')) {name = $('#f_name');}
+        if ($('#f_surname')) {surname = $('#f_surname');} 
+        if ($('#f_email')) {email = $('#f_email');}
+        if ($('#f_email') {pwd = $('#f_pwd');}
+        if ($('#f_pwd_repeat')) { pwd_rep = $('#f_pwd_repeat');}
+        if ($('#f_pwd_old')) {old_pwd = $('#f_pwd_old');}
+        if (pwd){ var pwdV = pwd.val();} 
+        if (pwd_rep) {var pwd_repV = pwd_rep.val();} 
+        if (old_pwd) {var old_pwdV = old_pwd.val();}
+		if ($('#f_vpmail')) {vpmail = $('#f_vpmail');}
+		if ($('#f_vpview')) {vpiew = $('#f_vpview');}
+		if ($('#f_newsmail')) {newsmail = $('#f_newsmail');}
+		if ($('#f_courselist')) {courselist = $('#f_courselist');}
 
         if(old_pwdV == "")
         {
@@ -147,7 +184,13 @@
             'data[mail]': email.val(),
             'data[name]': name.val(),
             'data[surname]': surname.val(),
-            'data[oldpwd]' : old_pwd.val()
+            'data[oldpwd]' : old_pwd.val(),
+			'data[vpmail]' : vpmail.val(),
+			'data[newsmail]' : newsmail.val(),
+			'data[vpview]' : vpview.val(),
+			'data[courselist]': courselist.val()
+			
+			
         }, function (data) {
 
             try {

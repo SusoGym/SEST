@@ -431,10 +431,9 @@ class Teacher extends User
     public function getCoverLessonNrs()
     {
         return $this->coverLessonNrs;
-    }
-
-
-    /**
+    } 
+	
+	/**
      * sets currentCoverLessonsNr
      * @param array (int)
      */
@@ -443,6 +442,33 @@ class Teacher extends User
         $this->coverLessonNrs = $arr;
     }
 
+	
+	/**
+	* returns status of mail service for changed coverlesson plan
+	* @return bool
+	*/
+	public function getVpMailStatus(){
+		return Model::getInstance()->getTeacherVpMailStatus($this->id);		
+	}
+	
+	/**
+	* returns status of mail service for newsletters
+	* @return bool
+	*/
+	public function getNewsMailStatus(){
+		return Model::getInstance()->getTeacherNewsMailStatus($this->id);		
+	}
+	
+	/**
+	* returns status of initial interface fo Cover Lesson View
+	* @return bool
+	*/
+	public function getVpViewStatus(){
+		return Model::getInstance()->getTeacherVpViewStatus($this->id);		
+	}
+
+
+   
     /**
      *Returns required slots according to lessonAmount
      *
@@ -603,7 +629,7 @@ class StudentUser extends User
     protected $class;
     protected $bday;
     protected $parent;
-    protected $courses;
+    
 
     /**
      * StudentUser constructor.
@@ -615,13 +641,13 @@ class StudentUser extends User
      * @param int $parent
      * @param string $courses
      */
-    function __construct($id, $name, $surname, $class, $bday, $parent, $courses)
+    function __construct($id, $name, $surname, $class, $bday, $parent, $courses = null)
     {
         parent::__construct($id, 3, null, $name, $surname);
         $this->class = $class;
         $this->bday = $bday;
         $this->parent = $parent;
-        $this->courses = $courses;
+        //$this->courses = $courses;  -- 
     }
 
     /**
@@ -649,11 +675,11 @@ class StudentUser extends User
     }
 
     /**
-     * @return string
+	* @return string
      */
     public function getCourses()
     {
-        return $this->courses;
+        return Model::getInstance()->getStudentCourses($this->Id);
     }
 
     /**
