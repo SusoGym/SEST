@@ -23,7 +23,7 @@ public $id;
 public $aktiv;//boolean
 public $emailed = 0;
 public $changedEntry = 0;
-public $stand;//Datum der letzten Änderung
+public $stand;//Datum der letzten ï¿½nderung
 private $connection;
 
 
@@ -80,7 +80,7 @@ $this->vFach = $data['fach'];
 $this->vRaum = $data['raum'];
 //zu vertretender Lehrer als Objekt
 if($this->vTeacherObject->getShortName() == $data['eLehrer']){
-//Vertreter und zu Vertretender sind identisch -> z.B. bei Raumänderung
+//Vertreter und zu Vertretender sind identisch -> z.B. bei Raumï¿½nderung
 $this->eTeacherObject = $this->vTeacherObject;
 }
 else{
@@ -99,7 +99,7 @@ $this->id = $data['id'];
 
 
 /**
-* Formatierung der Daten (führende Null bei Klassennamen, Leerzeichen entfernen etc)
+* Formatierung der Daten (fï¿½hrende Null bei Klassennamen, Leerzeichen entfernen etc)
 * @param String
 * @return String
 */
@@ -132,7 +132,7 @@ return str_replace(" ","",$pString);
 
 
 /**
-*Erstlle eine ID zum Eintrag in die DB mittels welcher die Existenz einse Eintrags überprüft wird
+*Erstlle eine ID zum Eintrag in die DB mittels welcher die Existenz einse Eintrags ï¿½berprï¿½ft wird
 *@return string
 */
 private function makeId(){
