@@ -860,46 +860,52 @@ class Controller
             $surname = $data['surname'];
             $oldpwd = $data['oldpwd'];
 			//Teacher AND Student handling needs to be worked on
-			if (self::$user instanceOf Teacher) {
-					$vpmail == $data['vpmail'];
-					$vpview == $data['vpview'];
-					$this->model->updateTeacherData(self::$user->getId(),$vpview,$vpmail);	
-					$this->infoToView['vpmail'] = $vpmail;
-					$this->infoToView['vpview'] = $vpview;
+			if (self::$user instanceOf Guardian){
+				if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+                die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie eine valide Emailadresse an!"))));
+				}
+
+				if ($oldpwd == "") {
+					die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie ihr altes Passwort an!"))));
+				} else if (!$this->model->passwordValidate(self::getUser()->getEmail(), $oldpwd)) {
+					die(json_encode(array("success" => false, "notifications" => array("Ihr altes Passwort ist nicht korrekt!"), "resetold" => true)));
+				}
+
+				if ($pwd != "") {
+					$this->model->changePwd(self::getUser()->getId(), $pwd);
+				}
+				$succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail);
+
+				if (!$succ) {
+					die(json_encode(array("success" => false, "notifications" => array("Die angegebene Emailadresse ist bereits mit einem anderen Account verknüpft!"))));
+				}
+
+				$_SESSION['user']['mail'] = $mail;
+				if ($pwd != "")
+                $_SESSION['user']['pwd'] = $pwd;
+				}
+			elseif (self::$user instanceOf Teacher) {
+					$vpmail = $data['vpmail'];
+					$vpview = $data['vpview'];
+					$newsmail = $data['newsmail'];
+					$this->model->updateTeacherData(self::$user->getId(),$vpview,$vpmail,$newsmail);	
+					
+					$this->infoToView['vpmail'] = self::$user->getVpMailStatus();
+					$this->infoToView['vpview'] = self::$user->getVpViewStatus();
+					$this->infoToView['newsmail'] = self::$user->getNewsMailStatus();
 					}
 			elseif (self::$user instanceOf StudentUser) {
 				$courseList = $data['courselist'];
 				$this->model->updateStudentData($courseList);
-				$this->infoToView['courselist'] = $courseList;
+				$this->infoToView['courses'] = self::$user->getCourses();
 			}
-            if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
-                die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie eine valide Emailadresse an!"))));
-            }
-
-            if ($oldpwd == "") {
-                die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie ihr altes Passwort an!"))));
-            } else if (!$this->model->passwordValidate(self::getUser()->getEmail(), $oldpwd)) {
-                die(json_encode(array("success" => false, "notifications" => array("Ihr altes Passwort ist nicht korrekt!"), "resetold" => true)));
-            }
-
-            if ($pwd != "") {
-                $this->model->changePwd(self::getUser()->getId(), $pwd);
-            }
-            $succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail);
-
-            if (!$succ) {
-                die(json_encode(array("success" => false, "notifications" => array("Die angegebene Emailadresse ist bereits mit einem anderen Account verknüpft!"))));
-            }
-
-            $_SESSION['user']['mail'] = $mail;
-            if ($pwd != "")
-                $_SESSION['user']['pwd'] = $pwd;
+            
             $this->notify("Ihre Nutzerdaten wurden erfolgreich aktualisiert!", 4000, true);
             die(json_encode(array("success" => true)));
 
         }
-
-        return "editdata";
+		
+		return "editdata";
     }
 
     public final function getValueIfNotExistent($arr, $key, $defVal)

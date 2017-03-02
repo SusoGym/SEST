@@ -939,15 +939,59 @@ class Model
         return true;
     }
 	
+	
+	/**
+	* get teacher's VPMail status
+	* @param int $id
+	* @return bool
+	*/
+	public function getTeacherVpMailStatus($id){
+		$data = self::$connection->selectValues("SELECT receive_vpmail from lehrer WHERE id = $id");
+		return $data[0][0];
+		}
+		
+	/**
+	* get teacher's NewsMail status
+	* @param int $id
+	* @return bool
+	*/
+	public function getTeacherNewsMailStatus($id){
+		$data = self::$connection->selectValues("SELECT receive_news from lehrer WHERE id = $id");
+		return $data[0][0];
+		}
+	
+	/**
+	* get teacher's VP View status
+	* false => view is set to personally relevant entries only
+	* @param int $id
+	* @return bool
+	*/
+	public function getTeacherVpViewStatus($id){
+		$data = self::$connection->selectValues("SELECT vpview_all from lehrer WHERE id = $id");
+		return $data[0][0];
+		}
+		
+	/**
+	* get student's courses
+	* @param int $id
+	* @return String
+	*/
+	public function getStudentCourses($id){
+		$data = self::$connection->selectValues("SELECT kurse from schueler WHERE id = $id");
+		return $data[0][0];
+		}
+		
 	/** Change teacherData
 	 *
 	 * @param $usrId
 	 * @param bool vpview
 	 * @param bool vpmail
+	 * @param bool newsmail
+	 * @param bool newsmail
 	 */
-	public function updateTeachData($usrId, $vpview, $vpmail) {
+	public function updateTeacherData($usrId, $vpview, $vpmail,$newsmail) {
 
-		$check = self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview = $vpview WHERE  id = $usrId");
+		$check = self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview_all = $vpview, receive_news = $newsmail WHERE  id = $usrId");
 	}
 	
 	/** Change teacherData
@@ -956,7 +1000,7 @@ class Model
 	 * @param string $courseList 
 	 */
 	public function updateStudentData($usrId, $courseList) {
-		$check = self::$connection->straightQuery("update schueler set courselist = $courseList WHERE  id = $usrId");
+		$check = self::$connection->straightQuery("update schueler set kurse = $courseList WHERE  id = $usrId");
 	}
 
 
