@@ -927,6 +927,10 @@ class Model
     public function updateUserData($usrId, $name, $surname, $email)
     {
 
+        $name = self::$connection->escape_string($name);
+        $surname = self::$connection->escape_string($surname);
+        $email = self::$connection->escape_string($email);
+
         $check = self::$connection->selectValues("SELECT * FROM `user` WHERE email='$email' AND NOT id = $usrId");
 
         if (isset($check[0]))
@@ -986,25 +990,29 @@ class Model
     /** Change teacherData
      *
      * @param $usrId
-     * @param bool vpview
-     * @param bool vpmail
-     * @param bool newsmail
-     * @param bool newsmail
+     * @param bool $vpview
+     * @param bool $vpmail
+     * @param bool $newsmail
+     * @return bool
      */
     public function updateTeacherData($usrId, $vpview, $vpmail, $newsmail)
     {
-
-        $check = self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview_all = $vpview, receive_news = $newsmail WHERE  id = $usrId");
+        self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview_all = $vpview, receive_news = $newsmail WHERE  id = $usrId");
+        return true;
     }
 
     /** Change teacherData
      *
      * @param $usrId
      * @param string $courseList
+     * @return bool
      */
     public function updateStudentData($usrId, $courseList)
     {
-        $check = self::$connection->straightQuery("update schueler set kurse = $courseList WHERE  id = $usrId");
+
+        $courseList= self::$connection->escape_string($courseList);
+        self::$connection->straightQuery("update schueler set kurse = '$courseList' WHERE  id = $usrId");
+        return true;
     }
 
 
