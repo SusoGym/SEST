@@ -1,7 +1,7 @@
 <?php
 $data = $this->getDataForView();
 
-$selectionActive = $est = $vplan = $events = $news = $editData = true;
+$selectionActive = $est = $vplan = $events = $news = $editData = $childSel = true;
 $today = date("Ymd");
 
 $userObj = Controller::getUser();
@@ -50,19 +50,27 @@ $modules = array();
 
 array_push($modules, array("id" => "home", "href" => ".", "title" => "Home", "icon" => "home", "inner" => "<font style='font-size: 24px;'>Suso-Intern</font>"));
 
-if ($editData) {
-    array_push($modules, array("id" => "editdata", "href" => "?type=editdata", "title" => "Account bearbeiten", "icon" => "settings"));
-
-}
 
 if ($userObj instanceof Guardian) {
-    array_push($modules, array("id" => "childsel", "href" => "?type=childsel", "title" => "Kinder verwalten", "icon" => "face"));
+    if ($editData) {
+        array_push($modules, array("id" => "editdata", "href" => "?type=parent_editdata", "title" => "Account bearbeiten", "icon" => "settings"));
+    }
+    if ($childSel) {
+        array_push($modules, array("id" => "childsel", "href" => "?type=childsel", "title" => "Kinder verwalten", "icon" => "face"));
+    }
     if ($est) {
         array_push($modules, array("id" => "est", "href" => "?type=eest", "title" => "Elternsprechtag", "icon" => "supervisor_account"));
     }
-} else {
+} else if ($userObj instanceof Teacher) {
     if ($est) {
         array_push($modules, array("id" => "est", "href" => "?type=lest", "title" => "Elternsprechtag", "icon" => "supervisor_account"));
+    }
+    if ($editData) {
+        array_push($modules, array("id" => "editdata", "href" => "?type=teacher_editdata", "title" => "Account bearbeiten", "icon" => "settings"));
+    }
+} else if ($userObj instanceof StudentUser) {
+    if ($editData) {
+        array_push($modules, array("id" => "editdata", "href" => "?type=student_editdata", "title" => "Account bearbeiten", "icon" => "settings"));
     }
 }
 

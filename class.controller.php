@@ -138,8 +138,14 @@ class Controller
             case "addstudent":
                 $this->addStudent();
                 break;
-            case "editdata":
-                $template = $this->handleUserEditData();
+            case "parent_editdata":
+                $template = $this->handleParentEditData();
+                break;
+            case "teacher_editdata":
+                $template = $this->handleTeacherEditData();
+                break;
+            case "student_editdata":
+                $template = $this->handleStudentEditData();
                 break;
             case "vplan":
                 $template = $this->handleCoverLessons();
@@ -467,38 +473,79 @@ class Controller
     private function handleCoverLessons()
     {
 
-        if(self::$user == null)
+
+        $usr = self::getUser();
+
+        if ($usr == null && isset($this->input['user']) && isset($this->input['pwd'])) {
+            $usr = $this->model->getLdapUserByLdapNameAndPwd($this->input['user'], $this->input['pwd']);
+        }
+
+        if ($usr == null && isset($this->input['console']))
+            die(json_encode(array("code" => 404, "message" => "Invalid userdata!")));
+        else if ($usr == null)
             return "login";
 
         $isStaff = false;
-        $this->infoToView["VP_showAll"] = isset($this->input['all']);
+        $this->infoToView["VP_showAll"] = isset($this->input['all']) || ($usr instanceof Teacher && $usr->getVpViewStatus());
         $this->infoToView['VP_allDays'] = $this->model->getVPDays($isStaff || $this->infoToView['VP_showAll']);
-        $this->infoToView['user'] = self::$user;
+        $this->infoToView['user'] = $usr;
 
-        if(isset($this->infoToView['VP_showAll']))
-        {
+        if (isset($this->infoToView['VP_showAll']) && $this->infoToView['VP_showAll']) {
             $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessons($this->infoToView['VP_showAll'], null, $this->infoToView['VP_allDays']);
             $this->infoToView['VP_blockedRooms'] = $this->model->getBlockedRooms($this->infoToView['VP_allDays']);
             $this->infoToView['VP_absentTeachers'] = $this->model->getAbsentTeachers($this->infoToView['VP_allDays']);
         }
 
-        if (self::$user instanceof Teacher) {
+        if ($usr instanceof Teacher) {
             $isStaff = true;
-            $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessons($this->infoToView['VP_showAll'], self::$user, $this->infoToView['VP_allDays']);
+            $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessons($this->infoToView['VP_showAll'], $usr, $this->infoToView['VP_allDays']);
             $this->infoToView['VP_blockedRooms'] = $this->model->getBlockedRooms($this->infoToView['VP_allDays']);
             $this->infoToView['VP_absentTeachers'] = $this->model->getAbsentTeachers($this->infoToView['VP_allDays']);
-        } elseif (self::$user instanceOf Guardian) {
+        } elseif ($usr instanceOf Guardian) {
             /** @var Student $child */
             $classes = array();
             foreach ($this->infoToView["children"] as $child) {
                 $classes[] = $child->getClass();
             }
-            $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessonsParents($classes, $this->infoToView['VP_allDays']);
-        } elseif (self::$user instanceof StudentUser) {
-            $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessonsStudents(self::$user, $this->infoToView['VP_allDays']);
+            if (!isset($this->infoToView['VP_coverLessons'])) {
+                $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessonsParents($classes, $this->infoToView['VP_allDays']);
+            }
+        } elseif ($usr instanceof StudentUser) {
+            if (!isset($this->infoToView['VP_coverLessons'])) {
+                $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessonsStudents($usr, $this->infoToView['VP_allDays']);
+            }
         }
         $this->infoToView['VP_lastUpdate'] = $this->model->getUpdateTime();
         $this->infoToView['VP_termine'] = $this->model->getNextDates($isStaff);
+
+        if (isset($this->input['console'])) {
+
+            $lessons = array();
+
+            foreach ($this->infoToView['VP_coverLessons'] as $date => $data) {
+
+                $coverLessonsThisDay = array();
+                /** @var CoverLesson $coverLesson */
+                foreach ($data as $coverLesson) {
+                    $coverLessonArr = array("subject" => $coverLesson->eFach, "teacher" => $coverLesson->eTeacherObject->getShortName(),
+                        "subteacher" => $coverLesson->vTeacherObject->getUntisName(), "subsubject" => $coverLesson->vFach, "subroom" => $coverLesson->vRaum,
+                        "classes" => $coverLesson->klassen, "comment" => $coverLesson->kommentar, "hour" => $coverLesson->stunde);
+
+                    $coverLessonsThisDay[] = $coverLessonArr;
+                }
+
+                $lessons[$date] = $coverLessonsThisDay;
+
+
+            }
+
+
+            $data = array("coverlessons" => $lessons);
+
+            header('Content-Type: application/json');
+            die(json_encode($data, JSON_PRETTY_PRINT));
+        }
+
         return "vplan";
     }
 
@@ -856,11 +903,77 @@ class Controller
 
     }
 
+
+    public function handleStudentEditData()
+    {
+
+        if (!(self::$user instanceof StudentUser)) {
+            $this->notify("Nur Schüler können auf diesen Bereich zugreifen!");
+            return $this->getDashBoardName();
+        }
+
+        $this->infoToView['user'] = self::getUser();
+
+        if (isset($this->input['console']) && isset($this->input['data'])) {
+            $courses = $this->input['data']['courses'];
+
+            $this->model->updateStudentData(self::getUser()->getId(), $courses);
+
+            $this->notify("Ihre Einstellungen wurden erfolgreich aktualisiert!", 4000, true);
+            die(json_encode(array("success" => true)));
+        }
+
+        return "student_editdata";
+    }
+
     /**
      * @return string
      */
-    public function handleUserEditData()
+    public function handleTeacherEditData()
     {
+
+        if (!(self::$user instanceof Teacher)) {
+            $this->notify("Nur Lehrer können auf diesen Bereich zugreifen!");
+            return $this->getDashBoardName();
+        }
+
+        $input = $this->input;
+        $this->infoToView['user'] = self::getUser();
+        // $_SESSION['user']['mail'] $_SESSION['user']['pwd']
+
+        if (isset($input['console']) && isset($input['data'])) {
+            $data = $input['data'];
+
+            $vpmail = $data['vpmail'];
+            $vpview = $data['vpview'];
+            $newsmail = $data['newsmail'];
+
+            $this->model->updateTeacherData(self::$user->getId(), $vpview, $vpmail, $newsmail);
+
+            $this->notify("Ihre Einstellungen wurden erfolgreich aktualisiert!", 4000, true);
+            die(json_encode(array("success" => true)));
+
+        }
+
+
+        $this->infoToView['vpmail'] = self::$user->getVpMailStatus();
+        $this->infoToView['vpview'] = self::$user->getVpViewStatus();
+        $this->infoToView['newsmail'] = self::$user->getNewsMailStatus();
+
+        return "teacher_editdata";
+    }
+
+    /**
+     * @return string
+     */
+    public function handleParentEditData()
+    {
+
+        if (!(self::$user instanceof Guardian)) {
+            $this->notify("Nur Eltern können auf diesen Bereich zugreifen!");
+            return $this->getDashBoardName();
+        }
+
         $input = $this->input;
         $this->infoToView['user'] = self::getUser();
         // $_SESSION['user']['mail'] $_SESSION['user']['pwd']
@@ -872,53 +985,36 @@ class Controller
             $name = $data['name'];
             $surname = $data['surname'];
             $oldpwd = $data['oldpwd'];
-			//Teacher AND Student handling needs to be worked on
-			if (self::$user instanceOf Guardian){
-				if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+            //Teacher AND Student handling needs to be worked on
+            if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
                 die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie eine valide Emailadresse an!"))));
-				}
+            }
 
-				if ($oldpwd == "") {
-					die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie ihr altes Passwort an!"))));
-				} else if (!$this->model->passwordValidate(self::getUser()->getEmail(), $oldpwd)) {
-					die(json_encode(array("success" => false, "notifications" => array("Ihr altes Passwort ist nicht korrekt!"), "resetold" => true)));
-				}
+            if ($oldpwd == "") {
+                die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie ihr altes Passwort an!"))));
+            } else if (!$this->model->passwordValidate(self::getUser()->getEmail(), $oldpwd)) {
+                die(json_encode(array("success" => false, "notifications" => array("Ihr altes Passwort ist nicht korrekt!"), "resetold" => true)));
+            }
 
-				if ($pwd != "") {
-					$this->model->changePwd(self::getUser()->getId(), $pwd);
-				}
-				$succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail);
+            if ($pwd != "") {
+                $this->model->changePwd(self::getUser()->getId(), $pwd);
+            }
+            $succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail);
 
-				if (!$succ) {
-					die(json_encode(array("success" => false, "notifications" => array("Die angegebene Emailadresse ist bereits mit einem anderen Account verknüpft!"))));
-				}
+            if (!$succ) {
+                die(json_encode(array("success" => false, "notifications" => array("Die angegebene Emailadresse ist bereits mit einem anderen Account verknüpft!"))));
+            }
 
-				$_SESSION['user']['mail'] = $mail;
-				if ($pwd != "")
+            $_SESSION['user']['mail'] = $mail;
+            if ($pwd != "")
                 $_SESSION['user']['pwd'] = $pwd;
-				}
-			elseif (self::$user instanceOf Teacher) {
-					$vpmail = $data['vpmail'];
-					$vpview = $data['vpview'];
-					$newsmail = $data['newsmail'];
-					$this->model->updateTeacherData(self::$user->getId(),$vpview,$vpmail,$newsmail);
-
-					$this->infoToView['vpmail'] = self::$user->getVpMailStatus();
-					$this->infoToView['vpview'] = self::$user->getVpViewStatus();
-					$this->infoToView['newsmail'] = self::$user->getNewsMailStatus();
-					}
-			elseif (self::$user instanceOf StudentUser) {
-				$courseList = $data['courselist'];
-				$this->model->updateStudentData($courseList);
-				$this->infoToView['courses'] = self::$user->getCourses();
-			}
 
             $this->notify("Ihre Nutzerdaten wurden erfolgreich aktualisiert!", 4000, true);
             die(json_encode(array("success" => true)));
 
         }
 
-		return "editdata";
+        return "parent_editdata";
     }
 
     public final function getValueIfNotExistent($arr, $key, $defVal)
