@@ -9,6 +9,7 @@
         foreach ($data['notifications'] as $not)
         {
             echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
+            echo "console.info('Toast: " . $not['msg'] . "');'";
         }
 
     ?>

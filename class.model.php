@@ -331,15 +331,13 @@ class Model
 
     /**
      * @param $teacherId int
-     * @param $rawData
      * @return int
      */
-    public function getTeacherLessonAmountByTeacherId($teacherId, $rawData = null)
+    public function getTeacherLessonAmountByTeacherId($teacherId)
     {
         $data = self::$connection->selectValues("SELECT deputat FROM lehrer WHERE id=$teacherId");
-        if (isset($data)) {
-            $lessons = $data[0][0];
-        }
+
+        $lessons = $data[0][0];
 
         return $lessons;
     }
@@ -397,7 +395,7 @@ class Model
 
             if (!isset($novelData->{'code'}) || !isset($novelData->{'type'}) || $novelData->{'code'} != "200" || $novelData->{'type'} != 'Teacher') {
                 ChromePhp::info(json_encode($novelData));
-                if (isset($novelData->{'type'}) && $novelData->{'type'} == "student") {
+                if (isset($novelData->{'type'}) && $novelData->{'type'} == "student" && $novelData->{'code'} == "200") {
                     $query = "SELECT * FROM schueler WHERE klasse='" . $novelData->{'class'} . "' AND NAME LIKE '" . $novelData->{'surname'} . "' AND";
                     $names = explode(' ', $novelData->{'givenname'});
 
@@ -410,7 +408,7 @@ class Model
                     $data = self::$connection->selectAssociativeValues($query);
 
                     if (!isset($data[0])) {
-                        return null;
+                        die("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator.");
                     }
                     $data = $data[0];
 
@@ -938,70 +936,76 @@ class Model
 
         return true;
     }
-	
-	
-	/**
-	* get teacher's VPMail status
-	* @param int $id
-	* @return bool
-	*/
-	public function getTeacherVpMailStatus($id){
-		$data = self::$connection->selectValues("SELECT receive_vpmail from lehrer WHERE id = $id");
-		return $data[0][0];
-		}
-		
-	/**
-	* get teacher's NewsMail status
-	* @param int $id
-	* @return bool
-	*/
-	public function getTeacherNewsMailStatus($id){
-		$data = self::$connection->selectValues("SELECT receive_news from lehrer WHERE id = $id");
-		return $data[0][0];
-		}
-	
-	/**
-	* get teacher's VP View status
-	* false => view is set to personally relevant entries only
-	* @param int $id
-	* @return bool
-	*/
-	public function getTeacherVpViewStatus($id){
-		$data = self::$connection->selectValues("SELECT vpview_all from lehrer WHERE id = $id");
-		return $data[0][0];
-		}
-		
-	/**
-	* get student's courses
-	* @param int $id
-	* @return String
-	*/
-	public function getStudentCourses($id){
-		$data = self::$connection->selectValues("SELECT kurse from schueler WHERE id = $id");
-		return $data[0][0];
-		}
-		
-	/** Change teacherData
-	 *
-	 * @param $usrId
-	 * @param bool vpview
-	 * @param bool vpmail
-	 * @param bool newsmail
-	 * @param bool newsmail
-	 */
-	public function updateTeacherData($usrId, $vpview, $vpmail,$newsmail) {
 
-		$check = self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview_all = $vpview, receive_news = $newsmail WHERE  id = $usrId");
-	}
-	
-	/** Change teacherData
-	 *
-	 * @param $usrId
-	 * @param string $courseList 
-	 */
-	public function updateStudentData($usrId, $courseList) {
-		$check = self::$connection->straightQuery("update schueler set kurse = $courseList WHERE  id = $usrId");
-	}
+
+    /**
+     * get teacher's VPMail status
+     * @param int $id
+     * @return bool
+     */
+    public function getTeacherVpMailStatus($id)
+    {
+        $data = self::$connection->selectValues("SELECT receive_vpmail from lehrer WHERE id = $id");
+        return $data[0][0];
+    }
+
+    /**
+     * get teacher's NewsMail status
+     * @param int $id
+     * @return bool
+     */
+    public function getTeacherNewsMailStatus($id)
+    {
+        $data = self::$connection->selectValues("SELECT receive_news from lehrer WHERE id = $id");
+        return $data[0][0];
+    }
+
+    /**
+     * get teacher's VP View status
+     * false => view is set to personally relevant entries only
+     * @param int $id
+     * @return bool
+     */
+    public function getTeacherVpViewStatus($id)
+    {
+        $data = self::$connection->selectValues("SELECT vpview_all from lehrer WHERE id = $id");
+        return $data[0][0];
+    }
+
+    /**
+     * get student's courses
+     * @param int $id
+     * @return String
+     */
+    public function getStudentCourses($id)
+    {
+        $data = self::$connection->selectValues("SELECT kurse from schueler WHERE id = $id");
+        return $data[0][0];
+    }
+
+    /** Change teacherData
+     *
+     * @param $usrId
+     * @param bool vpview
+     * @param bool vpmail
+     * @param bool newsmail
+     * @param bool newsmail
+     */
+    public function updateTeacherData($usrId, $vpview, $vpmail, $newsmail)
+    {
+
+        $check = self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview_all = $vpview, receive_news = $newsmail WHERE  id = $usrId");
+    }
+
+    /** Change teacherData
+     *
+     * @param $usrId
+     * @param string $courseList
+     */
+    public function updateStudentData($usrId, $courseList)
+    {
+        $check = self::$connection->straightQuery("update schueler set kurse = $courseList WHERE  id = $usrId");
+    }
 
 
     /*************************************************
@@ -1009,19 +1013,20 @@ class Model
      *************************************************/
 
     /**
-     *get all relevant days for display
+     * get all relevant days for display
      * @param bool $isTeacher
+     * @return array [timestamp, dateAsString]
      */
-    public function VP_getAllDays($isTeacher)
+    public function getVPDays($isTeacher)
     {
-        (!$isTeacher) ? $add = " AND tag<3 " : $add = "";
+        $add = $isTeacher ? "" : "AND tag<3"; // how lovely
         $allDays = array();
-        $data = self::$connection->selectValues("SELECT DISTINCT datum FROM vp_vpdata WHERE tag>0 " . $add . " ORDER BY datum ASC");
-        if (isset($data)) {
-            foreach ($data as $d) {
-                $allDays[] = array("timestamp" => $d[0], "dateAsString" => $this->getDateString($d[0]));
-            }
+        $data = self::$connection->selectValues("SELECT DISTINCT datum FROM vp_vpdata WHERE tag>0 $add ORDER BY datum ASC");
+
+        foreach ($data as $day) {
+            $allDays[] = array("timestamp" => $day[0], "dateAsString" => $this->getDateString($day[0]));
         }
+
         return $allDays;
     }
 
@@ -1032,7 +1037,7 @@ class Model
      */
     private function getDateString($date)
     {
-        return $this->getWeekday($date) . ". " . $this->reverseDate($date);
+        return $this->getWeekday($date) . ". " . $this->formatDateToGerman($date);
     }
 
     /**
@@ -1042,41 +1047,41 @@ class Model
      */
     private function getWeekday($date)
     {
-        $wochentage = array('So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa');
-        $monat = $date[4] . $date[5];
-        $tag = $date[6] . $date[7];
-        $jahr = $date[0] . $date[1] . $date[2] . $date[3];
-        $date = getdate(mktime(0, 0, 0, $monat, $tag, $jahr));
-        $wochentag = $date['wday'];
-        return $wochentage[$wochentag];
+        $weekdays = array('So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa');
+        $month = $date[4] . $date[5];
+        $day = $date[6] . $date[7];
+        $year = $date[0] . $date[1] . $date[2] . $date[3];
+        $date = getdate(mktime(0, 0, 0, $month, $day, $year));
+        $dayOfWeek = $date['wday'];
+        return $weekdays[$dayOfWeek];
     }
 
 
     /**
-     *return date in format DD.MM.YYYY
+     * return date in format DD.MM.YYYY
      * @param string $date in format "YYYYMMDD"
      * @return String
      */
-    private function reverseDate($date)
+    private function formatDateToGerman($date)
     {
         return $date[6] . $date[7] . "." . $date[4] . $date[5] . "." . $date[0] . $date[1] . $date[2] . $date[3];
     }
 
 
-    /*
-    *return date in Format Monday, den dd.mm.YYYY
-    * @param $date String im Format YYYYMMDD
-    * @return String
-    */
-    public function makeCompleteDate($date)
+    /**
+     * return date in Format DayOfWeek, den dd.mm.YYYY
+     * @param $date String im Format YYYYMMDD
+     * @return String
+     */
+    public function formatDateToCompleteDate($date)
     {
         $year = $date[0] . $date[1] . $date[2] . $date[3];
         $month = $date[4] . $date[5];
         $day = $date[6] . $date[7];
-        $wochentage = array('Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag');
+        $daysOfWeek = array('Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag');
         $datum = getdate(mktime(0, 0, 0, $month, $day, $year));
-        $wochentag = $datum['wday'];
-        $completeDate = $wochentage[$wochentag] . ", den " . $day . "." . $month . "." . $year;
+        $dayOfWeek = $datum['wday'];
+        $completeDate = $daysOfWeek[$dayOfWeek] . ", den " . $day . "." . $month . "." . $year;
         return $completeDate;
     }
 
@@ -1099,34 +1104,35 @@ class Model
     /**
      *get all current cover lessons for teachers
      * @param boolean $showAll all coverLessons or only those of current user
-     * @param Teacher Object
+     * @param Teacher $tchr
      * @param array("datumstring","timestamp") $allDays
-     * @return Array(coverLesson Object)
+     * @return array(coverLesson Object)
      */
     public function getAllCoverLessons($showAll, $tchr, $allDays)
     {
-        $vertretungen = null;
-        $untisName = $tchr->getUntisName();
-        $shortName = $tchr->getShortName();
-        (!$showAll) ? $add = " AND (vLehrer=\"$untisName\" OR eLehrer=\"$shortName\") " : $add = "";
+        $vertretungen = array();
+
+        $add = "";
+        if ($tchr != null && !$showAll) {
+            $add = " AND (vLehrer='" . $tchr->getUntisName() . "' OR eLehrer='" . $tchr->getShortName() . "') ";
+        }
         foreach ($allDays as $day) {
             $datum = $day['timestamp'];
             $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
-			WHERE tag>0
-			AND aktiv=true
-			AND datum=\"$datum\"
+			WHERE aktiv=true
+			AND datum='$datum'
 			$add
 			ORDER BY datum,vLehrer,stunde ASC");
 
             if (count($data) > 0) {
-                foreach ($data as $d) {
+                foreach ($data as $dayData) {
                     $coverLesson = new CoverLesson();
-                    $coverLesson->constructFromDB($d);
+                    $coverLesson->constructFromDB($dayData);
                     $vertretungen[$day["timestamp"]][] = $coverLesson;
                     unset($coverLesson);
                 }
             }
-            unset($data);
+
         }
 
         return $vertretungen;
@@ -1135,7 +1141,7 @@ class Model
     /**
      * get all Cover Lessons for a teacher in Untis presented data (i.e. "--" and "selbst" will be shown)
      * no CoverLesson Object will be instantiated
-     * @param Teacher Object
+     * @param Teacher $teacher
      * @return array()
      */
     public function getCoverLessonsByTeacher($teacher)
@@ -1143,15 +1149,16 @@ class Model
         $coverLessons = array();
         $tname = $teacher->getUntisName();
         $tkurz = $teacher->getShortName();
-        $data = self::$connection->selectValues("SELECT datum,klassen,stunde,fach,raum,eLehrer,eFach,kommentar,vnr,vLehrer
+        $data = self::$connection->selectAssociativeValues("SELECT *
 		FROM vp_vpdata 
-		WHERE (vLehrer=\"$tname\" OR eLehrer=\"$tkurz\" )
+		WHERE (vLehrer='$tname' OR eLehrer='$tkurz')
 		AND aktiv=true and tag>0 ORDER by datum,stunde");
         //echo " --- Anzahl Vertretungen: ".count($data).'<br>';
         if (count($data) > 0) {
             foreach ($data as $d) {
-                $datum = $this->makeCompleteDate($d[0]);
-                $coverLessons[] = array("vnr" => $d[8], "Datum" => $datum, "Vertreter" => $d[9], "Klassen" => $d[1], "Stunde" => $d[2], "Fach" => $d[3], "Raum" => $d[4], "statt_Lehrer" => $d[5], "statt_Fach" => $d[6], "Kommentar" => $d[7]);
+                $datum = $this->formatDateToCompleteDate($d[0]);
+                $coverLessons[] = array("vnr" => $d['vnr'], "Datum" => $datum, "Vertreter" => $d['vLehrer'], "Klassen" => $d['klassen'], "Stunde" => $d['stunde'], "Fach" => $d['fach'], "Raum" => $d['raum'], "statt_Lehrer" => $d['eLehrer'], "statt_Fach" => $d['eFach'], "Kommentar" => $d['kommentar']);
+
             }
         }
         return $coverLessons;
@@ -1159,7 +1166,7 @@ class Model
 
     /**
      *get CoverLesson data by primary key
-     * @param int id
+     * @param int $id
      * @return array()
      */
     public function getCoverLessonById($id)
@@ -1174,56 +1181,53 @@ class Model
     }
 
 
-    /*
-    *get all cover lessons for parents
-    *@param form array(String) $classes
-    *@param array("datumstring","timestamp") $allDays
-    *@return Array(coverLesson Object)
-    */
+    /**
+     *get all cover lessons for parents
+     * @param form array(String) $classes
+     * @param array("datumstring","timestamp") $allDays
+     * @return array(coverLesson Object)
+     */
     public function getAllCoverLessonsParents($classes, $allDays)
     {
         $vertretungen = null;
         //create query string to identify forms
         $classQuery = null;
-        $x = 0;
-        foreach ($classes as $class) {
-            if ($x == 0) {
-                $classQuery = " AND (klassen LIKE " . '"%' . $class . '%"';
-            } else {
-                $classQuery .= " OR klassen LIKE " . '"%' . $class . '%"';
-            }
-            $x++;
+
+        for ($i = 0; $i < sizeof($classes); $i++) {
+            $class = $classes[$i];
+
+            $classQuery .= ($i == 0 ? " AND (" : " OR");
+            $classQuery .= "klassen LIKE '%$class%'";
         }
+
         $classQuery .= ")";
+
         foreach ($allDays as $day) {
             $datum = $day['timestamp'];
             $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
 			WHERE tag>0
 			AND tag<3
 			AND aktiv=true
-			AND datum=\"$datum\"
+			AND datum='$datum'
 			$classQuery
 			ORDER BY datum,stunde ASC");
             if (count($data) > 0) {
-                $x = 0;
                 foreach ($data as $d) {
-                    $coverLesson = new CoverLesson($this->connection);
+                    $coverLesson = new CoverLesson();
                     $coverLesson->constructFromDB($d);
                     $vertretungen[$day["timestamp"]][] = $coverLesson;
-                    unset($coverLesson);
                 }
             }
-            unset($data);
         }
         return $vertretungen;
     }
 
     /**
-    *get all cover lessons for students
-    * @param StudentUser $student
-    * @param array("datumstring","timestamp") $allDays
-    * @return Array(coverLesson Object)
-    */
+     *get all cover lessons for students
+     * @param StudentUser $student
+     * @param array("datumstring","timestamp") $allDays
+     * @return array(coverLesson Object)
+     */
     public function getAllCoverLessonsStudents($student, $allDays)
     {
         $vertretungen = null;
@@ -1236,12 +1240,11 @@ class Model
 			AND tag<3
 			AND aktiv=true
 			AND datum='$datum'
-			AND vp_vpdata.klassen LIKE '%". $student->getClass() ."%' 
+			AND vp_vpdata.klassen LIKE '%" . $student->getClass() . "%' 
 			ORDER BY datum,stunde ASC");
             if (count($data) > 0) {
-                $x = 0;
                 foreach ($data as $d) {
-                    $coverLesson = new CoverLesson($this->connection);
+                    $coverLesson = new CoverLesson();
                     $coverLesson->constructFromDB($d);
                     $vertretungen[$day["timestamp"]][] = $coverLesson;
                     unset($coverLesson);
@@ -1264,10 +1267,10 @@ class Model
         $roomstring = "";
         $blockedRooms = array();
         foreach ($datum as $d) {
-            $dtm = $d['timestamp'];
-            $brs = self::$connection->selectValues("SELECT name FROM vp_blockierteraeume WHERE datum=\"$dtm\" ");
-            if (isset($brs)) {
-                foreach ($brs as $room) {
+            $date = $d['timestamp'];
+            $data = self::$connection->selectValues("SELECT name FROM vp_blockierteraeume WHERE datum='$date' ");
+            if (isset($data)) {
+                foreach ($data as $room) {
                     if ($roomstring == "") {
                         $roomstring = $room[0];
                     } else {
@@ -1297,10 +1300,10 @@ class Model
         $atstring = "";
         $absentTeachers = array();
         foreach ($datum as $d) {
-            $dtm = $d['timestamp'];
-            $ats = self::$connection->selectValues("SELECT name FROM vp_abwesendeLehrer WHERE datum=\"$dtm\" ");
-            if (isset($ats)) {
-                foreach ($ats as $t) {
+            $date = $d['timestamp'];
+            $data = self::$connection->selectValues("SELECT name FROM vp_abwesendeLehrer WHERE datum='$date' ");
+            if (isset($data)) {
+                foreach ($data as $t) {
                     if ($atstring == "") {
                         $atstring = $t[0];
                     } else {
@@ -1318,15 +1321,15 @@ class Model
         return $absentTeachers;
     }
 
-    /*
-    *get Primary key and email by Teacher untisname
-    * @param String $untisname
-    * @return array(String, Int)
-    */
+    /**
+     *get Primary key and email by Teacher untisname
+     * @param String $untisName
+     * @return array(String, Int)
+     */
     public function getTeacherDataByUntisName($untisName)
     {
         $tchrData = array();
-        $data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE untisName=\"$untisName\" ");
+        $data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE untisName='$untisName'");
         if (count($data) > 0) {
             $tchrData = array("email" => $data[0][0], "id" => $data[0][1]);
             return $tchrData;
@@ -1336,15 +1339,15 @@ class Model
 
     }
 
-    /*
-    *get Primary key and email by Teacher untisname
-    * @param String $untisname
-    * @return array(String, Int)
-    */
+    /**
+     *get Primary key and email by Teacher untisname
+     * @param String $short
+     * @return array(String, Int)
+     */
     public function getTeacherDataByShortName($short)
     {
         $tchrData = array();
-        $data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE kuerzel=\"$short\" ");
+        $data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE kuerzel='$short' ");
         if (count($data) > 0) {
             $tchrData = array("email" => $data[0][0], "id" => $data[0][1]);
             return $tchrData;
@@ -1363,10 +1366,14 @@ class Model
     {
         //MUST be separated from student's class
         $courses = array();
-        $data = self::$connection(""); //Query missing - new table to be created [studentID,courseName]
+        $data = self::$connection->selectAssociativeValues("SELECT kurse FROM schueler WHERE id=$studentId"); //Query missing - new table to be created [studentID,courseName]
         if (isset($data)) {
-            foreach ($data[0] as $d) {
-                $courses[] = $d[0];
+            if (isset($data[0])) {
+                $data = $data[0];
+            }
+
+            foreach ($data as $d) {
+                $courses[] = $d['kurse'];
             }
         }
         return $courses;
@@ -1378,7 +1385,7 @@ class Model
      ***********************************************************/
 
     /**
-     * /*Bereite DB fuer neue Eintraege vor
+     * Bereite DB fuer neue Eintraege vor
      *Setze alle Eintraege des Datums der geparsten Datei auf inaktiv
      *Setze das tag Feld auf 0, damit die nur die aktuell geparsten Dateien (Tage) eingetragen werden
      * @param $dat
@@ -1605,8 +1612,8 @@ class Model
 
     /**
      * create mail content for automated cover lesson email
-     * @param Teacher Object
-     * Return String
+     * @param Teacher $teacher
+     * @return String
      */
     public function makeHTMLVpMailContent($teacher)
     {

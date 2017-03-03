@@ -1,12 +1,16 @@
 <?php
 $data = $this->getDataForView();
 
-$selectionActive = $est = $vplan = $events = $news = true;
+$selectionActive = $est = $vplan = $events = $news = $editData = true;
 $today = date("Ymd");
 
 $userObj = Controller::getUser();
 
-if ($userObj instanceof Guardian) {
+if ($userObj == null) {
+
+    $selectionActive = $est = $editData = false;
+
+} else if ($userObj instanceof Guardian) {
     $children = $data['children'];
     if (count($children) == 0) {
         $est = false;
@@ -45,13 +49,18 @@ if (isset($data['modules'])) {
 $modules = array();
 
 array_push($modules, array("id" => "home", "href" => ".", "title" => "Home", "icon" => "home", "inner" => "<font style='font-size: 24px;'>Suso-Intern</font>"));
-array_push($modules, array("id" => "editdata", "href" => "?type=editdata", "title" => "Account bearbeiten", "icon" => "settings"));
+
+if ($editData) {
+    array_push($modules, array("id" => "editdata", "href" => "?type=editdata", "title" => "Account bearbeiten", "icon" => "settings"));
+
+}
+
 if ($userObj instanceof Guardian) {
     array_push($modules, array("id" => "childsel", "href" => "?type=childsel", "title" => "Kinder verwalten", "icon" => "face"));
     if ($est) {
         array_push($modules, array("id" => "est", "href" => "?type=eest", "title" => "Elternsprechtag", "icon" => "supervisor_account"));
     }
-    } else {
+} else {
     if ($est) {
         array_push($modules, array("id" => "est", "href" => "?type=lest", "title" => "Elternsprechtag", "icon" => "supervisor_account"));
     }

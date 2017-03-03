@@ -679,7 +679,7 @@ class StudentUser extends User
      */
     public function getCourses()
     {
-        return Model::getInstance()->getStudentCourses($this->Id);
+        return Model::getInstance()->getStudentCourses($this->id);
     }
 
     /**
@@ -687,7 +687,7 @@ class StudentUser extends User
      */
     public function getData()
     {
-        return array("id" => $this->id, "class" => $this->class, "surname" => $this->surname, "name" => $this->name, "eid" => $this->parent, "bday" => $this->bday, "courses" => $this->courses);
+        return array("id" => $this->id, "class" => $this->class, "surname" => $this->surname, "name" => $this->name, "eid" => $this->parent, "bday" => $this->bday, "courses" => $this->getCourses());
     }
 
 }

@@ -142,8 +142,7 @@ class Controller
                 $template = $this->handleUserEditData();
                 break;
             case "vplan":
-                $this->handleCoverLessons();
-                $template = "vplan";
+                $template = $this->handleCoverLessons();
                 break;
 
             default:
@@ -463,21 +462,34 @@ class Controller
 
     /**
      * Coverlesson logic
-     *
+     * @return string
      */
     private function handleCoverLessons()
     {
+
+        if(self::$user == null)
+            return "login";
+
         $isStaff = false;
-        $this->infoToView["VP_showAll"] = false;
-        $this->infoToView['VP_allDays'] = $this->model->VP_getAllDays($isStaff);
+        $this->infoToView["VP_showAll"] = isset($this->input['all']);
+        $this->infoToView['VP_allDays'] = $this->model->getVPDays($isStaff || $this->infoToView['VP_showAll']);
         $this->infoToView['user'] = self::$user;
+
+        if(isset($this->infoToView['VP_showAll']))
+        {
+            $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessons($this->infoToView['VP_showAll'], null, $this->infoToView['VP_allDays']);
+            $this->infoToView['VP_blockedRooms'] = $this->model->getBlockedRooms($this->infoToView['VP_allDays']);
+            $this->infoToView['VP_absentTeachers'] = $this->model->getAbsentTeachers($this->infoToView['VP_allDays']);
+        }
+
         if (self::$user instanceof Teacher) {
             $isStaff = true;
-            (isset($this->input["all"])) ? $this->infoToView["VP_showAll"] = true : $this->infoToView["VP_showAll"] = false;
             $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessons($this->infoToView['VP_showAll'], self::$user, $this->infoToView['VP_allDays']);
             $this->infoToView['VP_blockedRooms'] = $this->model->getBlockedRooms($this->infoToView['VP_allDays']);
             $this->infoToView['VP_absentTeachers'] = $this->model->getAbsentTeachers($this->infoToView['VP_allDays']);
         } elseif (self::$user instanceOf Guardian) {
+            /** @var Student $child */
+            $classes = array();
             foreach ($this->infoToView["children"] as $child) {
                 $classes[] = $child->getClass();
             }
@@ -487,6 +499,7 @@ class Controller
         }
         $this->infoToView['VP_lastUpdate'] = $this->model->getUpdateTime();
         $this->infoToView['VP_termine'] = $this->model->getNextDates($isStaff);
+        return "vplan";
     }
 
     /**
@@ -888,8 +901,8 @@ class Controller
 					$vpmail = $data['vpmail'];
 					$vpview = $data['vpview'];
 					$newsmail = $data['newsmail'];
-					$this->model->updateTeacherData(self::$user->getId(),$vpview,$vpmail,$newsmail);	
-					
+					$this->model->updateTeacherData(self::$user->getId(),$vpview,$vpmail,$newsmail);
+
 					$this->infoToView['vpmail'] = self::$user->getVpMailStatus();
 					$this->infoToView['vpview'] = self::$user->getVpViewStatus();
 					$this->infoToView['newsmail'] = self::$user->getNewsMailStatus();
@@ -899,12 +912,12 @@ class Controller
 				$this->model->updateStudentData($courseList);
 				$this->infoToView['courses'] = self::$user->getCourses();
 			}
-            
+
             $this->notify("Ihre Nutzerdaten wurden erfolgreich aktualisiert!", 4000, true);
             die(json_encode(array("success" => true)));
 
         }
-		
+
 		return "editdata";
     }
 
