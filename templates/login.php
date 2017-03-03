@@ -89,6 +89,7 @@
     if (isset($data['notifications']))
         foreach ($data['notifications'] as $not) {
             echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
+            echo "console.info('Toast: " . $not['msg'] . "');";
         }
 
     ?>
@@ -108,6 +109,7 @@
                 $('label[for="pwd_login"]').removeClass("active");
             } else {
                 Materialize.toast("Unexpected response: " + data, 4000);
+                console.info("Unexcpected response: " + data);
                 $('#pwd_login').val("");
 
                 $('label[for="pwd_login"]').removeClass("active");

@@ -47,6 +47,7 @@
       <ul class="left hide-on-med-and-down">
         <?php include("navbar.php"); ?>
       </ul>
+        <?php if (Controller::getUser() != null): //if logged in ?>
       <ul class="right hide-on-med-and-down">
         <li>
           <a id="logout" href="?type=logout" title="Logout">
@@ -55,6 +56,8 @@
           </a>
         </li>
       </ul>
+
+        <?php endif; ?>
     </div>
   </nav>
 

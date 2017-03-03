@@ -61,7 +61,7 @@ $this->id = $this->makeId();
 public function constructFromDB($data){
 $this->primaryKey = $data['vNr'];
 $this->tag = $data['tag'];
-$this->datum = Model::getInstance()->makeCompleteDate($data['datum']);
+$this->datum = Model::getInstance()->formatDateToCompleteDate($data['datum']);
 $this->timestampDatum = $data['datum'];
 //vertretender Lehrer als Objekt
 //$vTeacher = new Teacher($this->getTeacherIdByUntisName($data['vLehrer']),$this->connection);
