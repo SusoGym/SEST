@@ -4,18 +4,18 @@
  *Class FileHandler
  */
 class FileHandler {
-
+    
     /**
      * @var string path to file
      */
     private $file;
-
-
+    
+    
     /**
      *var model Object
      */
     private $model;
-
+    
     /**
      *Constructor
      *
@@ -25,8 +25,8 @@ class FileHandler {
         $this->file = $file;
         $this->model = Model::getInstance();
     }
-
-
+    
+    
     /**
      *read headerline
      *
@@ -37,11 +37,11 @@ class FileHandler {
         $line = trim(fgets($fh, "1024"));
         $sourceField = explode(";", $line);
         fclose($fh);
-
+        
         return $sourceField;
     }
-
-
+    
+    
     /**
      *read DB Datafields
      *
@@ -51,8 +51,8 @@ class FileHandler {
     public function readDBFields($student) {
         return $this->model->readDBFields($student);
     }
-
-
+    
+    
     /**
      *read sourceData daten aus Datei lesen
      *
@@ -67,11 +67,11 @@ class FileHandler {
             $sourceData[] = fgets($fh, "1024");
         }
         fclose($fh);
-
+        
         return $sourceData;
     }
-
-
+    
+    
     /**
      *Quelldatei mit Termindaten auslesen
      * @ return array(Termine)
@@ -88,10 +88,10 @@ class FileHandler {
             $x++;
         }
         fclose($fh);
-
+        
         return $events;
     }
-
+    
     /**
      *updateData aktualisiert Datenbank auf Basis einer csv datei
      *
@@ -118,7 +118,7 @@ class FileHandler {
             }
             $x++;
         }
-
+        
         foreach ($lineFieldValue as $l) {
             if ($this->model->checkDBData($student, $l["id"])) {
                 $this->model->updateData($student, $l["id"], $l);
@@ -130,11 +130,11 @@ class FileHandler {
         }
         $changesApplied[0] = $updateCounter;
         $changesApplied[1] = $insertCounter;
-
+        
         return $changesApplied;
     }
-
-
+    
+    
     /**
      *delete unused data from DB
      *
@@ -143,9 +143,9 @@ class FileHandler {
      */
     public function deleteDataFromDB($student) {
         return $this->model->deleteDataFromDB($student);
-
+        
     }
-
+    
     /**
      * create csv-file
      *
@@ -159,7 +159,7 @@ class FileHandler {
         }
         fclose($f);
     }
-
+    
 }
 
 ?>

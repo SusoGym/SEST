@@ -1,7 +1,7 @@
 <?php namespace administrator;
-    include("header.php");
-    $data = \View::getInstance()->getDataForView();
-    date_default_timezone_set('Europe/Berlin');
+include("header.php");
+$data = \View::getInstance()->getDataForView();
+date_default_timezone_set('Europe/Berlin');
 ?>
 
 <div class="container">
@@ -38,24 +38,24 @@
                 </form>
             </div>
             <?php
-                if (isset($data["slots"]))
-                { ?>
+            if (isset($data["slots"]))
+            { ?>
             <ul class="collection">
                 <?php
-                    foreach ($data["slots"] as $s) { ?>
-
-                        <?php
-                        $anfang = date_format(date_create($s['anfang']), 'd.m.Y H:i');
-                        $ende = (date_format(date_create($s['anfang']), 'd.m.Y') == date_format(date_create($s['ende']), 'd.m.Y')) ? date_format(date_create($s['ende']), 'H:i') : date_format(date_create($s['ende']), 'd.m.Y H:i');
-                        ?>
-                        <li class="collection-item"><?php echo $anfang . " bis " . $ende; ?>
-                            <a id="slot" href="?type=setslots&del=<?php echo $s['id']; ?> "
-                               class="secondary-content teal-text">
-                                <i class="material-icons">delete</i>
-                            </a>
-                        </li>
-                        <?php
-                    } ?>
+                foreach ($data["slots"] as $s) { ?>
+                    
+                    <?php
+                    $anfang = date_format(date_create($s['anfang']), 'd.m.Y H:i');
+                    $ende = (date_format(date_create($s['anfang']), 'd.m.Y') == date_format(date_create($s['ende']), 'd.m.Y')) ? date_format(date_create($s['ende']), 'H:i') : date_format(date_create($s['ende']), 'd.m.Y H:i');
+                    ?>
+                    <li class="collection-item"><?php echo $anfang . " bis " . $ende; ?>
+                        <a id="slot" href="?type=setslots&del=<?php echo $s['id']; ?> "
+                           class="secondary-content teal-text">
+                            <i class="material-icons">delete</i>
+                        </a>
+                    </li>
+                    <?php
+                } ?>
         </div>
         <?php } ?>
 

@@ -1,16 +1,16 @@
 <?php namespace administrator;
 
 class TManager {
-
+    
     /**
      *Klasse zur Verarbeitung von Terminobjekten
      */
-
+    
     /** @var array */
     private $monate = null;//Array("mnum"=>string,"mstring"=>string,"jahr"=>int) der Monate mit Terminen
-
-
-
+    
+    
+    
     /**
      *Eintrag aller Termine in die Datenbank
      *
@@ -20,8 +20,8 @@ class TManager {
         $model = Model::getInstance();
         $model->addEventsToDB($termine);
     }
-
-
+    
+    
     /**
      *Monatsarray mit Terminen erstellen
      *
@@ -40,7 +40,7 @@ class TManager {
         }
         if (!$noAdd) $this->monate[] = array("mnum" => $monatZahl, "mstring" => $monat, "jahr" => $jahr);
     }
-
+    
     /**
      *Monatsarray abrufen
      *
@@ -49,8 +49,8 @@ class TManager {
     public function getMonths() {
         return $this->monate;
     }
-
-
+    
+    
     /**
      *Eintrag aller Termins in eine ics-Datei
      *
@@ -88,8 +88,8 @@ class TManager {
         fwrite($f, "END:VCALENDAR");
         fclose($f);
     }
-
-
+    
+    
 }
 
 ?>
