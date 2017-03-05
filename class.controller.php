@@ -212,8 +212,8 @@ class Controller
             return true;
         } elseif (isset($this->input["content"])) {
             //Trage Vertretungen ein
-            $this->model->insertCoverLesson($this->input["content"]); // TO BE THOROUGHLY TESTED
-            return true;
+            $this->model->insertCoverLesson($this->input["content"]);             
+	     return true;
         } elseif (isset($this->input["mail"])) {
             //per POST
             //Starte Mailversand
@@ -1038,7 +1038,9 @@ class Controller
      */
     private function sendMails($list)
     {
-        require("/phpmailer/class.phpmailer.php");
+	$currentTime = date('d.m.Y H:i:s');
+	$this->model->writeToVpLog("Starting to send mails on ".$currentTime);
+	require("phpmailer/class.phpmailer.php");
         //sending emails
         $timestamp = time();
         $datum = date("Y-m-d  H:i:s", $timestamp);
@@ -1078,11 +1080,16 @@ class Controller
             $this->model->writeToVpLog("Trying to execute Query: INSERT into vplanProtokoll (`pk`,`datum`,`recipient`,`mail`,`content`) VALUES ('','$datum','$untisName','$allmailstring','$cont')");
             */
             if (!$mail[$x]->Send()) {
+		   echo "cannot send!";
                 //$mail[$x]->Send() liefert FALSE zurück: Es ist ein Fehler aufgetreten
-                //$this->model->writeToVpLog("....failed".$mail->ErrorInfo);
+		  $currentTime = date('d.m.Y H:i:s');
+                $this->model->writeToVpLog("....failure.".$mail->ErrorInfo." Trying to reach ".$l->getEmail()." ".$currentTime);
             } else {
-                //echo "mail gesendet an: ".$l->getEmail().'<br>';
+                echo "mail gesendet an: ".$l->getEmail().'<br>';
                 //Eintrag des Sendeprotokolls
+			$currentTime = date('d.m.Y H:i:s');
+			$this->model->writeToVpLog($l->getEmail()." ".$currentTime);
+
                 //Inhalt
                 //$this->model->writeToVpLog("....success");
             }
@@ -1092,11 +1099,14 @@ class Controller
             foreach ($l->getCoverLessonNrs() as $cl) {
                 $this->model->UpdateVpMailSentDate($cl);
             }
+	     
+
             $mail[$x] = null;
             $allmailstring = null;
             $cont = null;
             $x++;
         }
+        $this->model->writeToVpLog("*****************************************************");
     }
 
 

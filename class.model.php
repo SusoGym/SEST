@@ -1083,7 +1083,7 @@ class Model
      */
     public function formatDateToCompleteDate($date)
     {
-        $year = $date[0] . $date[1] . $date[2] . $date[3];
+	$year = $date[0] . $date[1] . $date[2] . $date[3];
         $month = $date[4] . $date[5];
         $day = $date[6] . $date[7];
         $daysOfWeek = array('Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag');
@@ -1164,7 +1164,7 @@ class Model
         //echo " --- Anzahl Vertretungen: ".count($data).'<br>';
         if (count($data) > 0) {
             foreach ($data as $d) {
-                $datum = $this->formatDateToCompleteDate($d[0]);
+                $datum = $this->formatDateToCompleteDate($d['datum']);
                 $coverLessons[] = array("vnr" => $d['vnr'], "Datum" => $datum, "Vertreter" => $d['vLehrer'], "Klassen" => $d['klassen'], "Stunde" => $d['stunde'], "Fach" => $d['fach'], "Raum" => $d['raum'], "statt_Lehrer" => $d['eLehrer'], "statt_Fach" => $d['eFach'], "Kommentar" => $d['kommentar']);
 
             }
@@ -1463,35 +1463,34 @@ class Model
         $POSTCoverL->constructFromPOST($content);
 
         //Prüfe ob dieser Eintrag bereits vorhanden ist
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata WHERE id=\"$POSTCoverL->id\" ");
+	 $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata WHERE id=\"$POSTCoverL->id\" ");
         if (count($data) > 0) {
             $DBCoverL = new CoverLesson();
             $DBCoverL->ConstructFromDB($data[0]);
             $pk = $DBCoverL->primaryKey;
-            self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=true,tag=$POSTCoverL->tag,stand=\"$POSTCoverL->stand\" WHERE vNr=$pk");
+	     self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=true,tag=$POSTCoverL->tag,stand=\"$POSTCoverL->stand\" WHERE vNr=$pk");
             //prüfe ob nur Kommentar geaendert ist
             if (strcmp($POSTCoverL->kommentar, $DBCoverL->kommentar) !== 0) {
                 $k = $POSTCoverL->kommentar;
                 //Komentar updaten
-                self::$connection->straightQuery("UPDATE vp_vpdata SET kommentar=\"$k\",aktiv=true,changed=CURRENT_TIMESTAMP WHERE vNr=$pk");
+	     self::$connection->straightQuery("UPDATE vp_vpdata SET kommentar=\"$k\",aktiv=true,changed_entry=CURRENT_TIMESTAMP WHERE vnr=$pk");
             }
             if ($POSTCoverL->changedEntry == 1) {
                 //update all fields except emailed - this is a change to the former version where emailed was set to 0
                 //$POSTCoverL->emailed = 0;
                 $POSTCoverL->aktiv = true;
-                self::$connection->straightQuery("UPDATE vp_vpdata SET tag=$POSTCoverL->tag,datum=\"$POSTCoverL->datum\",vlehrer=\"$POSTCoverL->vTeacher\",
+	         self::$connection->straightQuery("UPDATE vp_vpdata SET tag=$POSTCoverL->tag,datum=\"$POSTCoverL->datum\",vlehrer=\"$POSTCoverL->vTeacher\",
 				klassen=\"$POSTCoverL->klassen\",stunde=\"$POSTCoverL->stunde\",fach=\"$POSTCoverL->vFach\",raum=\"$POSTCoverL->vRaum\",
 				eLehrer=\"$POSTCoverL->eTeacherKurz\",eFach=\"$POSTCoverL->eFach\",kommentar=\"$POSTCoverL->kommentar\",id=\"$POSTCoverL->id\",aktiv=$POSTCoverL->aktiv,
-				stand=\"$POSTCoverL->stand\",changed=CURRENT_TIMESTAMP WHERE vNr=$pk");
+				stand=\"$POSTCoverL->stand\",changed_entry=CURRENT_TIMESTAMP WHERE vNr=$pk");
             }
         } else {
             //Eintrag in Datenbank
             $POSTCoverL->aktiv = true;
-            self::$connection->insertValues("INSERT into vp_vpdata (`vNr`,`tag`,`datum`,`vLehrer`,`klassen`,`stunde`,`fach`,`raum`,`eLehrer`,`eFach`,`kommentar`,`id`,`aktiv`,`stand`,`changed` )
+	     self::$connection->insertValues("INSERT into vp_vpdata (`vnr`,`tag`,`datum`,`vLehrer`,`klassen`,`stunde`,`fach`,`raum`,`eLehrer`,`eFach`,`kommentar`,`id`,`aktiv`,`stand`,`changed_entry` )
 			VALUES ('','$POSTCoverL->tag','$POSTCoverL->datum','$POSTCoverL->vTeacher','$POSTCoverL->klassen','$POSTCoverL->stunde','$POSTCoverL->vFach','$POSTCoverL->vRaum',
 			'$POSTCoverL->eTeacherKurz','$POSTCoverL->eFach','$POSTCoverL->kommentar','$POSTCoverL->id','$POSTCoverL->aktiv','$POSTCoverL->stand',CURRENT_TIMESTAMP)");
         }
-
     }
 
 
@@ -1502,7 +1501,8 @@ class Model
     public function writeToVpLog($text)
     {
         $f = fopen("vpaction.log", "a");
-        fwrite($f, $text . "\r\n");
+        $text .= "\r\n";
+        fwrite($f, $text);
         fclose($f);
     }
 
@@ -1516,9 +1516,9 @@ class Model
         $mailListLehrer = array();
         //Lese Emailbedarf für Aktualisierung (neue Vertretungen )
         $data = self::$connection->selectValues("SELECT DISTINCT lehrer.id,email FROM vp_vpdata,lehrer 
-		WHERE changed > emailed
+		WHERE changed_entry >= emailed
 		AND vp_vpdata.vLehrer=lehrer.untisName
-		AND lehrer.receive_vpmail=TRUE
+		AND lehrer.receive_vpmail IS TRUE
 		AND aktiv=TRUE AND vlehrer NOT LIKE '%--%' 
 		AND vlehrer NOT LIKE '%selbst%' 
 		AND tag>0");
@@ -1533,8 +1533,8 @@ class Model
         $data = self::$connection->selectValues("SELECT DISTINCT lehrer.id,email 
 		FROM vp_vpdata,lehrer 
 		WHERE vp_vpdata.eLehrer=lehrer.kuerzel
-		AND changed > emailed
-		AND lehrer.receive_vpmail=TRUE
+		AND changed_entry >= emailed
+		AND lehrer.receive_vpmail IS TRUE
 		AND aktiv=TRUE 
 		AND (vlehrer LIKE \"%--%\" OR vlehrer LIKE \"%selbst%\") AND tag>0 ");
         if (count($data) > 0) {
@@ -1549,7 +1549,7 @@ class Model
         $data = self::$connection->selectValues("SELECT DISTINCT lehrer.id,email FROM vp_vpdata,lehrer 
 		WHERE aktiv=FALSE
 		AND vp_vpdata.vLehrer=lehrer.untisName
-		AND lehrer.receive_vpmail=TRUE
+		AND lehrer.receive_vpmail IS TRUE
 		AND vlehrer NOT LIKE '%--%' 
 		AND vlehrer NOT LIKE '%selbst%' 
 		AND tag>0");
@@ -1606,7 +1606,7 @@ class Model
      */
     public function updateVpMailSentDate($entry)
     {
-        self::$connection->straightQuery("UPDATE vp_vpdata set emailed = CURRENT_TIMESTAMP WHERE vnr=$entry");
+       self::$connection->straightQuery("UPDATE vp_vpdata set emailed = CURRENT_TIMESTAMP WHERE vnr=$entry");
     }
 
     /**
@@ -1627,7 +1627,7 @@ class Model
     {
         $coverLessonNrs = array();
         $data = $this->getCoverLessonsByTeacher($teacher);
-        $linkStyle = 'style="font-family:Arial,Sans-Serif;font-size:12px;font-weight:bold;color: #86160e;font-decoration:underline;"';
+        $linkStyle = 'style="font-family:Arial,Sans-Serif;font-size:12px;font-weight:bold;color: #009688;font-decoration:underline;"';
         $vnArr = array();
         $content = mb_convert_encoding('<table><tr><td style="color:#000000;font-family:Arial,Sans-Serif;font-weight:bold;font-size:14px;">Übersicht für ' .
             $teacher->getSurname() . ', ' . $teacher->getName() . '</td><td style="color:#000000;font-family:Arial,Sans-Serif;font-weight:bold;font-size:9px;"> 
@@ -1638,7 +1638,7 @@ class Model
             //make headers
             $content .= '<table>';
             $v = $data[0];
-            $content .= '<tr style="font-family:Arial,Sans-Serif;font-size:12px;font-weight:bold;color:#ffffff; background-color: #86160e;">';
+            $content .= '<tr style="font-family:Arial,Sans-Serif;font-size:12px;font-weight:bold;color:#ffffff; background-color: #009688;">';
             $colcounter = 0;
             foreach ($v as $key => $value) {
                 if ($colcounter > 0) {
@@ -1659,7 +1659,7 @@ class Model
                     $zeile = true;
                 }
                 if ($v["Vertreter"] == $teacher->getUntisName()) {
-                    $style = $style . 'color:#ff0000;"';
+                    $style = $style . 'color:#009688;"';
                 } else {
                     $style = $style . 'color:#000000;"';
                 }
@@ -1677,8 +1677,8 @@ class Model
         }
 
         $content .= '</table>';
-        $subscriptionInfo = '<p style="font-family:Arial,Sans-Serif;font-size:12px; font-weight:bold;">' . mb_convert_encoding('<br><br>Diese Email wurde automatisch versendet. Die
-	Einstellung zum Emailversand können Sie jederzeit in der <a ' . $linkStyle . ' href="http://www.suso.schulen.konstanz.de/intern">Suso-Intern-Anwendung</a> (Login erforderlich) ändern.<br>
+        $subscriptionInfo = '<p style="font-family:Arial,Sans-Serif;font-size:12px; font-weight:bold;">' . mb_convert_encoding('<br><br>Diese Email wurde automatisch versendet.
+	 Die Einstellung zum Emailversand können Sie jederzeit in der <a ' . $linkStyle . ' href="http://www.suso.schulen.konstanz.de/intern">Suso-Intern-Anwendung</a> (Login erforderlich) ändern.<br>
 	Bitte melden Sie Unregelmäßigkeiten oder Fehler im Emailversand.<br><br>Vielen Dank für Ihre Unterstützung!', 'UTF-8') . '</p>';
 
         $teacher->setCurrentCoverLessonNrs($coverLessonNrs);

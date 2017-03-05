@@ -59,7 +59,7 @@ $this->id = $this->makeId();
 *Erstelle das Objekt aus den Daten der DB
 */
 public function constructFromDB($data){
-$this->primaryKey = $data['vNr'];
+$this->primaryKey = $data['vnr'];
 $this->tag = $data['tag'];
 $this->datum = Model::getInstance()->formatDateToCompleteDate($data['datum']);
 $this->timestampDatum = $data['datum'];
