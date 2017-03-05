@@ -1,14 +1,14 @@
 <?php namespace administrator;
-    include("header.php");
+include("header.php");
 
-    $data = \View::getInstance()->getDataForView();
-    $isText = false;
-    foreach ($data["options"] as $options) {
-        if ($options['field']) {
-            $isText = true;
-            break;
-        }
+$data = \View::getInstance()->getDataForView();
+$isText = false;
+foreach ($data["options"] as $options) {
+    if ($options['field']) {
+        $isText = true;
+        break;
     }
+}
 
 ?>
 
@@ -28,17 +28,17 @@
         </span>
                 <p style="margin-top: 20px;">
                     <?php
-                        // TODO: textareas, datepicker, etc..
-                        foreach ($data["options"] as $options){
-                        if (!$options['field']) { ?>
+                    // TODO: textareas, datepicker, etc..
+                    foreach ($data["options"] as $options){
+                    if (!$options['field']) { ?>
                 <div class="input-field col s12 l4 m6">
                     <input id="<?php echo $options["type"]; ?>" name="<?php echo $options["type"]; ?>" type="text"
                            class="" value="<?php echo $options['value']; ?>" required>
                     <label for="<?php echo $options["type"]; ?>">  <?php echo $options['kommentar']; ?> </label>
                 </div>
                 <?php
-                    }
-                    } ?>
+                }
+                } ?>
 
                 </p>
                 <?php if ($isText) {
@@ -54,7 +54,7 @@
                             </div>
                         <?php }
                     }
-
+                    
                 } ?>
 
                 <div class="row" style="margin-bottom: 0;">

@@ -1,10 +1,10 @@
 <?php namespace administrator;
 
-    $data = \View::getInstance()->getDataForView();
+$data = \View::getInstance()->getDataForView();
 
-    $teachers = $data['allteachers'];
+$teachers = $data['allteachers'];
 
-    include "header.php";
+include "header.php";
 ?>
 
 
@@ -25,10 +25,10 @@
                         <ul class="forms collection">
                             <?php foreach ($data['allForms'] as $f) {
                                 $classes = "collection-item";
-
+                                
                                 if (isset($data['currentForm']) && $data['currentForm'] == $f)
                                     $classes .= " active";
-
+                                
                                 ?>
 
                                 <li class="tab"><a class="<?php echo $classes; ?>"
@@ -40,48 +40,48 @@
                 </div>
                 <div class="col l9 m12 s12">
                     <?php
-                        if (isset($data['currentForm'])) {
-                            $f = $data['currentForm'];
-                            ?>
-                            <div id="form<?php echo $f; ?>" class="col s12">
-                                <h4>Lehrer für
-                                    <font class="teal-text"><?php echo $f ?></font>
-                                    festlegen</h4>
+                    if (isset($data['currentForm'])) {
+                        $f = $data['currentForm'];
+                        ?>
+                        <div id="form<?php echo $f; ?>" class="col s12">
+                            <h4>Lehrer für
+                                <font class="teal-text"><?php echo $f ?></font>
+                                festlegen</h4>
 
-                                <div class="input-field col s12">
-                                    <form method="POST" action="?type=setclasses">
-                                        <input type="hidden" name="update"
-                                               value="<?php echo $data['currentForm']; ?>">
-                                        <select multiple name="teacher[]">
-                                            <?php
-                                                /** @var \Teacher $t */
-                                                foreach ($teachers as $t) {
-
-                                                    $status = "";
-
-                                                    if (isset($data['teachersOfForm'][$data['currentForm']])) {
-                                                        in_array($t->getId(), $data['teachersOfForm'][$data['currentForm']]) ? $status = "selected" : $status = "";
-                                                    }
-
-                                                    ?>
-                                                    <option <?php echo $status; ?>
-                                                            value="<?php echo $t->getId(); ?>"><?php echo $t->getFullname(); ?></option>
-                                                <?php } ?>
-                                        </select>
-                                        <button class="btn-flat right waves-effect waves-teal" id="btn_login"
-                                                type="submit">
-                                            Submit<i class="material-icons right">send</i></button>
-                                    </form>
-                                </div>
-
+                            <div class="input-field col s12">
+                                <form method="POST" action="?type=setclasses">
+                                    <input type="hidden" name="update"
+                                           value="<?php echo $data['currentForm']; ?>">
+                                    <select multiple name="teacher[]">
+                                        <?php
+                                        /** @var \Teacher $t */
+                                        foreach ($teachers as $t) {
+                                            
+                                            $status = "";
+                                            
+                                            if (isset($data['teachersOfForm'][$data['currentForm']])) {
+                                                in_array($t->getId(), $data['teachersOfForm'][$data['currentForm']]) ? $status = "selected" : $status = "";
+                                            }
+                                            
+                                            ?>
+                                            <option <?php echo $status; ?>
+                                                    value="<?php echo $t->getId(); ?>"><?php echo $t->getFullname(); ?></option>
+                                        <?php } ?>
+                                    </select>
+                                    <button class="btn-flat right waves-effect waves-teal" id="btn_login"
+                                            type="submit">
+                                        Submit<i class="material-icons right">send</i></button>
+                                </form>
                             </div>
 
-                        <?php } else {
-                            //tell user to choose form
-                            ?>
-                            <h4>Bitte Klasse wählen</h4>
-                        <?php }
-
+                        </div>
+                    
+                    <?php } else {
+                        //tell user to choose form
+                        ?>
+                        <h4>Bitte Klasse wählen</h4>
+                    <?php }
+                    
                     ?>
                 </div>
             </div>

@@ -18,24 +18,24 @@ include("header.php");
 					</a>
                  Nutzereinstellungen aktualisieren:
 				</span>
-            <?php if($user->getClass() == "11" || $user->getClass() == "12"): ?>
+            <?php if ($user->getClass() == "11" || $user->getClass() == "12"): ?>
 
-            <form onsubmit="submitForm()" action="javascript:void(0);" autocomplete="off">
-                <div class="row">
-                    <div class="input-field col s6 l6 m6 offset-s1 offset-l1 offset-m1">
-                        <label for="f_courselist">Liste der Kurse (z.B. E1;M3;gk2 ...):</label>
-                        <input name="f_courselist" id="f_courselist" type="text"
-                               value="<?php echo $user->getCourses(); ?>">
+                <form onsubmit="submitForm()" action="javascript:void(0);" autocomplete="off">
+                    <div class="row">
+                        <div class="input-field col s6 l6 m6 offset-s1 offset-l1 offset-m1">
+                            <label for="f_courselist">Liste der Kurse (z.B. E1;M3;gk2 ...):</label>
+                            <input name="f_courselist" id="f_courselist" type="text"
+                                   value="<?php echo $user->getCourses(); ?>">
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s3 l3 m3 offset-s8 offset-l8 offset-m8">
-                        <button class="btn waves-effect waves-light" type="submit">Update
-                            <i class="material-icons right">send</i>
-                        </button>
+                    <div class="row">
+                        <div class="input-field col s3 l3 m3 offset-s8 offset-l8 offset-m8">
+                            <button class="btn waves-effect waves-light" type="submit">Update
+                                <i class="material-icons right">send</i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
             <?php endif; ?>
         </div>
     </div>
