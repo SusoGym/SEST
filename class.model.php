@@ -396,19 +396,19 @@ class Model
             if (!isset($novelData->{'code'}) || !isset($novelData->{'type'}) || $novelData->{'code'} != "200" || $novelData->{'type'} != 'Teacher') {
                 ChromePhp::info(json_encode($novelData));
                 if (isset($novelData->{'type'}) && $novelData->{'type'} == "student" && $novelData->{'code'} == "200") {
-                    $query = "SELECT * FROM schueler WHERE klasse='" . $novelData->{'class'} . "' AND NAME LIKE '" . $novelData->{'surname'} . "' AND";
+                    $query = "SELECT * FROM schueler WHERE klasse='" . $novelData->{'class'} . "' AND NAME LIKE '%" . $novelData->{'surname'} . "%' AND";
                     $names = explode(' ', $novelData->{'givenname'});
 
                     for ($i = 0; $i < sizeof($names); $i++) {
                         if ($i != 0)
                             $query .= " OR";
-                        $query .= " vorname LIKE '" . $names[$i] . "'";
+                        $query .= " vorname LIKE '%" . $names[$i] . "%'";
                     }
 
                     $data = self::$connection->selectAssociativeValues($query);
 
                     if (!isset($data[0])) {
-                        die("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator.");
+                        die(var_dump($names)." LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator.");
                     }
                     $data = $data[0];
 
