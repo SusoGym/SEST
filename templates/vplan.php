@@ -10,9 +10,9 @@ $todayMonth = date('Ym');
 $todayTimestamp = strtotime($today);
 if ($user instanceOf Teacher) {
     if ($data['VP_showAll']) {
-        $modeLink = '<a href="?type=vplan" class="teal-text right"><i class="material-icons left">filter_list</i><span style="font-size:10px;" >nur eigene anzeigen</span></a>';
+        $modeLink = '<a href="?type=vplan&all=0" class="teal-text right"><i class="material-icons left">filter_list</i><span style="font-size:10px;" >nur eigene anzeigen</span></a>';
     } else {
-        $modeLink = '<a href="?type=vplan&all" class="teal-text right"><i class="material-icons left">select_all</i><span style="font-size:10px;" >alle anzeigen</span></a>';
+        $modeLink = '<a href="?type=vplan&all=1" class="teal-text right"><i class="material-icons left">select_all</i><span style="font-size:10px;" >alle anzeigen</span></a>';
     }
 
 } elseif ($user instanceOf Guardian) {
@@ -78,15 +78,17 @@ foreach ($data["VP_allDays"] as $day) { ?>
 
                             <table class="striped hide-on-small-only">
                                 <thead>
-                                <tr>
-                                    <th>Stunde</th>
-                                    <th>Lehrer</th>
-                                    <th>Fach</th>
-                                    <th>Raum</th>
-                                    <th>statt Lehrer:</th>
-                                    <th>statt Fach:</th>
-                                    <th>Kommentar</th>
-                                </tr>
+									<tr>
+										<th>Stunde</th>
+										<th>Klasse</th>
+										<th>Vertretung</th>
+										<th>Fach</th>
+										<th>Raum</th>
+							  <?php if ($user instanceOf Teacher){ ?> <th>statt Lehrer</th> <?php } ?>
+							  <?php if ($user instanceOf Teacher){ ?> <th>statt Fach</th> <?php } ?>
+										<th>Kommentar</th>
+									</tr>
+                                
                                 </thead>
                                 <tbody class="black-text">
                                 <?php /** @var CoverLesson $lesson */
@@ -97,12 +99,13 @@ foreach ($data["VP_allDays"] as $day) { ?>
                                         } ?>
                                         <tr>
                                             <td><?php echo $lesson->stunde ?></td>
+											<td><?php echo $lesson->klassen; ?></td>
                                             <td><?php echo $lesson->vTeacherObject->getUntisName(); ?></td>
                                             <td><?php echo $lesson->vFach ?></td>
                                             <td><?php echo $lesson->vRaum ?></td>
-                                            <td><?php echo $lesson->eTeacherObject->getShortName() ?></td>
-                                            <td><?php echo $lesson->eFach ?></td>
-                                            <td><?php echo $lesson->kommentar ?></td>
+                                              <?php if ($user instanceOf Teacher){ ?> <td><?php echo $lesson->eTeacherObject->getShortName() ?> </td><?php } ?>
+                                             <?php if ($user instanceOf Teacher){ ?> <td><?php echo $lesson->eFach ?></td><?php } ?>
+											 <td><?php echo $lesson->kommentar ?></td>
                                         </tr>
                                     <?php }
                                 } ?>

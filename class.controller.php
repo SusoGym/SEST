@@ -486,8 +486,11 @@ class Controller
             return "login";
 
         $isStaff = false;
-        $this->infoToView["VP_showAll"] = isset($this->input['all']) || ($usr instanceof Teacher && $usr->getVpViewStatus());
-        $this->infoToView['VP_allDays'] = $this->model->getVPDays($isStaff || $this->infoToView['VP_showAll']);
+        $this->infoToView["VP_showAll"] = $usr instanceof Teacher && $usr->getVpViewStatus();
+		if(isset($this->input['all'])) {
+			($this->input['all'] == false ) ? $this->infoToView["VP_showAll"] = false : $this->infoToView["VP_showAll"] = true;
+			}
+		$this->infoToView['VP_allDays'] = $this->model->getVPDays($isStaff || $this->infoToView['VP_showAll']);
         $this->infoToView['user'] = $usr;
 
         if (isset($this->infoToView['VP_showAll']) && $this->infoToView['VP_showAll']) {
