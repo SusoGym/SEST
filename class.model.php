@@ -1205,7 +1205,7 @@ class Model
             $class = $classes[$i];
 
             $classQuery .= ($i == 0 ? " AND (" : " OR");
-            $classQuery .= "klassen LIKE '%$class%'";
+            $classQuery .= " klassen LIKE '%$class%'";
         }
 
         $classQuery .= ")";
