@@ -69,7 +69,7 @@
 
 <ul id="slide-out" class="side-nav">
     <li>
-        <img class="logo-mobile" src="/assets/logo.png">
+        <img class="logo-mobile" src="assets/logo.png">
     </li>
     <li><a class="waves-effect" href="."><i class="material-icons">home</i><font style="font-size: 24px;">Suso-Intern:
                 Admin</font></a></li>
