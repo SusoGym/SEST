@@ -30,6 +30,13 @@
   .name {
     margin:20px;
   }
+  #mobilevptable th {
+    text-align: left !important;
+  }
+  #mobilevptable tr {
+    max-width: 80%;
+    text-align: left !important;
+  }
   </style>
 </head>
 <body class="grey lighten-2" id="body" style="height: 100vh;">
@@ -37,7 +44,7 @@
   <form id="logoutform" action="" method="post"><!-- logout form -->
     <input type="hidden" name="type" value="logout">
   </form>
-
+<div class="navbar-fixed">
   <nav>
     <div class="nav-wrapper teal">
       <span class="hide-on-large-only brand-logo">Suso-Intern</span>
@@ -61,6 +68,8 @@
     </div>
   </nav>
 
+
+  </div>
   <ul id="slide-out" class="side-nav">
     <li>
       <img class="logo-mobile" src="/assets/logo.png">

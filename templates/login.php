@@ -21,12 +21,12 @@
                         <div class="input-field col s12">
                             <i class="material-icons prefix">person</i>
                             <input id="usr_login" type="text" class="" required>
-                            <label for="usr_login">Email-Adresse</label>
+                            <label for="usr_login" class="truncate">Email-Adresse</label>
                         </div>
                         <div class="input-field col s12">
                             <i class="material-icons prefix">vpn_key</i>
                             <input id="pwd_login" type="password" required>
-                            <label for="pwd_login">Passwort</label>
+                            <label for="pwd_login" class="truncate">Passwort</label>
                         </div>
                         <div class="row" style="margin-bottom: 0;">
                             <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
@@ -43,26 +43,26 @@
                         <div class="input-field col s6">
                             <i class="material-icons prefix">account_circle</i>
                             <input id="name_register" name="name" type="text" required>
-                            <label for="name_register">Vorname</label>
+                            <label for="name_register" class="truncate">Vorname</label>
                         </div>
                         <div class="input-field col s6">
                             <input id="surname_register" name="surname" type="text" required>
-                            <label for="surname_register">Nachname</label>
+                            <label for="surname_register" class="truncate">Nachname</label>
                         </div>
                         <div class="input-field col s12">
                             <i class="material-icons prefix">mail</i>
                             <input id="mail_register" name="mail" type="email" required="required" class="validate">
-                            <label for="mail_register">Email-Adresse</label>
+                            <label for="mail_register" class="truncate">Email-Adresse</label>
                         </div>
                         <div class="input-field col s12">
                             <i class="material-icons prefix">vpn_key</i>
                             <input id="pwd_register" name="pwd" type="password" required>
-                            <label for="pwd_register">Passwort</label>
+                            <label for="pwd_register" class="truncate">Passwort</label>
                         </div>
                         <div class="input-field col s12">
                             <i class="material-icons prefix">cached</i>
                             <input id="pwdrep_register" name="pwdrep" type="password" required>
-                            <label for="pwdrep_register">Passwort wiederholen</label>
+                            <label for="pwdrep_register" class="truncate">Passwort wiederholen</label>
                         </div>
                         <div class="row" style="margin-bottom: 0;">
                             <button class="btn-flat right waves-effect waves-teal" id="btn_register" type="submit">
