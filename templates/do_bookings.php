@@ -1,7 +1,7 @@
 <div class="cols s12 m12 l12">
     <ul class="collapsible white" data-collapsible="accordion">
         <?php foreach ($teachers as $teacherStudent):
-
+            
             $teacher = $teacherStudent['teacher'];
             (in_array($teacher->getId(), $data['bookedTeachers'])) ? $bookedThisTeacher = true : $bookedThisTeacher = false;
             $amountAvailableSlots = count($teacher->getAllBookableSlots($user->getParentId()));
@@ -9,7 +9,7 @@
 
             <li>
                 <div class="collapsible-header">
-
+                    
                     <?php if ($bookedThisTeacher): ?>
                         <span id="info" class="right green-text" style="font-sisze: 14px">gebucht!</span>
                     <?php elseif ($amountAvailableSlots == 0): ?>
@@ -29,37 +29,37 @@
                     <span class="left hide-on-med-and-down" style="font-size:12px;">
             &emsp;(
                         <?php
-                            $students = 0;
-                            /** @var Student $student */
-                            foreach ($teacherStudent['students'] as $student) {
-                                if ($students > 0) {
-                                    echo ' / ';
-                                }
-                                echo $student->getName() . " " . $student->getSurname();
-                                $students++;
+                        $students = 0;
+                        /** @var Student $student */
+                        foreach ($teacherStudent['students'] as $student) {
+                            if ($students > 0) {
+                                echo ' / ';
                             }
+                            echo $student->getName() . " " . $student->getSurname();
+                            $students++;
+                        }
                         ?>
                         )
           </span>
 
 
                 </div>
-
+                
                 <?php if ($amountAvailableSlots != 0): ?>
                     <div class="collapsible-body">
                         <ul class="collection">
                             <?php foreach ($teacher->getAllBookableSlots($user->getParentId()) as $slot):
                                 $anfang = date_format(date_create($slot['anfang']), 'H:i');
                                 $ende = date_format(date_create($slot['ende']), 'H:i');
-
+                                
                                 $symbol = $symbolColor = $text = $link = "";
                                 ?>
-
+                                
                                 <?php
                                 if ($slot['eid'] == null) {
                                     if ($bookedThisTeacher || $maxedOutAppointments)
                                         continue;
-
+                                    
                                     if (in_array($slot['slotId'], $appointments)) {
                                         //cannot book a slot at that time because already booked another
                                         $symbol = "clear";
@@ -83,7 +83,7 @@
                                         $text = "jetzt buchen";
                                         $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=book'";
                                     }
-
+                                    
                                 } elseif ($slot['eid'] == $user->getParentId()) {
                                     //slot is booked by oneself
                                     $symbol = "check";
@@ -109,14 +109,14 @@
                     </span>
                                     </div>
                                 </li>
-
+                            
                             <?php endforeach; ?>
                         </ul>
                     </div>
                 <?php endif; ?>
             </li>
-
-
+        
+        
         <?php endforeach; ?>
 
     </ul>

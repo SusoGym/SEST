@@ -1,6 +1,6 @@
 <?php
-    include("header.php");
-	$data = $this->getDataForView();
+include("header.php");
+$data = $this->getDataForView();
 ?>
 <div class="container">
     <div class="card white">
@@ -9,27 +9,33 @@
             <p><?php echo $data['welcomeText']; ?></p>
         </div>
     </div>
-	<div class="card white">
+    <div class="card white">
         <div class="card-content">
-			<span class="card-title">Demnächst</span>
-            <?php 
-			foreach ($data["upcomingEvents"] as $t){
-			
-				
-			?>
-			<span ><br><b><a class="teal-text"><?php echo  $t->typ; ?></b></a><a class="teal-text">
-			<?php	echo  $t->sweekday." ".$t->sday; 
-			if (isset($t->stime)){echo ' ('.$t->stime.')';}
-			if (isset($t->eday)) {echo "-";}
-			echo  " ".$t->eweekday." ".$t->eday;
-			if (isset($t->etime)){echo ' ('.$t->etime.')';}
-			?>
+            <span class="card-title">Demnächst</span>
+            <?php
+            foreach ($data["upcomingEvents"] as $t) {
+                
+                
+                ?>
+                <span><br><b><a class="teal-text"><?php echo $t->typ; ?></b></a><a class="teal-text">
+			<?php echo $t->sweekday . " " . $t->sday;
+            if (isset($t->stime)) {
+                echo ' (' . $t->stime . ')';
+            }
+            if (isset($t->eday)) {
+                echo "-";
+            }
+            echo " " . $t->eweekday . " " . $t->eday;
+            if (isset($t->etime)) {
+                echo ' (' . $t->etime . ')';
+            }
+            ?>
 			</a>
-			</span>				
-			<?php
-			  
-			}
-			?>
+			</span>
+                <?php
+                
+            }
+            ?>
         </div>
     </div>
 </div>
