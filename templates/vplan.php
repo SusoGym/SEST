@@ -25,6 +25,8 @@ if ($user instanceOf Teacher) {
 
 } elseif ($user instanceOf Guardian) {
 
+} elseif ($user instanceOf StudentUser) {
+	($user->getClass() == "11" || $user->getClass() == "12") ? $showPupilsDetails = true : $showPupilsDetails = false; 
 }
 
 
@@ -116,9 +118,11 @@ foreach ($data["VP_allDays"] as $day) { ?>
                                 <?php /** @var CoverLesson $lesson */
                                 foreach ($data["VP_coverLessons"][$day['timestamp']] as $lesson) {
                                     if ($lesson->timestampDatum == $day["timestamp"]) {
-                                        if (isset($this->form) && ($this->form[0] == "K" || $lesson->eFach == "ev" || $lesson->eFach == "SP" || $lesson->eFach == "rk" || $lesson->eFach == "NWT" || $lesson->eFach == "F")) {
-                                            $showPupilsDetails = true;
-                                        } ?>
+									if ($lesson->eFach == "ev" || $lesson->eFach == "SP" || $lesson->eFach == "rk" || $lesson->eFach == "NWT" || $lesson->eFach == "F") {
+										$showPupilsDetails = true;
+									} 
+								$kommentar = $showPupilsDetails ? "(statt: ".$lesson->eTeacherObject->getShortName().") ".$lesson->kommentar : $lesson->kommentar;
+								?>
                                         <tr>
                                             <td><?php echo $lesson->stunde ?></td>
 											<td><?php echo $lesson->klassen; ?></td>
@@ -127,7 +131,7 @@ foreach ($data["VP_allDays"] as $day) { ?>
                                             <td><?php echo $lesson->vRaum ?></td>
                                               <?php if ($user instanceOf Teacher){ ?> <td><?php echo $lesson->eTeacherObject->getShortName() ?> </td><?php } ?>
                                              <?php if ($user instanceOf Teacher){ ?> <td><?php echo $lesson->eFach ?></td><?php } ?>
-											 <td><?php echo $lesson->kommentar ?></td>
+											 <td><?php echo $kommentar ?></td>
                                         </tr>
                                     <?php }
                                 } ?>
@@ -157,9 +161,11 @@ foreach ($data["VP_allDays"] as $day) { ?>
                                 <?php /** @var CoverLesson $lesson */
                                 foreach ($data["VP_coverLessons"][$day['timestamp']] as $lesson) {
                                     if ($lesson->timestampDatum == $day["timestamp"]) {
-                                        if (isset($this->form) && ($this->form[0] == "K" || $lesson->eFach == "ev" || $lesson->eFach == "SP" || $lesson->eFach == "rk" || $lesson->eFach == "NWT" || $lesson->eFach == "F")) {
+                                    if ($lesson->eFach == "ev" || $lesson->eFach == "SP" || $lesson->eFach == "rk" || $lesson->eFach == "NWT" || $lesson->eFach == "F") {
                                             $showPupilsDetails = true;
-                                        } ?>
+                                        }
+									$kommentar = $showPupilsDetails ? "(statt: ".$lesson->eTeacherObject->getShortName().") ".$lesson->kommentar  : $lesson->kommentar;
+								?>
 
                                         <div class="collection-item">
                                             <div class="row hide-on-med-and-up" style="margin-bottom: 0px;">
@@ -174,7 +180,7 @@ foreach ($data["VP_allDays"] as $day) { ?>
                                                 <div class="col s6 center-align"><span
                                                             class="truncate"><?php echo $lesson->vRaum ?></span></div>
                                                 <div class="col s12 center-align"><span
-                                                            class="truncate"><?php echo $lesson->kommentar ?></span>
+                                                            class="truncate"><?php echo $kommentar ?></span>
                                                 </div>
                                             </div>
                                         </div>
