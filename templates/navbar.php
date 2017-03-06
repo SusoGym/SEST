@@ -7,9 +7,9 @@ $today = date("Ymd");
 $userObj = Controller::getUser();
 
 if ($userObj == null) {
-
+    
     $selectionActive = $est = $editData = false;
-
+    
 } else if ($userObj instanceof Guardian) {
     $children = $data['children'];
     if (count($children) == 0) {
@@ -25,7 +25,7 @@ if ($userObj == null) {
         $est = false;
     }
 } elseif ($userObj instanceof StudentUser) {
-
+    
     $est = false;
 }
 
@@ -90,7 +90,7 @@ foreach ($modules as $module) {
     $title = $module['title'];
     $icon = $module['icon'];
     $inner = (isset($module['inner'])) ? $module['inner'] : $title;
-
+    
     ?>
     <li>
         <a id="<?php echo $id ?>" <?php if ($link != "") echo "href='$link'" ?> title="<?php echo $title ?>"

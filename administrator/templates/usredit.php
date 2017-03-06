@@ -1,6 +1,6 @@
 <?php namespace administrator;
-    include("header.php");
-    $data = \View::getInstance()->getDataForView();
+include("header.php");
+$data = \View::getInstance()->getDataForView();
 ?>
 <div class="container">
 
@@ -15,7 +15,7 @@
                 <?php echo \View::getInstance()->getTitle(); ?>
              </span>
             <?php /** @var \User $usr */
-                $usr = $data['user']; ?>
+            $usr = $data['user']; ?>
             <form action="?type=usredit&edit&name=<?php echo $usr->getEmail(); ?>" method="POST" autocomplete="off">
                 <div class="row">
                     <div class="input-field col s4 l4 m4">
@@ -25,7 +25,8 @@
                     </div>
                     <div class="input-field col s4 l4 m4">
                         <label for="f_surname">Nachname:</label>
-                        <input name="f_surname" type="text" value="<?php echo $usr->getSurname(); ?>" required="required"
+                        <input name="f_surname" type="text" value="<?php echo $usr->getSurname(); ?>"
+                               required="required"
                                class="validate">
                     </div>
                     <div class="input-field col s4 l4 m4">

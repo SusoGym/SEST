@@ -1,6 +1,6 @@
 <?php namespace administrator;
-    include("header.php");
-    $data = \View::getInstance()->getDataForView();
+include("header.php");
+$data = \View::getInstance()->getDataForView();
 ?>
 
 
@@ -23,13 +23,13 @@
                 <div class="row">
                     <table width="50%" align="center">
                         <tbody>
-
+                        
                         <?php foreach ($data['fileData'][0] as $d)
-                            { ?>
+                        { ?>
                         <tr>
                             <td>
-
-
+                                
+                                
                                 <?php echo $d ?>
                             </td>
                             <td class="input-field">

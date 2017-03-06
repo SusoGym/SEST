@@ -20,14 +20,14 @@ if ($vpmail) {
     $vpmailStatus1 = null;
     $vpmailStatus2 = "checked";
 }
-if ($newsmail){
+if ($newsmail) {
     $newsmailStatus1 = "checked";
     $newsmailStatus2 = null;
 } else {
     $newsmailStatus1 = null;
     $newsmailStatus2 = "checked";
 }
-if ($vpview){
+if ($vpview) {
     $vpviewStatus1 = "checked";
     $vpviewStatus2 = null;
 } else {
@@ -51,23 +51,29 @@ if ($vpview){
                 <div class="row">
                     <div class=" col s4 l4 m4">
                         <label for="f_vpmail">Erhalte Email bei Änderungen im Vertretungsplan:<br></label>
-                        <input class="with-gap" name="f_vpmail" type="radio" id="radio1" value="true"<?php echo $vpmailStatus1; ?> >
+                        <input class="with-gap" name="f_vpmail" type="radio" id="radio1"
+                               value="true"<?php echo $vpmailStatus1; ?> >
                         <label for="radio1">ja</label>
-                        <input class="with-gap" name="f_vpmail" type="radio" id="radio2" value="false"<?php echo $vpmailStatus2; ?> >
+                        <input class="with-gap" name="f_vpmail" type="radio" id="radio2"
+                               value="false"<?php echo $vpmailStatus2; ?> >
                         <label for="radio2">nein</label>
                     </div>
                     <div class=" col s4 l4 m4">
                         <label for="f_vpview">Standardansicht Vertretungsplan:<br></label>
-                        <input class="with-gap" name="f_vpview" type="radio" id="radio3" value="false" <?php echo $vpviewStatus2; ?> >
+                        <input class="with-gap" name="f_vpview" type="radio" id="radio3"
+                               value="false" <?php echo $vpviewStatus2; ?> >
                         <label for="radio3">nur eigene</label>
-                        <input class="with-gap" name="f_vpview" type="radio" id="radio4" value="true"<?php echo $vpviewStatus1; ?> >
+                        <input class="with-gap" name="f_vpview" type="radio" id="radio4"
+                               value="true"<?php echo $vpviewStatus1; ?> >
                         <label for="radio4">alle</label>
                     </div>
                     <div class=" col s4 l4 m4">
                         <label for="f_newsmail">Erhalte Newsletter per Email:<br></label>
-                        <input class="with-gap" name="f_newsmail" type="radio" id="radio5" value="true"<?php echo $newsmailStatus1; ?> >
+                        <input class="with-gap" name="f_newsmail" type="radio" id="radio5"
+                               value="true"<?php echo $newsmailStatus1; ?> >
                         <label for="radio5">ja</label>
-                        <input class="with-gap" name="f_newsmail" type="radio" id="radio6" value="false"<?php echo $newsmailStatus2; ?> >
+                        <input class="with-gap" name="f_newsmail" type="radio" id="radio6"
+                               value="false"<?php echo $newsmailStatus2; ?> >
                         <label for="radio6">nein</label>
                     </div>
                 </div>

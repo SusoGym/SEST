@@ -20,26 +20,6 @@
             font-style: italic;
         }
 
-<<<<<<< HEAD
-  .logo-mobile {
-    width: 80%;
-    margin: 20px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto
-  }
-  .name {
-    margin:20px;
-  }
-  #mobilevptable th {
-    text-align: left !important;
-  }
-  #mobilevptable tr {
-    max-width: 80%;
-    text-align: left !important;
-  }
-  </style>
-=======
         .logo-mobile {
             width: 80%;
             margin: 20px;
@@ -52,21 +32,14 @@
             margin: 20px;
         }
     </style>
->>>>>>> 197dec42b149439a0005a7dd4d0e36e201779450
 </head>
 <body class="grey lighten-2" id="body" style="height: 100vh;">
 
 <form id="logoutform" action="" method="post"><!-- logout form -->
     <input type="hidden" name="type" value="logout">
-<<<<<<< HEAD
-  </form>
-<div class="navbar-fixed">
-  <nav>
-=======
 </form>
 
 <nav>
->>>>>>> 197dec42b149439a0005a7dd4d0e36e201779450
     <div class="nav-wrapper teal">
         <span class="hide-on-large-only brand-logo">Suso-Intern</span>
         <a href="#" data-activates="slide-out" class="button-collapse">
@@ -89,15 +62,9 @@
     </div>
 </nav>
 
-<<<<<<< HEAD
-
-  </div>
-  <ul id="slide-out" class="side-nav">
-=======
 <ul id="slide-out" class="side-nav">
->>>>>>> 197dec42b149439a0005a7dd4d0e36e201779450
     <li>
-        <img class="logo-mobile" src="/assets/logo.png">
+        <img class="logo-mobile" src="assets/logo.png">
     </li>
     <?php include("navbar.php"); ?>
     <div class="divider"></div>
