@@ -12,9 +12,9 @@ $showDetails = false;
 $much = $data['VP_showAll'];
 if ($user instanceOf Teacher) {
     if ($much) {
-        $modeLink = '<a href="?type=vplan&all=0" class="teal-text right"><i class="material-icons left">filter_list</i><span style="font-size:10px;" >nur eigene anzeigen</span></a>';
+        $modeLink = '<li><a href="?type=vplan&all=0" class="btn-floating teal tooltipped" data-position="left" data-tooltip="eigene anzeigen"><i class="material-icons left">filter_list</i></a></li>';
     } else {
-        $modeLink = '<a href="?type=vplan&all=1" class="teal-text right"><i class="material-icons left">select_all</i><span style="font-size:10px;" >alle anzeigen</span></a>';
+        $modeLink = '<li><a href="?type=vplan&all=1" class="btn-floating teal tooltipped" data-position="left" data-tooltip="alle anzeigen"><i class="material-icons left">select_all</i></a></li>';
     }
     
     $showDetails = true;
@@ -30,7 +30,16 @@ if ($data['VP_showAll'])
     
     <?php if (isset($modeLink)) {
         ?>
-        <div class="card">
+		<div class="fixed-action-btn">
+			<a class="btn-floating btn-large teal">
+			  <i class="large material-icons">more_vert</i>
+			</a>
+			<ul>
+			  <?php echo $modeLink; ?>
+			</ul>
+		</div>
+        <!----
+		<div class="card">
             <div class="card-content">
                 <div class="center">
                     <?php echo $modeLink; ?>
@@ -41,6 +50,7 @@ if ($data['VP_showAll'])
                 </div>
             </div>
         </div>
+		---->
         <?php
     } ?>
     
