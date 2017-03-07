@@ -75,7 +75,7 @@
 
 <ul id="slide-out" class="side-nav">
     <li>
-        <img class="logo-mobile" src="/assets/logo.png">
+        <img class="logo-mobile" src="assets/logo.png">
     </li>
     <?php include("navbar.php"); ?>
     <div class="divider"></div>
