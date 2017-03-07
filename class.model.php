@@ -298,9 +298,9 @@ class Model {
      */
     public function getTeacherShortNameByTeacherId($teacherId, $rawData = null) {
         $returnData = null;
-        if ($rawData == null) {
+        if (!isset($rawData["shortName"]))  {
             $data = self::$connection->selectValues("SELECT kuerzel FROM lehrer WHERE id=$teacherId");
-            if ($data == null) {
+			if ($data == null) {
                 $returnData = null; // empty / not found
             } else {
                 $returnData = $data[0][0];
@@ -1099,7 +1099,7 @@ class Model {
 			AND datum='$datum'
 			$add
 			ORDER BY $order ASC");
-            
+          
             if (count($data) > 0) {
                 foreach ($data as $dayData) {
                     $coverLesson = new CoverLesson();
