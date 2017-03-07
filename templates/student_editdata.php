@@ -21,20 +21,18 @@ include("header.php");
             <?php if ($user->getClass() == "11" || $user->getClass() == "12"): ?>
 
                 <form onsubmit="submitForm()" action="javascript:void(0);" autocomplete="off">
-                    <div class="row">
-                        <div class="input-field col s6 l6 m6 offset-s1 offset-l1 offset-m1">
+                    <div class="rw">
+                        <div class="input-field">
                             <label for="f_courselist">Liste der Kurse (z.B. E1;M3;gk2 ...):</label>
                             <input name="f_courselist" id="f_courselist" type="text"
                                    value="<?php echo $user->getCourses(); ?>">
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="input-field col s3 l3 m3 offset-s8 offset-l8 offset-m8">
+                        <div class="input-field right-align">
                             <button class="btn waves-effect waves-light" type="submit">Update
-                                <i class="material-icons right">send</i>
+                                <i class="material-icons right">loop</i>
                             </button>
                         </div>
-                    </div>
                 </form>
             <?php endif; ?>
         </div>
