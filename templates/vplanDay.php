@@ -65,7 +65,7 @@
                         <thead>
                         <tr>
                             <th>Stunde</th>'
-                            . ($much ? '<th>Klasse</th>' : '') .
+                            . '<th>Klasse</th>'  .
                             '<th>Lehrer</th>
                             <th>Fach</th>
                             <th>Raum</th>' .
@@ -92,8 +92,8 @@
                         $comment = "(Statt: $orgTeacher) $comment";
                     
                     $desktop .= "<tr><td>$hour</td>";
-                    if ($much)
-                        $desktop .= "<td>$classes</td>";
+                   
+                    $desktop .= "<td>$classes</td>";
                     $desktop .= "<td>$subTeacher</td><td>$subSubject</td><td>$subRoom</td>";
                     if ($showDetails)
                         $desktop .= "<td>$orgTeacher</td><td>$orgSubject</td>";
@@ -123,9 +123,7 @@
                     </thead>
                     <tbody>
                     
-                    <?php
-                    if ($much):
-                        ?>
+                    
                         <tr>
                             <th>Klasse</th>
                             <?php foreach ($coverLessons as $lesson): ?>
@@ -134,9 +132,7 @@
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         </tr>
-                        <?php
-                    endif;
-                    ?>
+                      
                     <?php
                     if ($showDetails):
                         ?>
