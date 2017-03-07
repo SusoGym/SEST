@@ -2,7 +2,7 @@
     <div class="card-content">
                 <span class="card-title"><i
                             class="material-icons left ">event</i><?php echo $day['dateAsString']; ?></span>
-
+        
         <?php
         foreach ($events as $t) {
             if ($timestamp != $t->sTimeStamp)
@@ -29,8 +29,8 @@
             </span>
             <?php
         }
-
-
+        
+        
         if ($much) { ?>
             <p>
                 <br/>
@@ -45,27 +45,27 @@
 
         <ul class="collection">
             <?php if ($coverLessons != null):
-
+                
                 $desktop = "";
-
+                
                 /** @var CoverLesson $lesson */
                 for ($i = 0;
                      $i < sizeof($coverLessons);
                      $i++) {
-
+                    
                     $lesson = $coverLessons[$i];
                     if ($lesson->timestampDatum != $timestamp)
                         continue;
-
+                    
                     //Desktop stuff
-
+                    
                     if ($i == 0)
                         $desktop .= '
                         <table class="striped hide-on-small-only">
                         <thead>
                         <tr>
                             <th>Stunde</th>'
-                            . '<th>Klasse</th>'  .
+                            . ($showClass ? '<th>Klasse</th>' : '') .
                             '<th>Lehrer</th>
                             <th>Fach</th>
                             <th>Raum</th>' .
@@ -76,7 +76,7 @@
                         </tr>
                         </thead>
                         <tbody>';
-
+                    
                     $comment = $lesson->kommentar;
                     $hour = $lesson->stunde;
                     $classes = $lesson->klassen;
@@ -85,44 +85,46 @@
                     $subRoom = $lesson->vRaum;
                     $orgTeacher = $lesson->eTeacherObject->getShortName();
                     $orgSubject = $lesson->eFach;
-
+                    
                     $lowerCaseSubject = strtolower($lesson->eFach);
-
+                    
                     if (($lowerCaseSubject == "ev" || $lowerCaseSubject == "rk" || $lowerCaseSubject == "sp" || $lowerCaseSubject == "nwt" || $lowerCaseSubject == "f") && !$showDetails)
                         $comment = "(Statt: $orgTeacher) $comment";
-
+                    
                     $desktop .= "<tr><td>$hour</td>";
-
-                    $desktop .= "<td>$classes</td>";
+                    
+                    if ($showClass)
+                        $desktop .= "<td>$classes</td>";
                     $desktop .= "<td>$subTeacher</td><td>$subSubject</td><td>$subRoom</td>";
                     if ($showDetails)
                         $desktop .= "<td>$orgTeacher</td><td>$orgSubject</td>";
                     $desktop .= "<td>$comment</td>";
-
-
+                    
+                    
                     if ($i == sizeof($coverLessons) - 1)
                         $desktop .= "</tbody></table>";
-
+                    
                     // Done with desktop
-
-
+                    
+                    
                 }
-
+                
                 echo $desktop;
-
+                
                 ?>
 
                 <table id="mobilevptable" class="responsive-table hide-on-med-and-up">
                     <thead>
                     <tr>
                         <th>Stunde</th>
-                        <?php foreach ($coverLessons as $lesson):?>
+                        <?php foreach ($coverLessons as $lesson): ?>
                             <th style="white-space: nowrap;"><?php echo $lesson->stunde ?></th>
                         <?php endforeach; ?>
                     </tr>
                     </thead>
                     <tbody>
-
+                    
+                    <?php if ($showClass): ?>
 
                         <tr>
                             <th>Klasse</th>
@@ -132,8 +134,9 @@
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         </tr>
-
-                    <?php
+                        
+                        <?php
+                    endif;
                     if ($showDetails):
                         ?>
                         <tr>
@@ -172,7 +175,6 @@
                     </tr>
 
 
-
                     <tr>
                         <th>Raum</th>
                         <?php foreach ($coverLessons as $lesson): ?>
@@ -189,16 +191,16 @@
                             $orgTeacher = $lesson->eTeacherObject->getShortName();
                             if (($lowerCaseSubject == "ev" || $lowerCaseSubject == "rk" || $lowerCaseSubject == "sp" || $lowerCaseSubject == "nwt" || $lowerCaseSubject == "f") && !$showDetails)
                                 $comment = "(Statt: $orgTeacher) $comment";
-
+                            
                             ?>
                             <?php if ($lesson->timestampDatum == $timestamp): ?>
-                                <td><?php echo $comment ?></td>
-                            <?php endif; ?>
+                            <td><?php echo $comment ?></td>
+                        <?php endif; ?>
                         <?php endforeach; ?>
                     </tr>
                     </tbody>
                 </table>
-
+                
                 <?php
             else: ?>
                 <table class="black-text">
@@ -206,7 +208,7 @@
                         <td>keine Vertretungen</td>
                     </tr>
                 </table>
-
+            
             <?php endif; ?>
     </div>
 </div>
