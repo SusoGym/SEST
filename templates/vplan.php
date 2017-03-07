@@ -16,7 +16,7 @@ if ($user instanceOf Teacher) {
     } else {
         $modeLink = '<li><a href="?type=vplan&all=1" class="btn-floating teal tooltipped" data-position="left" data-tooltip="alle anzeigen"><i class="material-icons left">select_all</i></a></li>';
     }
-    
+
     $showDetails = true;
 } elseif ($user instanceOf StudentUser) {
     $showDetails = $user->getClass() == "11" || $user->getClass() == "12";
@@ -27,7 +27,7 @@ if ($data['VP_showAll'])
 
 ?>
 <div class="container">
-    
+
     <?php if (isset($modeLink)) {
         ?>
 		<div class="fixed-action-btn">
@@ -38,22 +38,9 @@ if ($data['VP_showAll'])
 			  <?php echo $modeLink; ?>
 			</ul>
 		</div>
-        <!----
-		<div class="card">
-            <div class="card-content">
-                <div class="center">
-                    <?php echo $modeLink; ?>
-                    <a href="<?php echo $data['icsPath']; ?>" class="teal-text btn-flat">
-                        <i class="material-icons left">file_download</i>
-                        Herunterladen
-                    </a>
-                </div>
-            </div>
-        </div>
-		---->
         <?php
     } ?>
-    
+
     <?php
     $dayNr = 0;
     foreach ($data["VP_allDays"] as $day) {
@@ -64,7 +51,7 @@ if ($data['VP_showAll'])
             $blockedRooms = $data['VP_blockedRooms'][$timestamp];
         }
         $coverLessons = isset($data['VP_coverLessons'][$timestamp]) ? $data['VP_coverLessons'][$timestamp] : null;
-        
+
         include("vplanDay.php");
         $dayNr++;
     } ?>
