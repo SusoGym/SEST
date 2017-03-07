@@ -1086,13 +1086,19 @@ class Model {
         if ($tchr != null && !$showAll) {
             $add = " AND (vLehrer='" . $tchr->getUntisName() . "' OR eLehrer='" . $tchr->getShortName() . "') ";
         }
+        
+        $order = "datum,vLehrer,stunde";
+        
+        if($tchr == null)
+        $order = "datum,klassen,stunde";
+        
         foreach ($allDays as $day) {
             $datum = $day['timestamp'];
             $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
 			WHERE aktiv=true
 			AND datum='$datum'
 			$add
-			ORDER BY datum,vLehrer,stunde ASC");
+			ORDER BY $order ASC");
             
             if (count($data) > 0) {
                 foreach ($data as $dayData) {
@@ -1143,7 +1149,7 @@ class Model {
     public function getCoverLessonById($id) {
         $coverLesson = null;
         $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
-			WHERE vNr = $id");
+			WHERE vnr = $id");
         if (isset($data)) {
             $coverLesson = $data[0];
         }
@@ -1175,13 +1181,15 @@ class Model {
         
         foreach ($allDays as $day) {
             $datum = $day['timestamp'];
-            $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
+            $query = "SELECT * FROM vp_vpdata 
 			WHERE tag>0
 			AND tag<3
 			AND aktiv=true
 			AND datum='$datum'
 			$classQuery
-			ORDER BY datum,stunde ASC");
+			ORDER BY datum,stunde,klassen ASC";
+            
+            $data = self::$connection->selectAssociativeValues($query);
             if (count($data) > 0) {
                 foreach ($data as $d) {
                     $coverLesson = new CoverLesson();
@@ -1437,7 +1445,7 @@ class Model {
             $DBCoverL = new CoverLesson();
             $DBCoverL->ConstructFromDB($data[0]);
             $pk = $DBCoverL->primaryKey;
-            self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=true,tag=$POSTCoverL->tag,stand=\"$POSTCoverL->stand\" WHERE vNr=$pk");
+            self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=true,tag=$POSTCoverL->tag,stand=\"$POSTCoverL->stand\" WHERE vnr=$pk");
             //prüfe ob nur Kommentar geaendert ist
             if (strcmp($POSTCoverL->kommentar, $DBCoverL->kommentar) !== 0) {
                 $k = $POSTCoverL->kommentar;
@@ -1451,7 +1459,7 @@ class Model {
                 self::$connection->straightQuery("UPDATE vp_vpdata SET tag=$POSTCoverL->tag,datum=\"$POSTCoverL->datum\",vlehrer=\"$POSTCoverL->vTeacher\",
 				klassen=\"$POSTCoverL->klassen\",stunde=\"$POSTCoverL->stunde\",fach=\"$POSTCoverL->vFach\",raum=\"$POSTCoverL->vRaum\",
 				eLehrer=\"$POSTCoverL->eTeacherKurz\",eFach=\"$POSTCoverL->eFach\",kommentar=\"$POSTCoverL->kommentar\",id=\"$POSTCoverL->id\",aktiv=$POSTCoverL->aktiv,
-				stand=\"$POSTCoverL->stand\",changed_entry=CURRENT_TIMESTAMP WHERE vNr=$pk");
+				stand=\"$POSTCoverL->stand\",changed_entry=CURRENT_TIMESTAMP WHERE vnr=$pk");
             }
         } else {
             //Eintrag in Datenbank
