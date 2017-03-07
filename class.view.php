@@ -57,7 +57,7 @@ class View {
         $exists = file_exists($templateFile);
         
         if (self::$DEBUG)
-            ChromePhp::info("Displaying 'templates/$template.php' with data: " . json_encode($this->dataForView));
+            ChromePhp::info("Displaying 'templates/$template.php'");
         
         if ($exists) {
             /** @noinspection PhpIncludeInspection */

@@ -483,8 +483,8 @@ class Controller {
         
         $inputAll = isset($this->input['all']) ? ($this->input['all'] == null ? true : $this->input['all']) : false;
         
-        $this->infoToView["VP_showAll"] = $inputAll || $this->infoToView['VP_showAll'];
-        
+        if(isset($this->input['all']))
+            $this->infoToView['VP_showAll'] = $inputAll;
         
         $this->infoToView['VP_allDays'] = $this->model->getVPDays($isStaff || $this->infoToView['VP_showAll']);
         $this->infoToView['user'] = $usr;
@@ -544,7 +544,7 @@ class Controller {
             header('Content-Type: application/json');
             die(json_encode($data, JSON_PRETTY_PRINT));
         }
-        
+            
         return "vplan";
     }
     
