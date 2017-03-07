@@ -66,13 +66,13 @@
                         <tr>
                             <th>Stunde</th>'
                             . ($showClass ? '<th>Klasse</th>' : '') .
-                            '<th>Lehrer</th>
-                            <th>Fach</th>
-                            <th>Raum</th>' .
                             ($showDetails ? '
                                 <th>statt Lehrer:</th>
                                 <th>statt Fach:</th>' : '') .
-                            '<th>Kommentar</th>
+                            '<th>Lehrer</th>
+                            <th>Fach</th>
+                            <th>Raum</th>
+                            <th>Kommentar</th>
                         </tr>
                         </thead>
                         <tbody>';
@@ -95,9 +95,10 @@
                     
                     if ($showClass)
                         $desktop .= "<td>$classes</td>";
-                    $desktop .= "<td>$subTeacher</td><td>$subSubject</td><td>$subRoom</td>";
+                    
                     if ($showDetails)
                         $desktop .= "<td>$orgTeacher</td><td>$orgSubject</td>";
+                    $desktop .= "<td>$subTeacher</td><td>$subSubject</td><td>$subRoom</td>";
                     $desktop .= "<td>$comment</td>";
                     
                     
