@@ -91,7 +91,7 @@ class Controller {
             $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcometeacher');
             
         } else if (self::$user instanceof StudentUser) {
-            $this->infoToView['welcomeText'] = "Hi, boi!";
+            $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomestudent');
         }
         switch ($this->input['type']) {
             case "public":
