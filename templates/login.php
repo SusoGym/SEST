@@ -21,7 +21,7 @@
                         <div class="input-field col s12">
                             <i class="material-icons prefix">person</i>
                             <input id="usr_login" type="text" class="" required>
-                            <label for="usr_login" class="truncate">Email-Adresse</label>
+                            <label for="usr_login" class="truncate">Email-Adresse / Schul-Nutzername</label>
                         </div>
                         <div class="input-field col s12">
                             <i class="material-icons prefix">vpn_key</i>
@@ -86,7 +86,7 @@
 </div>
 
 <div id="forgot" class="modal">
-  <form submit="javascript:void(0);" onsubmit="forgot()" >
+  <form action="javascript:void(0);" onsubmit="forgot()" >
     <div class="modal-content">
       <h4>Passwort vergessen?</h4>
       <div class="forgotform input-field">
@@ -113,6 +113,9 @@
             echo "console.info('Toast: " . $not['msg'] . "');";
         }
 
+        if(isset($_GET['s']))
+         echo "Materialize.toast('Bitte nutzen sie zur Anmeldung ihre Schul-Zugangsdaten.');";
+        
     ?>
 
 
@@ -125,7 +128,7 @@
           $('p#forgottext').html('<i class="material-icons left teal-text">check</i>Bitte rufen Sie Ihre E-Mails ab, um ihr Passwort zurückzusetzen.');
         } else {
           $('p#forgottext').show();
-          $('p#forgottext').html('<i class="material-icons left red-text">clear</i>Etwas stimmt nicht: '+data.message);
+          $('p#forgottext').html('<i class="material-icons left red-text">clear</i>'+data.message);
         }
       });
 

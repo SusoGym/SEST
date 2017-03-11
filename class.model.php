@@ -298,9 +298,9 @@ class Model {
      */
     public function getTeacherShortNameByTeacherId($teacherId, $rawData = null) {
         $returnData = null;
-        if (!isset($rawData["shortName"]))  {
+        if (!isset($rawData["shortName"])) {
             $data = self::$connection->selectValues("SELECT kuerzel FROM lehrer WHERE id=$teacherId");
-			if ($data == null) {
+            if ($data == null) {
                 $returnData = null; // empty / not found
             } else {
                 $returnData = $data[0][0];
@@ -975,6 +975,79 @@ class Model {
         return true;
     }
     
+    /**
+     * Creates random token used for password forgotten
+     *
+     * @param $email
+     * @return array
+     */
+    public function generatePasswordReset($email) {
+        $resp = array("success" => true, "key" => null, "message" => "OK");
+        
+        $email = self::$connection->escape_string($email);
+        
+        $randomKey = uniqid() . uniqid(); // random 26 char digit
+        $user = $this->getUserByMail($email);
+        
+        if ($user == null || $user->getType() == 0) {
+            $resp['success'] = false;
+            $resp['message'] = 'No valid user email';
+            
+            return $resp;
+        }
+        $userId = $user->getId();
+        
+        self::$connection->straightQuery("INSERT INTO pwd_reset (token, uid, validuntil) VALUES ('$randomKey', $userId, NOW() + INTERVAL 24 HOUR);");
+        
+        $resp['key'] = $randomKey;
+        
+        return $resp;
+    }
+    
+    /**
+     * @param $token
+     * @param $newPwd
+     * @return array
+     */
+    public function redeemPasswordReset($token, $newPwd) {
+        $resp = array("success" => true, "message" => "OK");
+        
+        $newPwd = self::$connection->escape_string($newPwd);
+        $token = self::$connection->escape_string($token);
+        
+        $arr = self::$connection->selectAssociativeValues("SELECT COUNT(*) as count, uid FROM pwd_reset WHERE token='$token';")[0];
+        if ($arr['count'] != "1") {
+            $resp['success'] = false;
+            $resp['message'] = "Invalid request";
+        } else {
+            $pwd = password_hash($newPwd, PASSWORD_DEFAULT);
+            $uid = $arr['uid'];
+            self::$connection->straightMultiQuery(
+                "UPDATE user SET password_hash='$pwd' WHERE id=$uid;" .
+                "DELETE FROM pwd_reset WHERE token='$token';"
+            );
+        }
+        
+        return $resp;
+    }
+    
+    /**
+     * @param $token string
+     * @return bool
+     */
+    public function checkPasswordResetToken($token) {
+        $token = self::$connection->escape_string($token);
+        $count = self::$connection->selectAssociativeValues("SELECT COUNT(*) as count FROM pwd_reset WHERE token='$token' AND validuntil > NOW()")[0]['count'];
+    
+        return $count == "1";
+    }
+    
+    /**
+     * Deletes all expired password reset token
+     */
+    public function cleanUpPwdReset() {
+        self::$connection->straightQuery("DELETE FROM pwd_reset WHERE validuntil < NOW();");
+    }
     
     /*************************************************
      ********methods only used in CoverLesson module***
@@ -1089,8 +1162,8 @@ class Model {
         
         $order = "datum,vLehrer,stunde";
         
-        if($tchr == null)
-        $order = "datum,klassen,stunde";
+        if ($tchr == null)
+            $order = "datum,klassen,stunde";
         
         foreach ($allDays as $day) {
             $datum = $day['timestamp'];
@@ -1099,7 +1172,7 @@ class Model {
 			AND datum='$datum'
 			$add
 			ORDER BY $order ASC");
-          
+            
             if (count($data) > 0) {
                 foreach ($data as $dayData) {
                     $coverLesson = new CoverLesson();

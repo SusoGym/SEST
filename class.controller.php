@@ -55,6 +55,10 @@ class Controller {
     
     protected function handleLogic() {
         
+        
+        if (isset($this->input['console']))
+            header('Content-Type: text/json');
+        
         // handles login verification and creation of user object
         if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd'])) {
             if (!$this->checkLogin($_SESSION['user']['mail'], $_SESSION['user']['pwd'])) {
@@ -144,7 +148,9 @@ class Controller {
             case "vplan":
                 $template = $this->handleCoverLessons();
                 break;
-            
+            case "pwdreset":
+                $template = $this->handlePwdReset();
+                break;
             default:
                 if (self::$user instanceof Teacher) {
                     /** @var Teacher $user */
@@ -363,6 +369,123 @@ class Controller {
     }
     
     /**
+     * Handle pwd reset logic
+     */
+    public function handlePwdReset() {
+        $this->model->cleanUpPwdReset();
+        
+        if (isset($this->input['token'])) {
+            $token = $this->input['token'];
+            $validToken = $this->model->checkPasswordResetToken($token);
+            
+            if (isset($this->input['console'])) {
+                if(!$validToken)
+                {
+                    die(json_encode(array("success" => false, "message" => "Ungültige oder abgelaufene Anfrage")));
+                }
+                if (isset($this->input['pwdreset']['pwd'])) {
+                    $array = $this->model->redeemPasswordReset($token, $this->input['pwdreset']['pwd']);
+                    
+                    if ($array['success'])
+                        $this->notify("Ihr Passwort wurde erfolgreich geändert!", 4000, true);
+                    
+                    die(json_encode($array));
+                }
+            }
+            
+            $this->infoToView['validRequest'] = $validToken;
+            return "pwdreset";
+        }
+        
+        if (!isset($this->input['console']))
+            return "login";
+        
+        $success = true;
+        $message = "OK";
+        $code = 200;
+        
+        if (isset($this->input['pwdreset']['mail'])) {
+            $email = $this->input['pwdreset']['mail'];
+            
+            if (self::$user != null) {
+                $message = "Logged in";
+                $success = false;
+                $code = 400;
+            } else {
+                
+                $validEmail = filter_var($email, FILTER_VALIDATE_EMAIL);
+                
+                if ($validEmail) {
+                    
+                    $isUser = ($usr = $this->model->getUserByMail($email)) != null && $usr->getType() == 1;
+                    
+                    if (!$isUser) {
+                        $message = "Diese Email ist mit keinem Benutzer verknüpft!";
+                        $success = false;
+                        $code = 404;
+                    } else {
+                        $resp = $this->model->generatePasswordReset($email);
+                        if (!$resp['success']) {
+                            $message = $resp['message'];
+                            $success = false;
+                            $code = 500;
+                        } else {
+                            $key = $resp['key'];
+                            $resp = $this->sendPwdResetMail($email, $key);
+                            if (!$resp['success']) {
+                                $success = false;
+                                $message = "Error while sending mail: " . $resp['message'];
+                                $code = 500;
+                            }
+                        }
+                    }
+                } else {
+                    $message = "Invalid Email";
+                    $success = false;
+                    $code = 400;
+                }
+            }
+        } else {
+            $success = false;
+            $message = "Invalid Input";
+            $code = 400;
+        }
+        ChromePhp::info("boii");
+        die(json_encode(array("success" => $success, "message" => $message, "code" => $code)));
+    }
+    
+    /**
+     * Sends email to specified email in which password reset link is given
+     *
+     * @param $email
+     * @param $token
+     * @return array
+     */
+    public function sendPwdResetMail($email, $token) {
+        require "PHPMailer.php";
+        $mail = new PHPMailer();
+        $mail->setFrom("noreply@suso.schulen.konstanz.de", "Suso Gymnasium Intern");
+        $mail->CharSet = "UTF-8";
+        $mail->isHTML();
+        $mail->Subject = "Passwort vergessen";
+        
+        $url = $_SERVER['HTTP_HOST'] . "?type=pwdreset&token=$token";
+        
+        ob_start();
+        include("templates/resetmail.php");
+        $body = ob_get_clean();
+        
+        $mail->Body = $body;
+        $mail->addAddress($email);
+        
+        if ($mail->send())
+            return array("success" => true);
+        
+        return array("success" => false, "message" => $mail->ErrorInfo);
+        
+    }
+    
+    /**
      * Handles parent's est logic
      *
      * @return string template to be displayed
@@ -479,16 +602,16 @@ class Controller {
             return "login";
         
         $isStaff = (self::$user instanceOf Teacher) ? true : false;
-		
+        
         $this->infoToView["VP_showAll"] = $usr instanceof Teacher && $usr->getVpViewStatus();
         
         $inputAll = isset($this->input['all']) ? ($this->input['all'] == null ? true : $this->input['all']) : false;
         
-        if(isset($this->input['all']))
+        if (isset($this->input['all']))
             $this->infoToView['VP_showAll'] = $inputAll;
         
         $this->infoToView['VP_allDays'] = $this->model->getVPDays($isStaff || $this->infoToView['VP_showAll']);
-		$this->infoToView['user'] = $usr;
+        $this->infoToView['user'] = $usr;
         
         if ($this->infoToView['VP_showAll']) {
             $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessons($this->infoToView['VP_showAll'], null, $this->infoToView['VP_allDays']);
@@ -545,7 +668,7 @@ class Controller {
             header('Content-Type: application/json');
             die(json_encode($data, JSON_PRETTY_PRINT));
         }
-            
+        
         return "vplan";
     }
     
@@ -1030,27 +1153,25 @@ class Controller {
     private function sendMails($list) {
         $currentTime = date('d.m.Y H:i:s');
         $this->model->writeToVpLog("Starting to send mails on " . $currentTime);
-        require("phpmailer/class.phpmailer.php");
+        require("PHPMailer.php");
         //sending emails
         $timestamp = time();
         $datum = date("Y-m-d  H:i:s", $timestamp);
-        $x = 0;
+        /** @var Teacher $l */
         foreach ($list as $l) {
-            $mail[$x] = new PHPMailer();
-            $mail[$x]->From = "stundenplan@suso.konstanz.de";
-            $mail[$x]->FromName = "Vertretungsplan Suso";
-            $mail[$x]->CharSet = "UTF-8";
-            $mail[$x]->IsHTML(true);
-            $time = date('d.m.Y - H:i:s');
-            $l_email = $l->getEmail();
-            $mail[$x]->AddAddress($l_email);
-            $mail[$x]->Subject = $time . " aktueller Vertretungsplan";
-            $mail[$x]->Body = $this->model->makeHTMLVpMailContent($l);
+            /** @var PHPMailer $phpmail */
+            $phpmail = new PHPMailer();
+            $phpmail->setFrom("stundenplan@suso.konstanz.de", "Vertretungsplan Suso");
+            $phpmail->CharSet = "UTF-8";
+            $phpmail->isHTML();
+            $phpmail->AddAddress($l->getEmail());
+            $phpmail->Subject = date('d.m.Y - H:i:s') . " aktueller Vertretungsplan";
+            $phpmail->Body = $this->model->makeHTMLVpMailContent($l);
             
             //Protokolldaten vorbereiten
             //Mailadressen der Instanz:
             $allmailstring = "";
-            foreach ($mail[$x]->to as $ema) {
+            foreach ($phpmail->getAllRecipientAddresses() as $ema) {
                 if ($allmailstring == "") {
                     $allmailstring = $ema[0];
                 } else {
@@ -1061,19 +1182,11 @@ class Controller {
             
             
             //Senden
-            /*
-            $cont="";
-            foreach($l->getCoverLessonNrs() as $v) {
-            if ($cont == "") {$cont = $v;} else {$cont = $cont.';'.$v;}
-            }
-            $untisName = $l->getUntisName();
-            $this->model->writeToVpLog("Trying to execute Query: INSERT into vplanProtokoll (`pk`,`datum`,`recipient`,`mail`,`content`) VALUES ('','$datum','$untisName','$allmailstring','$cont')");
-            */
-            if (!$mail[$x]->Send()) {
+            if (!$phpmail->Send()) {
                 echo "cannot send!";
                 //$mail[$x]->Send() liefert FALSE zurück: Es ist ein Fehler aufgetreten
                 $currentTime = date('d.m.Y H:i:s');
-                $this->model->writeToVpLog("....failure." . $mail->ErrorInfo . " Trying to reach " . $l->getEmail() . " " . $currentTime);
+                $this->model->writeToVpLog("....failure." . $phpmail->ErrorInfo . " Trying to reach " . $l->getEmail() . " " . $currentTime);
             } else {
                 echo "mail gesendet an: " . $l->getEmail() . '<br>';
                 //Eintrag des Sendeprotokolls
@@ -1090,11 +1203,8 @@ class Controller {
                 $this->model->UpdateVpMailSentDate($cl);
             }
             
-            
-            $mail[$x] = null;
             $allmailstring = null;
             $cont = null;
-            $x++;
         }
         $this->model->writeToVpLog("*****************************************************");
     }
