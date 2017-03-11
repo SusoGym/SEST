@@ -25,8 +25,11 @@
                         </div>
                         <div class="input-field col s12">
                             <i class="material-icons prefix">vpn_key</i>
-                            <input id="pwd_login" type="password" required>
+                            <input id="pwd_login" type="password" style="margin-bottom:0px;" required>
                             <label for="pwd_login" class="truncate">Passwort</label>
+                            <span class="right" style="margin-bottom:20px;" >
+                              <a href="#forgot" class="teal-text text-darken-2">Passwort vergessen?</a>
+                            </span>
                         </div>
                         <div class="row" style="margin-bottom: 0;">
                             <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">Submit<i
@@ -75,16 +78,34 @@
         </ul>
     </div>
 </div>
+
 <div id="student_blueprint" class="row" style="display: none;">
     <input id="student" class="col s6 autocomplete name" name="student" type="text" placeholder="Name">
     <input type="date" class="datepicker col s6 bday" id="bday" name="bday" placeholder="Geburtsdatum">
     <!-- id="bday" class="col s6" name="bday" type="date" class="bday" -->
 </div>
 
+<div id="forgot" class="modal">
+  <form submit="javascript:void(0);" onsubmit="forgot()" >
+    <div class="modal-content">
+      <h4>Passwort vergessen?</h4>
+      <div class="forgotform input-field">
+        <input id="mail_forgot" type="email" class="validate">
+        <label for="mail_forgot">Email</label>
+      </div>
+      <p id="forgottext" class="center" style="display:none;"></p>
+    </div>
+    <div class="modal-footer forgotform">
+        <button type="submit" class="modal-action waves-effect waves-teal btn-flat">Zurücksetzen<i class="material-icons right">send</i></button>
+    </div>
+  </form>
+</div>
 <script src="https://code.jquery.com/jquery-2.2.4.min.js"
         integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script>
+
+    $('.modal').modal();
     <?php
     if (isset($data['notifications']))
         foreach ($data['notifications'] as $not) {
@@ -94,6 +115,21 @@
 
     ?>
 
+
+    function forgot() {
+      var mail = $('#mail_forgot').val();
+      $.post("", {'type': 'pwdreset', 'console': '', 'pwdreset[mail]': mail}, function (data) {
+        if (data.success == true) {
+          $('.forgotform').hide();
+          $('p#forgottext').show();
+          $('p#forgottext').html('<i class="material-icons left teal-text">check</i>Bitte rufen Sie Ihre E-Mails ab, um ihr Passwort zurückzusetzen.');
+        } else {
+          $('p#forgottext').show();
+          $('p#forgottext').html('<i class="material-icons left red-text">clear</i>Etwas stimmt nicht: '+data.message);
+        }
+      });
+
+    }
 
     function submitLogin() {
         var pwd = $('#pwd_login').val();
@@ -173,5 +209,4 @@
 
 </script>
 </body>
-
 </html>
