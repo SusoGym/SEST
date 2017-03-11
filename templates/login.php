@@ -136,9 +136,9 @@
         var usr = $('#usr_login').val();
 
         $.post("", {'type': 'login', 'console': '', 'login[password]': pwd, 'login[mail]': usr}, function (data) {
-            if (data == "true") {
+            if (data == true) {
                 location.reload();
-            } else if (data == "false") {
+            } else if (data == false) {
                 Materialize.toast("Email-Addresse oder Passwort falsch", 4000);
                 $('#pwd_login').val("");
 
@@ -187,12 +187,11 @@
         }, function (data) {
 
             try {
-                var myData = JSON.parse(data);
-                if (myData.success) {
+                if (data.success) {
                     location.reload();
                 }
                 else { // oh no! ;-;
-                    var notifications = myData['notifications'];
+                    var notifications = data['notifications'];
                     notifications.forEach(function (data) {
                         Materialize.toast(data, 4000);
                     });
