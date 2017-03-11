@@ -107,17 +107,16 @@ include("header.php");
         }, function (data) {
 
             try {
-                var myData = JSON.parse(data);
-                if (myData.success) {
+                if (data.success) {
                     location.reload();
                 }
                 else { // oh no! ;-;
-                    var notifications = myData['notifications'];
+                    var notifications = data['notifications'];
                     notifications.forEach(function (data) {
                         Materialize.toast(data, 4000);
                     });
 
-                    if ("resetold" in myData) {
+                    if ("resetold" in data) {
                         old_pwd.val("");
                     }
                 }
