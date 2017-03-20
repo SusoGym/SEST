@@ -142,9 +142,15 @@ class ChromePhp {
         return self::$_instance;
     }
     
+    private static $SQL_DEBUG = false;
+    
+    public static function setSQLDebug($bool)
+    {
+        self::$SQL_DEBUG = $bool;
+    }
     
     public static function logSQL() {
-        if (!defined("SQL_DEBUG") || !SQL_DEBUG)
+        if (!self::$SQL_DEBUG)
             return;
         
         $str = "";
