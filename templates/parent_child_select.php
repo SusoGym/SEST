@@ -100,9 +100,8 @@
             return;
         }
 
-        $.get("index.php" + url_param, function (data) {
+        $.get("index.php" + url_param, function (myData) {
             try {
-                var myData = JSON.parse(data);
                 if (myData.success) {
                     location.reload();
                 }
