@@ -375,7 +375,7 @@ class Model {
             if (!isset($novelData->{'code'}) || !isset($novelData->{'type'}) || $novelData->{'code'} != "200" || $novelData->{'type'} != 'Teacher') {
                 ChromePhp::info(json_encode($novelData));
                 if (isset($novelData->{'type'}) && $novelData->{'type'} == "student" && $novelData->{'code'} == "200") {
-                    $query = "SELECT * FROM schueler WHERE klasse='" . $novelData->{'class'} . "' AND NAME LIKE '%" . $novelData->{'surname'} . "%' AND";
+                    $query = "SELECT * FROM schueler WHERE klasse='" . $novelData->{'class'} . "' AND name LIKE '%" . $novelData->{'surname'} . "%' AND (";
                     $names = explode(' ', $novelData->{'givenname'});
                     
                     for ($i = 0; $i < sizeof($names); $i++) {
@@ -383,7 +383,7 @@ class Model {
                             $query .= " OR";
                         $query .= " vorname LIKE '%" . $names[$i] . "%'";
                     }
-                    
+                    $query.=")";
                     $data = self::$connection->selectAssociativeValues($query);
                     
                     if (!isset($data[0])) {
