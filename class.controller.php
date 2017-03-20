@@ -373,7 +373,7 @@ class Controller {
      */
     public function handlePwdReset() {
         $this->model->cleanUpPwdReset();
-        
+		        
         if (isset($this->input['token'])) {
             $token = $this->input['token'];
             $validToken = $this->model->checkPasswordResetToken($token);
@@ -469,7 +469,7 @@ class Controller {
         $mail->isHTML();
         $mail->Subject = "Passwort vergessen";
         
-        $url = $_SERVER['HTTP_HOST'] . "?type=pwdreset&token=$token";
+        $url = $_SERVER['HTTP_HOST'] . "/intern/?type=pwdreset&token=$token";
         
         ob_start();
         include("templates/resetmail.php");
