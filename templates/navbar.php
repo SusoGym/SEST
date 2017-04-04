@@ -2,14 +2,15 @@
 $data = $this->getDataForView();
 
 $selectionActive = $est = $vplan = $events = $news = $editData = $childSel = true;
+$blog = false;
 $today = date("Ymd");
 
 $userObj = Controller::getUser();
 
 if ($userObj == null) {
-
+    
     $selectionActive = $est = $editData = false;
-
+    
 } else if ($userObj instanceof Guardian) {
     $children = $data['children'];
     if (count($children) == 0) {
@@ -25,7 +26,7 @@ if ($userObj == null) {
         $est = false;
     }
 } elseif ($userObj instanceof StudentUser) {
-
+    
     $est = false;
 }
 
@@ -84,23 +85,28 @@ if ($news) {
     array_push($modules, array("id" => "news", "href" => "?type=news", "title" => "Newsletter", "icon" => "library_books"));
 }
 
+if ($userObj != null) {
+    if ($blog) {
+        array_push($modules, array("id" => "blog", "href" => "/blog", "title" => "Blog", "icon" => "library_books"));
+    }
+}
 foreach ($modules as $module) {
     $id = $module['id'];
     $link = $module['href'];
     $title = $module['title'];
     $icon = $module['icon'];
     $inner = (isset($module['inner'])) ? $module['inner'] : $title;
-
+    
     ?>
-    <li>
-        <a id="<?php echo $id ?>" <?php if ($link != "") echo "href='$link'" ?> title="<?php echo $title ?>"
-           class="waves-effect">
-            <i class="material-icons left">
-                <?php echo $icon ?>
-            </i>
-            <?php echo $inner ?>
-        </a>
-    </li>
+ <li>
+  <a id="<?php echo $id ?>" <?php if ($link != "") echo "href='$link'" ?> title="<?php echo $title ?>"
+     class="waves-effect">
+   <i class="material-icons left">
+       <?php echo $icon ?>
+   </i>
+      <?php echo $inner ?>
+  </a>
+ </li>
     <?php
 }
 
