@@ -136,7 +136,7 @@
 
     function submitLogin() {
         var pwd = $('#pwd_login').val();
-        var usr = $('#usr_login').val();
+        var usr = $('#usr_login').val().replace(/ /g, '');
 
         $.post("", {'type': 'login', 'console': '', 'login[password]': pwd, 'login[mail]': usr}, function (data) {
             if (data == true) {
@@ -162,11 +162,11 @@
         // register[ usr, mail, pwd, student[ [name, bday], [name, bday], ...]
         var url_param = "?console&type=register";
 
-        var mail = $('#mail_register').val();
+        var mail = $('#mail_register').val().replace(/ /g, '');
         var pwd = $('#pwd_register');
         var pwdrep = $('#pwdrep_register');
-        var nameVal = $('#name_register').val();
-        var surnameVal = $('#surname_register').val();
+        var nameVal = $('#name_register').val().replace(/ /g, '');
+        var surnameVal = $('#surname_register').val().replace(/ /g, '');
 
         if (pwd.val() != pwdrep.val()) {
             pwd.val("");
