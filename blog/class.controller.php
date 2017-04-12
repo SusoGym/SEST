@@ -8,6 +8,7 @@ class Controller extends Utility {
     private $data;
     /** @var  Model instance of model */
     private $model;
+    
     // Response Variables
     /** @var int The response code (based upon HTML codes) */
     private $code = 200;
@@ -34,7 +35,13 @@ class Controller extends Utility {
         }
     }
     
+    /**
+     * Deconstruct. Combines all the result of the processing of the input in a json response
+     */
     function __destruct() {
+        
+        if (!$this->console)
+            return;
         
         if (!self::$errorless_exit)
             return;
@@ -122,7 +129,19 @@ class Controller extends Utility {
     }
     
     /**
+     * Creates response for being unauthorized
+     */
+    private function unauthorized() {
+        $this->code = 401;
+        $this->message = "User is not allowed to perform this action!";
+        die();
+    }
+    
+    /**
+     * Return array with all requested parameters, if existent in $data use that value, else call missingArgs()
+     *
      * @param array ...$requested
+     *
      * @return array
      */
     private function handleParameters(...$requested) {
@@ -147,7 +166,10 @@ class Controller extends Utility {
     }
     
     /**
+     * Return array with all requested parameters, if existent in $data use that value, else use null
+     *
      * @param array ...$requested
+     *
      * @return array
      */
     private function handleOptionalParameters(...$requested) {
@@ -163,22 +185,108 @@ class Controller extends Utility {
         return $response;
     }
     
+    /**
+     * Returns User object from token or exit with 401 when token is invalid
+     *
+     * @param $token string
+     *
+     * @return \blog\User|null
+     */
+    private function getTokenUser($token) {
+        $user = $this->model->getUserByToken($token);
+        
+        if ($user == null) {
+            $this->code = 401;
+            $this->message = "Invalid auth_token!";
+            
+            die();
+        }
+        
+        return $user;
+    }
+    
     // Processing methods [may have 1 arg to receive $data | may return $payload (preferably objects) | must be protected]
     // objects can be created with ->  (object) [ key1 => value1, key2 => value2, ... ]
     
     /**
      * / Action function \
-     * Returns the news array in an specified date range
+     * Returns the posts as array in the specified date range
      *
      * @param startDate string {optional} The range beginning [yyyy-mm-dd hh:mm:ss]
-     * @param endDate string {optional}   The range ending
+     * @param endDate   string {optional}   The range ending
+     *
      * @return array
      */
-    protected function fetchNews() {
+    protected function fetchPosts() {
         $params = $this->handleOptionalParameters("startDate", "endDate");
-        $news = $this->model->getNews($params['startDate'], $params['endDate']);
+        $news = $this->model->getPosts($params['startDate'], $params['endDate']);
         
         return $news;
+    }
+    
+    /**
+     * / Action function \
+     * Pushes new news post to database
+     *
+     * Permission: PERMISSION_ADD_POST
+     *
+     * @param auth_token  string
+     * @param subject     string
+     * @param body        string
+     * @param releaseDate string {optional} [yyyy-mm-dd hh:mm:ss] // default: current timestamp
+     *
+     * @return \blog\Post
+     */
+    protected function addPost() {
+        $params = array_merge($this->handleParameters("auth_token", "subject", "body"), $this->handleOptionalParameters("releaseDate"));
+        
+        $user = $this->getTokenUser($params['auth_token']);
+        
+        if (!$user->hasPermission(PERMISSION_ADD_POST)) {
+            $this->unauthorized();
+        }
+        
+        $post = Post::generatePost($params['body'], $params['subject'], $user, $params['releaseDate'])->post();
+        
+        return $post;
+    }
+    
+    /**
+     * / Action function \
+     * Edit already pushed post
+     *
+     * Permission: PERMISSION_EDIT_POST
+     *
+     * @param postId     int
+     * @param auth_token string
+     * @param subject    string
+     * @param body       string
+     *
+     * @return \blog\Post
+     */
+    protected function editPost() {
+        $param = array_merge($this->handleParameters("postId", "auth_token"), $this->handleOptionalParameters("body", "subject", "author", "releaseDate"));
+        
+        if (!$this->getTokenUser($param['auth_token'])->hasPermission(PERMISSION_EDIT_POST))
+            $this->unauthorized();
+        
+        $post = $this->model->getPost($param['postId']);
+        if ($param['body'] != null) {
+            $post->setBody($param['body']);
+        }
+        if ($param['subject'] != null) {
+            $post->setSubject($param['subject']);
+        }
+        if ($param['author'] != null) {
+            $post->setAuthor($param['author']);
+        }
+        if ($param['releaseDate'] != null) {
+            $post->setReleaseDate($param['releaseDate']);
+        }
+        
+        $post->post();
+        
+        return $post;
     }
     
     /**
@@ -186,22 +294,23 @@ class Controller extends Utility {
      * Returns the user information about the requested user
      * At least one parameter must be given
      *
-     * @param auth -token string returns information about token owner
-     * @param userId int        returns information about user with specified userId
+     * @param auth     -token string returns information about token owner
+     * @param userId   int        returns information about user with specified userId
      * @param username string   returns information about user with specified username
-     * @return array
+     *
+     * @return \blog\User
      */
     protected function getUserInfo() {
-        $params = $this->handleOptionalParameters("auth-token", "userId", "username");
+        $params = $this->handleOptionalParameters("auth_token", "userId", "username");
         $user = null;
-        if ($params['auth-token'] != null) {
-            $user = $this->model->getUserByToken($params['auth-token']);
+        if ($params['auth_token'] != null) {
+            $user = $this->model->getUserByToken($params['auth_token']);
         } else if ($params['userId'] != null) {
             $user = $this->model->getUserById($params['userId']);
         } else if ($params['username']) {
             $user = $this->model->getUserByName($params['username']);
         } else {
-            $this->missingArgs("auth-token' or 'userId' or 'username");
+            $this->missingArgs("auth_token' or 'userId' or 'username");
         }
         
         if ($user == null) {
@@ -209,46 +318,14 @@ class Controller extends Utility {
             $this->code = 404;
             $this->message = "Invalid user identifier given!";
         } else {
-            return $user->getData();
+            return $user;
         }
         
     }
     
     /**
      * / Action function \
-     * Pushes new news post to database
-     *
-     * @param auth -token string
-     * @param subject string
-     * @param body string
-     * @param releaseDate string {optional} [yyyy-mm-dd hh:mm:ss] // default: current timestamp
-     * @return array
-     */
-    protected function addNews() {
-        $params = array_merge($this->handleParameters("auth-token", "subject", "body"), $this->handleOptionalParameters("releaseDate"));
-        
-        $user = $this->model->getUserByToken($params['auth-token']);
-        
-        if ($user == null) {
-            $this->code = 401;
-            $this->message = "Invalid auth-token!";
-            
-            return null;
-        }
-        if (!$user->hasPermission(PERMISSION_ADD_NEWS)) {
-            $this->code = 401;
-            $this->message = "User does not have the permission to post news!";
-            
-            return null;
-        }
-        $postId = $this->model->addNews($user, $params['subject'], $params['body'], $params['releaseDate']);
-        
-        return array("postId" => $postId);
-    }
-    
-    /**
-     * / Action function \
-     * Generates Auth-Token from stored SESSION data {user:[mail, pwd]}
+     * Generates auth_token from stored SESSION data {user:[mail, pwd]}
      *
      * @return array
      */
@@ -271,15 +348,16 @@ class Controller extends Utility {
             return null;
         }
         
-        return array("authToken" => $token, "expire" => $this->model->getExpirationDate($token), "user" => $this->model->getUserByToken($token)->getData());
+        return array("authToken" => $token, "expire" => $this->model->getExpirationDate($token), "user" => $this->model->getUserByToken($token));
     }
     
     /**
      * / Action function \
-     * Generates Auth-Token from given login-data
+     * Generates auth_token from given login-data
      *
      * @param username string
      * @param password string
+     *
      * @return array
      */
     protected function createToken() {
@@ -294,6 +372,148 @@ class Controller extends Utility {
             return null;
         }
         
-        return array("authToken" => $token, "expire" => $this->model->getExpirationDate($token), "user" => $this->model->getUserByToken($token)->getData());
+        return array("authToken" => $token, "expire" => $this->model->getExpirationDate($token), "user" => $this->model->getUserByToken($token));
+    }
+    
+    /**
+     * / Action function \
+     * Returns all permissions and their bitwise value
+     *
+     * @return array
+     */
+    protected function getPermissions() {
+        $consts = get_defined_constants(true)['user'];
+        $perms = array();
+        
+        $prefix = "PERMISSION_";
+        
+        foreach ($consts as $key => $value) {
+            if (substr($key, 0, strlen($prefix)) === $prefix) {
+                $perms[$key] = $value;
+            }
+        }
+        
+        return $perms;
+    }
+    
+    /**
+     * / Action function \
+     * Returns whether or not the specified user has the specified permission | needs one user argument
+     *
+     * @param permission int
+     * @param auth_token string
+     * @param userId     int
+     * @param username   string
+     *
+     * @return array
+     */
+    protected function hasPermission() {
+        $params = array_merge($this->handleOptionalParameters("auth_token", "userId", "username"), $this->handleParameters("permission"));
+        $user = null;
+        if ($params['auth_token'] != null) {
+            $user = $this->model->getUserByToken($params['auth_token']);
+        } else if ($params['userId'] != null) {
+            $user = $this->model->getUserById($params['userId']);
+        } else if ($params['username']) {
+            $user = $this->model->getUserByName($params['username']);
+        } else {
+            $this->missingArgs("auth_token' or 'userId' or 'username");
+        }
+        if ($user == null) {
+            
+            $this->code = 404;
+            $this->message = "Invalid user identifier given!";
+            die();
+        }
+        
+        return array("permission" => intval($params['permission']), "success" => $user->hasPermission($params['permission']), "user" => $user);
+        
+    }
+    
+    /**
+     * / Action function \
+     * Changes the permissions of the specified user | needs one user argument
+     *
+     * @param permission      int
+     * @param value           bool
+     * @param auth_token      string
+     * @param user_auth_token string
+     * @param userId          int
+     * @param username        string
+     *
+     * @return array
+     */
+    protected function changePermission() {
+        $params = array_merge($this->handleOptionalParameters("user_auth_token", "userId", "username", "mode"), $this->handleParameters("auth_token", "permission", "value"));
+        $user = null;
+        if ($params['user_auth_token'] != null) {
+            $user = $this->model->getUserByToken($params['user_auth_token']);
+        } else if ($params['userId'] != null) {
+            $user = $this->model->getUserById($params['userId']);
+        } else if ($params['username']) {
+            $user = $this->model->getUserByName($params['username']);
+        } else {
+            $this->missingArgs("user_auth_token' or 'userId' or 'username");
+        }
+        
+        if (!$this->getTokenUser($params['auth_token'])->hasPermission(PERMISSION_CHANGE_PERMISSION)) {
+            $this->unauthorized();
+        }
+        
+        if ($user == null) {
+            
+            $this->code = 404;
+            $this->message = "Invalid user identifier given!";
+            die();
+        }
+        
+        $user->setPermission(intval($params['permission']), boolval($params['value']));
+        
+        return array("permission" => intval($params['permission']), "success" => $user->pushChanges(), "user" => $user);
+    }
+    
+    /**
+     * / Action function \
+     * Changes the display-name of the specified user | needs one user argument
+     *
+     * @param permission      int
+     * @param value           bool
+     * @param auth_token      string
+     * @param user_auth_token string
+     * @param userId          int
+     * @param username        string
+     *
+     * @return array
+     */
+    protected function changeDisplayName() {
+        $params = array_merge($this->handleOptionalParameters("user_auth_token", "userId", "username", "mode"), $this->handleParameters("auth_token", "displayName"));
+        $user = null;
+        if ($params['user_auth_token'] != null) {
+            $user = $this->model->getUserByToken($params['user_auth_token']);
+        } else if ($params['userId'] != null) {
+            $user = $this->model->getUserById($params['userId']);
+        } else if ($params['username']) {
+            $user = $this->model->getUserByName($params['username']);
+        } else {
+            $this->missingArgs("auth_token' or 'userId' or 'username");
+        }
+        
+        $executer = $this->getTokenUser($params['auth_token']);
+        
+        
+        if (($executer != $user && !$executer->hasPermission(PERMISSION_CHANGE_DISPLAYNAME_OTHER)) || ($executer == $user && !$executer->hasPermission(PERMISSION_CHANGE_DISPLAYNAME)))
+            $this->unauthorized();
+        
+        if ($user == null) {
+            
+            $this->code = 404;
+            $this->message = "Invalid user identifier given!";
+            die();
+        }
+        
+        $user->setDisplayName($params['displayName']);
+        
+        return array("displayName" => $params['displayName'], "success" => $user->pushChanges(), "user" => $user);
+        
     }
 }

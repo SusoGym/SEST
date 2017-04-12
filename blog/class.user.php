@@ -1,9 +1,15 @@
 <?php namespace blog;
 
 define('PERMISSION_EVERYTHING', 1);
-define("PERMISSION_ADD_NEWS", 2);
+define('PERMISSION_ADD_POST', 2);
+define('PERMISSION_VIEW_EDITOR_PANEL', 4);
+define('PERMISSION_DELETE_POST', 8);
+define('PERMISSION_EDIT_POST', 16);
+define('PERMISSION_CHANGE_PERMISSION', 32);
+define('PERMISSION_CHANGE_DISPLAYNAME', 64);
+define('PERMISSION_CHANGE_DISPLAYNAME_OTHER', 128);
 
-class User {
+class User implements \JsonSerializable {
     
     /** @var $id int */
     private $id;
@@ -14,7 +20,7 @@ class User {
     /** @var $displayName string */
     private $displayName;
     
-    function __construct($id, $username, $permission, $displayName) {
+    public function __construct($id, $username, $permission, $displayName) {
         
         $this->id = intval($id);
         $this->username = $username;
@@ -26,6 +32,7 @@ class User {
     
     /**
      * Returns userId
+     *
      * @return int
      */
     public function getId() {
@@ -34,6 +41,7 @@ class User {
     
     /**
      * Returns username
+     *
      * @return string
      */
     public function getUsername() {
@@ -42,6 +50,7 @@ class User {
     
     /**
      * Returns permissions
+     *
      * @return int
      */
     public function getPermission() {
@@ -50,12 +59,13 @@ class User {
     
     /**
      * Checks if user has specified permission
+     *
      * @param $permission
+     *
      * @return bool
      */
-    public function hasPermission($permission)
-    {
-        if($permission != PERMISSION_EVERYTHING && $this->hasPermission(PERMISSION_EVERYTHING))
+    public function hasPermission($permission) {
+        if ($permission != PERMISSION_EVERYTHING && $this->hasPermission(PERMISSION_EVERYTHING))
             return true;
         
         return (($this->getPermission()) & $permission) == $permission;
@@ -63,13 +73,12 @@ class User {
     
     /**
      * Sets specified permission for user
+     *
      * @param $permission int
-     * @param $value bool
+     * @param $value      bool
      */
-    public function setPermission($permission, $value)
-    {
-        if($value)
-        {
+    public function setPermission($permission, $value) {
+        if ($value) {
             $this->permission |= $permission;
         } else {
             $this->permission &= ~$permission;
@@ -78,6 +87,7 @@ class User {
     
     /**
      * Returns displayname
+     *
      * @return string
      */
     public function getDisplayName() {
@@ -88,20 +98,27 @@ class User {
     }
     
     /**
+     * @param string $displayName
+     */
+    public function setDisplayName($displayName) {
+        $this->displayName = $displayName;
+    }
+    
+    /**
      * Pushes this user object changes to the database
+     *
      * @return bool success
      */
-    public function pushChanges()
-    {
+    public function pushChanges() {
         return Model::getInstance()->pushUser($this);
     }
     
     /**
      * Returns the content of this class as an array
+     *
      * @return array
      */
-    public function getData()
-    {
+    function jsonSerialize() {
         return array("id" => $this->id, "username" => $this->username, "permission" => $this->permission, "displayName" => $this->displayName);
     }
 }
