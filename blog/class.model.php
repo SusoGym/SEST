@@ -22,11 +22,14 @@ class Model {
     }
     
     /**
+     * Returns Posts in specified date-range
+     *
      * @param $start string in format yyyy-mm-dd hh:mm:ss
-     * @param $end string  in format yyyy-mm-dd hh:mm:ss
+     * @param $end   string  in format yyyy-mm-dd hh:mm:ss
+     *
      * @return array
      */
-    public function getNews($start = null, $end = null) {
+    public function getPosts($start = null, $end = null) {
         $range = "1";
         
         if ($start != null) {
@@ -49,31 +52,80 @@ class Model {
         if ($result == null)
             return null;
         
-        return $result;
+        $posts = array();
+        
+        foreach ($result as $post) {
+            array_push($posts, new Post(intval($post['id']), $post['body'], $post['subject'], intval($post['author']), $post['releasedate']));
+        }
+        
+        return $posts;
         
     }
     
     /**
-     * @param $author User author id
-     * @param $subject string
-     * @param $body string
-     * @param $releasedatestring string time the news was released format [yyyy-mm-dd hh:mm:ss]
-     * @return int ID of the post
+     * Returns post of specified id
+     *
+     * @param $id
+     *
+     * @return Post | null if not existent
      */
-    public function addNews($author, $subject, $body, $releasedate = null) {
-        if ($releasedate == null) {
-            $releasedate = date("Y-m-d H:i:s", time());
+    public function getPost($id) {
+        
+        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_news WHERE id=$id");
+        
+        if ($result == null)
+            return null;
+        $result = $result[0];
+        
+        return new Post(intval($result['id']), $result['body'], $result['subject'], intval($result['author']), $result['releasedate']);
+    }
+    
+    /**
+     * Pushes new post to database and returns it's insertion id
+     *
+     * @param $post \blog\Post
+     *
+     * @return Post
+     */
+    public function addPost($post) {
+        
+        $releaseDate = $post->getReleaseDate();
+        
+        if ($releaseDate == null) {
+            $releaseDate = date("Y-m-d H:i:s", time());
         }
         
-        $userId = $author->getId();
+        $userId = $post->getAuthor();
+        $subject = $post->getSubject();
+        $body = $post->getBody();
         
-        return $this->connection->insertValues("INSERT INTO blog_news(subject, body, releasedate, author) VALUES ('$subject', '$body', TIMESTAMP('$releasedate'), '$userId')");
+        $id = $this->connection->insertValues("INSERT INTO blog_news(subject, body, releasedate, author) VALUES ('$subject', '$body', TIMESTAMP('$releaseDate'), '$userId')");
+        
+        $post->setId($id);
+        $post->setReleaseDate($releaseDate);
+        
+        return $post;
+    }
+    
+    /**
+     * Pushes post to database
+     *
+     * @param $post \blog\Post
+     */
+    public function updatePost($post) {
+        $id = $post->getId();
+        $subject = $post->getSubject();
+        $body = $post->getBody();
+        $author = $post->getAuthor();
+        $releaseDate = $post->getReleaseDate();
+        $this->connection->straightQuery("UPDATE blog_news SET subject='$subject', body='$body', author=$author, releasedate='$releaseDate' WHERE id=$id");
     }
     
     /**
      * Returns UserId by username, creates user if not existent
      *
      * @param $username
+     *
      * @return User
      */
     public function getUserByName($username) {
@@ -91,6 +143,7 @@ class Model {
      * Returns user by userId
      *
      * @param $id int userId
+     *
      * @return User|null
      */
     public function getUserById($id) {
@@ -107,6 +160,7 @@ class Model {
      * Returns user authenticated by token-id or null if invalid login token
      *
      * @param $token string
+     *
      * @return User|null if invalid token
      */
     public function getUserByToken($token) {
@@ -127,6 +181,7 @@ class Model {
      * Pushes user object to database
      *
      * @param $user User
+     *
      * @return bool success
      */
     public function pushUser($user) {
@@ -160,8 +215,9 @@ class Model {
      * Pushes auth-token to database
      *
      * @param $userId int
-     * @param $token null|string token to be pushed
-     * @param $clean bool whether or not to clean expired tokens
+     * @param $token  null|string token to be pushed
+     * @param $clean  bool whether or not to clean expired tokens
+     *
      * @return string the pushed token
      */
     public function addAuthToken($userId, $token = null, $clean = true) {
@@ -183,6 +239,7 @@ class Model {
      * Gets token from database that was auto-generated
      *
      * @param $userId int
+     *
      * @return string token
      */
     public function getToken($userId) {
@@ -198,6 +255,7 @@ class Model {
      * Returns the expiration date of the given token
      *
      * @param $token string
+     *
      * @return string|null if not a token
      */
     public function getExpirationDate($token) {
@@ -220,6 +278,7 @@ class Model {
      * Inserts user to database and returns user object
      *
      * @param $username
+     *
      * @return User
      */
     public function createUserByName($username) {

@@ -69,6 +69,7 @@ class Utility {
      *
      * @param $arr array to search trough
      * @param $key string key to search for
+     *
      * @return mixed|null
      */
     static function getIgnoreCaseOrNull($arr, $key) {
@@ -86,6 +87,7 @@ class Utility {
      *
      * @param $arr array
      * @param $key string
+     *
      * @return bool
      */
     static function getExistentAndValue($arr, $key) {
@@ -95,9 +97,10 @@ class Utility {
     /**
      * Return content to key in array, if not existent return fallback
      *
-     * @param $arr array
-     * @param $key string
+     * @param $arr      array
+     * @param $key      string
      * @param $fallback mixed
+     *
      * @return mixed
      */
     static function getOrFallBack($arr, $key, $fallback) {
@@ -107,7 +110,7 @@ class Utility {
     /**
      * Displays specific template, if template not existent display fallback
      *
-     * @param $template string
+     * @param      $template string
      * @param null $fallBack string
      */
     static function displayTemplate($template, $fallBack = null) {
@@ -133,6 +136,7 @@ class Utility {
      *
      * @param $username
      * @param $pwd
+     *
      * @return bool correct login data
      */
     static function verifyLogin($username, $pwd) {
@@ -157,6 +161,7 @@ class Utility {
      *
      * @param $username
      * @param $pwd
+     *
      * @return string|null auth-token | null if invalid login-data
      */
     static function generateAuthToken($username, $pwd) {

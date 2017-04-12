@@ -1,7 +1,8 @@
 <?php namespace blog;
 
 require("../ChromePhp.php");
-require ("../class.connect.php");
+require("../class.connect.php");
+require("class.post.php");
 require("class.model.php");
 require("class.utility.php");
 require("class.user.php");
