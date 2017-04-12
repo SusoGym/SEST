@@ -107,11 +107,13 @@ class Model {
      * Returns user authenticated by token-id or null if invalid login token
      *
      * @param $token string
-     * @return User|null
+     * @return User|null if invalid token
      */
     public function getUserByToken($token) {
         
-        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_token WHERE token='$token'");
+        $this->cleanTokens();
+        
+        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_token WHERE token='$token';");
         
         if ($result == null)
             return null;
@@ -156,17 +158,21 @@ class Model {
     
     /**
      * Pushes auth-token to database
+     *
      * @param $userId int
      * @param $token null|string token to be pushed
+     * @param $clean bool whether or not to clean expired tokens
      * @return string the pushed token
      */
-    public function addAuthToken($userId, $token = null) {
-        
+    public function addAuthToken($userId, $token = null, $clean = true) {
+        if ($clean) {
+            $this->cleanTokens();
+        }
         if ($token == null) {
             $token = uniqid() . uniqid();
         }
         $this->connection->escape_stringDirect($token);
-        $timestamp = date("Y-m-d H:i:s", time() + 3600*12); // 12h
+        $timestamp = date("Y-m-d H:i:s", time() + 3600 * 12); // 12h
         
         $this->connection->straightQuery("INSERT IGNORE INTO blog_token(token, userId, expire) VALUES('$token', $userId, TIMESTAMP('$timestamp'));");
         
@@ -175,38 +181,48 @@ class Model {
     
     /**
      * Gets token from database that was auto-generated
+     *
      * @param $userId int
      * @return string token
      */
-    public function getToken($userId)
-    {
-        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_token WHERE userId=$userId AND expire IS NOT NULL");
-        if($result == null)
-            return $this->addAuthToken($userId);
+    public function getToken($userId) {
+        $this->cleanTokens();
+        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_token WHERE userId=$userId AND expire IS NOT NULL;");
+        if ($result == null)
+            return $this->addAuthToken($userId, null, false);
+        
         return $result[0]['token'];
     }
     
     /**
      * Returns the expiration date of the given token
+     *
      * @param $token string
      * @return string|null if not a token
      */
-    public function getExpirationDate($token)
-    {
-        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_token WHERE token='$token' ORDER BY STR_TO_DATE(expire, '%Y-%m-%d %T')");
-        if($result == null)
+    public function getExpirationDate($token) {
+        $this->cleanTokens();
+        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_token WHERE token='$token' ORDER BY STR_TO_DATE(expire, '%Y-%m-%d %T');");
+        if ($result == null)
             return null;
         
         return $result[0]['expire'];
     }
     
     /**
+     * Removes all expired tokens from the database
+     */
+    public function cleanTokens() {
+        $this->connection->straightQuery("DELETE FROM blog_token WHERE expire < NOW();");
+    }
+    
+    /**
      * Inserts user to database and returns user object
+     *
      * @param $username
      * @return User
      */
-    public function createUserByName($username)
-    {
+    public function createUserByName($username) {
         $this->connection->escape_stringDirect($username);
         $id = $this->connection->insertValues("INSERT INTO blog_user(username, permission) VALUES ('$username', 0)");
         
