@@ -10,8 +10,8 @@ $input = array_merge($_GET, $_POST);
 require "ChromePhp.php"; // debugging
 
 $arr = setupDebug($input);
-$DEBUG = $arr[0];
-$SQL_DEBUG = $arr[1];
+$DEBUG = false;//$arr[0];
+$SQL_DEBUG = false;//$arr[1];
 
 /* Utility Classes */
 require "class.utility.php";
@@ -50,7 +50,7 @@ function setupDebug($input)
 {
     $SQL_DEBUG = false;
     $DEBUG = false;
-    
+
     if(isset($input['nodebug']))
     {
         unset($_SESSION['sqldebug']);
@@ -58,17 +58,17 @@ function setupDebug($input)
         ChromePhp::info("Debug: 0 SQL: 0");
         return array(0, 0);
     }
-    
+
     $SQL_DEBUG = isset($input['sqldebug']) || isset($_SESSION['sqldebug']);
     $DEBUG = isset($input['debug']) || isset($_SESSION['debug']);
-    
+
     $_SESSION['sqldebug'] = $SQL_DEBUG;
     $_SESSION['debug'] = $DEBUG;
-    
+
     ChromePhp::info("Debug: $DEBUG SQL: $SQL_DEBUG");
     if(!$DEBUG && $SQL_DEBUG)
         $DEBUG = true;
-    
+
     return array($DEBUG, $SQL_DEBUG);
 }
 
@@ -81,7 +81,7 @@ function enableCustomErrorHandler() {
         if (0 === error_reporting()) {
             return false;
         }
-        
+
         throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
     });
 }

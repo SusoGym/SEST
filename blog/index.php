@@ -12,7 +12,8 @@ session_start();
 
 date_default_timezone_set('Europe/Berlin');
 
-$data = array("console" => ""); //fixme: remove if no longer testing
+$data = array();
+// $data = array("console" => ""); //fixme: remove if no longer testing
 $data = array_merge($data, $_SESSION, $_GET, $_POST);
 
 Utility::handleDebug($data);
