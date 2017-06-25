@@ -24,6 +24,7 @@ class User extends Printable {
      * @var $surname string Name name of the user
      */
     protected $name;
+	
     
     /**
      *Construct method of User class
@@ -81,6 +82,16 @@ class User extends Printable {
     public function getEmail() {
         return $this->email;
     }
+	
+	/**
+	* returns newsletter Email reception
+	* @return int (1 = HTML / 0 = PlainText)
+	*/
+	public function getNewsletterReception(){
+		$teacher = ($this->getType()=="Teacher") ?	 true : false ;
+		$model = Model::getInstance();
+		return $model->getNewsletterReception($teacher); //corresponding function in model still missing		
+		}
     
     /**
      * @return array[String => Data] used for creating __toString and jsonSerialize
