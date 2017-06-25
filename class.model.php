@@ -1738,6 +1738,172 @@ class Model {
         return $mailContent = $content . $subscriptionInfo . '<br>';
         
     }
+	
+	/*******************************
+	****Newsletter Functionality****
+	*******************************/
+	
+	/**
+	* Get Newsletter Data
+	* @param int id
+	* @return array
+	*/
+	public function getNewsletterData($id){
+		$data = self::$connection->selectValues("SELECT publish, text, schoolyear, lastchanged, sent
+		FROM newsletter where newsid = $id");
+		return array("publishdate" => $data[0][0], "text" => $data[0][1], "schoolyear" => $data[0][2], 
+		"lastchanged" => $data[0][3], "sent" => $data[0][4] );
+		
+		}
+	
+	
+		
+	/**
+	* Get Newsletter School years
+	* @return array*/
+	public function getNewsYears(){
+		$data = self::$connection->selectValues("SELECT DISTINCT schoolyear FROM newsletter ORDER BY schoolyear");
+		$schoolyears = array();
+		foreach ($data as $d){
+			$schoolyears[] = $d[0];
+			}
+		return $schoolyears;
+		}
+	
+	/**
+	* get NewsletterIds by schoolyear
+	* @param array(String)
+	* @return array
+	*/
+	public function getNewsIds() {
+			$data = self::$connection->selectValues("SELECT newsid FROM newsletter 
+			ORDER BY schoolyear,publish");
+			foreach ($data as $d) {
+				$news[] = $d;
+				}
+			
+		return $news;
+		}
+	
+	/**
+	* Insert News Data into DB
+	* @param int publishdate
+	* @param String newstext
+	* @param int senddate
+	* @param String schoolYear
+	* @return int id;
+	*/
+    public function InsertNewsIntoDB($publishdate,$newstext,$schoolyear) {
+		return self::$connection->insertValues("INSERT into newsletter (`newsid`,`publish`,`text`,`schoolyear`,`lastchanged`)
+			VALUES ('','$publishdate','$newstext','$schoolyear',CURRENT_TIMESTAMP)");
+        	}
+			
+	/**
+	* Update News data
+	* @param int id
+	* @param int publishdate
+	* @param String newstext
+	* @param int senddate
+	* @param String schoolYear
+	*/ 
+	public function UpdateNewsInDB($id,$publishdate,$newstext,$schoolyear) {
+		self::$connection->straightQuery("UPDATE newsletter SET publish=$publishdate,text=\"$newstext\", 
+		schoolyear=\"$schoolyear\", lastchanged=CURRENT_TIMESTAMP WHERE newsid=$id");
+		}
+		
+	/* 
+	* create HTML layouted Text of newsletter
+	* @param Newsletter Object
+	* @return String
+	*/
+	public function makeHTMLNewsletter($newsletter){
+		$text = "";
+		$linkStyle = 'style="font-family:Arial,Sans-Serif;font-size:12px;font-weight:bold;color: teal;font-decoration:underline;"';
+		$text =  mb_convert_encoding('<table border="1" cell-padding="0">
+										<tr><td><img src="../assets/logo.png" width="100" height="50">Heinrich-Suso-Gymnasium Konstanz<hr style="color:teal;"></td></tr>
+										<tr><td style="color:teal;font-family:Arial,Sans-Serif;font-weight:bold;font-size:18px;">Newsletter vom ' .
+            $newsletter->getNewsDate() . '</td></tr>', 'UTF-8');
+		$text .='<tr><td>';
+		//Text auf Überschriften prüfen
+		$newstext = mb_convert_encoding($newsletter->getNewsText(),'UTF-8');
+		$lines = explode("\r\n",$newstext);
+		foreach  ($lines as $line) {
+		//Prüfe auf Überschrift2
+		if (isset($line[0]) && $line[0] == "=" && $line[1] == "="){
+			$headerline = "";
+			if($line[2] == "=") {
+				//Header2
+				$offset = 3;
+				$style = 'style = "color:teal; size:12px;" ';
+				$space = '<br>';
+				}
+			else{
+				//Header1
+				$offset = 2;
+				$style = 'style = "color: teal; font-weight:bold; size:16px;" ';
+				$space = '<br><br>';
+				}
+			for($x = $offset;$x<strlen($line) - $offset;$x++){
+					$headerline .= $line[$x];
+					}
+			$text .= '<br><a '.$style.'>'.$headerline.'</a>'.$space;
+			}
+			else {
+				$text .= $line.'<br>';	
+				}
+			}
+		$text .= '</td></tr>';
+		//Hinweis auf abbestellen
+		$text .='<tr><td><b>Wenn Sie den Newsletter abbestellen wollen, erledigen Sie dies bitte über die </b><a '.$linkStyle.' href="https:\\www.suso.schulen.konstanz.de\intern" target="_blank">Suso-Intern-App Webanwendung</a></td></tr>';
+		$text .= '</table>';
+		return $text;
+		}
+		
+	/* 
+	* create Plain Text layouted Text of newsletter
+	* @param Newsletter Object
+	* @return String
+	*/
+	public function makePlainTextNewsletter($newsletter){
+		$text = "";
+		$text =  "********************************\r\n".
+				"Heinrich-Suso-Gymnasium Konstanz \r\n".
+				"******************************** \r\n".
+				"Newsletter vom " .$newsletter->getNewsDate()."\r\n";
+		//Text auf Überschriften prüfen
+		$newstext = mb_convert_encoding($newsletter->getNewsText(),'UTF-8');
+		$lines = explode("\r\n",$newstext);
+		foreach  ($lines as $line) {
+		//Prüfe auf Überschrift2
+		if (isset($line[0]) && $line[0] == "=" && $line[1] == "="){
+			$headerline = "";
+			if($line[2] == "=") {
+				//Header2
+				$offset = 3;
+				$space1 = "\r\n\r\n";
+				$space2 = "\r\n-----------------------------------------------\r\n\r\n";
+				
+				}
+			else{
+				//Header1
+				$offset = 2;
+				$space1 = "\r\n\r\n+++++++++++++++++++++++++++++++++++++++++++++++\r\n";
+				$space2 = "\r\n+++++++++++++++++++++++++++++++++++++++++++++++\r\n\r\n";
+				}
+			for($x = $offset;$x<strlen($line) - $offset;$x++){
+					$headerline .= $line[$x];
+					}
+			$text .= $space1.$headerline.$space2;
+			}
+			else {
+				$text .= $line;	
+				}
+			}
+		$text .="\r\n\r\nWenn Sie den Newsletter abbestellen wollen, erledigen Sie dies bitte über die Suso-Intern-App Webanwendung (https:\\www.suso.schulen.konstanz.de\intern)";
+				
+		return $text;
+		}
+	
     
 }
 
