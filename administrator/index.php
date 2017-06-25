@@ -15,6 +15,7 @@ require "../class.controller.php";
 require "../class.model.php";
 require "../class.view.php";
 require "../class.termin.php";
+require "../class.newsletter.php";
 
 
 
