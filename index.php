@@ -1,18 +1,11 @@
 <?php
 
-/* Let's go! */
-session_start();
-
-
 $input = array_merge($_GET, $_POST);
+$DEBUG = false || isset($input['debug']);
+$SQL_DEBUG = false || isset($input['sqldebug']);
 
 /* Debug Classes */
 require "ChromePhp.php"; // debugging
-
-$arr = setupDebug($input);
-$DEBUG = false;//$arr[0];
-$SQL_DEBUG = false;//$arr[1];
-
 /* Utility Classes */
 require "class.utility.php";
 require "class.user.php";
@@ -28,16 +21,17 @@ require "class.newsletter.php";
 /* Settings */
 
 \ChromePhp::setEnabled($DEBUG);
-ChromePhp::setSQLDebug($SQL_DEBUG);
 
 if ($DEBUG) {
     ini_set("display_errors", true);
-    View::$DEBUG = true;
+    View::$DEBUG = false;
     enableCustomErrorHandler();
 }
 
 date_default_timezone_set('Europe/Berlin'); // if not corretly set in php.ini
 
+/* Let's go! */
+session_start();
 
 if (isset($input['destroy'])) {
     session_destroy();
@@ -46,32 +40,6 @@ if (isset($input['destroy'])) {
 
 
 $control = new Controller($input);
-
-function setupDebug($input)
-{
-    $SQL_DEBUG = false;
-    $DEBUG = false;
-
-    if(isset($input['nodebug']))
-    {
-        unset($_SESSION['sqldebug']);
-        unset($_SESSION['debug']);
-        ChromePhp::info("Debug: 0 SQL: 0");
-        return array(0, 0);
-    }
-
-    $SQL_DEBUG = isset($input['sqldebug']) || isset($_SESSION['sqldebug']);
-    $DEBUG = isset($input['debug']) || isset($_SESSION['debug']);
-
-    $_SESSION['sqldebug'] = $SQL_DEBUG;
-    $_SESSION['debug'] = $DEBUG;
-
-    ChromePhp::info("Debug: $DEBUG SQL: $SQL_DEBUG");
-    if(!$DEBUG && $SQL_DEBUG)
-        $DEBUG = true;
-
-    return array($DEBUG, $SQL_DEBUG);
-}
 
 /**
  * This function will throw Exceptions instead of warnings (better to debug)
@@ -82,7 +50,7 @@ function enableCustomErrorHandler() {
         if (0 === error_reporting()) {
             return false;
         }
-
+        
         throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
     });
 }
