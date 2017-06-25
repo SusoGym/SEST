@@ -374,8 +374,10 @@ class Controller extends \Controller {
 					$newsletter = new \Newsletter();
 					$newsletter->createFromId($input['nl']);
 					}
-				//Ermittle Empfänger	
+				//Ermittle Empfänger
+			    // to be done - must be function of Model
 				$this->sendNewsletterMails($list,$newsletter);
+				$this->getNewsletters();
 				$this->display("newsarchive");
 				break;
             //Select update options
@@ -741,7 +743,7 @@ class Controller extends \Controller {
     private function sendNewsletterMails($list,$newsletter) {
         $currentTime = date('d.m.Y H:i:s');
         //$this->model->writeToVpLog("Starting to send mails on " . $currentTime);
-        require("./PHPMailer.php");
+        require("../PHPMailer.php");
         //sending emails
         $timestamp = time();
         $datum = date("Y-m-d  H:i:s", $timestamp);
