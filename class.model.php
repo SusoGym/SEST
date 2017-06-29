@@ -752,7 +752,7 @@ class Model {
     public
     function checkNovellLogin($usr, $pwd) {
         
-        $apiUrl = "https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php"; //TODO: do by config or sth
+        $apiUrl = self::$connection->getIniParams()["ldap"]; //used to be hard coded "https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php"; 
         $headers = array('Authorization: Basic ' . base64_encode("$usr:$pwd"));
         
         $ch = curl_init();
