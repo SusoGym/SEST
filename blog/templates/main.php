@@ -218,9 +218,10 @@
       if (Cookies.getJSON('auth')) {
         auth = Cookies.getJSON('auth');
         loggedin = true;
+
+        manageElements();
       } else {
         $.post('', {'console': '', 'action': 'createTokenFromSession'}, function(data){
-          console.log(data);
           if (data.code === 200) {
             auth.token = data.payload.authToken;
             auth.expire = new Date(data.payload.expire);
@@ -260,7 +261,15 @@
 
     function logout() {
       Cookies.remove('auth', {path:''});
-      authenticate();
+      $.post("../", {'type': 'logout', 'console': ''}, function (data) {
+        if (data.code == 200) {
+          Materialize.toast('Erfolgreich abgemeldet!', 2000);
+        } else {
+          Materialize.toast(data.message, 2000);
+        }
+
+        authenticate();
+      });
     }
 
     function manageElements() {
@@ -282,10 +291,10 @@
             permissions[permissionsobj[val]] = val;
           })
           $.post('', {'console': '', 'action': 'getUserInfo', 'auth_token': token}, function(data){
-            console.log(data);
             if (data.code === 200) {
               $('.loginbtn').hide();
               $('.logoutbtn').show();
+              $('.logoutbtn').text(data.username);
               userperm = data.payload.permission;
               var string = userperm.toString(2);
               while (string.length < permissions.filter(Boolean).length) {
