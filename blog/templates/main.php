@@ -138,55 +138,67 @@
     <?php endif; ?>
 
     authenticate();
+    fetchPosts();
     $('#entry').hide();
     $('#newdate').hide();
     $('[permission]').hide();
     $(".button-collapse").sideNav();
     $('.modal').modal();
     $('#switchHTML').change(switchHTML);
+    $('.collapsible').collapsible();
 
-    $.get('', {'console': true, 'action': 'fetchPosts'}, function(data){
-      if (data.code !== 200) {
-        Materialize.toast(data.message, 2000);
-      } else {
+    function fetchPosts() {
+      $.get('', {'console': true, 'action': 'fetchPosts'}, function(data){
+        if (data.code !== 200) {
+          Materialize.toast(data.message, 2000);
+        } else {
+          $('#blog-placeholder').empty();
+          data.payload.forEach(function(element, index, array){
+            console.log(index);
+            if (index == 0) {
+              var lastDate = new Date(0);
 
-        data.payload.forEach(function(element){
+            } else {
+              if (array[index-1].releaseDate) {
+                var lastDate = new Date(array[index-1].releaseDate);
+              }
+               else {
+                var lastDate = new Date(0);
+              }
+            }
 
-          if (!lastDate) {
-            var lastDate = new Date(0);
-          }
+            date = new Date(element.releaseDate);
+            if (lastDate.getUTCFullYear()+'-'+lastDate.getUTCMonth()+'-'+lastDate.getUTCDate() !== date.getUTCFullYear()+'-'+date.getUTCMonth()+'-'+date.getUTCDate()) {
 
-          date = new Date(element.releaseDate);
-          if (lastDate.getFullYear()+'-'+lastDate.getMonth()+'-'+lastDate.getDate() !== date.getFullYear()+'-'+date.getMonth()+'-'+date.getDate()) {
+              newdate = $('#newdate').clone();
+              newdate.attr('id', 'newdate'+element.id);
+              $('#blog-placeholder').append(newdate);
+              $('#newdate'+element.id+' #date').text(date.getDate()+'. '+(date.getMonth()+1)+'. '+date.getFullYear()+':');
 
-            newdate = $('#newdate').clone();
-            newdate.attr('id', 'newdate'+element.id);
-            $('#blog-placeholder').append(newdate);
-            $('#newdate'+element.id+' #date').text(date.getDate()+'. '+(date.getMonth()+1)+'. '+date.getFullYear()+':');
+              $('#newdate'+element.id).show();
 
-            $('#newdate'+element.id).show();
+            }
 
-          }
+            card = $('#entry').clone();
+            card.attr('id', 'entry'+element.id);
+            $('#blog-placeholder').append(card);
 
-          card = $('#entry').clone();
-          card.attr('id', 'entry'+element.id);
-          $('#blog-placeholder').append(card);
+            $('#entry'+element.id+' #author').text(element.authorObject.displayName);
+            if (date.getHours()<10) {hours='0'+date.getHours();}else{hours=date.getHours();}
+            if (date.getMinutes()<10) {mins='0'+date.getMinutes();}else{mins=date.getMinutes();}
+            datestring = hours+':'+mins+' Uhr';
+            $('#entry'+element.id+' #date').text(datestring);
+            $('#entry'+element.id+' #title').text(element.subject);
+            $('#entry'+element.id+' #body').html(element.body);
 
-          $('#entry'+element.id+' #author').text(element.authorObject.displayName);
-          if (date.getHours()<10) {hours='0'+date.getHours();}else{hours=date.getHours();}
-          if (date.getMinutes()<10) {mins='0'+date.getMinutes();}else{mins=date.getMinutes();}
-          datestring = hours+':'+mins+' Uhr';
-          $('#entry'+element.id+' #date').text(datestring);
-          $('#entry'+element.id+' #title').text(element.subject);
-          $('#entry'+element.id+' #body').html(element.body);
+            $('#entry'+element.id).show();
 
-          $('#entry'+element.id).show();
+            var lastDate = date;
 
-          var lastDate = date;
-
-        });
-      }
-    });
+          });
+        }
+      });
+    }
 
     var ishtml = false;
     function switchHTML() {
@@ -207,7 +219,17 @@
     function createPost() {
       var title = $('#createtitle').val();
       var text = (ishtml) ? CKEDITOR.instances.createtext.getSnapshot() : $('textarea#createtext').val();
-      $.post('', {'console': '', 'action': 'addPost'})
+      $.post('', {'console': '', 'action': 'addPost', 'auth_token': Cookies.getJSON('auth').token, 'subject': title, 'body': text, 'releaseDate': toMYSQLDate(new Date())}, function (data){
+        if (data.code == 200) {
+          Materialize.toast('Post hinzugefügt', 2000);
+          $('#createform').find("input[type=text], textarea").val("");
+          CKEDITOR.instances.createtext.setData('');
+          $('.collapsible').collapsible('close', 0);
+          fetchPosts();
+        } else {
+          Materialize.toast(data.message, 2000);
+        }
+      });
     }
 
     function authenticate() {
@@ -322,6 +344,22 @@
         }
       });
       return permarray;
+    }
+
+    function toMYSQLDate(d) {
+
+      a = d.getFullYear();
+      b = d.getMonth();
+      if(b < 10){b = '0'+b;}
+      c = d.getDate();
+      if(c < 10){c = '0'+c;}
+      e = d.getHours();
+      if(e < 10){e = '0'+e;}
+      f = d.getMinutes();
+      if(f < 10){f = '0'+f;}
+      g = d.getSeconds();
+      if(g < 10){ g = '0'+g;}
+      return a+'-'+b+'-'+c+' '+e+':'+f+':'+g;
     }
     </script>
   </body>
