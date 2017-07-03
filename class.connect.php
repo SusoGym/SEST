@@ -36,9 +36,14 @@ class Connection {
      * @var string ics filename
      */
     private $icsfile;
+	/**
+     * @var string ldap link
+     */
+    private $ldap;
     /**
      * @var \mysqli database connection instance
      */
+
     private $connID;
     /**
      * @var string database name
@@ -86,6 +91,9 @@ class Connection {
                 case "ICS":
                     $this->icsfile = trim($larr[1]);
                     break;
+				case "ldap":
+                    $this->ldap = trim($larr[1]);
+                    break;
                 
                 
             }
@@ -100,7 +108,7 @@ class Connection {
      * @return array(string)
      */
     public function getIniParams() {
-        return array("download" => $this->download, "basepath" => $this->basepath, "icsfile" => $this->icsfile);  // could be much more versatile
+        return array("download" => $this->download, "basepath" => $this->basepath, "icsfile" => $this->icsfile, "ldap"=> $this->ldap);  // could be much more versatile
     }
     
     

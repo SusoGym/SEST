@@ -319,11 +319,67 @@ class Controller extends \Controller {
                 $this->addMenueItem("?type=options", "Optionen");
                 $this->display("simple_menue");
                 break;
-            //Enter Newsletter
+            //call Newsletter function
             case "news":
-                $this->title = "Newsletter eintragen";
-                $this->display("enternews");
+                $this->title = "Newslettermanagement";
+				$this->addMenueItem("?type=archive", "Newsletter Archiv");
+                $this->addMenueItem("?type=enternews", "neuen Newsletter erstellen");
+                $this->display("simple_menue");
                 break;
+			//view existing news
+			case "archive":
+				$this->title = "Übersicht";
+				$this->getNewsletters();
+				$this->display("newsarchive");
+				break;
+			//enter news
+			case "enternews":
+			    if (isset($input['nl'])) {
+					$this->infoToView["newsid"] = $input['nl'];
+					$this->title = "Newsletter bearbeiten";
+					$newsletter = new \Newsletter();
+					$newsletter->createFromId($input['nl']);
+					$this->infoToView['editingnewsletter'] = $newsletter;
+					}
+				else {
+					$this->infoToView["newsid"] = null;
+					$this->title = "Newsletter erstellen";
+					}
+				$this->infoToView["button"] = "Speichern";
+				$this->infoToView["link"] = "savenews";
+				$this->display("enternews");
+				break;
+			//save News
+			case "savenews":
+				$this->title = "Newsletter gespeichert";
+				$newsletter = new \Newsletter();
+				$newsletter->createFromPOST($_POST['nldate'], $_POST['nltext'], isset($_POST['nl']) ? $_POST['nl'] : null );
+				$this->getNewsletters();
+				$this->display("newsarchive");
+				break;
+			//view news
+			case "view":
+				$this->title = "Newsletter lesen";
+				$newsletter = new \Newsletter();
+				$newsletter->createFromId($input['nl']);
+				$this->infoToView["newsletter"] = $newsletter;
+				$this->display("viewnews");
+				break;
+			//send News
+			case "sendnews":
+				$this->title = "Newsletter versendet";
+				$newsletter = null;
+				$list = null;
+				if (isset($input['nl'])) {
+					$newsletter = new \Newsletter();
+					$newsletter->createFromId($input['nl']);
+					}
+				//Ermittle Empfänger
+			    // to be done - must be function of Model
+				$this->sendNewsletterMails($list,$newsletter);
+				$this->getNewsletters();
+				$this->display("newsarchive");
+				break;
             //Select update options
             case "updmgt":
                 $this->title = "Datenabgleich";
@@ -660,7 +716,83 @@ class Controller extends \Controller {
         $filehandler->createCSV($data);
         $this->notify("Datei " . $fileName . " erzeugt");
     }
-    
+	
+	/**
+	* get Newsletters to View
+	*/
+	private function getNewsletters(){
+	$model = \Model::getInstance();
+				$news = $model->getNewsIds();
+				$newsletters = array();
+				foreach ($news as $n) {
+					$newsletter = new \Newsletter();
+					$newsletter->createFromId($n[0]);
+					$newsletters[] = $newsletter;
+					unset($newsletter);
+					$this->infoToView["newsletters"] = $newsletters;		
+					}
+				$this->infoToView["schoolyears"] = $model->getNewsYears();	
+		}
+		
+	/**
+     *
+     * triggering email via phpmailer
+     * @param array() containing list of mail recipients (User object)
+	 * @param NewsletterObject
+     */
+    private function sendNewsletterMails($list,$newsletter) {
+        $currentTime = date('d.m.Y H:i:s');
+        //$this->model->writeToVpLog("Starting to send mails on " . $currentTime);
+        require("../PHPMailer.php");
+        //sending emails
+        $timestamp = time();
+        $datum = date("Y-m-d  H:i:s", $timestamp);
+        /** @var User $l */
+        foreach ($list as $l) {
+            /** @var PHPMailer $phpmail */
+            $phpmail = new PHPMailer();
+            $phpmail->setFrom("noreply@suso.konstanz.de", "Suso-Gymnasium Newsletter");
+            $phpmail->CharSet = "UTF-8";
+            if ($l->getNewsletterHTML) {$phpmail->isHTML();}
+            $phpmail->AddAddress($l->getEmail());
+            $phpmail->Subject = date('d.m.Y - H:i:s') . 'Suso-Newsletter vom '.$newsletter->getNewsDate();
+            $phpmail->Body = ($l->getNewsletterHTML) ? $newsletter->makeViewText(true) : $newsletter->makeViewText(false);
+            
+            //Mailadressen der Instanz:
+            $allmailstring = "";
+            foreach ($phpmail->getAllRecipientAddresses() as $ema) {
+                if ($allmailstring == "") {
+                    $allmailstring = $ema[0];
+                } else {
+                    $allmailstring = $allmailstring . ';' . $ema[0];
+                }
+            }
+            $cont = null;
+                     
+            //Senden
+            if (!$phpmail->Send()) {
+                echo "cannot send!";
+                //$mail[$x]->Send() liefert FALSE zurück: Es ist ein Fehler aufgetreten
+                $currentTime = date('d.m.Y H:i:s');
+                //$this->model->writeToVpLog("....failure." . $phpmail->ErrorInfo . " Trying to reach " . $l->getEmail() . " " . $currentTime);
+            } else {
+                echo "mail gesendet an: " . $l->getEmail() . '<br>';
+                //Eintrag des Sendeprotokolls
+                $currentTime = date('d.m.Y H:i:s');
+                //$this->model->writeToVpLog($l->getEmail() . " " . $currentTime);
+                
+                //Inhalt
+                //$this->model->writeToVpLog("....success");
+            }
+                    
+                        
+            $allmailstring = null;
+            $cont = null;
+        }
+        //$this->model->writeToVpLog("*****************************************************");
+    }
+	
+	    
 }
 
 ?>
