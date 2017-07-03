@@ -315,7 +315,7 @@ class Controller extends Utility {
 
         if ($user == null) {
 
-            $this->code = 404;
+            $this->code = 400;
             $this->message = "Invalid user identifier given!";
         } else {
             return $user;
