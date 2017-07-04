@@ -110,11 +110,12 @@
 
     <div id="entry" class="hidden hoverable card white">
       <div class="card-content">
-        <a id="delete" href="javascript:void(0);" onclick="deletePost();" style="position:absolute;top:60px;right:20px;" permission="PERMISSION_DELETE_POST"><i class="material-icons red-text">delete</i></a>
-        <a id="edit" href="javascript:void(0);" onclick="editPost();" style="position:absolute;top:20px;right:20px;" permission="PERMISSION_EDIT_POST"><i class="material-icons amber-text">edit</i></a>
         <span id="title" class="card-title"></span>
         <p class="grey-text" style="margin-bottom: 4px;"><span id="author"></span>, <span id="date"></span></p>
         <p id="body"></p>
+        <a id="delete" href="javascript:void(0);" onclick="deletePost();" style="position:absolute;top:60px;right:20px;" permission="PERMISSION_DELETE_POST"><i class="material-icons red-text">delete</i></a>
+        <a id="edit" href="javascript:void(0);" onclick="editPost();" style="position:absolute;top:20px;right:20px;" permission="PERMISSION_EDIT_POST"><i class="material-icons amber-text">edit</i></a>
+        
       </div>
     </div>
 
