@@ -104,12 +104,14 @@
       </li>
     </ul>
 
-    <div id="blog-placeholder" >
+    <div id="blog-placeholder">
 
     </div>
 
     <div id="entry" class="hidden hoverable card white">
       <div class="card-content">
+        <a id="delete" href="javascript:void(0);" onclick="deletePost();" style="position:absolute;top:60px;right:20px;" permission="PERMISSION_DELETE_POST"><i class="material-icons red-text">delete</i></a>
+        <a id="edit" href="javascript:void(0);" onclick="editPost();" style="position:absolute;top:20px;right:20px;" permission="PERMISSION_EDIT_POST"><i class="material-icons amber-text">edit</i></a>
         <span id="title" class="card-title"></span>
         <p class="grey-text" style="margin-bottom: 4px;"><span id="author"></span>, <span id="date"></span></p>
         <p id="body"></p>
@@ -124,6 +126,40 @@
 
     <div id="hiddensnippet" style="display:none;">
 
+    </div>
+
+    <div id="confirmdelete" class="modal">
+      <div class="modal-content">
+        <h4 class="red-text">Beitrag löschen?</h4>
+        <p>Diese Aktion kann nicht rückgängig gemacht werden!</p>
+      </div>
+      <div class="modal-footer">
+        <a id="deletebtn" href="javascript:void(0);" class="modal-action modal-close waves-effect waves-light btn red">Löschen<i class="material-icons right">delete</i></a>
+        <a href="javascript:void(0);" class="modal-action modal-close waves-effect btn-flat">Abbrechen</a>
+      </div>
+    </div>
+
+    <div id="editPost" class="modal">
+      <div class="modal-content">
+        <h4>Post bearbeiten</h4>
+        <div class="row">
+          <div class="input-field col s12">
+
+              <i class="material-icons left prefix">title</i>
+            <input id="edittitle" type="text">
+            <label for="title">Titel</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col s12">
+            <textarea id="edittext"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="editbtn" href="javascript:void(0);" class="modal-action modal-close waves-effect waves-light btn amber">Bearbeiten<i class="material-icons right">edit</i></a>
+        <a href="javascript:void(0);" class="modal-action modal-close waves-effect btn-flat">Abbrechen</a>
+      </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
@@ -146,15 +182,15 @@
     $('.modal').modal();
     $('#switchHTML').change(switchHTML);
     $('.collapsible').collapsible();
+    CKEDITOR.replace( 'edittext' );
 
     function fetchPosts() {
       $.get('', {'console': true, 'action': 'fetchPosts'}, function(data){
         if (data.code !== 200) {
-          Materialize.toast(data.message, 2000);
+          Materialize.toast('['+data.code+'] '+data.message, 2000);
         } else {
           $('#blog-placeholder').empty();
           data.payload.forEach(function(element, index, array){
-            console.log(index);
             if (index == 0) {
               var lastDate = new Date(0);
 
@@ -190,6 +226,8 @@
             $('#entry'+element.id+' #date').text(datestring);
             $('#entry'+element.id+' #title').text(element.subject);
             $('#entry'+element.id+' #body').html(element.body);
+            $('#entry'+element.id+' #delete').attr('onclick', 'confirmDelete('+element.id+')');
+            $('#entry'+element.id+' #edit').attr('onclick', 'editModal('+element.id+')');
 
             $('#entry'+element.id).show();
 
@@ -223,11 +261,51 @@
         if (data.code == 200) {
           Materialize.toast('Post hinzugefügt', 2000);
           $('#createform').find("input[type=text], textarea").val("");
-          CKEDITOR.instances.createtext.setData('');
+          if (CKEDITOR.instances.createtext) {
+
+            CKEDITOR.instances.createtext.setData('');
+          }
           $('.collapsible').collapsible('close', 0);
           fetchPosts();
         } else {
-          Materialize.toast(data.message, 2000);
+          Materialize.toast('['+data.code+'] '+data.message, 2000);
+        }
+      });
+    }
+
+    function editModal(id) {
+      $('#editPost #editbtn').attr('onclick', 'editPost('+id+')');
+      $('#editPost #edittitle').val($('#entry'+id+' #title').text());
+      Materialize.updateTextFields();
+      CKEDITOR.instances.edittext.setData($('#entry'+id+' #body').html());
+      $('#editPost').modal('open');
+    }
+
+    function editPost(id) {
+      title = $('#editPost #edittitle').val();
+      text = CKEDITOR.instances.edittext.getSnapshot();
+      $.post('', {'console': '', 'action': 'editPost', 'auth_token': Cookies.getJSON('auth').token, 'postId': id, 'subject': title, 'body': text}, function (data){
+        if (data.code == 200) {
+          Materialize.toast('Post erfolgreich bearbeitet', 2000);
+          fetchPosts();
+        } else {
+          Materialize.toast('['+data.code+'] '+data.message, 2000);
+        }
+      });
+    }
+
+    function confirmDelete(id) {
+      $('#confirmdelete #deletebtn').attr('onclick', 'deletePost('+id+')');
+      $('#confirmdelete').modal('open');
+    }
+
+    function deletePost(id) {
+      $.post('', {'console': '', 'action': 'deletePost', 'auth_token': Cookies.getJSON('auth').token, 'postId': id}, function(data){
+        if (data.code == 200) {
+          Materialize.toast('Post erfolgreich gelöscht', 2000);
+          fetchPosts();
+        } else {
+          Materialize.toast('['+data.code+'] '+data.message, 2000);
         }
       });
     }
@@ -287,7 +365,7 @@
         if (data.code == 200) {
           Materialize.toast('Erfolgreich abgemeldet!', 2000);
         } else {
-          Materialize.toast(data.message, 2000);
+          Materialize.toast('['+data.code+'] '+data.message, 2000);
         }
 
         authenticate();
@@ -329,12 +407,12 @@
                   i++;
                 }
               });
-              console.log(permarray);
               permarray.forEach(function(val){
                 if (val=="PERMISSION_EVERYTHING") {
                   $('[permission]').show();
                 }
                 $('[permission="'+val+'"]').show();
+                $('.modal').modal();
               });
             } else {
               $('.loginbtn').show();

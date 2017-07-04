@@ -95,9 +95,9 @@ class Model {
             $releaseDate = date("Y-m-d H:i:s", time());
         }
 
-        $userId = $post->getAuthor();
-        $subject = $post->getSubject();
-        $body = $post->getBody();
+        $userId = addslashes($post->getAuthor());
+        $subject = addslashes($post->getSubject());
+        $body = addslashes($post->getBody());
 
         $id = $this->connection->insertValues("INSERT INTO blog_news(subject, body, releasedate, author) VALUES ('$subject', '$body', TIMESTAMP('$releaseDate'), '$userId')");
 
@@ -114,11 +114,21 @@ class Model {
      */
     public function updatePost($post) {
         $id = $post->getId();
-        $subject = $post->getSubject();
-        $body = $post->getBody();
-        $author = $post->getAuthor();
-        $releaseDate = $post->getReleaseDate();
+        $subject = addslashes($post->getSubject());
+        $body = addslashes($post->getBody());
+        $author = addslashes($post->getAuthor());
+        $releaseDate = addslashes($post->getReleaseDate());
         $this->connection->straightQuery("UPDATE blog_news SET subject='$subject', body='$body', author=$author, releasedate='$releaseDate' WHERE id=$id");
+    }
+
+    /**
+     * Deletes post from database
+     *
+     * @param $post \blog\Post
+     */
+    public function deletePost($post) {
+        $id = $post->getId();
+        $this->connection->straightQuery("DELETE FROM blog_news WHERE id=$id");
     }
 
     /**
