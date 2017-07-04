@@ -291,6 +291,31 @@ class Controller extends Utility {
 
     /**
      * / Action function \
+     * Delete already pushed post
+     *
+     * Permission: PERMISSION_DELETE_POST
+     *
+     * @param postId     int
+     * @param auth_token string
+     * @param subject    string
+     * @param body       string
+     *
+     * @return \blog\Post
+     */
+    protected function deletePost() {
+        $param = $this->handleParameters("postId", "auth_token");
+
+        if (!$this->getTokenUser($param['auth_token'])->hasPermission(PERMISSION_DELETE_POST))
+            $this->unauthorized();
+
+        $post = $this->model->getPost($param['postId']);
+        $post->delete();
+
+        return $post;
+    }
+
+    /**
+     * / Action function \
      * Returns the user information about the requested user
      * At least one parameter must be given
      *
