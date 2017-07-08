@@ -246,7 +246,12 @@ class Controller extends Utility {
             $this->unauthorized();
         }
 
-        $post = Post::generatePost($params['body'], $params['subject'], $user, $params['releaseDate'])->post();
+        $body = $params['body'];
+        $subject = $params['subject'];
+
+        $body = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $body);
+
+        $post = Post::generatePost($body, $subject, $user, $params['releaseDate'])->post();
 
         return $post;
     }
