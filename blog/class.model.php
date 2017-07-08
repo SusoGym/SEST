@@ -55,7 +55,12 @@ class Model {
         $posts = array();
 
         foreach ($result as $post) {
-            array_push($posts, new Post(intval($post['id']), $post['body'], $post['subject'], intval($post['author']), $post['releasedate']));
+            $body = $post['body'];
+            $subject = $post['subject'];
+
+            $body = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $body);
+
+            array_push($posts, new Post(intval($post['id']), $body, $subject, intval($post['author']), $post['releasedate']));
         }
 
         return $posts;
