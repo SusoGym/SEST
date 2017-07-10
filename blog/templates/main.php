@@ -21,6 +21,27 @@
   .hidden {
     display:none;
   }
+  .embed-container {
+    position: relative;
+    padding-bottom: 56.25%; /* ratio 16x9 */
+    height: 0;
+    overflow: hidden;
+    width: 100%;
+    height: auto;
+   }
+  .embed-container iframe {
+
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+  }
+  img
+  {
+   max-width:100%;
+   max-height:100%;
+  }
   </style>
 </head>
 <body class="grey lighten-2" id="body" style="height: 100.06vh;">
@@ -112,7 +133,7 @@
       <div class="card-content">
         <span id="title" class="card-title"></span>
         <p class="grey-text" style="margin-bottom: 4px;"><span id="author"></span>, <span id="date"></span></p>
-        <p id="body"></p>
+        <p id="body" style="display= inline-block;"></p>
         <a id="delete" href="javascript:void(0);" onclick="deletePost();" style="position:absolute;top:60px;right:20px;" permission="PERMISSION_DELETE_POST"><i class="material-icons red-text">delete</i></a>
         <a id="edit" href="javascript:void(0);" onclick="editPost();" style="position:absolute;top:20px;right:20px;" permission="PERMISSION_EDIT_POST"><i class="material-icons amber-text">edit</i></a>
         
@@ -169,6 +190,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.4/js.cookie.min.js"></script>
     <script type="application/javascript">
 
+        String.prototype.replaceAll = function(target, replacement) {
+            return this.split(target).join(replacement);
+        };
+
     <?php if (isset($_GET['destroy'])) : ?>
       Cookies.remove('auth', {path:''});
       window.location = "./";
@@ -220,13 +245,15 @@
             card.attr('id', 'entry'+element.id);
             $('#blog-placeholder').append(card);
 
+            body = putDivAroundIframe(element.body);
+
             $('#entry'+element.id+' #author').text(element.authorObject.displayName);
             if (date.getHours()<10) {hours='0'+date.getHours();}else{hours=date.getHours();}
             if (date.getMinutes()<10) {mins='0'+date.getMinutes();}else{mins=date.getMinutes();}
             datestring = hours+':'+mins+' Uhr';
             $('#entry'+element.id+' #date').text(datestring);
             $('#entry'+element.id+' #title').text(element.subject);
-            $('#entry'+element.id+' #body').html(element.body);
+            $('#entry'+element.id+' #body').html(body);
             $('#entry'+element.id+' #delete').attr('onclick', 'confirmDelete('+element.id+')');
             $('#entry'+element.id+' #edit').attr('onclick', 'editModal('+element.id+')');
 
@@ -309,6 +336,30 @@
           Materialize.toast('['+data.code+'] '+data.message, 2000);
         }
       });
+    }
+
+    function putDivAroundIframe(txt) {
+
+        var arr = txt.match(/(<iframe.*?<\/iframe>)/g);
+
+        var replaced = [];
+        console.info(arr);
+
+        if(typeof arr !== 'undefined')
+        { // we have an iFrame! yay
+            arr.forEach(function (element, index, array) {
+
+                if($.inArray(element, replaced) !== -1)
+                    return;
+
+                console.info(element);
+                replaced.push(element);
+
+               txt = txt.replaceAll(element, "<div class='embed-container'>" + element +"</div>");
+            });
+        }
+
+        return txt;
     }
 
     function authenticate() {
