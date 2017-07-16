@@ -167,9 +167,9 @@ class Newsletter{
 	* @param bool html 
 	* @return String
 	*/
-	public function	makeViewText($html = true) {
+	public function	makeViewText($user,$html = true) {
 	if ($html) {
-		$text = Model::makeHTMLNewsletter($this);
+		$text = Model::makeHTMLNewsletter($this,$user);
 		}
 	else {
 		$text = Model::makePlainTextNewsletter($this);
