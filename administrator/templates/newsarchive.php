@@ -7,7 +7,12 @@ $data = \View::getInstance()->getDataForView();
 
     <div class="card ">
         <div class="card-content">
-            <span class="card-title"><?php echo \View::getInstance()->getTitle(); ?></span>
+		<span class="card-title">
+			<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href=".">
+						 <i class="material-icons">chevron_left</i>
+			</a>
+            <?php echo \View::getInstance()->getTitle(); ?>
+		</span>
 		<ul class="collapsible white" data-collapsible="accordion">
 		<?php 
 		foreach ($data["schoolyears"] as $year) { ?>
@@ -35,7 +40,7 @@ $data = \View::getInstance()->getDataForView();
 									
 									<?php }
 									else { ?>
-									<a class="secondary-content action " href="?type=send&nl=<?php echo $news->getId(); ?>">senden</a>
+									<a class="secondary-content action " href="?type=sendnews&nl=<?php echo $news->getId(); ?>">senden</a>
 									<a class="secondary-content action " href="?type=enternews&nl=<?php echo $news->getId(); ?>">bearbeiten</a>
 									
 										
