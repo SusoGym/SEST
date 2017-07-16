@@ -1,7 +1,7 @@
 <?php namespace administrator;
 include("header.php");
 $data = \View::getInstance()->getDataForView();
-
+$user=$data['user'];
 
 
 ?>
@@ -10,9 +10,14 @@ $data = \View::getInstance()->getDataForView();
 
     <div class="card ">
         <div class="card-content">
-            <span class="card-title"><?php echo $data["title"] ; ?></span> 
+			<span class="card-title">
+			<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href="?type=archive">
+				 <i class="material-icons">chevron_left</i>
+			</a>
+           <?php echo $data["title"] ; ?>
+		   </span> 
 		<div>
-	<div class="row"><?php echo $data["newsletter"]->makeViewText(); ?>	</div>
+	<div class="row"><?php echo $data["newsletter"]->makeViewText($user); ?>	</div>
 	
 
     </div>
