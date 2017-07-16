@@ -94,6 +94,31 @@ class User extends Printable {
 		}
     
     /**
+     * returns status of mail service for newsletters
+     *
+     * @return bool
+     */
+    public function getNewsMailStatus() {
+		$teacher = ($this->getType()==2) ?	 true : false ;
+		return Model::getInstance()->getNewsMailStatus($this->id,$teacher);
+    }
+	
+	/**
+     * returns format of newsletter mail true if HTML
+     *
+     * @return bool
+     */
+    public function getNewsHTMLStatus() {
+		$teacher = ($this->getType()==2) ?	 true : false ;
+        return Model::getInstance()->getNewsHTMLStatus($this->id,$teacher);
+    }
+    
+    
+	
+	
+	
+	
+    /**
      * @return array[String => Data] used for creating __toString and jsonSerialize
      */
     public function getData() {
@@ -436,15 +461,6 @@ class Teacher extends User {
     }
     
     /**
-     * returns status of mail service for newsletters
-     *
-     * @return bool
-     */
-    public function getNewsMailStatus() {
-        return Model::getInstance()->getTeacherNewsMailStatus($this->id);
-    }
-    
-    /**
      * returns status of initial interface fo Cover Lesson View
      *
      * @return bool
@@ -452,7 +468,6 @@ class Teacher extends User {
     public function getVpViewStatus() {
         return Model::getInstance()->getTeacherVpViewStatus($this->id);
     }
-    
     
     
     /**
