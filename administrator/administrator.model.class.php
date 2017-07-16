@@ -45,7 +45,7 @@ class Model extends \Model {
      */
     public function checkDBData($student, $id) {
         ($student) ? $table = "schueler" : $table = "lehrer";
-        $data = self::$connection->selectValues("SELECT id FROM $table where id=$id");
+        $data = self::$connection->selectValues("SELECT id FROM $table where ASV_ID=\"$id\" ");
         if (count($data) > 0) {
             return true;
         } else {
@@ -74,7 +74,7 @@ class Model extends \Model {
                 $string = "$key=\"$value\" ";
             }
         }
-        $string = $string . ",upd=1 WHERE id=$id";
+        $string = $string . ",upd=1 WHERE ASV_ID=\"$id\" ";
         $string = "UPDATE $table SET " . $string;
         
         //echo $string.'<br>';
