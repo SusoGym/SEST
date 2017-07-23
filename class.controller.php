@@ -483,7 +483,7 @@ class Controller {
         $mail->isHTML();
         $mail->Subject = "Passwort vergessen";
         
-        $url = $_SERVER['HTTP_HOST'] . "/intern/?type=pwdreset&token=$token";
+        $url = $_SERVER['HTTP_HOST'] . "/intern/index.php?type=pwdreset&token=$token";
         
         ob_start();
         include("templates/resetmail.php");
