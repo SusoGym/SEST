@@ -1,0 +1,17 @@
+[{
+  "relation": ["delegate_permission/common.get_login_creds"],
+  "target": {
+    "namespace": "web",
+    "site": "https://suso.schulen.konstanz.de/intern"
+  }
+},
+  {
+    "relation": ["delegate_permission/common.get_login_creds"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "de.konstanz.schulen.suso",
+      "sha256_cert_fingerprints": [
+        "FA:C2:E3:22:88:6E:9F:68:61:A7:8B:9D:D4:DA:6D:46:D5:0C:97:94:0C:58:8D:C6:B7:DF:2A:9D:ED:73:93:33"
+      ]
+    }
+  }]
