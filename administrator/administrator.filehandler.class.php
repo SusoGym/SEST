@@ -120,8 +120,8 @@ class FileHandler {
         }
         
         foreach ($lineFieldValue as $l) {
-            if ($this->model->checkDBData($student, $l["id"])) {
-                $this->model->updateData($student, $l["id"], $l);
+            if ($this->model->checkDBData($student, $l["ASV_ID"])) {
+                $this->model->updateData($student, $l["ASV_ID"], $l);
                 $updateCounter++;
             } else {
                 $this->model->insertData($student, $l);

@@ -753,6 +753,7 @@ class Model {
     function checkNovellLogin($usr, $pwd) {
         
         $apiUrl = self::$connection->getIniParams()["ldap"]; //used to be hard coded "https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php"; 
+		
         $headers = array('Authorization: Basic ' . base64_encode("$usr:$pwd"));
         
         $ch = curl_init();
@@ -879,22 +880,28 @@ class Model {
      * @param $name
      * @param $surname
      * @param $email
+	 * @param $news bool
+	 * @param $html bool
      * @return bool success
      */
-    public function updateUserData($usrId, $name, $surname, $email) {
+    public function updateUserData($usrId, $name, $surname, $email, $getnews, $htmlnews) {
         
         $name = self::$connection->escape_string($name);
         $surname = self::$connection->escape_string($surname);
         $email = self::$connection->escape_string($email);
+		
         
         $check = self::$connection->selectValues("SELECT * FROM `user` WHERE email='$email' AND NOT id = $usrId");
         
         if (isset($check[0]))
             return false;
         
-        self::$connection->straightMultiQuery("UPDATE user SET email='$email' WHERE id=$usrId; UPDATE eltern SET vorname='$name', name='$surname' WHERE userid=$usrId");
+        self::$connection->straightMultiQuery("UPDATE user SET email='$email' WHERE id=$usrId; 
+		UPDATE eltern SET vorname='$name', name='$surname'  WHERE userid=$usrId;
+		UPDATE eltern SET receive_news = $getnews, htmlnews = $htmlnews WHERE userid = $usrId");
         
-        return true;
+		
+		return true;
     }
     
     
@@ -916,8 +923,23 @@ class Model {
      * @param int $id
      * @return bool
      */
-    public function getTeacherNewsMailStatus($id) {
-        $data = self::$connection->selectValues("SELECT receive_news from lehrer WHERE id = $id");
+    public function getNewsMailStatus($id,$teacher) {
+		$table = ($teacher) ? "lehrer" : "eltern";
+		$idfield = ($teacher) ? "id" : "userid";
+        $data = self::$connection->selectValues("SELECT receive_news from $table WHERE $idfield = $id");
+        return $data[0][0];
+    }
+	
+	/**
+     * get teacher's NewsMail format
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function getNewsHTMLStatus($id, $teacher) {
+		$table = ($teacher) ? "lehrer" : "eltern";
+		$idfield = ($teacher) ? "id" : "userid";
+        $data = self::$connection->selectValues("SELECT htmlnews from $table WHERE $idfield = $id");
         
         return $data[0][0];
     }
@@ -955,8 +977,8 @@ class Model {
      * @param bool $newsmail
      * @return bool
      */
-    public function updateTeacherData($usrId, $vpview, $vpmail, $newsmail) {
-        self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview_all = $vpview, receive_news = $newsmail WHERE  id = $usrId");
+    public function updateTeacherData($usrId, $vpview, $vpmail, $newsmail,$newshtml) {
+        self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview_all = $vpview, receive_news = $newsmail, htmlnews = $newshtml WHERE  id = $usrId");
         
         return true;
     }
@@ -1814,13 +1836,15 @@ class Model {
 	/* 
 	* create HTML layouted Text of newsletter
 	* @param Newsletter Object
+	* @param User Object
 	* @return String
 	*/
-	public function makeHTMLNewsletter($newsletter){
+	public function makeHTMLNewsletter($newsletter,$user){
 		$text = "";
 		$linkStyle = 'style="font-family:Arial,Sans-Serif;font-size:12px;font-weight:bold;color: teal;font-decoration:underline;"';
+		($user->getType() == 0) ? $imgsrc = "../assets/logo.png" : $imgsrc = "./assets/logo.png"; 
 		$text =  mb_convert_encoding('<table border="1" cell-padding="0">
-										<tr><td><img src="../assets/logo.png" width="100" height="50">Heinrich-Suso-Gymnasium Konstanz<hr style="color:teal;"></td></tr>
+										<tr><td><img src="'.$imgsrc.'" width="100" height="50">Heinrich-Suso-Gymnasium Konstanz<hr style="color:teal;"></td></tr>
 										<tr><td style="color:teal;font-family:Arial,Sans-Serif;font-weight:bold;font-size:18px;">Newsletter vom ' .
             $newsletter->getNewsDate() . '</td></tr>', 'UTF-8');
 		$text .='<tr><td>';

@@ -1,7 +1,7 @@
 <?php
 
 /**
- *Controller class handles input and other data
+ * class handles input and other data
  */
 class Controller {
     
@@ -151,6 +151,20 @@ class Controller {
             case "pwdreset":
                 $template = $this->handlePwdReset();
                 break;
+			case "news":
+				$template = "newsletter";
+				$this->infoToView['user'] = self::$user;
+				$this->getNewsletters();
+				break;
+			//view news
+			case "view":
+				$this->infoToView['title'] = "Newsletter lesen";
+				$this->infoToView['user'] = self::$user;
+				$newsletter = new Newsletter();
+				$newsletter->createFromId($this->input['nl']);
+				$this->infoToView["newsletter"] = $newsletter;
+				$this->display("viewnews");
+				break;
             default:
                 if (self::$user instanceof Teacher) {
                     /** @var Teacher $user */
@@ -469,7 +483,7 @@ class Controller {
         $mail->isHTML();
         $mail->Subject = "Passwort vergessen";
         
-        $url = $_SERVER['HTTP_HOST'] . "/intern/?type=pwdreset&token=$token";
+        $url = $_SERVER['HTTP_HOST'] . "/intern/index.php?type=pwdreset&token=$token";
         
         ob_start();
         include("templates/resetmail.php");
@@ -783,7 +797,7 @@ class Controller {
         $view = View::getInstance();
         $this->infoToView['usr'] = self::$user;
         //set Module activity
-        $this->infoToView['modules'] = array("vplan" => true, "events" => true, "news" => false);
+        $this->infoToView['modules'] = array("vplan" => true, "events" => true, "news" => true);
         
         if (isset($_SESSION['notifications'])) {
             if (!isset($this->infoToView['notifications']))
@@ -1065,8 +1079,9 @@ class Controller {
             $vpmail = $data['vpmail'];
             $vpview = $data['vpview'];
             $newsmail = $data['newsmail'];
+			$newshtml = $data['newshtml'];
             
-            $this->model->updateTeacherData(self::$user->getId(), $vpview, $vpmail, $newsmail);
+            $this->model->updateTeacherData(self::$user->getId(), $vpview, $vpmail, $newsmail, $newshtml);
             
             $this->notify("Ihre Einstellungen wurden erfolgreich aktualisiert!", 4000, true);
             die(json_encode(array("success" => true)));
@@ -1077,6 +1092,7 @@ class Controller {
         $this->infoToView['vpmail'] = self::$user->getVpMailStatus();
         $this->infoToView['vpview'] = self::$user->getVpViewStatus();
         $this->infoToView['newsmail'] = self::$user->getNewsMailStatus();
+		$this->infoToView['newshtml'] = self::$user->getNewsHTMLStatus();
         
         return "teacher_editdata";
     }
@@ -1102,7 +1118,9 @@ class Controller {
             $mail = $data['mail'];
             $name = $data['name'];
             $surname = $data['surname'];
-            $oldpwd = $data['oldpwd'];
+			$oldpwd = $data['oldpwd'];
+			$getnews = $data['getnews'];
+			$htmlnews = $data['htmlnews'];
             //Teacher AND Student handling needs to be worked on
             if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
                 die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie eine valide Emailadresse an!"))));
@@ -1117,7 +1135,7 @@ class Controller {
             if ($pwd != "") {
                 $this->model->changePwd(self::getUser()->getId(), $pwd);
             }
-            $succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail);
+            $succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail, $getnews, $htmlnews);
             
             if (!$succ) {
                 die(json_encode(array("success" => false, "notifications" => array("Die angegebene Emailadresse ist bereits mit einem anderen Account verknüpft!"))));
@@ -1131,7 +1149,8 @@ class Controller {
             die(json_encode(array("success" => true)));
             
         }
-        
+        $this->infoToView['newsmail'] = self::$user->getNewsMailStatus();
+		$this->infoToView['newshtml'] = self::$user->getNewsHTMLStatus();
         return "parent_editdata";
     }
     
@@ -1144,6 +1163,25 @@ class Controller {
     }
     
     
+	/**
+	* get Newsletters to View
+	*/
+	public function getNewsletters(){
+	$model = $this->model->getInstance();
+				$news = $this->model->getNewsIds();
+				$newsletters = array();
+				foreach ($news as $n) {
+					$newsletter = new Newsletter();
+					$newsletter->createFromId($n[0]);
+					$newsletters[] = $newsletter;
+					unset($newsletter);
+					$this->infoToView["newsletters"] = $newsletters;		
+					}
+				$this->infoToView["schoolyears"] = $model->getNewsYears();	
+		}
+	
+	
+	
     /**
      *
      *triggering email via phpmailer

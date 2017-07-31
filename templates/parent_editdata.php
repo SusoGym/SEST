@@ -4,7 +4,27 @@
 $data = $this->getDataForView();
 $user = $data['user'];
 include("header.php");
-
+$newsmail = $data['newsmail'];
+$newshtml = $data['newshtml'];
+if ($newsmail) {
+    $newsmailStatus1 = "checked";
+    $newsmailStatus2 = null;
+	$htmlButton = null;
+} else {
+    $newsmailStatus1 = null;
+    $newsmailStatus2 = "checked";
+	$htmlButton = "disabled";
+}
+if($newshtml) {
+	$newshtmlStatus1 = "checked";
+	$newshtmlStatus2 = null;
+	
+	}
+else {
+	$newshtmlStatus1 = null;
+	$newshtmlStatus2= "checked";
+	
+	}
 ?>
 
 <div class="container">
@@ -37,6 +57,26 @@ include("header.php");
                                required="required" class="validate">
                     </div>
                 </div>
+				<div class="row">
+					 <div class=" col s4 l4 m4">
+                        <label for="f_newsmail">Erhalte Newsletter per Email:<br></label>
+                        <input class="with-gap" name="f_newsmail" type="radio" id="radio1"
+                               value="true"<?php echo $newsmailStatus1; ?> >
+                        <label for="radio1">ja</label>
+                        <input class="with-gap" name="f_newsmail" type="radio" id="radio2"
+                               value="false"<?php echo $newsmailStatus2; ?> >
+                        <label for="radio2">nein</label>
+                    </div>
+					<div class=" col s4 l4 m4">
+                        <label for="f_newshtml">Newsletter im HTML-Format:<br></label>
+                        <input class="with-gap" name="f_newshtml" type="radio" id="radio3"
+                               value="true"<?php echo $newshtmlStatus1; ?> >
+                        <label for="radio3">ja</label>
+                        <input class="with-gap" name="f_newshtml" type="radio" id="radio4"
+                               value="false"<?php echo $newshtmlStatus2; ?> >
+                        <label for="radio4">nein</label>
+                    </div>
+				</div>
                 <div class="row">
                     <div class="input-field col s6 l6 m6">
                         <label for="f_pwd">Neues Passwort:</label>
@@ -49,7 +89,7 @@ include("header.php");
                 </div>
                 <div class="row">
                     <div class="input-field col s4 l4 m4">
-                        <label for="f_pwd_old">Altes Passwort:</label>
+                        <label for="f_pwd_old">Passwort:</label>
                         <input name="f_pwd_old" id="f_pwd_old" type="password" required="required" class="validate">
                     </div>
                 </div>
@@ -74,7 +114,9 @@ include("header.php");
 
 <script type="application/javascript">
     function submitForm() {
-        var name = $('#f_name');
+		var newsmail = $("input:radio[name ='f_newsmail']:checked").val();
+        var newshtml = $("input:radio[name ='f_newshtml']:checked").val();
+		var name = $('#f_name');
         var surname = $('#f_surname');
         var email = $('#f_email');
         var pwd = $('#f_pwd');
@@ -101,9 +143,10 @@ include("header.php");
             'data[mail]': email.val(),
             'data[name]': name.val(),
             'data[surname]': surname.val(),
-            'data[oldpwd]': old_pwd.val()
-
-
+            'data[oldpwd]': old_pwd.val(),
+			'data[getnews]': newsmail,
+			'data[htmlnews]': newshtml
+		
         }, function (data) {
 
             try {

@@ -345,7 +345,7 @@
         var replaced = [];
         console.info(arr);
 
-        if(typeof arr !== 'undefined')
+        if(typeof arr !== 'undefined' && arr != null)
         { // we have an iFrame! yay
             arr.forEach(function (element, index, array) {
 

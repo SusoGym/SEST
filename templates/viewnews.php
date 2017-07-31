@@ -11,11 +11,11 @@ $user=$data['user'];
     <div class="card ">
         <div class="card-content">
 			<span class="card-title">
-			<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href="?type=archive">
-				 <i class="material-icons">chevron_left</i>
-			</a>
-           <?php echo $data["title"] ; ?>
-		   </span> 
+					<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href="?type=news">
+						 <i class="material-icons">chevron_left</i>
+					</a>
+            <?php echo \View::getInstance()->getTitle(); ?>
+			</span>
 		<div>
 	<div class="row"><?php echo $data["newsletter"]->makeViewText($user); ?>	</div>
 	
