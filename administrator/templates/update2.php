@@ -18,7 +18,8 @@ $data = \View::getInstance()->getDataForView();
             </p>
 
             <p>
-                <?php echo $this->action; ?></br />
+                <?php //echo $data["action"]; 
+				?></br />
             </p>
 
 

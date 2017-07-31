@@ -363,6 +363,7 @@ class Controller extends \Controller {
 				$newsletter = new \Newsletter();
 				$newsletter->createFromId($input['nl']);
 				$this->infoToView["newsletter"] = $newsletter;
+				$this->infoToView["user"] = self::$user;
 				$this->display("viewnews");
 				break;
 			//send News
@@ -716,23 +717,6 @@ class Controller extends \Controller {
         $filehandler->createCSV($data);
         $this->notify("Datei " . $fileName . " erzeugt");
     }
-	
-	/**
-	* get Newsletters to View
-	*/
-	private function getNewsletters(){
-	$model = \Model::getInstance();
-				$news = $model->getNewsIds();
-				$newsletters = array();
-				foreach ($news as $n) {
-					$newsletter = new \Newsletter();
-					$newsletter->createFromId($n[0]);
-					$newsletters[] = $newsletter;
-					unset($newsletter);
-					$this->infoToView["newsletters"] = $newsletters;		
-					}
-				$this->infoToView["schoolyears"] = $model->getNewsYears();	
-		}
 		
 	/**
      *

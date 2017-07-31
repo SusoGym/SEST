@@ -125,7 +125,7 @@
         if (data.success == true) {
           $('.forgotform').hide();
           $('p#forgottext').show();
-          $('p#forgottext').html('<i class="material-icons left teal-text">check</i>Bitte rufen Sie Ihre E-Mails ab, um ihr Passwort zurückzusetzen.');
+          $('p#forgottext').html('<i class="material-icons left teal-text">check</i>Bitte rufen Sie Ihre E-Mails ab, um ihr Passwort zurückzusetzen.<br>Kontrollieren Sie auch Ihren Spam Ordner!');
         } else {
           $('p#forgottext').show();
           $('p#forgottext').html('<i class="material-icons left red-text">clear</i>'+data.message);

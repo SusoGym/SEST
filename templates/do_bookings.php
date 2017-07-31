@@ -11,7 +11,7 @@
                 <div class="collapsible-header">
                     
                     <?php if ($bookedThisTeacher): ?>
-                        <span id="info" class="right green-text" style="font-sisze: 14px">gebucht!</span>
+                        <span id="info" class="right green-text" style="font-size: 14px">gebucht!</span>
                     <?php elseif ($amountAvailableSlots == 0): ?>
                         <span id="info" class="right red-text" style="font-size: 14px">ausgebucht!</span>
                     <?php elseif ($maxedOutAppointments): ?>
