@@ -387,7 +387,8 @@ class Model {
                     $data = self::$connection->selectAssociativeValues($query);
                     
                     if (!isset($data[0])) {
-                        die(var_dump($names) . " LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator.");
+                        ChromePhp::error("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator. \n" . json_encode(array("query" => $query, "data" => $data, "names" => $names), JSON_PRETTY_PRINT));
+                        die("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator.");
                     }
                     $data = $data[0];
                     
