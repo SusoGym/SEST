@@ -1,5 +1,6 @@
-<?php namespace blog;
-class Utility {
+<?php
+namespace base;
+class SuperUtility {
     
     /**
      * @var string defines where templates are located

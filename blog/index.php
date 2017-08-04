@@ -1,10 +1,11 @@
 <?php namespace blog;
 
-require("../ChromePhp.php");
-require("../class.connect.php");
+
+use base\SuperUtility;
+
+require("../base/dependencies.php");
 require("class.post.php");
 require("class.model.php");
-require("class.utility.php");
 require("class.user.php");
 require("class.controller.php");
 
@@ -24,10 +25,10 @@ if (isset($data['destroy'])) {
   // header('Location: .');
 }
 
-Utility::handleDebug($data);
-Utility::setExceptionHandler($data);
+SuperUtility::handleDebug($data);
+SuperUtility::setExceptionHandler($data);
 
 \ChromePhp::info("Input: " . json_encode($data));
 
 $controller = new Controller($data);
-$controller->go();
+$controller->start();
