@@ -1,24 +1,12 @@
 <?php namespace blog;
 
-class Model {
+use base\SuperModel;
 
-    /** @var $instance Model */
-    private static $instance;
+class Model extends SuperModel {
 
-    /** Returns instance of model
-     *
-     * @return Model
-     */
-    public static function getInstance() {
-        return self::$instance == null ? self::$instance = new Model() : self::$instance;
-    }
-
-    /** @var  \Connection */
-    private $connection;
-
-    private function __construct() {
-        \Connection::$configFile = "../cfg.ini";
-        $this->connection = new \Connection();
+    public function __construct()
+    {
+        parent::__construct("../cfg.ini");
     }
 
     /**
