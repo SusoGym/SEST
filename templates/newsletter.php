@@ -7,12 +7,11 @@ include("header.php");
 $yr = date('Y');
 $mt = date('m');
 if ($mt>7) {
-	$currentSchoolYear = $yr."/".$yr+1;
+	$currentSchoolYear = $yr.'/'.($yr+1);
 	}
 else{
-	$currentSchoolYear = ($yr-1)."/".$yr;
+	$currentSchoolYear = ($yr-1).'/'.$yr;
 	}
-
 ?>
 
 <div class="container">

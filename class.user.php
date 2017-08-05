@@ -24,6 +24,14 @@ class User extends Printable {
      * @var $surname string Name name of the user
      */
     protected $name;
+	/**
+	* @var bool $receiveNewsMail
+	*/	
+	protected $receiveNewsMail;
+	/**
+	* @var bool $HTMLNews
+	*/
+	protected $HTMLNews;
 	
     
     /**
@@ -84,14 +92,47 @@ class User extends Printable {
     }
 	
 	/**
+	* return ReceiveNewsletterMail
+	* @return bool 
+	*/
+	public function getReceiveNewsMail(){
+		return $this->receiveNewsMail;	
+	}
+	
+	/**
+	* get NewsMail HTML status
+	* @return bool
+	*/
+	public function getNewsStatus(){
+		return $this->HTMLNews;
+	}
+	
+	/**
+	* set receive News Mail Status
+	* @param bool $status
+	*/
+	public function setReceiveNewsMail($status){
+		$this->receiveNewsMail = $status;
+	}
+	
+	/**
+	* set receive News Mail Status
+	* @param bool $status
+	*/
+	public function setHTMLNews($status){
+		$this->HTMLNews = $status;
+	}
+	
+	/**
 	* returns newsletter Email reception
 	* @return int (1 = HTML / 0 = PlainText)
 	*/
-	public function getNewsletterReception(){
+	/*public function getNewsletterReceptionType(){
 		$teacher = ($this->getType()=="Teacher") ?	 true : false ;
 		$model = Model::getInstance();
-		return $model->getNewsletterReception($teacher); //corresponding function in model still missing		
+		return $model->getNewsletterReceptionType($teacher); //corresponding function in model still missing		
 		}
+	*/	
     
     /**
      * returns status of mail service for newsletters

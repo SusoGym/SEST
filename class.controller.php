@@ -149,7 +149,7 @@ class Controller {
                 $template = $this->handleCoverLessons();
                 break;
             case "pwdreset":
-		$template = $this->handlePwdReset();
+				$template = $this->handlePwdReset();
 	        break;
 			case "news":
 				$template = "newsletter";
