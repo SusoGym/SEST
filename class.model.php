@@ -67,7 +67,7 @@ class Model {
      * @param string $name Schueler Nachname
      * @return Student
      **/
-    public function getStudentByName($name, $surname = null) {
+    public function getStudentByName($name, $surname = null,$bday = null) {
         
         $name = self::$connection->escape_string($name);
         if ($surname != null) {
@@ -76,9 +76,9 @@ class Model {
         } else {
             $wholeName = $name;
         }
-        
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE Replace(CONCAT(vorname, name), ' ', '') = '$wholeName'");
-        
+       
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE Replace(CONCAT(vorname, name), ' ', '') = '$wholeName'   AND gebdatum = '$bday'");
+       
         if ($data == null)
             return null;
         
@@ -387,7 +387,7 @@ class Model {
                     $data = self::$connection->selectAssociativeValues($query);
                     
                     if (!isset($data[0])) {
-                        ChromePhp::error("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator. \n" . json_encode(array("query" => $query, "data" => $data, "names" => $names), JSON_PRETTY_PRINT));
+                         ChromePhp::error("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator. \n" . json_encode(array("query" => $query, "data" => $data, "names" => $names), JSON_PRETTY_PRINT));
                         die("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator.");
                     }
                     $data = $data[0];
@@ -738,8 +738,9 @@ class Model {
                 return false;
             
             $query = "UPDATE schueler SET eid=$parentId WHERE id=$id;";
+            self::$connection->straightQuery($query);
         }
-        self::$connection->straightQuery($query);
+        
         
         return true;
     }
@@ -1061,7 +1062,6 @@ class Model {
     public function checkPasswordResetToken($token) {
         $token = self::$connection->escape_string($token);
         $count = self::$connection->selectAssociativeValues("SELECT COUNT(*) as count FROM pwd_reset WHERE token='$token' AND validuntil > NOW()")[0]['count'];
-    
         return $count == "1";
     }
     
