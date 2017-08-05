@@ -37,7 +37,8 @@ class Controller {
      * @param $input
      */
     public function __construct($input) {
-        
+       
+
         ChromePhp::info("-------- Next Page --------");
         ChromePhp::info("Input: " . json_encode($input));
         ChromePhp::info("Session: " . json_encode($_SESSION));
@@ -47,7 +48,6 @@ class Controller {
         
         $this->input = $input;
         $this->infoToView = array();
-        
         $this->handleLogic();
         
         
@@ -149,8 +149,8 @@ class Controller {
                 $template = $this->handleCoverLessons();
                 break;
             case "pwdreset":
-                $template = $this->handlePwdReset();
-                break;
+		$template = $this->handlePwdReset();
+	        break;
 			case "news":
 				$template = "newsletter";
 				$this->infoToView['user'] = self::$user;
@@ -391,7 +391,7 @@ class Controller {
         if (isset($this->input['token'])) {
             $token = $this->input['token'];
             $validToken = $this->model->checkPasswordResetToken($token);
-            
+           
             if (isset($this->input['console'])) {
                 if(!$validToken)
                 {
@@ -478,7 +478,7 @@ class Controller {
     public function sendPwdResetMail($email, $token) {
         require "PHPMailer.php";
         $mail = new PHPMailer();
-        $mail->setFrom("noreply@suso.schulen.konstanz.de", "Suso Gymnasium Intern");
+        $mail->setFrom("susointern@suso-gymnasium.de", "Suso Gymnasium Intern");
         $mail->CharSet = "UTF-8";
         $mail->isHTML();
         $mail->Subject = "Passwort vergessen";
@@ -677,8 +677,7 @@ class Controller {
             }
             
             
-            $data = array("coverlessons" => $lessons, "user" => $usr);
-            
+            $data = array("coverlessons" => $lessons, "user" => $usr);            
             header('Content-Type: application/json');
             die(json_encode($data, JSON_PRETTY_PRINT));
         }
@@ -955,10 +954,10 @@ class Controller {
                     $student = explode(":", $student);
                     $name = $student[0];
                     $bday = $student[1];
-                    $studentObj = $this->model->getStudentByName($name);
+                    $studentObj = $this->model->getStudentByName($name,null,$bday);
                     
                     if ($studentObj == null) {
-                        array_push($notification, "Bitte überpfrüfen Sie die angegebenen Schülerdaten!");
+                        array_push($notification, "Bitte überprüfen Sie die angegebenen Schülerdaten!");
                         ChromePhp::info("Invalid student data!");
                         $success = false;
                         break;
@@ -1107,12 +1106,12 @@ class Controller {
             
             return $this->getDashBoardName();
         }
-        
+       
         $input = $this->input;
         $this->infoToView['user'] = self::getUser();
         // $_SESSION['user']['mail'] $_SESSION['user']['pwd']
-        
-        if (isset($input['console']) && isset($input['data'])) {
+       
+        if (isset($input['console']) && isset($input['data'])) { 
             $data = $input['data'];
             $pwd = $data['pwd'];
             $mail = $data['mail'];
@@ -1126,6 +1125,7 @@ class Controller {
                 die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie eine valide Emailadresse an!"))));
             }
             
+
             if ($oldpwd == "") {
                 die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie ihr altes Passwort an!"))));
             } else if (!$this->model->passwordValidate(self::getUser()->getEmail(), $oldpwd)) {
@@ -1135,6 +1135,8 @@ class Controller {
             if ($pwd != "") {
                 $this->model->changePwd(self::getUser()->getId(), $pwd);
             }
+
+	
             $succ = $this->model->updateUserData(self::getUser()->getId(), $name, $surname, $mail, $getnews, $htmlnews);
             
             if (!$succ) {
@@ -1149,6 +1151,8 @@ class Controller {
             die(json_encode(array("success" => true)));
             
         }
+
+ 
         $this->infoToView['newsmail'] = self::$user->getNewsMailStatus();
 		$this->infoToView['newshtml'] = self::$user->getNewsHTMLStatus();
         return "parent_editdata";
