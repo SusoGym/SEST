@@ -6,6 +6,12 @@ $user = $data['user'];
 include("header.php");
 $yr = date('Y');
 $mt = date('m');
+
+if(!isset($data['newsletters']) || $data['newsletters'] == null)
+{
+    $data['newsletters'] = array();
+}
+
 if ($mt>7) {
 	$currentSchoolYear = $yr.'/'.($yr+1);
 	}
@@ -36,8 +42,7 @@ else{
             		
 		        <div>
 				<ul class="collection">
-				<?php foreach($data["newsletters"] as $news){ ?>
-						<?php 
+				<?php foreach($data["newsletters"] as $news){
 						if ($news->getSchoolYear() == $currentSchoolYear && $news->getSendDate() != 0) { ?>
 							<li class="collection-item">
 								<div>
