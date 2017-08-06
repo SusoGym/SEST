@@ -25,10 +25,10 @@ CREATE TABLE IF NOT EXISTS `lehrer` (
   `ldapname`       VARCHAR(100) NOT NULL,
   `deputat`        DOUBLE       NOT NULL,
   `email`          VARCHAR(50),
-  `receive_vpmail` TINYINT      NOT NULL DEFAULT '1',
-  `receive_news`   TINYINT               DEFAULT '1',
+  `receive_vpmail` TINYINT(1)      NOT NULL DEFAULT '1',
+  `receive_news`   TINYINT(1)               DEFAULT '1',
   `upd`            TINYINT(4)   NOT NULL,
-  `vpview_all`     TINYINT      NOT NULL DEFAULT '1'
+  `vpview_all`     TINYINT(1)      NOT NULL DEFAULT '1'
 );
 
 CREATE TABLE IF NOT EXISTS `options` (
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `options` (
   `value`     TEXT         NOT NULL,
   `kommentar` VARCHAR(255) NOT NULL,
   `ordinal`   INT          NOT NULL,
-  `field`     TINYINT      NOT NULL
+  `field`     TINYINT(1)      NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `pwd_reset` (
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `vp_vpdata` (
   `eFach`     VARCHAR(15)  NOT NULL,
   `kommentar` VARCHAR(255) NOT NULL,
   `emailed`   VARCHAR(20)  NOT NULL,
-  `aktiv`     TINYINT,
+  `aktiv`     TINYINT(1),
   `id`        VARCHAR(100) NOT NULL,
   `stand`     VARCHAR(100) NOT NULL
 );
@@ -137,5 +137,6 @@ CREATE TABLE IF NOT EXISTS newsletter (
   publish     INT,
   text        TEXT,
   schoolyear  TEXT,
-  lastchanged TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
+  lastchanged TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  sent        TEXT(10) DEFAULT '0'
 );

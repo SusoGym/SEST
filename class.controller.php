@@ -1172,18 +1172,20 @@ class Controller {
 	* get Newsletters to View
 	*/
 	public function getNewsletters(){
-	$model = $this->model->getInstance();
-				$news = $this->model->getNewsIds();
-				$newsletters = array();
-				foreach ($news as $n) {
-					$newsletter = new Newsletter();
-					$newsletter->createFromId($n[0]);
-					$newsletters[] = $newsletter;
-					unset($newsletter);
-					$this->infoToView["newsletters"] = $newsletters;		
-					}
-				$this->infoToView["schoolyears"] = $model->getNewsYears();	
+	    $model = $this->model->getInstance();
+        $news = $this->model->getNewsIds();
+		$newsletters = array();
+
+		foreach ($news as $n) {
+			$newsletter = new Newsletter();
+			$newsletter->createFromId($n[0]);
+			$newsletters[] = $newsletter;
+			unset($newsletter);
 		}
+        $this->infoToView["newsletters"] = $newsletters;
+		$this->infoToView["schoolyears"] = $model->getNewsYears();
+
+	}
 	
 	
 	

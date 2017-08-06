@@ -33,7 +33,6 @@ else{
             <?php /** @var \User $usr */
             $usr = $data['user']; ?>
 				</div>
-				</form>
                 <div class="row">
                     <div class="input-field col s12 l12 m12">
                         &nbsp;&nbsp;Wenn Sie den Newsletter automatisch per email erhalten wollen, stellen Sie dies in Ihrem Benutzeraccount ein!
@@ -42,7 +41,7 @@ else{
             		
 		        <div>
 				<ul class="collection">
-				<?php foreach($data["newsletters"] as $news){
+				<?php /** @var Newsletter $news */foreach($data["newsletters"] as $news){
 						if ($news->getSchoolYear() == $currentSchoolYear && $news->getSendDate() != 0) { ?>
 							<li class="collection-item">
 								<div>

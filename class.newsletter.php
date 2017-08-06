@@ -111,16 +111,18 @@ class Newsletter{
 	* param int id
 	*/
 	public function createFromId ($id) {
-		$data = Model::getNewsletterData($id);
+		$data = Model::getInstance()->getNewsletterData($id);
 		$this->id = $id;
 		$date = $data["publishdate"];
 		$date = $date[6].$date[7].'.'.$date[4].$date[5].'.'.$date[0].$date[1].$date[2].$date[3];
-		
+
 		$this->setNewsDate($date);
 		$this->setNewsText($data["text"]);
 		$this->setLastChanged($data["lastchanged"]);
 		$this->setSendDate($data["sent"]);
 		$this->setSchoolYear($data["schoolyear"]);
+
+		ChromePhp::info($this);
 		}
 	
 	/**
@@ -140,17 +142,17 @@ class Newsletter{
 		//trimming whitespaces
 		$newstext = trim($newstext);
 		//Escaping quotes in text
-		$newstext = str_replace("'","\'",$newstext);
+		$newstext = str_replace("'","'",$newstext);
 		$newstext = str_replace('"','\"',$newstext);
 		$this->setNewsText($newstext);
 		$this->setSendDate(null);
 		$this->setSchoolYear($schoolYear);
 		if (isset($id)) {
-			Model::UpdateNewsInDB($id,$publishdate,$newstext,$schoolYear);
+			Model::getInstance()->UpdateNewsInDB($id,$publishdate,$newstext,$schoolYear);
 			$this->setId = $id;
 			}
 		else{
-			$this->setId(Model::InsertNewsIntoDB($publishdate,$newstext,$schoolYear));
+			$this->setId(Model::getInstance()->InsertNewsIntoDB($publishdate,$newstext,$schoolYear));
 			}
 		
 		}
@@ -159,7 +161,7 @@ class Newsletter{
 	* enter sendDate
 	*/
 	public function UpdateSendDate(){
-		Model::setNewsSendDate($this->id);
+		Model::getInstance()->setNewsSendDate($this->id);
 		}
 	
 	/**
@@ -169,10 +171,10 @@ class Newsletter{
 	*/
 	public function	makeViewText($user,$html = true,$send = false) {
 	if ($html) {
-		$text = Model::makeHTMLNewsletter($this,$user, $send);
+		$text = Model::getInstance()->makeHTMLNewsletter($this,$user, $send);
 		}
 	else {
-		$text = Model::makePlainTextNewsletter($this);
+		$text = Model::getInstance()->makePlainTextNewsletter($this);
 		}
 				
 		
