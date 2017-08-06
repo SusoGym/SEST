@@ -67,7 +67,7 @@ class Model {
      * @param string $name Schueler Nachname
      * @return Student
      **/
-    public function getStudentByName($name, $surname = null) {
+    public function getStudentByName($name, $surname = null,$bday = null) {
         
         $name = self::$connection->escape_string($name);
         if ($surname != null) {
@@ -76,9 +76,9 @@ class Model {
         } else {
             $wholeName = $name;
         }
-        
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE Replace(CONCAT(vorname, name), ' ', '') = '$wholeName'");
-        
+       
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE Replace(CONCAT(vorname, name), ' ', '') = '$wholeName'   AND gebdatum = '$bday'");
+       
         if ($data == null)
             return null;
         
@@ -387,7 +387,7 @@ class Model {
                     $data = self::$connection->selectAssociativeValues($query);
                     
                     if (!isset($data[0])) {
-                        ChromePhp::error("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator. \n" . json_encode(array("query" => $query, "data" => $data, "names" => $names), JSON_PRETTY_PRINT));
+                         ChromePhp::error("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator. \n" . json_encode(array("query" => $query, "data" => $data, "names" => $names), JSON_PRETTY_PRINT));
                         die("LDAP ist valide, MySQL jedoch nicht. Bitte wende dich an einen Systemadministrator.");
                     }
                     $data = $data[0];
@@ -738,8 +738,9 @@ class Model {
                 return false;
             
             $query = "UPDATE schueler SET eid=$parentId WHERE id=$id;";
+            self::$connection->straightQuery($query);
         }
-        self::$connection->straightQuery($query);
+        
         
         return true;
     }
@@ -1061,7 +1062,6 @@ class Model {
     public function checkPasswordResetToken($token) {
         $token = self::$connection->escape_string($token);
         $count = self::$connection->selectAssociativeValues("SELECT COUNT(*) as count FROM pwd_reset WHERE token='$token' AND validuntil > NOW()")[0]['count'];
-    
         return $count == "1";
     }
     
@@ -1834,20 +1834,68 @@ class Model {
 		schoolyear=\"$schoolyear\", lastchanged=CURRENT_TIMESTAMP WHERE newsid=$id");
 		}
 		
+	/**
+	* enter sent Date for Newsletter
+	* @param int id
+	*/
+	public function enterNewsSentDate($id){
+	self::$connection->straightQuery("UPDATE newsletter SET sent=CURRENT_TIMESTAMP WHERE newsid=$id"); 
+	}
+	
+	/**
+	* Get List of Newsletter recipients
+	* @return array(User)
+	*/
+	public function getNewsRecipients(){
+	$users=array();
+	//get Teachers
+	$data = self::$connection->selectValues("SELECT id,email,htmlnews FROM lehrer WHERE receive_news = 1");
+	if ($data) {
+		foreach($data as $d){
+			$teacher = new Teacher($d[1],$d[0]);
+			$teacher->setReceiveNewsMail(true);
+			$d[2] ? $teacher->setHTMLNews(true) : $teacher->setHTMLNews(false);
+			array_push($users,$teacher);
+			unset($teacher);
+			}
+		}
+	//get Parents
+	$data = self::$connection->selectValues("SELECT userid,eltern.id,htmlnews,email FROM eltern,user,schueler 
+	WHERE userid = user.id 
+	AND eltern.id = schueler.eid
+	AND receive_news = 1");
+	if ($data) {
+		foreach($data as $d){
+			$parent = new Guardian($d[1],$d[3],$d[0]);
+			$parent->setReceiveNewsMail(true);
+			$d[2] ? $parent->setHTMLNews(true) : $parent->setHTMLNews(false);
+			array_push($users,$parent);
+			unset($parent);
+			}
+		}	
+	return $users;
+	}
+	
+		
 	/* 
 	* create HTML layouted Text of newsletter
 	* @param Newsletter Object
 	* @param User Object
 	* @return String
 	*/
-	public function makeHTMLNewsletter($newsletter,$user){
+	public function makeHTMLNewsletter($newsletter,$user,$send = false){
 		$text = "";
-		$linkStyle = 'style="font-family:Arial,Sans-Serif;font-size:12px;font-weight:bold;color: teal;font-decoration:underline;"';
+		$linkStyle = 'style="font-family:Arial,Sans-Serif;font-size:10px;font-weight:bold;color: teal;font-decoration:underline;"';
+		if (!$send) {
 		($user->getType() == 0) ? $imgsrc = "../assets/logo.png" : $imgsrc = "./assets/logo.png"; 
-		$text =  mb_convert_encoding('<table border="1" cell-padding="0">
-										<tr><td><img src="'.$imgsrc.'" width="100" height="50">Heinrich-Suso-Gymnasium Konstanz<hr style="color:teal;"></td></tr>
-										<tr><td style="color:teal;font-family:Arial,Sans-Serif;font-weight:bold;font-size:18px;">Newsletter vom ' .
-            $newsletter->getNewsDate() . '</td></tr>', 'UTF-8');
+		}
+		else {
+			$imgsrc = "../assets/logo.png";	
+		}
+		$text =  mb_convert_encoding('<table border="0" cell-padding="0">
+										<tr><td style="color:teal;font-family:Arial,Sans-Serif;font-weight:bold;font-size:18px;">Heinrich-Suso-Gymnasium Konstanz<hr style="color:teal;"></td></tr>
+										<tr><td style="color:#666666;font-family:Arial,Sans-Serif;font-weight:bold;font-size:16px;">Newsletter vom ' .
+            $newsletter->getNewsDate() . '<br></td></tr>', 'UTF-8');
 		$text .='<tr><td>';
 		//Text auf Überschriften prüfen
 		$newstext = mb_convert_encoding($newsletter->getNewsText(),'UTF-8');
@@ -1859,27 +1907,25 @@ class Model {
 			if($line[2] == "=") {
 				//Header2
 				$offset = 3;
-				$style = 'style = "color:teal; size:12px;" ';
-				$space = '<br>';
+				$style = 'style = "color:#008080; font-family:Arial,Sans-Serif;font-weight:bold; text-decoration: underline; font-size:13px;" ';
 				}
 			else{
 				//Header1
 				$offset = 2;
-				$style = 'style = "color: teal; font-weight:bold; size:16px;" ';
-				$space = '<br><br>';
+				$style = 'style = "color: #008080; font-family:Arial,Sans-Serif;font-weight:bold; text-decoration: underline; font-size:16px;" ';
 				}
 			for($x = $offset;$x<strlen($line) - $offset;$x++){
 					$headerline .= $line[$x];
 					}
-			$text .= '<br><a '.$style.'>'.$headerline.'</a>'.$space;
+			$text .= '<p '.$style.'>'.$headerline.'</p>';
 			}
 			else {
-				$text .= $line.'<br>';	
+				$text .= '<p style="color:#000000;font-size:12px">'.$line.'</p><br>';	
 				}
 			}
 		$text .= '</td></tr>';
-		//Hinweis auf abbestellen
-		$text .='<tr><td><b>Wenn Sie den Newsletter abbestellen wollen, erledigen Sie dies bitte über die </b><a '.$linkStyle.' href="https:\\www.suso.schulen.konstanz.de\intern" target="_blank">Suso-Intern-App Webanwendung</a></td></tr>';
+		$text .= '<tr><td><hr style="color:teal;"></td></tr><tr><td style="color:#000000;font-size:10px">Diese Mail wurde automatisch versendet, bitte antworten Sie nicht auf diese Email!
+		<br><b>Änderungen im Newsletterbezug über die </b><a '.$linkStyle.' href="'.'https:\\www.suso.schulen.konstanz.de\intern'.'" target="_blank">Suso-Intern-App Webanwendung</a></td></tr>';
 		$text .= '</table>';
 		return $text;
 		}
@@ -1891,7 +1937,7 @@ class Model {
 	*/
 	public function makePlainTextNewsletter($newsletter){
 		$text = "";
-		$text =  "********************************\r\n".
+		$text = "********************************\r\n".
 				"Heinrich-Suso-Gymnasium Konstanz \r\n".
 				"******************************** \r\n".
 				"Newsletter vom " .$newsletter->getNewsDate()."\r\n";
@@ -1924,7 +1970,9 @@ class Model {
 				$text .= $line;	
 				}
 			}
-		$text .="\r\n\r\nWenn Sie den Newsletter abbestellen wollen, erledigen Sie dies bitte über die Suso-Intern-App Webanwendung (https:\\www.suso.schulen.konstanz.de\intern)";
+		$text .="\r\n\r\nDiese Mail wurde automatisch versendet, bitte antworten Sie nicht auf diese Email!";
+		//Hinweis auf abbestellen
+		$text .="\r\nÄnderungen im Newsletterbezug über die Suso-Intern-App Webanwendung (https:\\www.suso.schulen.konstanz.de\intern)";
 				
 		return $text;
 		}

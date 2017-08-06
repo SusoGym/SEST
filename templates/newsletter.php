@@ -6,13 +6,12 @@ $user = $data['user'];
 include("header.php");
 $yr = date('Y');
 $mt = date('m');
-if ($mt>=8) {
-	$currentSchoolYear = $yr."/".$yr+1;
+if ($mt>7) {
+	$currentSchoolYear = $yr.'/'.($yr+1);
 	}
 else{
-	$currentSchoolYear = ($yr-1)."/".$yr;
+	$currentSchoolYear = ($yr-1).'/'.$yr;
 	}
-
 ?>
 
 <div class="container">

@@ -377,6 +377,7 @@ class Controller extends \Controller {
 					}
 				//Ermittle Empfänger
 			    // to be done - must be function of Model
+				$list = $this->model->getNewsRecipients();
 				$this->sendNewsletterMails($list,$newsletter);
 				$this->getNewsletters();
 				$this->display("newsarchive");
@@ -731,36 +732,25 @@ class Controller extends \Controller {
         //sending emails
         $timestamp = time();
         $datum = date("Y-m-d  H:i:s", $timestamp);
-        /** @var User $l */
-        foreach ($list as $l) {
+        /** @var User $$userObj */
+        foreach ($list as $userObj) {
             /** @var PHPMailer $phpmail */
-            $phpmail = new PHPMailer();
-            $phpmail->setFrom("noreply@suso.konstanz.de", "Suso-Gymnasium Newsletter");
+            $phpmail = new \PHPMailer();
+            $phpmail->setFrom("newsletter@suso.konstanz.de", "Suso-Gymnasium Newsletter");
             $phpmail->CharSet = "UTF-8";
-            if ($l->getNewsletterHTML) {$phpmail->isHTML();}
-            $phpmail->AddAddress($l->getEmail());
-            $phpmail->Subject = date('d.m.Y - H:i:s') . 'Suso-Newsletter vom '.$newsletter->getNewsDate();
-            $phpmail->Body = ($l->getNewsletterHTML) ? $newsletter->makeViewText(true) : $newsletter->makeViewText(false);
+            if ($userObj->getNewsStatus()) {$phpmail->isHTML();}
+            $phpmail->AddAddress($userObj->getEmail());
+            $phpmail->Subject = 'Suso-Newsletter vom '.$newsletter->getNewsDate();
+            $phpmail->Body = ($userObj->getNewsStatus() ) ? $newsletter->makeViewText($userObj,true,true) : $newsletter->makeViewText($userObj,false);
             
-            //Mailadressen der Instanz:
-            $allmailstring = "";
-            foreach ($phpmail->getAllRecipientAddresses() as $ema) {
-                if ($allmailstring == "") {
-                    $allmailstring = $ema[0];
-                } else {
-                    $allmailstring = $allmailstring . ';' . $ema[0];
-                }
-            }
-            $cont = null;
-                     
-            //Senden
+			//Senden
             if (!$phpmail->Send()) {
                 echo "cannot send!";
                 //$mail[$x]->Send() liefert FALSE zurück: Es ist ein Fehler aufgetreten
                 $currentTime = date('d.m.Y H:i:s');
                 //$this->model->writeToVpLog("....failure." . $phpmail->ErrorInfo . " Trying to reach " . $l->getEmail() . " " . $currentTime);
             } else {
-                echo "mail gesendet an: " . $l->getEmail() . '<br>';
+                //echo "mail gesendet an: " . $userObj->getEmail() . '<br>';
                 //Eintrag des Sendeprotokolls
                 $currentTime = date('d.m.Y H:i:s');
                 //$this->model->writeToVpLog($l->getEmail() . " " . $currentTime);
@@ -769,11 +759,11 @@ class Controller extends \Controller {
                 //$this->model->writeToVpLog("....success");
             }
                     
-                        
-            $allmailstring = null;
-            $cont = null;
+        unset($text);               
+           
         }
-        //$this->model->writeToVpLog("*****************************************************");
+        //Enter Send Date
+		$this->model->enterNewsSentDate($newsletter->getId());
     }
 	
 	    

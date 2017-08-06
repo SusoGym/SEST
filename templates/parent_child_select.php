@@ -100,13 +100,14 @@
             return;
         }
 
-        $.get("index.php" + url_param, function (myData) {
+        $.get("index.php" + url_param, function (data) {
             try {
-                if (myData.success) {
+                //var myData = JSON.parse(data);
+                if (data.success) {
                     location.reload();
                 }
                 else { // oh no! ;-;
-                    var notifications = myData['notifications'];
+                    var notifications = data.notifications; //myData['notifications'];
                     notifications.forEach(function (data) {
                         Materialize.toast(data, 4000);
                     });
