@@ -11,7 +11,8 @@ class SuperModel
      *
      * @return SuperModel
      */
-    public static function getInstance() {
+    public static function getInstance()
+    {
         return self::$instance;
     }
 
@@ -19,10 +20,19 @@ class SuperModel
     protected $connection;
 
     /**
+     * @return \Connection
+     */
+    public function getConnection()
+    {
+        return $this->connection;
+    }
+
+    /**
      * SuperModel constructor.
      * @param $configPath string path to config file
      */
-    public function __construct($configPath) {
+    public function __construct($configPath)
+    {
         \Connection::$configFile = $configPath;
         $this->connection = new \Connection();
         self::$instance = $this;

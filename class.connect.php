@@ -41,6 +41,10 @@ class Connection {
      */
     private $ldap;
     /**
+     * @var string
+     */
+    private $firebaseKey;
+    /**
      * @var \mysqli database connection instance
      */
 
@@ -94,7 +98,9 @@ class Connection {
 				case "ldap":
                     $this->ldap = trim($larr[1]);
                     break;
-                
+                case "firebase_key":
+                    $this->firebaseKey = trim($larr[1]);
+                    break;
                 
             }
         }
@@ -108,7 +114,7 @@ class Connection {
      * @return array(string)
      */
     public function getIniParams() {
-        return array("download" => $this->download, "basepath" => $this->basepath, "icsfile" => $this->icsfile, "ldap"=> $this->ldap);  // could be much more versatile
+        return array("download" => $this->download, "basepath" => $this->basepath, "icsfile" => $this->icsfile, "ldap"=> $this->ldap, "firebase_key" => $this->firebaseKey);  // could be much more versatile
     }
     
     

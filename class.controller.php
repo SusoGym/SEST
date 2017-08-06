@@ -677,7 +677,7 @@ class Controller {
             }
             
             
-            $data = array("coverlessons" => $lessons, "user" => $usr);
+            $data = array( "user" => $usr, "coverlessons" => $lessons);
             
             header('Content-Type: application/json');
             die(json_encode($data, JSON_PRETTY_PRINT));

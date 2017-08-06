@@ -7,7 +7,7 @@ $SQL_DEBUG = false || isset($input['sqldebug']);
 /* Debug Classes */
 require "ChromePhp.php"; // debugging
 /* Utility Classes */
-require "class.utility.php";
+require "base/class.superutility.php";
 require "class.user.php";
 /* Functional Classes */
 require "class.connect.php";
