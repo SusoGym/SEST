@@ -135,7 +135,7 @@ class Newsletter{
 		$dmt = $datearr[1];
 		$dd	= $datearr[0];
 		$publishdate = $dyr.$dmt.$dd;
-		($dmt > 8) ? $schoolYear = $dyr."/".($dyr+1) : $schoolYear = ($dyr-1)."/".$dyr;
+		($dmt > 7) ? $schoolYear = $dyr."/".($dyr+1) : $schoolYear = ($dyr-1)."/".$dyr;
 		$this->setNewsDate($publishdate);
 		//trimming whitespaces
 		$newstext = trim($newstext);
@@ -167,9 +167,9 @@ class Newsletter{
 	* @param bool html 
 	* @return String
 	*/
-	public function	makeViewText($user,$html = true) {
+	public function	makeViewText($user,$html = true,$send = false) {
 	if ($html) {
-		$text = Model::makeHTMLNewsletter($this,$user);
+		$text = Model::makeHTMLNewsletter($this,$user, $send);
 		}
 	else {
 		$text = Model::makePlainTextNewsletter($this);
