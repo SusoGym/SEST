@@ -107,6 +107,7 @@ class SuperController extends SuperUtility
 
     /**
      * Creates response for missing arguments
+     * @param  $names array[string]
      */
     protected function missingArgs(...$names) {
         $this->code = 400;

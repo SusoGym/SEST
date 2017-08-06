@@ -1,0 +1,3 @@
+CREATE TABLE fcm_registration(id INT AUTO_INCREMENT PRIMARY KEY, userId int, userType int, fcm_token VARCHAR(700) UNIQUE, verification_client VARCHAR(26), verification_server VARCHAR(26));
+CREATE TABLE fcm_deletion(id INT AUTO_INCREMENT PRIMARY KEY, fcm_token VARCHAR(700) UNIQUE, verification_client VARCHAR(26), verification_server VARCHAR(26));
+CREATE TABLE fcm_token (id int PRIMARY KEY ,userId int, userType int,  token varchar(700));
