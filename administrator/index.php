@@ -8,7 +8,7 @@ const SQL_DEBUG = false;
 
 
 require "../ChromePhp.php"; // debugging
-require "../class.utility.php";
+require "../base/class.superutility.php";
 require "../class.user.php";
 require "../class.connect.php";
 require "../class.controller.php";
