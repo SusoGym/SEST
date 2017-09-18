@@ -658,7 +658,8 @@ class Controller {
         if (isset($this->input['console'])) {
             
             $lessons = array();
-            
+
+            try{
             foreach ($this->infoToView['VP_coverLessons'] as $date => $data) {
                 
                 $coverLessonsThisDay = array();
@@ -674,6 +675,10 @@ class Controller {
                 $lessons[$date] = $coverLessonsThisDay;
                 
                 
+            }
+            } catch (Exception $e)
+            {
+                ChromePhp::error("Exception while trying to put coverLessons into array: " . $e->getMessage());
             }
             
             

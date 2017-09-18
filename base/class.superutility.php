@@ -32,7 +32,8 @@ class SuperUtility
      */
     static function handleDebug($data)
     {
-        $enable = true;
+        $enableData = self::getIgnoreCaseOrNull($data, "debug");
+        $enable = $enableData == null ? isset($data['debug']): $enableData;
         \ChromePhp::setEnabled($enable);
         \ChromePhp::setSQLDebug($enable);
         ini_set("display_errors", true);
@@ -43,7 +44,7 @@ class SuperUtility
     /**
      * Sets Custom Exception Handler
      *
-     * @param $data User Input
+     * @param $data array Input
      */
     static function setExceptionHandler($data)
     {
@@ -165,30 +166,6 @@ class SuperUtility
         $result = substr($result, 1, $length); // but why????
 
         return $result == "true";
-    }
-
-    /** Generates Auth-Token for specified login-data
-     *
-     * @param $username
-     * @param $pwd
-     *
-     * @return string|null auth-token | null if invalid login-data
-     */
-    static function generateAuthToken($username, $pwd)
-    {
-
-        if (!self::verifyLogin($username, $pwd))
-            return null;
-
-        $user = Model::getInstance()->getUserByName($username);
-
-        if ($user == null) {
-            $user = Model::getInstance()->createUserByName($username);
-        }
-
-        $authToken = Model::getInstance()->getToken($user->getId());
-
-        return $authToken;
     }
 }
 
