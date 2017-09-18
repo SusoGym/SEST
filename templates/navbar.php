@@ -88,7 +88,7 @@ if ($news) {
 
 if ($userObj != null) {
     if ($blog) {
-        array_push($modules, array("id" => "blog", "href" => "/blog", "title" => "Blog", "icon" => "library_books"));
+        array_push($modules, array("id" => "blog", "href" => "/blog", "title" => "Blog", "icon" => "sms", "inner" => "Blog", "external" => true));
     }
 }
 foreach ($modules as $module) {
@@ -97,6 +97,7 @@ foreach ($modules as $module) {
     $title = $module['title'];
     $icon = $module['icon'];
     $inner = (isset($module['inner'])) ? $module['inner'] : $title;
+    $external = isset($module['external']) ? $module['external'] : false;
     
     ?>
  <li>
@@ -105,7 +106,10 @@ foreach ($modules as $module) {
    <i class="material-icons left">
        <?php echo $icon ?>
    </i>
-      <?php echo $inner ?>
+      <?php echo $inner;
+      if($external){
+       echo " <i class='material-icons right hide-on-large-only' style=''>open_in_new</i> <sup><i class='material-icons right hide-on-med-and-down' style='font-size:10px;margin-left:3px;margin-top:-5px;'>open_in_new</i></sup>";
+      }?>
   </a>
  </li>
     <?php

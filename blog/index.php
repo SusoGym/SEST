@@ -4,6 +4,7 @@
 use base\SuperUtility;
 
 require("../base/dependencies.php");
+require("class.dependencies.php");
 require("class.post.php");
 require("class.model.php");
 require("class.user.php");

@@ -45,33 +45,8 @@
   </style>
 </head>
 <body class="grey lighten-2" id="body" style="height: 100.06vh;">
-  <nav>
-    <div class="nav-wrapper teal">
-      <span class="brand-logo center">Suso-Blog</span>
-      <a href="#" data-activates="slide-out" class="button-collapse">
-        <i class="material-icons">menu</i>
-      </a>
-      <ul class="right hide-on-med-and-down">
-        <li class="loginbtn hidden">
-          <a href="#login"><span>Login</span><i class="material-icons right">person</i></a>
-        </li>
-        <li class="logoutbtn hidden">
-          <a href="javascript:void(0);" onclick="logout();"><span>Logout</span><i class="material-icons right">power_settings_new</i></a>
-        </li>
-      </ul>
-    </div>
-    <ul id="slide-out" class="side-nav" style="z-index:999;">
-      <li>
-        <img class="logo-mobile" src="../assets/logo.png" alt="Logo">
-      </li>
-      <li class="loginbtn hidden">
-        <a href="#login"><span>Login</span><i class="material-icons left">person</i></a>
-      </li>
-      <li class="logoutbtn hidden">
-        <a href="javascript:void(0);" onclick="logout();"><span>Logout</span><i class="material-icons left">power_settings_new</i></a>
-      </li>
-    </ul>
-  </nav>
+
+ <div class="navbar"></div>
 
   <div id="login" class="modal">
     <div class="modal-content">
@@ -199,12 +174,12 @@
       window.location = "./";
     <?php endif; ?>
 
+    loadNavbar();
     authenticate();
     fetchPosts();
     $('#entry').hide();
     $('#newdate').hide();
     $('[permission]').hide();
-    $(".button-collapse").sideNav();
     $('.modal').modal();
     $('#switchHTML').change(switchHTML);
     $('.collapsible').collapsible();
@@ -343,7 +318,6 @@
         var arr = txt.match(/(<iframe.*?<\/iframe>)/g);
 
         var replaced = [];
-        console.info(arr);
 
         if(typeof arr !== 'undefined' && arr != null)
         { // we have an iFrame! yay
@@ -352,7 +326,6 @@
                 if($.inArray(element, replaced) !== -1)
                     return;
 
-                console.info(element);
                 replaced.push(element);
 
                txt = txt.replaceAll(element, "<div class='embed-container'>" + element +"</div>");
@@ -371,7 +344,6 @@
         auth = Cookies.getJSON('auth');
         loggedin = true;
 
-        manageElements();
       } else {
         $.post('', {'console': '', 'action': 'createTokenFromSession'}, function(data){
           if (data.code === 200) {
@@ -381,9 +353,9 @@
             Cookies.set('auth', auth, {expire: expire, path: ''});
             loggedin = true;
           }
-          manageElements();
         });
       }
+        manageElements();
     }
 
     function login() {
@@ -445,8 +417,7 @@
           $.post('', {'console': '', 'action': 'getUserInfo', 'auth_token': token}, function(data){
             if (data.code === 200) {
               $('.loginbtn').hide();
-              $('.logoutbtn').show();
-              $('.logoutbtn').text(data.username);
+              $('.logoutbtn').show().text(data.username);
               userperm = data.payload.permission;
               var string = userperm.toString(2);
               while (string.length < permissions.filter(Boolean).length) {
@@ -490,6 +461,12 @@
       g = d.getSeconds();
       if(g < 10){ g = '0'+g;}
       return a+'-'+b+'-'+c+' '+e+':'+f+':'+g;
+    }
+    
+    function loadNavbar() {
+        $(".navbar").load("templates/navbar.php", function () {
+            $(".button-collapse").sideNav();
+        });
     }
     </script>
   </body>

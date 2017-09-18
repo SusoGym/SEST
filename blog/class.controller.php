@@ -201,7 +201,7 @@ class Controller extends SuperController {
         $username = $_SESSION['user']['mail'];
         $pwd = $_SESSION['user']['pwd'];
 
-        $token = SuperUtility::generateAuthToken($username, $pwd);
+        $token = Utility::generateAuthToken($username, $pwd);
 
         if ($token == null) {
             $this->code = 401;
@@ -225,7 +225,7 @@ class Controller extends SuperController {
     protected function createToken() {
         $param = $this->handleParameters("username", "password");
 
-        $token = SuperUtility::generateAuthToken($param['username'], $param['password']);
+        $token = Utility::generateAuthToken($param['username'], $param['password']);
 
         if ($token == null) {
             $this->code = 401;
