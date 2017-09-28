@@ -49,7 +49,7 @@ class Termin {
                 //Endzeit angegeben
                 $this->start = $this->start . $this->makeTime($data[5]);
                 $this->ende = $this->ende . $this->makeTime($data[7]);
-            } elseif ($data[5]) {
+            } else if ($data[5]) {
                 //nur Startzeit angegeben
                 $this->start = $this->start . $this->makeTime($data[5]);
                 $this->ende = $this->ende . $this->makeTime($data[5]);
@@ -152,6 +152,7 @@ class Termin {
      *Datumsformat in DD.MM.YYY Format anpassen
      *
      * @param string Datum im YYYYMMDD Format
+     *
      * @return String
      */
     private function reverseDate($datum) {
@@ -164,6 +165,7 @@ class Termin {
      *zeitformat anpassen
      *
      * @param $time string
+     *
      * @return String
      */
     private function makeTime($time) {
@@ -180,6 +182,7 @@ class Termin {
      *Zeitformat in hh:mm
      *
      * @param string Zeit im hhmmss Format
+     *
      * @return String
      */
     private function reverseTime($time) {
@@ -191,6 +194,7 @@ class Termin {
      *ermittelt den Wochentag anhand eines Datumsformat
      *
      * @param String Datum im Format YYYMMDD
+     *
      * @return String
      */
     private function getWeekday($datum) {

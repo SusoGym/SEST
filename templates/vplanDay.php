@@ -41,8 +41,8 @@
                 <?php echo $blockedRooms; ?>
             </p>
         <?php } ?>
-
-
+        
+        
         <ul class="collection">
             <?php if ($coverLessons != null):
                 
@@ -66,17 +66,17 @@
                         <tr>
                             <th>Stunde</th>'
                             . ($showClass ? '<th>Klasse</th>' : '') .
-							( ($user instanceOf Teacher) ? '
+                            (($user instanceOf Teacher) ? '
 							<th>Lehrer</th>
                             <th>Fach</th>
-                            <th>Raum</th>' : '').
+                            <th>Raum</th>' : '') .
                             ($showDetails ? '
                                 <th>statt Lehrer:</th>
                                 <th>statt Fach:</th>' : '') .
-						    ( ($user instanceOf Teacher) ? '':		
-                            '<th>Lehrer</th>
+                            (($user instanceOf Teacher) ? '' :
+                                '<th>Lehrer</th>
                             <th>Fach</th>
-                            <th>Raum</th>').
+                            <th>Raum</th>') .
                             '<th>Kommentar</th>
                         </tr>
                         </thead>
@@ -100,12 +100,12 @@
                     
                     if ($showClass)
                         $desktop .= "<td>$classes</td>";
-                    if ($user instanceOf Teacher) 
-						$desktop .=  "<td>$subTeacher</td><td>$subSubject</td><td>$subRoom</td>";
+                    if ($user instanceOf Teacher)
+                        $desktop .= "<td>$subTeacher</td><td>$subSubject</td><td>$subRoom</td>";
                     if ($showDetails)
                         $desktop .= "<td>$orgTeacher</td><td>$orgSubject</td>";
-                    if (!($user instanceOf Teacher) )
-						$desktop .= "<td>$subTeacher</td><td>$subSubject</td><td>$subRoom</td>";
+                    if (!($user instanceOf Teacher))
+                        $desktop .= "<td>$subTeacher</td><td>$subSubject</td><td>$subRoom</td>";
                     $desktop .= "<td>$comment</td>";
                     
                     
@@ -120,7 +120,7 @@
                 echo $desktop;
                 
                 ?>
-
+                
                 <table id="mobilevptable" class="responsive-table hide-on-med-and-up">
                     <thead>
                     <tr>
@@ -133,7 +133,7 @@
                     <tbody>
                     
                     <?php if ($showClass): ?>
-
+                        
                         <tr>
                             <th>Klasse</th>
                             <?php foreach ($coverLessons as $lesson): ?>
@@ -164,7 +164,7 @@
                             <?php endforeach; ?>
                         </tr>
                     <?php endif; ?>
-
+                    
                     <tr>
                         <th>Fach</th>
                         <?php foreach ($coverLessons as $lesson): ?>
@@ -181,8 +181,8 @@
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </tr>
-
-
+                    
+                    
                     <tr>
                         <th>Raum</th>
                         <?php foreach ($coverLessons as $lesson): ?>

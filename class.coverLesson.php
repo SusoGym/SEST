@@ -101,6 +101,7 @@ class CoverLesson {
      * Formatierung der Daten (f�hrende Null bei Klassennamen, Leerzeichen entfernen etc)
      *
      * @param String
+     *
      * @return String
      */
     private function trimClassString($clStrg) {

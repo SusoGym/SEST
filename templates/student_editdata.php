@@ -9,7 +9,7 @@ include("header.php");
 ?>
 
 <div class="container">
-
+    
     <div class="card">
         <div class="card-content">
              <span class="card-title">
@@ -19,7 +19,7 @@ include("header.php");
                  Nutzereinstellungen aktualisieren:
 				</span>
             <?php if ($user->getClass() == "11" || $user->getClass() == "12"): ?>
-
+                
                 <form onsubmit="submitForm()" action="javascript:void(0);" autocomplete="off">
                     <div class="rw">
                         <div class="input-field">
@@ -28,11 +28,11 @@ include("header.php");
                                    value="<?php echo $user->getCourses(); ?>">
                         </div>
                     </div>
-                        <div class="input-field right-align">
-                            <button class="btn waves-effect waves-light" type="submit">Update
-                                <i class="material-icons right">loop</i>
-                            </button>
-                        </div>
+                    <div class="input-field right-align">
+                        <button class="btn waves-effect waves-light" type="submit">Update
+                            <i class="material-icons right">loop</i>
+                        </button>
+                    </div>
                 </form>
             <?php endif; ?>
         </div>
@@ -67,7 +67,7 @@ include("header.php");
                     notifications.forEach(function (data) {
                         Materialize.toast(data, 4000);
                     });
-                    
+
                 }
             } catch (e) {
                 Materialize.toast('Interner Server Fehler!');

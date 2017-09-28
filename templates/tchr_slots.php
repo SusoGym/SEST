@@ -13,7 +13,7 @@ if ($today > $data['assign_end']) {
 
 ?>
 <div class="container">
-
+    
     <div class="card ">
         <div class="card-content ">
             <span class="card-title"><?php echo $data['card_title']; ?></span>
@@ -95,8 +95,8 @@ if ($today > $data['assign_end']) {
                         </li>
                     
                     <?php } ?>
-
-
+                
+                
                 </ul>
             </div>
         </div>

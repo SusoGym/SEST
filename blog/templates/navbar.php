@@ -14,7 +14,8 @@
         </ul>
         <ul class="left hide-on-med-and-down">
             <li>
-                <a id="home" href=".." title="Home" class="waves-effect"><i class="material-icons left">home</i> <font style="font-size: 24px">Suso-Intern</font></a>
+                <a id="home" href=".." title="Home" class="waves-effect"><i class="material-icons left">home</i> <font
+                            style="font-size: 24px">Suso-Intern</font></a>
             </li>
         </ul>
     </div>
@@ -23,7 +24,8 @@
             <img class="logo-mobile" src="../assets/logo.png" alt="Logo">
         </li>
         <li>
-            <a id="home" href=".." title="Home" class="waves-effect"><i class="material-icons left">arrow_back</i> <font style="font-size: 24px">Suso-Intern</font></a>
+            <a id="home" href=".." title="Home" class="waves-effect"><i class="material-icons left">arrow_back</i> <font
+                        style="font-size: 24px">Suso-Intern</font></a>
         </li>
         <li class="loginbtn hidden">
             <a href="#login"><span>Login</span><i class="material-icons left">person</i></a>

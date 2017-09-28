@@ -5,7 +5,7 @@ include("header.php");
 ?>
 
 <div class="container">
-
+    
     <div class="card ">
         <div class="card-content">
             <span class="card-title">Hier können Sie Ihre Kinder auswählen: </span>
@@ -13,10 +13,14 @@ include("header.php");
                 <form action="?type=addstudent" class="row" method="post">
                     <span id="student_placeholder"></span>
                     <a onclick="addStudent();" class="btn-flat btn-large waves-effect waves-light teal-text col s12">Feld
-                        hinzufügen <i class="material-icons right large">add</i></a>
+                                                                                                                     hinzufügen
+                        <i
+                                class="material-icons right large">add</i></a>
                     <a onclick="form.submit();"
                        class="col s12  btn-large center modal-action waves-effect waves-teal btn-flat">Eingetragene
-                        Schüler hinzufügen <i class="material-icons right large">send</i></a>
+                                                                                                       Schüler
+                                                                                                       hinzufügen <i
+                                class="material-icons right large">send</i></a>
                 </form>
             </div>
         </div>
