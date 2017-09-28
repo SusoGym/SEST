@@ -1,7 +1,7 @@
 <?php
+
 namespace base;
-class SuperUtility
-{
+class SuperUtility {
 
     /**
      * @var string defines where templates are located
@@ -13,8 +13,7 @@ class SuperUtility
     /**
      * $this function will throw Exceptions instead of warnings (better to debug)
      */
-    static function enableCustomErrorHandler()
-    {
+    static function enableCustomErrorHandler() {
         set_error_handler(function ($errno, $errstr, $errfile, $errline) {
             // error was suppressed with the @-operator
             if (0 === error_reporting()) {
@@ -30,15 +29,19 @@ class SuperUtility
      *
      * @param $data array
      */
-    static function handleDebug($data)
-    {
+    static function handleDebug($data) {
         $enableData = self::getIgnoreCaseOrNull($data, "debug");
-        $enable = $enableData == null ? isset($data['debug']): $enableData;
+        $enable = $enableData == null ? isset($data['debug']) : $enableData;
+
+        $enableSQLData = self::getIgnoreCaseOrNull($data, "sqldebug");
+        $enableSQL = $enableSQLData == null ? isset($data['sqldebug']) : $enableSQLData;
+
         \ChromePhp::setEnabled($enable);
-        \ChromePhp::setSQLDebug($enable);
+        \ChromePhp::setSQLDebug($enableSQL);
         ini_set("display_errors", true);
-        if ($enable)
+        if ($enable || $enableSQL) {
             self::enableCustomErrorHandler();
+        }
     }
 
     /**
@@ -46,8 +49,7 @@ class SuperUtility
      *
      * @param $data array Input
      */
-    static function setExceptionHandler($data)
-    {
+    static function setExceptionHandler($data) {
         $json = boolval(self::getExistentAndValue($data, "console"));
 
         if (!$json || self::getExistentAndValue($data, "fullException"))
@@ -78,8 +80,7 @@ class SuperUtility
      *
      * @return mixed|null
      */
-    static function getIgnoreCaseOrNull($arr, $key)
-    {
+    static function getIgnoreCaseOrNull($arr, $key) {
         foreach ($arr as $k => $value) {
             if (strtolower($k) == strtolower($key)) {
                 return $value;
@@ -97,8 +98,7 @@ class SuperUtility
      *
      * @return bool
      */
-    static function getExistentAndValue($arr, $key)
-    {
+    static function getExistentAndValue($arr, $key) {
         return isset($arr[$key]) ? ($arr[$key] == "" ? true : $arr[$key] == "true" ? true : false) : false;
     }
 
@@ -111,8 +111,7 @@ class SuperUtility
      *
      * @return mixed
      */
-    static function getOrFallBack($arr, $key, $fallback)
-    {
+    static function getOrFallBack($arr, $key, $fallback) {
         return isset($arr[$key]) ? $arr[$key] : $fallback;
     }
 
@@ -122,8 +121,7 @@ class SuperUtility
      * @param      $template string
      * @param null $fallBack string
      */
-    static function displayTemplate($template, $fallBack = null)
-    {
+    static function displayTemplate($template, $fallBack = null) {
         $templateFile = self::$TEMPLATE_DIR . DIRECTORY_SEPARATOR . $template . '.php';
         $exists = file_exists($templateFile);
 
@@ -149,9 +147,19 @@ class SuperUtility
      *
      * @return bool correct login data
      */
-    static function verifyLogin($username, $pwd)
-    {
-        $url = "https://" . $_SERVER['HTTP_HOST'];
+    static function verifyLogin($username, $pwd) {
+        $url = "https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
+
+        $pos = strrpos($url, "/blog");
+
+        if ($pos !== false) {
+            $url = substr_replace($url, "", $pos, strlen($url));
+        } else {
+            $url = "https://" . $_SERVER['HTTP_HOST'];
+        }
+
+        $url .= "/index.php";
+
         /** @var resource $ch */
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -165,12 +173,13 @@ class SuperUtility
 
         $result = substr($result, 1, $length); // but why????
 
+        \ChromePhp::info("Checking login integrity from " . $url . "... Result is: " . $result);
+
         return $result == "true";
     }
 }
 
-abstract class Printable implements \JsonSerializable
-{
+abstract class Printable implements \JsonSerializable {
     /**
      * @return array[String=>mixed]
      */
@@ -187,8 +196,7 @@ abstract class Printable implements \JsonSerializable
      *
      * @return string
      */
-    public function __toString()
-    {
+    public function __toString() {
         return $this->getClassType() . ':' . json_encode($this->getData());
     }
 
@@ -197,8 +205,7 @@ abstract class Printable implements \JsonSerializable
      *
      * @return array
      */
-    public function jsonSerialize()
-    {
+    public function jsonSerialize() {
         return array("type" => $this->getClassType(), "data" => $this->getData());
     }
 
@@ -206,27 +213,24 @@ abstract class Printable implements \JsonSerializable
 
 /**
  * Class FireBase
+ *
  * @package base
  * More details: https://firebase.google.com/docs/cloud-messaging/http-server-ref
  */
-class FireBase
-{
+class FireBase {
 
     private static $API_ACCESS_KEY;
 
-    public static function fetchApiAccessKey()
-    {
+    public static function fetchApiAccessKey() {
         \ChromePhp::info(SuperModel::getInstance()->getConnection()->getIniParams());
         self::$API_ACCESS_KEY = SuperModel::getInstance()->getConnection()->getIniParams()['firebase_key'];
     }
 
-    public static function setApiAccessKey($apiAccessKey)
-    {
+    public static function setApiAccessKey($apiAccessKey) {
         self::$API_ACCESS_KEY = $apiAccessKey;
     }
 
-    public static function sendFireBaseRequest(FireBaseMessage $raw)
-    {
+    public static function sendFireBaseRequest(FireBaseMessage $raw) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
         curl_setopt($ch, CURLOPT_POST, true);
@@ -245,48 +249,47 @@ class FireBase
 
 }
 
-class FireBaseMessage
-{
+class FireBaseMessage {
     protected $postFields = array();
     const NORMAL = "normal";
     const HIGH = "high";
 
     /**
      * FireBaseRaw constructor.
+     *
      * @param $receiver string
      */
-    function __construct($receiver)
-    {
+    function __construct($receiver) {
         $this->postFields["to"] = $receiver;
     }
 
     /**
      * Send message
      */
-    function send()
-    {
+    function send() {
         FireBase::sendFireBaseRequest($this);
     }
 
     /**
      * @param $token string
+     *
      * @return FireBaseMessage
      */
-    public function addReceiver($token)
-    {
+    public function addReceiver($token) {
         if (!isset($this->postFields['registration_ids'])) {
             $this->postFields['registration_ids'] = array();
         }
         array_push($this->postFields['registration_ids'], $token);
+
         return $this;
     }
 
     /**
      * @param $tokens array
+     *
      * @return FireBaseMessage
      */
-    public function addReceivers(...$tokens)
-    {
+    public function addReceivers(...$tokens) {
         foreach ($tokens as $token) {
             $this->addReceiver($token);
         }
@@ -296,154 +299,166 @@ class FireBaseMessage
 
     /**
      * @param $priority string
+     *
      * @return FireBaseMessage
      */
-    public function setPriority($priority)
-    {
+    public function setPriority($priority) {
         $this->postFields['priority'] = $priority;
+
         return $this;
     }
 
     /**
-     * @param $key string
+     * @param $key   string
      * @param $value string
+     *
      * @return FireBaseMessage
      */
-    public function addData($key, $value)
-    {
+    public function addData($key, $value) {
         if (!isset($this->postFields['data'])) {
             $this->postFields['data'] = array();
         }
         $this->postFields['data'][$key] = $value;
+
         return $this;
     }
 
-    public function getPostFields()
-    {
+    public function getPostFields() {
         return $this->postFields;
     }
 }
 
-class FireBaseNotification extends FireBaseMessage
-{
+class FireBaseNotification extends FireBaseMessage {
 
     /**
      * @param $title string
+     *
      * @return FireBaseNotification
      */
-    public function setTitle($title)
-    {
+    public function setTitle($title) {
         $this->postFields['notification']['title'] = $title;
+
         return $this;
     }
 
     /**
      * @param $body string
+     *
      * @return FireBaseNotification
      */
-    public function setBody($body)
-    {
+    public function setBody($body) {
         $this->postFields['notification']['body'] = $body;
+
         return $this;
     }
 
     /**
      * @param $channelId string
+     *
      * @return FireBaseNotification
      */
-    public function setAndroidChannelId($channelId)
-    {
+    public function setAndroidChannelId($channelId) {
         $this->postFields['notification']['android_channel_id'] = $channelId;
+
         return $this;
     }
 
     /**
      * @param $icon string
+     *
      * @return FireBaseNotification
      */
-    public function setIcon($icon)
-    {
+    public function setIcon($icon) {
         $this->postFields['notification']['icon'] = $icon;
+
         return $this;
     }
 
     /**
      * @param $sound string
+     *
      * @return FireBaseNotification
      */
-    public function setSound($sound)
-    {
+    public function setSound($sound) {
         $this->postFields['notification']['sound'] = $sound;
+
         return $this;
     }
 
     /**
      * @param $tag string
+     *
      * @return FireBaseNotification
      */
-    public function setTag($tag)
-    {
+    public function setTag($tag) {
         $this->postFields['notification']['tag'] = $tag;
+
         return $this;
     }
 
     /**
      * @param $color string
+     *
      * @return FireBaseNotification
      */
-    public function setColor($color)
-    {
+    public function setColor($color) {
         $this->postFields['notification']['color'] = $color;
+
         return $this;
     }
 
     /**
      * @param $action string
+     *
      * @return FireBaseNotification
      */
-    public function setClickAction($action)
-    {
+    public function setClickAction($action) {
         $this->postFields['notification']['click_action'] = $action;
+
         return $this;
     }
 
     /**
      * @param $key string
+     *
      * @return FireBaseNotification
      */
-    public function setBodyLocKey($key)
-    {
+    public function setBodyLocKey($key) {
         $this->postFields['notification']['body_loc_key'] = $key;
+
         return $this;
     }
 
     /**
      * @param $args string
+     *
      * @return FireBaseNotification
      */
-    public function setBodyLocArgs($args)
-    {
+    public function setBodyLocArgs($args) {
         $this->postFields['notification']['body_loc_args'] = $args;
+
         return $this;
     }
 
     /**
      * @param $key string
+     *
      * @return FireBaseNotification
      */
-    public function setTitleLocKey($key)
-    {
+    public function setTitleLocKey($key) {
         $this->postFields['notification']['title_loc_key'] = $key;
+
         return $this;
     }
 
     /**
      * @param $args string
+     *
      * @return FireBaseNotification
      */
-    public function setTitleLocArgs($args)
-    {
+    public function setTitleLocArgs($args) {
         $this->postFields['notification']['title_loc_args'] = $args;
+
         return $this;
     }
 

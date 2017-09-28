@@ -157,7 +157,8 @@ class ChromePhp {
         foreach (func_get_args() as $element)
             $str .= $element;
         self::info("[SQL] $str");
-        
+
+        return self::_log(self::INFO, array_merge(array("[SQL]"), func_get_args()), true);
     }
     
     /**
@@ -258,8 +259,8 @@ class ChromePhp {
      * @param string $type
      * @return void
      */
-    protected static function _log($type, array $args) {
-        if (!self::$_enabled)
+    protected static function _log($type, array $args, $override = false) {
+        if (!self::$_enabled && !$override)
             return;
         
         // nothing passed in, don't do anything
