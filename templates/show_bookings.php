@@ -8,8 +8,8 @@
         
         
         ?>
-
-
+        
+        
         <li class="collection-header">
             <span class="teal-text" style="font-size:14px"><?php echo $anfang . " - " . $ende; ?></span>
             <span class="teal-text right"

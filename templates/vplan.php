@@ -22,9 +22,9 @@ if ($user instanceOf Teacher) {
     
     $showDetails = true;
     $showClass = true;
-} elseif ($user instanceOf StudentUser) {
+} else if ($user instanceOf StudentUser) {
     $showDetails = $user->getClass() == "11" || $user->getClass() == "12";
-} elseif ($user instanceof Guardian) {
+} else if ($user instanceof Guardian) {
     $showClass = true;
 }
 
@@ -63,7 +63,7 @@ if ($data['VP_showAll']) {
         include("vplanDay.php");
         $dayNr++;
     } ?>
-
+    
     <div class="card">
         <div class="card-content">
             <div class="center grey-text">

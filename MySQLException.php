@@ -9,7 +9,7 @@ class MySQLException extends Exception {
      * MySQLException constructor.
      *
      * @param $mysqli mysqli
-     * @param $query string
+     * @param $query  string
      */
     public function __construct($mysqli, $query) {
         $message = "Error with query \"$query\": " . $mysqli->error;
@@ -18,17 +18,15 @@ class MySQLException extends Exception {
         parent::__construct($message);
     }
     
-    public function getJson()
-    {
+    public function getJson() {
         $data = array("code" => 500, "message" => "Exception", "payload" => $this->getData());
-    
+        
         return json_encode($data, JSON_PRETTY_PRINT);
-    
+        
     }
     
     
-    public function getData()
-    {
+    public function getData() {
         return array("type" => "mysql", "query" => $this->query, "message" => $this->mysqli->error);
     }
     

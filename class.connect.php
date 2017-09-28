@@ -36,7 +36,7 @@ class Connection {
      * @var string ics filename
      */
     private $icsfile;
-	/**
+    /**
      * @var string ldap link
      */
     private $ldap;
@@ -47,7 +47,7 @@ class Connection {
     /**
      * @var \mysqli database connection instance
      */
-
+    
     private $connID;
     /**
      * @var string database name
@@ -95,7 +95,7 @@ class Connection {
                 case "ICS":
                     $this->icsfile = trim($larr[1]);
                     break;
-				case "ldap":
+                case "ldap":
                     $this->ldap = trim($larr[1]);
                     break;
                 case "firebase_key":
@@ -114,7 +114,7 @@ class Connection {
      * @return array(string)
      */
     public function getIniParams() {
-        return array("download" => $this->download, "basepath" => $this->basepath, "icsfile" => $this->icsfile, "ldap"=> $this->ldap, "firebase_key" => $this->firebaseKey);  // could be much more versatile
+        return array("download" => $this->download, "basepath" => $this->basepath, "icsfile" => $this->icsfile, "ldap" => $this->ldap, "firebase_key" => $this->firebaseKey);  // could be much more versatile
     }
     
     
@@ -144,6 +144,7 @@ class Connection {
      * universelle Methode zur Rückgabe von Abfrageergebnissen
      *
      * @param string $query SQL Abfrage
+     *
      * @return array[][] welches im ersten Index die Zeile, im Zweiten Index die Spalte bezeichnet
      *  zur Abfrage kann also jeweils im zweiten Index auf die einzelnen Ergebnisse in angegebener
      *  Reihenfolge zurückgegriffen werden
@@ -179,6 +180,7 @@ class Connection {
      * Indizes mit Feldnamen
      *
      * @param $query String SQL Query
+     *
      * @return array[Feldname][] | null
      * @throws MySQLException
      */
@@ -213,6 +215,7 @@ class Connection {
      * gibt ein Array mit den Feldnamen zurück
      *
      * @param string $query
+     *
      * @return array
      */
     public function selectFieldNames($query) {
@@ -236,6 +239,7 @@ class Connection {
      * Universelle Methode zum Einfügen von Daten
      *
      * @param string $query SQL Abfrage
+     *
      * @return int Insert ID
      * @throws MySQLException
      */
@@ -256,6 +260,7 @@ class Connection {
      * Führt eine SQL Query durch
      *
      * @param $query String SQL Query
+     *
      * @throws MySQLException
      */
     function straightQuery($query) {
@@ -273,6 +278,7 @@ class Connection {
      * Führt eine multi SQL Query durch (Statement1 ; Statement2 ; ...)
      *
      * @param $query
+     *
      * @throws MySQLException
      */
     function straightMultiQuery($query) {
@@ -308,6 +314,7 @@ class Connection {
      * Escapes special characters in a string for use in an SQL statement, taking into account the current charset of the connection
      *
      * @param $string
+     *
      * @return string
      */
     function escape_string($string) {

@@ -7,7 +7,7 @@ $user = $data['user'];
 ?>
 
 <div class="container">
-
+    
     <div class="card">
         <div class="card-content">
 			<span class="card-title">
@@ -19,8 +19,8 @@ $user = $data['user'];
 			</span>
             <div class="row"><?php echo $data["newsletter"]->makeViewText($user); ?></div>
         </div>
-
-
+    
+    
     </div>
 
 </div>

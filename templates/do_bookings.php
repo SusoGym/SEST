@@ -6,7 +6,7 @@
             (in_array($teacher->getId(), $data['bookedTeachers'])) ? $bookedThisTeacher = true : $bookedThisTeacher = false;
             $amountAvailableSlots = count($teacher->getAllBookableSlots($user->getParentId()));
             ?>
-
+            
             <li>
                 <div class="collapsible-header">
                     
@@ -19,7 +19,7 @@
                     <?php else: ?>
                         <span id="info" class="right orange-text" style="font-size: 14px">möglich</span>
                     <?php endif; ?>
-
+                    
                     <span class="left teal-text hide-on-small-only">
             <?php echo $teacher->getFullname(); ?>
           </span>
@@ -39,10 +39,10 @@
                             $students++;
                         }
                         ?>
-                        )
+            )
           </span>
-
-
+                
+                
                 </div>
                 
                 <?php if ($amountAvailableSlots != 0): ?>
@@ -84,7 +84,7 @@
                                         $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=book'";
                                     }
                                     
-                                } elseif ($slot['eid'] == $user->getParentId()) {
+                                } else if ($slot['eid'] == $user->getParentId()) {
                                     //slot is booked by oneself
                                     $symbol = "check";
                                     $text = "gebucht";
@@ -93,7 +93,7 @@
                                     $showSlot = true;
                                 }
                                 ?>
-
+                                
                                 <li class="collection-item">
                                     <div>
                     <span class="teal-text ">
@@ -118,6 +118,6 @@
         
         
         <?php endforeach; ?>
-
+    
     </ul>
 </div>

@@ -19,11 +19,11 @@ $data = array();
 $data = array_merge($data, $_SESSION, $_GET, $_POST);
 
 if (isset($data['destroy'])) {
-  session_destroy();
-  /*foreach ( $_COOKIE as $key => $value ) {
-    setcookie( $key, $value, time()-1, '/' );
-  }*/
-  // header('Location: .');
+    session_destroy();
+    /*foreach ( $_COOKIE as $key => $value ) {
+      setcookie( $key, $value, time()-1, '/' );
+    }*/
+    // header('Location: .');
 }
 
 SuperUtility::handleDebug($data);

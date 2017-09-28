@@ -1,29 +1,29 @@
 <?php
 
-    //$model = Model::getInstance();
-    $data = $this->getDataForView();
-    $students = $data['children'];
-    include("header.php");
+//$model = Model::getInstance();
+$data = $this->getDataForView();
+$students = $data['children'];
+include("header.php");
 
 ?>
 
 <div class="container">
-
+    
     <div class="card">
         <div class="card-content">
             <?php if (count($students) == 0)
-                { ?>
-                    <span class="card-title">
+            { ?>
+                <span class="card-title">
 					<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href=".">
 						 <i class="material-icons">chevron_left</i>
 					</a>
 					Bitte Kinder angeben:
 				</span>
-                    <a style="position: absolute; bottom:20px; right:20px;" class="btn-floating btn-large teal"
-                       href="#addstudent"><i class="material-icons">add</i></a>
-                <?php }
-                else
-                { ?>
+                <a style="position: absolute; bottom:20px; right:20px;" class="btn-floating btn-large teal"
+                   href="#addstudent"><i class="material-icons">add</i></a>
+            <?php }
+            else
+            { ?>
             <span class="card-title">
 					<a id="backButton" class="mdl-navigation__link waves-effect waves-light teal-text" href=".">
 						 <i class="material-icons">chevron_left</i>
@@ -41,7 +41,7 @@
                     <?php } ?>
                 </ul>
                 <?php } ?>
-
+            
             </div>
         </div>
         <div class="card-action center">
@@ -56,7 +56,9 @@
         <div class="row">
             <span id="student_placeholder"></span>
             <a onclick="addStudent();" class="btn-flat btn-large waves-effect waves-light teal-text col s12">Feld
-                hinzufügen <i class="material-icons right large">add</i></a>
+                                                                                                             hinzufügen
+                <i
+                        class="material-icons right large">add</i></a>
         </div>
         <a onclick="submitStudentForm();" class="modal-action waves-effect waves-green btn-flat right teal-text"
            style="margin-bottom: 20px;"><i class="material-icons right">send</i>Schüler hinzufügen</a>

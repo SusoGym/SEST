@@ -45,6 +45,7 @@ class View {
      *Template Dateien werden geladen
      *
      * @param $template string
+     *
      * @return void
      */
     public function loadTemplate($template) {

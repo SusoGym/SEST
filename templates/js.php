@@ -2,16 +2,15 @@
         integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script>
-
-
+    
+    
     <?php
     if (isset($data['notifications']))
-        foreach ($data['notifications'] as $not)
-        {
+        foreach ($data['notifications'] as $not) {
             echo "Materialize.toast('" . $not['msg'] . "', " . $not['time'] . ");";
             echo "console.info('Toast: " . $not['msg'] . "');";
         }
-
+    
     ?>
 
     $(document).ready(function () {

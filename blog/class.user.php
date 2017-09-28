@@ -10,7 +10,7 @@ define('PERMISSION_CHANGE_DISPLAYNAME', 64);
 define('PERMISSION_CHANGE_DISPLAYNAME_OTHER', 128);
 
 class User implements \JsonSerializable {
-
+    
     /** @var $id int */
     private $id;
     /** @var $username string */
@@ -19,9 +19,9 @@ class User implements \JsonSerializable {
     private $permission;
     /** @var $displayName string */
     private $displayName;
-
+    
     public function __construct($id, $username, $permission, $displayName) {
-
+        
         $this->id = intval($id);
         $this->username = $username;
         $this->permission = intval($permission);
@@ -29,8 +29,8 @@ class User implements \JsonSerializable {
             $this->displayName = $displayName;
         }
     }
-
-
+    
+    
     /**
      * Returns userId
      *
@@ -39,7 +39,7 @@ class User implements \JsonSerializable {
     public function getId() {
         return $this->id;
     }
-
+    
     /**
      * Returns username
      *
@@ -48,7 +48,7 @@ class User implements \JsonSerializable {
     public function getUsername() {
         return $this->username;
     }
-
+    
     /**
      * Returns permissions
      *
@@ -57,7 +57,7 @@ class User implements \JsonSerializable {
     public function getPermission() {
         return $this->permission;
     }
-
+    
     /**
      * Checks if user has specified permission
      *
@@ -68,10 +68,10 @@ class User implements \JsonSerializable {
     public function hasPermission($permission) {
         if ($permission != PERMISSION_EVERYTHING && $this->hasPermission(PERMISSION_EVERYTHING))
             return true;
-
+        
         return (($this->getPermission()) & $permission) == $permission;
     }
-
+    
     /**
      * Sets specified permission for user
      *
@@ -85,7 +85,7 @@ class User implements \JsonSerializable {
             $this->permission &= ~$permission;
         }
     }
-
+    
     /**
      * Returns displayname
      *
@@ -94,17 +94,17 @@ class User implements \JsonSerializable {
     public function getDisplayName() {
         if ($this->displayName == null)
             return $this->username;
-
+        
         return $this->displayName;
     }
-
+    
     /**
      * @param string $displayName
      */
     public function setDisplayName($displayName) {
         $this->displayName = $displayName;
     }
-
+    
     /**
      * Pushes this user object changes to the database
      *
@@ -113,7 +113,7 @@ class User implements \JsonSerializable {
     public function pushChanges() {
         return Model::getInstance()->pushUser($this);
     }
-
+    
     /**
      * Returns the content of this class as an array
      *
@@ -122,7 +122,7 @@ class User implements \JsonSerializable {
     function jsonSerialize() {
         return array("id" => $this->id, "username" => $this->username, "permission" => $this->permission, "displayName" => $this->displayName);
     }
-
+    
     public function __toString() {
         return "[User]" . json_encode($this);
     }

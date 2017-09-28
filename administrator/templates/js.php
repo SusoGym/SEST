@@ -33,9 +33,7 @@
     }
 
     function chooseForm(f) {
-        var form = f;
-        var url = "?type=setclasses&form=" + form;
-        this.document.location.href = url;
+        this.document.location.href = "?type=setclasses&form=" + f;
     }
 
 

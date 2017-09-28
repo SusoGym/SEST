@@ -9,26 +9,25 @@ $newshtml = $data['newshtml'];
 if ($newsmail) {
     $newsmailStatus1 = "checked";
     $newsmailStatus2 = null;
-	$htmlButton = null;
+    $htmlButton = null;
 } else {
     $newsmailStatus1 = null;
     $newsmailStatus2 = "checked";
-	$htmlButton = "disabled";
+    $htmlButton = "disabled";
 }
-if($newshtml) {
-	$newshtmlStatus1 = "checked";
-	$newshtmlStatus2 = null;
-	
-	}
-else {
-	$newshtmlStatus1 = null;
-	$newshtmlStatus2= "checked";
-	
-	}
+if ($newshtml) {
+    $newshtmlStatus1 = "checked";
+    $newshtmlStatus2 = null;
+    
+} else {
+    $newshtmlStatus1 = null;
+    $newshtmlStatus2 = "checked";
+    
+}
 ?>
 
 <div class="container">
-
+    
     <div class="card">
         <div class="card-content">
              <span class="card-title">
@@ -57,8 +56,8 @@ else {
                                required="required" class="validate">
                     </div>
                 </div>
-				<div class="row">
-					 <div class=" col s4 l4 m4">
+                <div class="row">
+                    <div class=" col s4 l4 m4">
                         <label for="f_newsmail">Erhalte Newsletter per Email:<br></label>
                         <input class="with-gap" name="f_newsmail" type="radio" id="radio1"
                                value="true"<?php echo $newsmailStatus1; ?> >
@@ -67,7 +66,7 @@ else {
                                value="false"<?php echo $newsmailStatus2; ?> >
                         <label for="radio2">nein</label>
                     </div>
-					<div class=" col s4 l4 m4">
+                    <div class=" col s4 l4 m4">
                         <label for="f_newshtml">Newsletter im HTML-Format:<br></label>
                         <input class="with-gap" name="f_newshtml" type="radio" id="radio3"
                                value="true"<?php echo $newshtmlStatus1; ?> >
@@ -76,7 +75,7 @@ else {
                                value="false"<?php echo $newshtmlStatus2; ?> >
                         <label for="radio4">nein</label>
                     </div>
-				</div>
+                </div>
                 <div class="row">
                     <div class="input-field col s6 l6 m6">
                         <label for="f_pwd">Neues Passwort:</label>
@@ -114,9 +113,9 @@ else {
 
 <script type="application/javascript">
     function submitForm() {
-		var newsmail = $("input:radio[name ='f_newsmail']:checked").val();
+        var newsmail = $("input:radio[name ='f_newsmail']:checked").val();
         var newshtml = $("input:radio[name ='f_newshtml']:checked").val();
-		var name = $('#f_name');
+        var name = $('#f_name');
         var surname = $('#f_surname');
         var email = $('#f_email');
         var pwd = $('#f_pwd');
@@ -124,7 +123,7 @@ else {
         var old_pwd = $('#f_pwd_old');
         var pwdV = pwd.val();
         var pwd_repV = pwd_rep.val();
-        var old_pwdV = old_pwd.val()
+        var old_pwdV = old_pwd.val();
         if (old_pwdV == "") {
             Materialize.toast("Bitte geben sie ihr altes Passwort an!");
             return;
@@ -144,9 +143,9 @@ else {
             'data[name]': name.val(),
             'data[surname]': surname.val(),
             'data[oldpwd]': old_pwd.val(),
-			'data[getnews]': newsmail,
-			'data[htmlnews]': newshtml
-		
+            'data[getnews]': newsmail,
+            'data[htmlnews]': newshtml
+
         }, function (data) {
 
             try {

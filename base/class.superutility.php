@@ -2,14 +2,14 @@
 
 namespace base;
 class SuperUtility {
-
+    
     /**
      * @var string defines where templates are located
      */
     static $TEMPLATE_DIR = "templates";
     static $DEFAULT_TEMPLATE = "main";
     static $errorless_exit = true;
-
+    
     /**
      * $this function will throw Exceptions instead of warnings (better to debug)
      */
@@ -19,11 +19,11 @@ class SuperUtility {
             if (0 === error_reporting()) {
                 return false;
             }
-
+            
             throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
         });
     }
-
+    
     /**
      * $this function will handle whether or not to print debug messages
      *
@@ -32,10 +32,10 @@ class SuperUtility {
     static function handleDebug($data) {
         $enableData = self::getIgnoreCaseOrNull($data, "debug");
         $enable = $enableData == null ? isset($data['debug']) : $enableData;
-
+        
         $enableSQLData = self::getIgnoreCaseOrNull($data, "sqldebug");
         $enableSQL = $enableSQLData == null ? isset($data['sqldebug']) : $enableSQLData;
-
+        
         \ChromePhp::setEnabled($enable);
         \ChromePhp::setSQLDebug($enableSQL);
         ini_set("display_errors", true);
@@ -43,7 +43,7 @@ class SuperUtility {
             self::enableCustomErrorHandler();
         }
     }
-
+    
     /**
      * Sets Custom Exception Handler
      *
@@ -51,27 +51,27 @@ class SuperUtility {
      */
     static function setExceptionHandler($data) {
         $json = boolval(self::getExistentAndValue($data, "console"));
-
+        
         if (!$json || self::getExistentAndValue($data, "fullException"))
             return;
-
+        
         set_exception_handler(function ($exception) {
-
+            
             /** @var $exception \Exception */
             $data = array("type" => "unknown", "message" => $exception->getMessage());
-
+            
             if ($exception instanceof \MySQLException) {
                 $data = $exception->getData();
             }
-
+            
             $data = array("code" => 500, "message" => "Uncaught exception!", "payload" => $data);
             self::$errorless_exit = false;
             die(json_encode($data, JSON_PRETTY_PRINT));
-
+            
         });
-
+        
     }
-
+    
     /**
      * Search trough array ignoring case, returns null if not existent else returns value
      *
@@ -86,10 +86,10 @@ class SuperUtility {
                 return $value;
             }
         }
-
+        
         return null;
     }
-
+    
     /**
      * Returns false if key not existent else return value in array
      *
@@ -101,7 +101,7 @@ class SuperUtility {
     static function getExistentAndValue($arr, $key) {
         return isset($arr[$key]) ? ($arr[$key] == "" ? true : $arr[$key] == "true" ? true : false) : false;
     }
-
+    
     /**
      * Return content to key in array, if not existent return fallback
      *
@@ -114,7 +114,7 @@ class SuperUtility {
     static function getOrFallBack($arr, $key, $fallback) {
         return isset($arr[$key]) ? $arr[$key] : $fallback;
     }
-
+    
     /**
      * Displays specific template, if template not existent display fallback
      *
@@ -124,22 +124,22 @@ class SuperUtility {
     static function displayTemplate($template, $fallBack = null) {
         $templateFile = self::$TEMPLATE_DIR . DIRECTORY_SEPARATOR . $template . '.php';
         $exists = file_exists($templateFile);
-
+        
         if (!$exists && $fallBack != null) {
             $templateFile = self::$TEMPLATE_DIR . DIRECTORY_SEPARATOR . $template . '.php';
             $exists = file_exists($templateFile);
         }
-
+        
         if (!$exists) {
             die("Unable to locate template '$templateFile'!");
         }
-
+        
         \ChromePhp::info("Displaying '$templateFile'");
         /** @noinspection PhpIncludeInspection */
         include($templateFile);
-
+        
     }
-
+    
     /** Verifies login-data via est-site
      *
      * @param $username
@@ -149,17 +149,17 @@ class SuperUtility {
      */
     static function verifyLogin($username, $pwd) {
         $url = "https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
-
+        
         $pos = strrpos($url, "/blog");
-
+        
         if ($pos !== false) {
             $url = substr_replace($url, "", $pos, strlen($url));
         } else {
             $url = "https://" . $_SERVER['HTTP_HOST'];
         }
-
+        
         $url .= "/index.php";
-
+        
         /** @var resource $ch */
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -167,14 +167,14 @@ class SuperUtility {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); //fixme: ssl unsafe!
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array("login[mail]" => $username, "login[password]" => $pwd, "console" => true, "type" => "login")));
-
+        
         $result = utf8_decode(curl_exec($ch));
         $length = strlen($result);
-
+        
         $result = substr($result, 1, $length); // but why????
-
+        
         \ChromePhp::info("Checking login integrity from " . $url . "... Result is: " . $result);
-
+        
         return $result == "true";
     }
 }
@@ -184,12 +184,12 @@ abstract class Printable implements \JsonSerializable {
      * @return array[String=>mixed]
      */
     public abstract function getData();
-
+    
     /**
      * @return string
      */
     public abstract function getClassType();
-
+    
     /* Functional stuff */
     /**
      * General __toString() override
@@ -199,7 +199,7 @@ abstract class Printable implements \JsonSerializable {
     public function __toString() {
         return $this->getClassType() . ':' . json_encode($this->getData());
     }
-
+    
     /**
      * General method to serialize to json
      *
@@ -208,7 +208,7 @@ abstract class Printable implements \JsonSerializable {
     public function jsonSerialize() {
         return array("type" => $this->getClassType(), "data" => $this->getData());
     }
-
+    
 }
 
 /**
@@ -218,18 +218,18 @@ abstract class Printable implements \JsonSerializable {
  * More details: https://firebase.google.com/docs/cloud-messaging/http-server-ref
  */
 class FireBase {
-
+    
     private static $API_ACCESS_KEY;
-
+    
     public static function fetchApiAccessKey() {
         \ChromePhp::info(SuperModel::getInstance()->getConnection()->getIniParams());
         self::$API_ACCESS_KEY = SuperModel::getInstance()->getConnection()->getIniParams()['firebase_key'];
     }
-
+    
     public static function setApiAccessKey($apiAccessKey) {
         self::$API_ACCESS_KEY = $apiAccessKey;
     }
-
+    
     public static function sendFireBaseRequest(FireBaseMessage $raw) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
@@ -246,14 +246,14 @@ class FireBase {
         \ChromePhp::info($result);
         curl_close($ch);
     }
-
+    
 }
 
 class FireBaseMessage {
     protected $postFields = array();
     const NORMAL = "normal";
     const HIGH = "high";
-
+    
     /**
      * FireBaseRaw constructor.
      *
@@ -262,14 +262,14 @@ class FireBaseMessage {
     function __construct($receiver) {
         $this->postFields["to"] = $receiver;
     }
-
+    
     /**
      * Send message
      */
     function send() {
         FireBase::sendFireBaseRequest($this);
     }
-
+    
     /**
      * @param $token string
      *
@@ -280,10 +280,10 @@ class FireBaseMessage {
             $this->postFields['registration_ids'] = array();
         }
         array_push($this->postFields['registration_ids'], $token);
-
+        
         return $this;
     }
-
+    
     /**
      * @param $tokens array
      *
@@ -293,10 +293,10 @@ class FireBaseMessage {
         foreach ($tokens as $token) {
             $this->addReceiver($token);
         }
-
+        
         return $this;
     }
-
+    
     /**
      * @param $priority string
      *
@@ -304,10 +304,10 @@ class FireBaseMessage {
      */
     public function setPriority($priority) {
         $this->postFields['priority'] = $priority;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $key   string
      * @param $value string
@@ -319,17 +319,17 @@ class FireBaseMessage {
             $this->postFields['data'] = array();
         }
         $this->postFields['data'][$key] = $value;
-
+        
         return $this;
     }
-
+    
     public function getPostFields() {
         return $this->postFields;
     }
 }
 
 class FireBaseNotification extends FireBaseMessage {
-
+    
     /**
      * @param $title string
      *
@@ -337,10 +337,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setTitle($title) {
         $this->postFields['notification']['title'] = $title;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $body string
      *
@@ -348,10 +348,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setBody($body) {
         $this->postFields['notification']['body'] = $body;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $channelId string
      *
@@ -359,10 +359,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setAndroidChannelId($channelId) {
         $this->postFields['notification']['android_channel_id'] = $channelId;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $icon string
      *
@@ -370,10 +370,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setIcon($icon) {
         $this->postFields['notification']['icon'] = $icon;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $sound string
      *
@@ -381,10 +381,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setSound($sound) {
         $this->postFields['notification']['sound'] = $sound;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $tag string
      *
@@ -392,10 +392,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setTag($tag) {
         $this->postFields['notification']['tag'] = $tag;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $color string
      *
@@ -403,10 +403,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setColor($color) {
         $this->postFields['notification']['color'] = $color;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $action string
      *
@@ -414,10 +414,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setClickAction($action) {
         $this->postFields['notification']['click_action'] = $action;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $key string
      *
@@ -425,10 +425,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setBodyLocKey($key) {
         $this->postFields['notification']['body_loc_key'] = $key;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $args string
      *
@@ -436,10 +436,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setBodyLocArgs($args) {
         $this->postFields['notification']['body_loc_args'] = $args;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $key string
      *
@@ -447,10 +447,10 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setTitleLocKey($key) {
         $this->postFields['notification']['title_loc_key'] = $key;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $args string
      *
@@ -458,8 +458,8 @@ class FireBaseNotification extends FireBaseMessage {
      */
     public function setTitleLocArgs($args) {
         $this->postFields['notification']['title_loc_args'] = $args;
-
+        
         return $this;
     }
-
+    
 }

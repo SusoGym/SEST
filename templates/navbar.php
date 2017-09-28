@@ -16,17 +16,17 @@ if ($userObj == null) {
     if (count($children) == 0) {
         $est = false;
         $selectionActive = false;
-		
+        
     }
     if ($est && (isset($data['est_date']) && $data['est_date'] < $today) || (isset($data['book_start']) && $data['book_start'] > $today)) {
         ChromePhp::info("No children selected by guardian or booking time expired");
         $est = false;
     }
-} elseif ($userObj instanceof Teacher) {
+} else if ($userObj instanceof Teacher) {
     if ($est && $data['est_date'] < $today && $data['assign_end'] < $today) {
         $est = false;
     }
-} elseif ($userObj instanceof StudentUser) {
+} else if ($userObj instanceof StudentUser) {
     
     $est = false;
 }
@@ -100,18 +100,18 @@ foreach ($modules as $module) {
     $external = isset($module['external']) ? $module['external'] : false;
     
     ?>
- <li>
-  <a id="<?php echo $id ?>" <?php if ($link != "") echo "href='$link'" ?> title="<?php echo $title ?>"
-     class="waves-effect">
-   <i class="material-icons left">
-       <?php echo $icon ?>
-   </i>
-      <?php echo $inner;
-      if($external){
-       echo " <i class='material-icons right hide-on-large-only' style=''>open_in_new</i> <sup><i class='material-icons right hide-on-med-and-down' style='font-size:10px;margin-left:3px;margin-top:-5px;'>open_in_new</i></sup>";
-      }?>
-  </a>
- </li>
+    <li>
+        <a id="<?php echo $id ?>" <?php if ($link != "") echo "href='$link'" ?> title="<?php echo $title ?>"
+           class="waves-effect">
+            <i class="material-icons left">
+                <?php echo $icon ?>
+            </i>
+            <?php echo $inner;
+            if ($external) {
+                echo " <i class='material-icons right hide-on-large-only' style=''>open_in_new</i> <sup><i class='material-icons right hide-on-med-and-down' style='font-size:10px;margin-left:3px;margin-top:-5px;'>open_in_new</i></sup>";
+            } ?>
+        </a>
+    </li>
     <?php
 }
 
