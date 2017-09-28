@@ -19,7 +19,10 @@ class Utility
 
         $user = Model::getInstance()->getUserByName($username);
 
+        \ChromePhp::info("Generating AuthToken for " . $user);
+
         if ($user == null) {
+            \ChromePhp::info("Creating new user as user object was null");
             $user = Model::getInstance()->createUserByName($username);
         }
 

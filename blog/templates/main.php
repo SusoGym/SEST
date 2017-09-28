@@ -111,7 +111,7 @@
         <p id="body" style="display= inline-block;"></p>
         <a id="delete" href="javascript:void(0);" onclick="deletePost();" style="position:absolute;top:60px;right:20px;" permission="PERMISSION_DELETE_POST"><i class="material-icons red-text">delete</i></a>
         <a id="edit" href="javascript:void(0);" onclick="editPost();" style="position:absolute;top:20px;right:20px;" permission="PERMISSION_EDIT_POST"><i class="material-icons amber-text">edit</i></a>
-        
+
       </div>
     </div>
 
@@ -174,16 +174,20 @@
       window.location = "./";
     <?php endif; ?>
 
-    loadNavbar();
-    authenticate();
-    fetchPosts();
-    $('#entry').hide();
-    $('#newdate').hide();
-    $('[permission]').hide();
-    $('.modal').modal();
-    $('#switchHTML').change(switchHTML);
-    $('.collapsible').collapsible();
+    loadPage();
     CKEDITOR.replace( 'edittext' );
+
+    function loadPage() {
+        loadNavbar();
+        authenticate();
+        fetchPosts();
+        $('#entry').hide();
+        $('#newdate').hide();
+        $('[permission]').hide();
+        $('.modal').modal();
+        $('#switchHTML').change(switchHTML);
+        $('.collapsible').collapsible();
+    }
 
     function fetchPosts() {
       $.get('', {'console': true, 'action': 'fetchPosts'}, function(data){
@@ -191,6 +195,11 @@
           Materialize.toast('['+data.code+'] '+data.message, 2000);
         } else {
           $('#blog-placeholder').empty();
+          if(data.payload == undefined)
+          {
+              Materialize.toast('Es wurden keine Einträge gefunden.');
+              return;
+          }
           data.payload.forEach(function(element, index, array){
             if (index == 0) {
               var lastDate = new Date(0);
@@ -222,7 +231,13 @@
 
             body = putDivAroundIframe(element.body);
 
-            $('#entry'+element.id+' #author').text(element.authorObject.displayName);
+            if(element.authorObject.displayName == null || element.authorObject.displayName == "")
+            {
+                $('#entry'+element.id+' #author').text("Unknown");
+            } else {
+                $('#entry'+element.id+' #author').text(element.authorObject.displayName);
+            }
+
             if (date.getHours()<10) {hours='0'+date.getHours();}else{hours=date.getHours();}
             if (date.getMinutes()<10) {mins='0'+date.getMinutes();}else{mins=date.getMinutes();}
             datestring = hours+':'+mins+' Uhr';
@@ -340,22 +355,28 @@
       var loggedin = false;
       var auth = {token: '', expire: new Date()};
 
+        var callback = function()
+        {
+            manageElements();
+        };
+
       if (Cookies.getJSON('auth')) {
         auth = Cookies.getJSON('auth');
         loggedin = true;
+        callback();
 
       } else {
-        $.post('', {'console': '', 'action': 'createTokenFromSession'}, function(data){
-          if (data.code === 200) {
-            auth.token = data.payload.authToken;
-            auth.expire = new Date(data.payload.expire);
-            var expire = (auth.expire.getTime() - Date.now()) / (1000*60*60*24);
-            Cookies.set('auth', auth, {expire: expire, path: ''});
-            loggedin = true;
-          }
-        });
+          $.post('', {'console': '', 'action': 'createTokenFromSession'}, function(data){
+              if (data.code === 200) {
+                  auth.token = data.payload.authToken;
+                  auth.expire = new Date(data.payload.expire);
+                  //var expire = (auth.expire.getTime() - Date.now()) / (1000*60*60*24);
+                  Cookies.set('auth', auth);
+                  loggedin = true;
+              }
+              callback();
+          });
       }
-        manageElements();
     }
 
     function login() {
@@ -379,16 +400,17 @@
           $('label[for="pwd_login"]').removeClass("active");
         }
 
-        authenticate();
+        loadPage();
       });
     }
 
     function logout() {
-      Cookies.remove('auth', {path:''});
+      Cookies.remove('auth');
       $.post("../", {'type': 'logout', 'console': ''}, function (data) {
         if (data.code == 200) {
           Materialize.toast('Erfolgreich abgemeldet!', 2000);
         } else {
+          console.error(data);
           Materialize.toast('['+data.code+'] '+data.message, 2000);
         }
 
@@ -413,7 +435,7 @@
           permissionsobj = data.payload;
           Object.keys(permissionsobj).forEach(function(val){
             permissions[permissionsobj[val]] = val;
-          })
+          });
           $.post('', {'console': '', 'action': 'getUserInfo', 'auth_token': token}, function(data){
             if (data.code === 200) {
               $('.loginbtn').hide();
@@ -462,7 +484,7 @@
       if(g < 10){ g = '0'+g;}
       return a+'-'+b+'-'+c+' '+e+':'+f+':'+g;
     }
-    
+
     function loadNavbar() {
         $(".navbar").load("templates/navbar.php", function () {
             $(".button-collapse").sideNav();
