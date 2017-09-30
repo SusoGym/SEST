@@ -21,10 +21,10 @@ require "class.newsletter.php";
 /* Settings */
 
 \ChromePhp::setEnabled($DEBUG);
+ChromePhp::setSQLDebug($SQL_DEBUG);
 
 if ($DEBUG) {
     ini_set("display_errors", true);
-    View::$DEBUG = false;
     enableCustomErrorHandler();
 }
 
