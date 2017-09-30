@@ -11,10 +11,6 @@ class View {
      */
     private static $instance;
     
-    /**
-     * @var bool
-     */
-    public static $DEBUG = false;
     
     /**
      * @return View
@@ -57,8 +53,7 @@ class View {
         $templateFile = self::$PATH . DIRECTORY_SEPARATOR . $template . '.php';
         $exists = file_exists($templateFile);
         
-        if (self::$DEBUG)
-            ChromePhp::info("Displaying 'templates/$template.php'");
+        ChromePhp::info("Displaying 'templates/$template.php'");
         
         if ($exists) {
             /** @noinspection PhpIncludeInspection */

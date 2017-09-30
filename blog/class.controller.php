@@ -306,7 +306,7 @@ class Controller extends SuperController {
      * @return array
      */
     protected function changePermission() {
-        $params = array_merge($this->handleOptionalParameters("user_auth_token", "userId", "username", "mode"), $this->handleParameters("auth_token", "permission", "value"));
+        $params = array_merge($this->handleOptionalParameters("user_auth_token", "userId", "username"), $this->handleParameters("auth_token", "permission", "value"));
         $user = null;
         if ($params['user_auth_token'] != null) {
             $user = $this->model->getUserByToken($params['user_auth_token']);
@@ -348,7 +348,7 @@ class Controller extends SuperController {
      * @return array
      */
     protected function changeDisplayName() {
-        $params = array_merge($this->handleOptionalParameters("user_auth_token", "userId", "username", "mode"), $this->handleParameters("auth_token", "displayName"));
+        $params = array_merge($this->handleOptionalParameters("user_auth_token", "userId", "username"), $this->handleParameters("auth_token", "displayName"));
         $user = null;
         if ($params['user_auth_token'] != null) {
             $user = $this->model->getUserByToken($params['user_auth_token']);
@@ -357,7 +357,7 @@ class Controller extends SuperController {
         } else if ($params['username']) {
             $user = $this->model->getUserByName($params['username']);
         } else {
-            $this->missingArgs("auth_token' or 'userId' or 'username");
+            $this->missingArgs("user_auth_token' or 'userId' or 'username");
         }
         
         $executer = $this->getTokenUser($params['auth_token']);
