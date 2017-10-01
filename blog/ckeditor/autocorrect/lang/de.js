@@ -1,0 +1,23 @@
+CKEDITOR.plugins.setLang( 'autocorrect', 'de', {
+	toolbar: 'Autokorrektur',
+	autocorrect: 'Autokorrektur',
+	disable: 'Autokorrektur deaktivieren',
+	enable: 'Autokorrektur aktivieren',
+	autocorrectNow: 'Jetzt autokorregieren',
+	options: 'Autokorrektur Einstellungen',
+	autoformat: 'Automatisch formatieren',
+	autoformatAsYouType: 'Wärend dem schreiben automatisch formatieren',
+	replaceTextAsYouType: 'Text wärend dem schreiben ersetzen',
+	replaceAsYouType: 'Wärend dem schreiben ersetzen',
+	applyAsYouType: 'Wärend dem schreiben annehmen',
+	apply: 'Annehmen',
+	replace: 'Ersetzen',
+	smartQuotesOption: '"Gerade Anführungszeichen" mit “Schlauen Anführungszeichen”',
+	formatOrdinalsOption: 'Ordnungen (1st) mit hochgestellten',
+	replaceHyphensOption: 'Bindestrich (--) mit Gedankenstrich(—)',
+	recognizeUrlsOption: 'Internet und Netzwerk Pfade mit Hyperlinks',
+	formatBulletedListsOption: 'Automatische Aufzählung',
+	formatNumberedListsOption: 'Automatisch nummerierte Liste',
+	createHorizontalRulesOption: 'Horizontale Regels',
+	replaceFractionsOption: 'Brüche (1/2) mit Bruchzeichen (½)'
+});

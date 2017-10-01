@@ -11,9 +11,7 @@
     <nav>
         <div class="nav-wrapper teal">
             <span class="brand-logo center">Suso-Blog</span>
-            <a href="#" data-activates="slide-out" class="button-collapse">
-                <i class="material-icons">menu</i>
-            </a>
+            <a href="#" data-activates="slide-out" class="button-collapse"> <i class="material-icons">menu</i> </a>
             <ul class="right hide-on-med-and-down">
                 <li class="loginbtn hidden">
                     <a href="#login"><span>Login</span><i class="material-icons right">person</i></a>
@@ -55,13 +53,11 @@
             <h4>Anmelden</h4>
             <form class="row suso-replace" action="javascript:void(0);" id="login_form">
                 <div class="input-field col l6 m6 s12">
-                    <i class="material-icons left prefix">person</i>
-                    <input id="usr_login" type="text">
+                    <i class="material-icons left prefix">person</i> <input id="usr_login" type="text">
                     <label for="usr_login">Email-Adresse / Schul-Nutzername</label>
                 </div>
                 <div class="input-field col l6 m6 s12">
-                    <i class="material-icons left prefix">vpn_key</i>
-                    <input id="pwd_login" type="password">
+                    <i class="material-icons left prefix">vpn_key</i> <input id="pwd_login" type="password">
                     <label for="pwd_login">Passwort</label>
                 </div>
                 <input type="submit" style="display: none;">
@@ -85,8 +81,7 @@
                           style="margin:0px;">
                         <div class="input-field col s12">
                             <i class="material-icons left prefix">title</i>
-                            <input id="createTitle" type="text" required>
-                            <label for="createTitle">Titel</label>
+                            <input id="createTitle" type="text" required> <label for="createTitle">Titel</label>
                         </div>
                         <div class="input-field col s12">
                             <textarea id="createText" placeholder="Text" class="materialize-textarea"></textarea>
@@ -148,8 +143,7 @@
                 <div class="row">
                     <div class="input-field col s12">
                         
-                        <i class="material-icons left prefix">title</i>
-                        <input id="editTitle" type="text">
+                        <i class="material-icons left prefix">title</i> <input id="editTitle" type="text">
                         <label for="title">Titel</label>
                     </div>
                 </div>
@@ -166,16 +160,16 @@
                 <a href="javascript:void(0);" class="modal-action modal-close waves-effect btn-flat">Abbrechen</a>
             </div>
         </div>
-        
-        <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
-        <script src="https://cdn.ckeditor.com/4.6.1/standard/ckeditor.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.4/js.cookie.min.js"></script>
-        <script src="./templates/suso.blogApiClient-1.0.js"></script>
-        <script src="./templates/susoblog.js"></script>
-        <script type="text/javascript">
-            Suso.initialize();
-            Suso.loadPage();
-        </script>
+
 </body>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.4/js.cookie.min.js"></script>
+<script src="//cdn.ckeditor.com/4.7.3/full/ckeditor.js"></script>
+<script src="./templates/suso.blogApiClient-1.0.js"></script>
+<script src="./templates/susoblog.js"></script>
+<script type="text/javascript">
+    Suso.initialize();
+    Suso.loadPage();
+</script>
 </html>

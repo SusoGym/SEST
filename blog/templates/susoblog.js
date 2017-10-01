@@ -25,10 +25,49 @@ var Suso = {
             window.location = "./";
         }
 
-        CKEDITOR.replace('editText');
-        CKEDITOR.replace('createText');
+        this._initializeCKEditor();
+    },
+    _initializeCKEditor: function () {
+        var plugins = ['videoembed', 'niftytimers', 'chart', 'autocorrect', 'autogrow', 'emojione', 'floating-tools', 'lineheight', 'wordcount'];
+        var dependencies = ['widgetselection', 'lineutils', 'widget'];
+
+        CKEDITOR.config.removePlugins = "print,newpage,preview,div,flash,forms,iframe,smiley,maximize,language";
+
+        CKEDITOR.scayt_multiLanguageMode = true;
+        CKEDITOR.config.scayt_sLang = "de_DE";
+        CKEDITOR.config.scayt_autoStartup = true;
+
+        CKEDITOR.config.niftyTimer = {widgetKey: '2e27b278-02ad-4e86-96bb-074dd2cad79c'};
+
+        var baseDir = '/blog/ckeditor/';
+
+        var pluginStr = '';
+        dependencies.forEach(function (value) {
+            var url = baseDir + value + '/';
+            CKEDITOR.plugins.addExternal(value, url, 'plugin.js');
+        });
+
+        plugins.forEach(function (value) {
+            var url = baseDir + value + '/';
+            CKEDITOR.plugins.addExternal(value, url, 'plugin.js');
+
+            if (pluginStr !== '') {
+                pluginStr += ',';
+            }
+
+            pluginStr += value;
+
+        });
+
 
         this._initializeOnClick();
+
+        CKEDITOR.replace('createText', {
+            extraPlugins: pluginStr, language: 'de'
+        });
+        CKEDITOR.replace('editText', {
+            extraPlugins: pluginStr, language: 'de'
+        });
     },
     /** Modals **/
     confirmDeleteModal: function (id) {
@@ -72,7 +111,6 @@ var Suso = {
         return txt;
     },
     loadPage: function () {
-        this._loadNavbar();
         this._checkOrCreateToken();
         this._fetchPosts();
         $('#entry').hide();
@@ -112,11 +150,6 @@ var Suso = {
             g = '0' + g;
         }
         return a + '-' + b + '-' + c + ' ' + e + ':' + f + ':' + g;
-    },
-    _loadNavbar: function () {
-        $(".navbar").load("templates/navbar.php", function () {
-            $(".button-collapse").sideNav();
-        });
     },
     _setAuthToken: function (token, expire) {
         if (token !== null && (typeof token) !== "undefined") {
@@ -175,12 +208,11 @@ var Suso = {
                 }
 
                 var date = new Date(element.releaseDate);
+                var placeHolder = $('#blog-placeholder');
                 if (lastDate.getUTCFullYear() + '-' + lastDate.getUTCMonth() + '-' + lastDate.getUTCDate() !== date.getUTCFullYear() + '-' + date.getUTCMonth() + '-' + date.getUTCDate()) {
 
                     var newdate = $('#newdate').clone();
                     newdate.attr('id', 'newdate' + element.id);
-
-                    var placeHolder = $('#blog-placeholder');
 
                     placeHolder.append(newdate);
                     $('#newdate' + element.id + ' #date').text(date.getDate() + '. ' + (date.getMonth() + 1) + '. ' + date.getFullYear() + ':');
@@ -245,7 +277,8 @@ var Suso = {
     },
     editPost: function (id) {
         var title = $('#editPost#editTitle').val();
-        var text = CKEDITOR.instances.editText.getSnapshot();
+        var text = '';
+        CKEDITOR.instances.editText.getSnapshot();
 
         SusoBlogAPI.editPost(function () {
             Materialize.toast('Post erfolgreich bearbeitet', 2000);
