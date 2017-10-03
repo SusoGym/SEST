@@ -39,15 +39,18 @@ class Model extends SuperModel {
      * @param $userId   int
      * @param $userType int
      *
-     * @return string the two verification strings
+     * @return array the two verification strings
      */
     public function requestTokenRegistration($token, $userId, $userType) {
+        
+        $this->connection->escape_stringDirect($token);
+        
         $tkn1 = uniqid() . uniqid();
         $tkn2 = uniqid() . uniqid();
         
         $this->connection->straightQuery("DELETE FROM fcm_registration WHERE fcm_token='$token'");
         
-        $query = "INSERT INTO fcm_registration(userId, userType, fcm_token, verification_client, verification_server) VALUES ($userId, $userType, '$token', '$tkn1', '$tkn2')";
+        $query = "INSERT INTO fcm_registration(userId, userType, fcm_token, verification_client, verification_server) VALUES ('$userId', '$userType', '$token', '$tkn1', '$tkn2')";
         
         $this->connection->insertValues($query);
         
@@ -65,7 +68,12 @@ class Model extends SuperModel {
      */
     public function verifyRegistration($token, $userId, $userType, $verification1, $verification2) {
         
-        $query = "SELECT * FROM fcm_registration WHERE fcm_token='$token' AND userId=$userId AND userType=$userType AND verification_client='$verification1' AND verification_server='$verification2'";
+        $this->connection->escape_stringDirect($token);
+        $this->connection->escape_stringDirect($verification1);
+        $this->connection->escape_stringDirect($verification2);
+        
+        
+        $query = "SELECT * FROM fcm_registration WHERE fcm_token='$token' AND userId='$userId' AND userType='$userType' AND verification_client='$verification1' AND verification_server='$verification2'";
         
         $request = $this->connection->selectAssociativeValues($query);
         if ($request == null) {
@@ -86,6 +94,9 @@ class Model extends SuperModel {
      * @return string the two verification strings
      */
     public function requestTokenDeletion($token) {
+        
+        $this->connection->escape_stringDirect($token);
+        
         $tkn1 = uniqid() . uniqid();
         $tkn2 = uniqid() . uniqid();
         
@@ -106,6 +117,10 @@ class Model extends SuperModel {
      * @return boolean success
      */
     public function verifyDeletion($token, $verification1, $verification2) {
+        
+        $token = self::getConnection()->escape_string($token);
+        $verification1 = self::getConnection()->escape_string($verification1);
+        $verification2 = self::getConnection()->escape_string($verification2);
         
         $query = "SELECT * FROM fcm_deletion WHERE fcm_token='$token' AND verification_client='$verification1' AND verification_server='$verification2'";
         
@@ -130,7 +145,7 @@ class Model extends SuperModel {
     public function getUserByIdAndType($userId, $userType) {
         
         $table = "";
-        $req = "id=$userId";
+        $req = "id='$userId'";
         
         switch ($userType) {
             case 3:
@@ -141,7 +156,7 @@ class Model extends SuperModel {
                 break;
             default:
                 $table = "eltern";
-                $req = "userid=$userId";
+                $req = "userid='$userId'";
                 break;
         }
         
@@ -157,7 +172,7 @@ class Model extends SuperModel {
         
         switch ($userType) {
             case 1:
-                $loginName = $this->connection->selectAssociativeValues("SELECT * FROM user WHERE id=$userId")[0]["email"];
+                $loginName = $this->connection->selectAssociativeValues("SELECT * FROM user WHERE id='$userId'")[0]["email"];
                 break;
             case 2:
                 $loginName = $data['ldapname'];
