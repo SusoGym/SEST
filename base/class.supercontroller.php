@@ -88,13 +88,13 @@ class SuperController extends SuperUtility {
             if ($reflect->isProtected()) {
                 $reflect->setAccessible(true);
                 
+                $this->action = $reflect->getName();
                 
                 if ($reflect->getNumberOfParameters() == 0) {
                     $this->responseData = $reflect->invoke($this);
                 } else {
                     $this->responseData = $reflect->invoke($this, $this->data);
                 }
-                $this->action = $reflect->getName();
                 
                 die();
             }
