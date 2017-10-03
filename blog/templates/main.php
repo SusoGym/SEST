@@ -169,6 +169,7 @@
 <script src="./templates/suso.blogApiClient-1.0.js"></script>
 <script src="./templates/susoblog.js"></script>
 <script type="text/javascript">
+    $(".button-collapse").sideNav();
     Suso.initialize();
     Suso.loadPage();
 </script>
