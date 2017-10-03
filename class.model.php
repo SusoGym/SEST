@@ -247,7 +247,7 @@ class Model {
      */
     public function getTeacherByTeacherId($tchrId, $data = null) {
         if ($data == null)
-            $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id=$tchrId");
+            $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE id='$tchrId'");
         
         if (isset($data[0]))
             $data = $data[0];
@@ -267,7 +267,7 @@ class Model {
      */
     public function getTeacherLdapNameByTeacherId($teacherId, $rawData = null) {
         if ($rawData == null)
-            $rawData = self::$connection->selectAssociativeValues("SELECT ldapname FROM lehrer WHERE id=$teacherId");
+            $rawData = self::$connection->selectAssociativeValues("SELECT ldapname FROM lehrer WHERE id='$teacherId'");
         
         if ($rawData == null)
             return null; // empty / not found
@@ -287,7 +287,7 @@ class Model {
     public function getTeacherUntisNameByTeacherId($teacherId, $rawData = null) {
         $returnData = null;
         if ($rawData == null) {
-            $data = self::$connection->selectValues("SELECT untisname FROM lehrer WHERE id=$teacherId");
+            $data = self::$connection->selectValues("SELECT untisname FROM lehrer WHERE id='$teacherId'");
             if ($data == null) {
                 $returnData = null; // empty / not found
             } else {
@@ -310,7 +310,7 @@ class Model {
     public function getTeacherShortNameByTeacherId($teacherId, $rawData = null) {
         $returnData = null;
         if (!isset($rawData["shortName"])) {
-            $data = self::$connection->selectValues("SELECT kuerzel FROM lehrer WHERE id=$teacherId");
+            $data = self::$connection->selectValues("SELECT kuerzel FROM lehrer WHERE id='$teacherId'");
             if ($data == null) {
                 $returnData = null; // empty / not found
             } else {
@@ -329,7 +329,7 @@ class Model {
      * @return int
      */
     public function getTeacherLessonAmountByTeacherId($teacherId) {
-        $data = self::$connection->selectValues("SELECT deputat FROM lehrer WHERE id=$teacherId");
+        $data = self::$connection->selectValues("SELECT deputat FROM lehrer WHERE id='$teacherId'");
         
         $lessons = $data[0][0];
         
@@ -343,6 +343,8 @@ class Model {
      * @return Teacher | null
      */
     public function getTeacherByEmailAndLdapPwd($email, $pwd) {
+        
+        $email = self::$connection->escape_string($email);
         
         $data = self::$connection->selectAssociativeValues("SELECT * FROM lehrer WHERE email='$email'");
         
@@ -363,7 +365,7 @@ class Model {
     
     
     public function getStudentUserById($id) {
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE id=$id");
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE id='$id'");
         
         if (!isset($data[0])) {
             return null;
@@ -382,6 +384,9 @@ class Model {
      * @return null|Teacher | StudentUser
      */
     public function getLdapUserByLdapNameAndPwd($ldapName, $pwd, $data = null) {
+        
+        $ldapName = self::$connection->escape_string($ldapName);
+        
         if ($data == null) {
             
             $novelData = $this->checkNovellLogin($ldapName, $pwd);
@@ -389,8 +394,12 @@ class Model {
             if (!isset($novelData->{'code'}) || !isset($novelData->{'type'}) || $novelData->{'code'} != "200" || $novelData->{'type'} != 'Teacher') {
                 ChromePhp::info(json_encode($novelData));
                 if (isset($novelData->{'type'}) && $novelData->{'type'} == "student" && $novelData->{'code'} == "200") {
-                    $query = "SELECT * FROM schueler WHERE klasse='" . $novelData->{'class'} . "' AND NAME LIKE '%" . $novelData->{'surname'} . "%' AND (";
-                    $names = explode(' ', $novelData->{'givenname'});
+                    
+                    $surname = self::$connection->escape_string($novelData->{'surname'});
+                    $givenName = self::$connection->escape_string($novelData->{'givenname'});
+                    
+                    $query = "SELECT * FROM schueler WHERE klasse='" . $novelData->{'class'} . "' AND NAME LIKE '%$surname%' AND (";
+                    $names = explode(' ', $givenName);
                     
                     for ($i = 0; $i < sizeof($names); $i++) {
                         if ($i != 0)
@@ -438,7 +447,7 @@ class Model {
      * @return bool
      */
     private function checkAssignedSlot($slotId, $teacherId) {
-        $data = self::$connection->selectvalues("SELECT slotid FROM bookable_slot WHERE slotid=$slotId AND lid=$teacherId");
+        $data = self::$connection->selectvalues("SELECT slotid FROM bookable_slot WHERE slotid='$slotId' AND lid='$teacherId'");
         if (isset($data)) {
             return true;
         } else {
@@ -483,7 +492,7 @@ class Model {
      * @param teacherId
      */
     public function deleteAssignedSlot($slotId, $teacherId) {
-        self::$connection->straightQuery("DELETE FROM bookable_slot WHERE slotid=$slotId AND lid=$teacherId");
+        self::$connection->straightQuery("DELETE FROM bookable_slot WHERE slotid='$slotId' AND lid='$teacherId'");
     }
     
     
@@ -496,7 +505,7 @@ class Model {
      */
     public function getAssignedSlots($teacher) {
         $slots = array();
-        $data = self::$connection->selectValues("SELECT slotid FROM bookable_slot WHERE lid=$teacher");
+        $data = self::$connection->selectValues("SELECT slotid FROM bookable_slot WHERE lid='$teacher'");
         if (isset($data)) {
             foreach ($data as $d) {
                 $slots[] = $d[0];
@@ -513,7 +522,7 @@ class Model {
      * @return Guardian
      */
     public function getParentByParentId($eid) {
-        $data = self::$connection->selectAssociativeValues("SELECT userid FROM eltern WHERE id=$eid");
+        $data = self::$connection->selectAssociativeValues("SELECT userid FROM eltern WHERE id='$eid'");
         if ($data == null)
             return null;
         $data = $data[0];
@@ -529,14 +538,14 @@ class Model {
      * @return int appointmentId
      */
     public function bookingAdd($slotId, $userId) {
-        return self::$connection->insertValues("UPDATE bookable_slot SET eid=$userId WHERE id=$slotId");
+        return self::$connection->insertValues("UPDATE bookable_slot SET eid='$userId' WHERE id='$slotId'");
     }
     
     /**
      * @param int $appointment
      */
     public function bookingDelete($appointment) {
-        self::$connection->straightQuery("UPDATE bookable_slot SET eid=NULL WHERE id=$appointment");
+        self::$connection->straightQuery("UPDATE bookable_slot SET eid=NULL WHERE id='$appointment'");
     }
     
     /**
@@ -546,7 +555,7 @@ class Model {
      * @return boolean
      */
     public function parentOwnsAppointment($parentId, $appointment) {
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM bookable_slot WHERE id=$appointment");
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM bookable_slot WHERE id='$appointment'");
         if (isset($data[0]))
             $data = $data[0];
         if (!isset($data) || $data['eid'] == null)
@@ -578,9 +587,9 @@ class Model {
     public function getAllBookableSlotsForParent($teacherId, $parentId) {
         $slots = array();
         $data = self::$connection->selectValues("SELECT bookable_slot.id,anfang,ende,eid,time_slot.id FROM bookable_slot,time_slot 
-			WHERE lid=$teacherId
+			WHERE lid='$teacherId'
 			AND bookable_slot.slotid=time_slot.id
-			AND (eid IS NULL OR eid=$parentId)
+			AND (eid IS NULL OR eid='$parentId')
 			ORDER BY anfang");
         if (isset($data)) {
             foreach ($data as $d) {
@@ -602,7 +611,7 @@ class Model {
         $appointments = array();
         $data = self::$connection->selectValues("SELECT time_slot.id,bookable_slot.id,bookable_slot.lid FROM time_slot,bookable_slot
 			WHERE time_slot.id=bookable_slot.slotid
-			AND bookable_slot.eid=$parentId ORDER BY anfang");
+			AND bookable_slot.eid='$parentId' ORDER BY anfang");
         if (isset($data)) {
             foreach ($data as $d) {
                 $appointments[] = array("slotId" => $d[0], "bookingId" => $d[1], "teacherId" => $d[2]);
@@ -620,7 +629,7 @@ class Model {
      * @return array(string)
      */
     public function getTaughtClasses($teacherId) {
-        $data = self::$connection->selectValues("SELECT klasse FROM unterricht WHERE lid = $teacherId ORDER BY klasse");
+        $data = self::$connection->selectValues("SELECT klasse FROM unterricht WHERE lid='$teacherId' ORDER BY klasse");
         $classes = array();
         if (isset($data)) {
             foreach ($data as $d) {
@@ -645,7 +654,7 @@ class Model {
 			WHERE time_slot.id=bookable_slot.slotid
 			AND bookable_slot.eid=eltern.id
 			AND eltern.userid=user.id
-			AND bookable_slot.lid=$teacherId ORDER BY anfang");
+			AND bookable_slot.lid='$teacherId' ORDER BY anfang");
         if (isset($data)) {
             foreach ($data as $d) {
                 $parentId = $d[2];
@@ -675,7 +684,7 @@ class Model {
         $data = self::$connection->selectValues("SELECT anfang,ende,lid 
 		FROM bookable_slot,time_slot
 		WHERE bookable_slot.slotid = time_slot.id
-		AND eid = $parentId
+		AND eid = '$parentId'
 		ORDER BY anfang");
         if (isset($data)) {
             foreach ($data as $d) {
@@ -727,6 +736,10 @@ class Model {
     public function registerParent($email, $pwd, $name, $surname) {
         
         $email = self::$connection->escape_string($email);
+        $pwd = self::$connection->escape_string($pwd);
+        $name = self::$connection->escape_string($name);
+        $surname = self::$connection->escape_string($surname);
+        
         $pwd = password_hash($pwd, PASSWORD_DEFAULT);
         
         $query = "INSERT INTO user (user_type, password_hash, email) VALUES (1,'$pwd', '$email');";
@@ -766,7 +779,7 @@ class Model {
             if ($student == null)
                 return false;
             
-            $query = "UPDATE schueler SET eid=$parentId WHERE id=$id;";
+            $query = "UPDATE schueler SET eid=$parentId WHERE id='$id';";
             self::$connection->straightQuery($query);
         }
         
@@ -781,8 +794,7 @@ class Model {
      * @returns array(string) [user => username case sensitive, type => student / teacher [, class => if student: students class]]
      * @throws Exception when error was thrown while connection to remote server or response was empty
      */
-    public
-    function checkNovellLogin($usr, $pwd) {
+    public function checkNovellLogin($usr, $pwd) {
         
         $apiUrl = self::$connection->getIniParams()["ldap"]; //used to be hard coded "https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php"; 
         
@@ -905,7 +917,7 @@ class Model {
      */
     public function changePwd($usrId, $newPwd) {
         $pwdhash = $pwd = password_hash($newPwd, PASSWORD_DEFAULT);
-        self::$connection->straightQuery("UPDATE user SET password_hash='$pwdhash' WHERE id=$usrId");
+        self::$connection->straightQuery("UPDATE user SET password_hash='$pwdhash' WHERE id='$usrId'");
     }
     
     /** Change userdata
@@ -926,14 +938,13 @@ class Model {
         $email = self::$connection->escape_string($email);
         
         
-        $check = self::$connection->selectValues("SELECT * FROM `user` WHERE email='$email' AND NOT id = $usrId");
+        $check = self::$connection->selectValues("SELECT * FROM `user` WHERE email='$email' AND NOT id='$usrId'");
         
         if (isset($check[0]))
             return false;
         
-        self::$connection->straightMultiQuery("UPDATE user SET email='$email' WHERE id=$usrId; 
-		UPDATE eltern SET vorname='$name', name='$surname'  WHERE userid=$usrId;
-		UPDATE eltern SET receive_news = $getnews, htmlnews = $htmlnews WHERE userid = $usrId");
+        self::$connection->straightMultiQuery("UPDATE user SET email='$email' WHERE id='$usrId';
+		UPDATE eltern SET vorname='$name', name='$surname', receive_news = '$getnews', htmlnews = '$htmlnews' WHERE userid='$usrId';");
         
         
         return true;
@@ -948,7 +959,7 @@ class Model {
      * @return bool
      */
     public function getTeacherVpMailStatus($id) {
-        $data = self::$connection->selectValues("SELECT receive_vpmail from lehrer WHERE id = $id");
+        $data = self::$connection->selectValues("SELECT receive_vpmail from lehrer WHERE id = '$id'");
         
         return $data[0][0];
     }
@@ -963,7 +974,7 @@ class Model {
     public function getNewsMailStatus($id, $teacher) {
         $table = ($teacher) ? "lehrer" : "eltern";
         $idfield = ($teacher) ? "id" : "userid";
-        $data = self::$connection->selectValues("SELECT receive_news from $table WHERE $idfield = $id");
+        $data = self::$connection->selectValues("SELECT receive_news from $table WHERE $idfield = '$id'");
         
         return $data[0][0];
     }
@@ -978,7 +989,7 @@ class Model {
     public function getNewsHTMLStatus($id, $teacher) {
         $table = ($teacher) ? "lehrer" : "eltern";
         $idfield = ($teacher) ? "id" : "userid";
-        $data = self::$connection->selectValues("SELECT htmlnews from $table WHERE $idfield = $id");
+        $data = self::$connection->selectValues("SELECT htmlnews from $table WHERE $idfield = '$id'");
         
         return $data[0][0];
     }
@@ -992,7 +1003,7 @@ class Model {
      * @return bool
      */
     public function getTeacherVpViewStatus($id) {
-        $data = self::$connection->selectValues("SELECT vpview_all from lehrer WHERE id = $id");
+        $data = self::$connection->selectValues("SELECT vpview_all from lehrer WHERE id = '$id'");
         
         return $data[0][0];
     }
@@ -1005,7 +1016,7 @@ class Model {
      * @return String
      */
     public function getStudentCourses($id) {
-        $data = self::$connection->selectValues("SELECT kurse from schueler WHERE id = $id");
+        $data = self::$connection->selectValues("SELECT kurse from schueler WHERE id = '$id'");
         
         return $data[0][0];
     }
@@ -1020,7 +1031,7 @@ class Model {
      * @return bool
      */
     public function updateTeacherData($usrId, $vpview, $vpmail, $newsmail, $newshtml) {
-        self::$connection->straightQuery("update lehrer set receive_vpmail = $vpmail, vpview_all = $vpview, receive_news = $newsmail, htmlnews = $newshtml WHERE  id = $usrId");
+        self::$connection->straightQuery("update lehrer set receive_vpmail = '$vpmail', vpview_all = '$vpview', receive_news = '$newsmail', htmlnews = '$newshtml' WHERE  id = '$usrId'");
         
         return true;
     }
@@ -1035,7 +1046,7 @@ class Model {
     public function updateStudentData($usrId, $courseList) {
         
         $courseList = self::$connection->escape_string($courseList);
-        self::$connection->straightQuery("update schueler set kurse = '$courseList' WHERE  id = $usrId");
+        self::$connection->straightQuery("update schueler set kurse = '$courseList' WHERE  id = '$usrId'");
         
         return true;
     }
@@ -1063,7 +1074,7 @@ class Model {
         }
         $userId = $user->getId();
         
-        self::$connection->straightQuery("INSERT INTO pwd_reset (token, uid, validuntil) VALUES ('$randomKey', $userId, NOW() + INTERVAL 24 HOUR);");
+        self::$connection->straightQuery("INSERT INTO pwd_reset (token, uid, validuntil) VALUES ('$randomKey', '$userId', NOW() + INTERVAL 24 HOUR);");
         
         $resp['key'] = $randomKey;
         
@@ -1090,7 +1101,7 @@ class Model {
             $pwd = password_hash($newPwd, PASSWORD_DEFAULT);
             $uid = $arr['uid'];
             self::$connection->straightMultiQuery(
-                "UPDATE user SET password_hash='$pwd' WHERE id=$uid;" .
+                "UPDATE user SET password_hash='$pwd' WHERE id='$uid';" .
                 "DELETE FROM pwd_reset WHERE token='$token';"
             );
         }
@@ -1270,8 +1281,8 @@ class Model {
      */
     public function getCoverLessonsByTeacher($teacher) {
         $coverLessons = array();
-        $tname = $teacher->getUntisName();
-        $tkurz = $teacher->getShortName();
+        $tname = self::$connection->escape_string($teacher->getUntisName());
+        $tkurz = self::$connection->escape_string($teacher->getShortName());
         $data = self::$connection->selectAssociativeValues("SELECT *
 		FROM vp_vpdata 
 		WHERE (vLehrer='$tname' OR eLehrer='$tkurz')
@@ -1298,7 +1309,7 @@ class Model {
     public function getCoverLessonById($id) {
         $coverLesson = null;
         $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata 
-			WHERE vnr = $id");
+			WHERE vnr = '$id'");
         if (isset($data)) {
             $coverLesson = $data[0];
         }
@@ -1321,7 +1332,7 @@ class Model {
         $classQuery = null;
         
         for ($i = 0; $i < sizeof($classes); $i++) {
-            $class = $classes[$i];
+            $class = self::$connection->escape_string($classes[$i]);
             
             $classQuery .= ($i == 0 ? " AND (" : " OR");
             $classQuery .= " klassen LIKE '%$class%'";
@@ -1371,7 +1382,7 @@ class Model {
 			AND tag<3
 			AND aktiv=true
 			AND datum='$datum'
-			AND vp_vpdata.klassen LIKE '%" . $student->getClass() . "%' 
+			AND vp_vpdata.klassen LIKE '%" . self::$connection->escape_string($student->getClass()) . "%'
 			ORDER BY datum,stunde ASC");
             if (count($data) > 0) {
                 foreach ($data as $d) {
@@ -1466,6 +1477,7 @@ class Model {
      */
     public function getTeacherDataByUntisName($untisName) {
         $tchrData = array();
+        $untisName = self::$connection->escape_string($untisName);
         $data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE untisName='$untisName'");
         if (count($data) > 0) {
             $tchrData = array("email" => $data[0][0], "id" => $data[0][1]);
@@ -1486,6 +1498,7 @@ class Model {
      */
     public function getTeacherDataByShortName($short) {
         $tchrData = array();
+        $short = self::$connection->escape_string($short);
         $data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE kuerzel='$short' ");
         if (count($data) > 0) {
             $tchrData = array("email" => $data[0][0], "id" => $data[0][1]);
@@ -1506,7 +1519,7 @@ class Model {
     public function getCoursesOfStudent($studentId) {
         //MUST be separated from student's class
         $courses = array();
-        $data = self::$connection->selectAssociativeValues("SELECT kurse FROM schueler WHERE id=$studentId"); //Query missing - new table to be created [studentID,courseName]
+        $data = self::$connection->selectAssociativeValues("SELECT kurse FROM schueler WHERE id='$studentId'"); //Query missing - new table to be created [studentID,courseName]
         if (isset($data)) {
             if (isset($data[0])) {
                 $data = $data[0];
@@ -1533,14 +1546,14 @@ class Model {
      * @param $dat
      */
     public function prepareForEntry($dat) {
-        $dArr = explode(';', $dat);
+        $dArr = explode(';', self::$connection->escape_string($dat));
         $datum = $dArr[0];
         $file = $dArr[1];
         $today = date('Ymd');
-        self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=false WHERE datum=$datum");
+        self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=false WHERE datum='$datum'");
         //Nur bei der ersten geparsten datei wird das tag feld auf Null gesetzt
         if ($file == 1) {
-            self::$connection->straightQuery("UPDATE vp_vpdata SET tag=0 WHERE datum<$datum");
+            self::$connection->straightQuery("UPDATE vp_vpdata SET tag=0 WHERE datum<'$datum'");
         }
     }
     
@@ -1550,12 +1563,12 @@ class Model {
      * @param absT String im Format YYYYMMDD;Lehrername
      */
     public function insertAbsentee($absT) {
-        $arr = explode(";", $absT);
+        $arr = explode(";", self::$connection->escape_string($absT));
         $datum = $arr[0];
         $rest = $arr[1];
         $arr = explode(",", $rest);
         //DELETE all entries for this date in order to be renewed
-        self::$connection->straightQuery("DELETE FROM vp_abwesendeLehrer WHERE datum=\"$datum\" ");
+        self::$connection->straightQuery("DELETE FROM vp_abwesendeLehrer WHERE datum='$datum' ");
         foreach ($arr as $r) {
             self::$connection->insertValues("INSERT INTO vp_abwesendeLehrer (`alNr`,`datum`,`name`) 
 				VALUES ('','$datum','$r')");
@@ -1571,11 +1584,11 @@ class Model {
      * @param bR String im Format YYYYMMDD;Raumnummer
      */
     public function insertBlockedRoom($bR) {
-        $arr = explode(";", $bR);
+        $arr = explode(";", self::$connection->escape_string($bR));
         $datum = $arr[0];
         $rest = $arr[1];
         //DELETE all entries for this date in order to be renewed
-        self::$connection->straightQuery("DELETE FROM vp_blockierteraeume WHERE datum=\"$datum\" ");
+        self::$connection->straightQuery("DELETE FROM vp_blockierteraeume WHERE datum='$datum' ");
         $arr = explode(",", $rest);
         foreach ($arr as $r) {
             self::$connection->insertValues("INSERT INTO vp_blockierteraeume (`brNr`,`datum`,`name`) 
@@ -1596,26 +1609,26 @@ class Model {
         $POSTCoverL->constructFromPOST($content);
         
         //Prüfe ob dieser Eintrag bereits vorhanden ist
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata WHERE id=\"$POSTCoverL->id\" ");
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM vp_vpdata WHERE id='$POSTCoverL->id' ");
         if (count($data) > 0) {
             $DBCoverL = new CoverLesson();
             $DBCoverL->ConstructFromDB($data[0]);
             $pk = $DBCoverL->primaryKey;
-            self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=true,tag=$POSTCoverL->tag,stand=\"$POSTCoverL->stand\" WHERE vnr=$pk");
+            self::$connection->straightQuery("UPDATE vp_vpdata SET aktiv=true,tag=$POSTCoverL->tag,stand='$POSTCoverL->stand' WHERE vnr='$pk'");
             //prüfe ob nur Kommentar geaendert ist
             if (strcmp($POSTCoverL->kommentar, $DBCoverL->kommentar) !== 0) {
                 $k = $POSTCoverL->kommentar;
                 //Komentar updaten
-                self::$connection->straightQuery("UPDATE vp_vpdata SET kommentar=\"$k\",aktiv=true,changed_entry=CURRENT_TIMESTAMP WHERE vnr=$pk");
+                self::$connection->straightQuery("UPDATE vp_vpdata SET kommentar='$k',aktiv=true,changed_entry=CURRENT_TIMESTAMP WHERE vnr='$pk'");
             }
             if ($POSTCoverL->changedEntry == 1) {
                 //update all fields except emailed - this is a change to the former version where emailed was set to 0
                 //$POSTCoverL->emailed = 0;
                 $POSTCoverL->aktiv = true;
-                self::$connection->straightQuery("UPDATE vp_vpdata SET tag=$POSTCoverL->tag,datum=\"$POSTCoverL->datum\",vlehrer=\"$POSTCoverL->vTeacher\",
-				klassen=\"$POSTCoverL->klassen\",stunde=\"$POSTCoverL->stunde\",fach=\"$POSTCoverL->vFach\",raum=\"$POSTCoverL->vRaum\",
-				eLehrer=\"$POSTCoverL->eTeacherKurz\",eFach=\"$POSTCoverL->eFach\",kommentar=\"$POSTCoverL->kommentar\",id=\"$POSTCoverL->id\",aktiv=$POSTCoverL->aktiv,
-				stand=\"$POSTCoverL->stand\",changed_entry=CURRENT_TIMESTAMP WHERE vnr=$pk");
+                self::$connection->straightQuery("UPDATE vp_vpdata SET tag=$POSTCoverL->tag,datum='$POSTCoverL->datum',vlehrer=' $POSTCoverL->vTeacher',
+				klassen='$POSTCoverL->klassen',stunde='$POSTCoverL->stunde',fach='$POSTCoverL->vFach',raum='$POSTCoverL->vRaum',
+				eLehrer='$POSTCoverL->eTeacherKurz',eFach='$POSTCoverL->eFach',kommentar='$POSTCoverL->kommentar',id='$POSTCoverL->id',aktiv=$POSTCoverL->aktiv,
+				stand='$POSTCoverL->stand',changed_entry=CURRENT_TIMESTAMP WHERE vnr=$pk");
             }
         } else {
             //Eintrag in Datenbank
@@ -1744,7 +1757,7 @@ class Model {
      * @param entry Id des CoverLesson Datensatzes
      */
     public function updateVpMailSentDate($entry) {
-        self::$connection->straightQuery("UPDATE vp_vpdata set emailed = CURRENT_TIMESTAMP WHERE vnr=$entry");
+        self::$connection->straightQuery("UPDATE vp_vpdata set emailed = CURRENT_TIMESTAMP WHERE vnr='$entry'");
     }
     
     /**
@@ -1838,7 +1851,7 @@ class Model {
      */
     public function getNewsletterData($id) {
         $data = self::$connection->selectValues("SELECT publish, text, schoolyear, lastchanged, sent
-		FROM newsletter where newsid = $id");
+		FROM newsletter where newsid = '$id'");
         
         return array("publishdate" => $data[0][0], "text" => $data[0][1], "schoolyear" => $data[0][2],
                      "lastchanged" => $data[0][3], "sent" => $data[0][4]);
@@ -1912,8 +1925,8 @@ class Model {
      * @param String schoolYear
      */
     public function UpdateNewsInDB($id, $publishdate, $newstext, $schoolyear) {
-        self::$connection->straightQuery("UPDATE newsletter SET publish=$publishdate,text=\"$newstext\",
-		schoolyear=\"$schoolyear\", lastchanged=CURRENT_TIMESTAMP WHERE newsid=$id");
+        self::$connection->straightQuery("UPDATE newsletter SET publish=$publishdate,text='$newstext',
+		schoolyear='$schoolyear', lastchanged=CURRENT_TIMESTAMP WHERE newsid='$id'");
     }
     
     /**
@@ -1922,7 +1935,7 @@ class Model {
      * @param int id
      */
     public function enterNewsSentDate($id) {
-        self::$connection->straightQuery("UPDATE newsletter SET sent=CURRENT_TIMESTAMP WHERE newsid=$id");
+        self::$connection->straightQuery("UPDATE newsletter SET sent=CURRENT_TIMESTAMP WHERE newsid='$id'");
     }
     
     /**
@@ -1945,7 +1958,7 @@ class Model {
         }
         //get Parents
         $data = self::$connection->selectValues("SELECT userid,eltern.id,htmlnews,email FROM eltern,user,schueler
-	WHERE userid = user.id 
+	WHERE userid = user.id
 	AND eltern.id = schueler.eid
 	AND receive_news = 1");
         if ($data) {

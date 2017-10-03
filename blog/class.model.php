@@ -19,6 +19,9 @@ class Model extends SuperModel {
     public function getPosts($start = null, $end = null) {
         $range = "1";
         
+        $this->connection->escape_stringDirect($start);
+        $this->connection->escape_stringDirect($end);
+        
         if ($start != null) {
             $start = "STR_TO_DATE('$start', '%Y-%m-%d %T')";
         }
@@ -72,7 +75,7 @@ class Model extends SuperModel {
         
         \ChromePhp::info("Fetching posts of id $id");
         
-        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_news WHERE id=$id");
+        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_news WHERE id='$id'");
         
         if ($result == null) {
             \ChromePhp::info("No post of id $id found!");
@@ -105,9 +108,9 @@ class Model extends SuperModel {
             $releaseDate = date("Y-m-d H:i:s", time());
         }
         
-        $userId = addslashes($post->getAuthor());
-        $subject = addslashes($post->getSubject());
-        $body = addslashes($post->getBody());
+        $userId = $post->getAuthor();
+        $subject = self::getConnection()->escape_string($post->getSubject());
+        $body = self::getConnection()->escape_string($post->getBody());
         
         $id = $this->connection->insertValues("INSERT INTO blog_news(subject, body, releasedate, author) VALUES ('$subject', '$body', TIMESTAMP('$releaseDate'), '$userId')");
         
@@ -128,11 +131,11 @@ class Model extends SuperModel {
         \ChromePhp::info("Editing post with id " . $post->getId());
         
         $id = $post->getId();
-        $subject = addslashes($post->getSubject());
-        $body = addslashes($post->getBody());
-        $author = addslashes($post->getAuthor());
-        $releaseDate = addslashes($post->getReleaseDate());
-        $this->connection->straightQuery("UPDATE blog_news SET subject='$subject', body='$body', author=$author, releasedate='$releaseDate' WHERE id=$id");
+        $subject = self::getConnection()->escape_string($post->getSubject());
+        $body = self::getConnection()->escape_string($post->getBody());
+        $author = $post->getAuthor();
+        $releaseDate = self::getConnection()->escape_string($post->getReleaseDate());
+        $this->connection->straightQuery("UPDATE blog_news SET subject='$subject', body='$body', author=$author, releasedate='$releaseDate' WHERE id='$id'");
         
         \ChromePhp::info("Successfully edited post with id " . $post->getId());
     }
@@ -146,7 +149,7 @@ class Model extends SuperModel {
         \ChromePhp::info("Deleting post with id " . $post->getId());
         
         $id = $post->getId();
-        $this->connection->straightQuery("DELETE FROM blog_news WHERE id=$id");
+        $this->connection->straightQuery("DELETE FROM blog_news WHERE id='$id'");
         
         \ChromePhp::info("Successfully deleted post with id " . $post->getId());
     }
@@ -186,7 +189,7 @@ class Model extends SuperModel {
      */
     public function getUserById($id) {
         
-        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_user WHERE id=$id");
+        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_user WHERE id='$id'");
         
         if ($result == null) {
             \ChromePhp::info("Searched for user with id $id found none");
@@ -209,6 +212,8 @@ class Model extends SuperModel {
      * @return User|null if invalid token
      */
     public function getUserByToken($token) {
+        
+        $this->connection->escape_stringDirect($token);
         
         $this->cleanTokens();
         
@@ -246,15 +251,15 @@ class Model extends SuperModel {
         $this->connection->escape_stringDirect($username);
         $this->connection->escape_stringDirect($displayName);
         
-        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_user WHERE (username='$username' OR id=$id OR displayname='$displayName');");
+        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_user WHERE (username='$username' OR id='$id' OR displayname='$displayName');");
         
         $query = "";
         
         if ($result == null) { // no user with given attributes ==> create
-            $query = "INSERT INTO blog_user(id, username, permission, displayname) VALUES ($id, '$username', $permission, '$displayName');";
+            $query = "INSERT INTO blog_user(id, username, permission, displayname) VALUES ('$id', '$username', $permission, '$displayName');";
             \ChromePhp::info("Creating new user in database " . $user);
         } else if (sizeof($result) == 1) { // one user with given attributes ==> update
-            $query = "UPDATE blog_user SET username='$username', permission=$permission, displayname='$displayName' WHERE id=$id;";
+            $query = "UPDATE blog_user SET username='$username', permission=$permission, displayname='$displayName' WHERE id='$id';";
             \ChromePhp::info("Updating existing user in database to " . $user);
         } else {
             \ChromePhp::info("Not pushing user to database as same user already exists $user");
@@ -286,7 +291,7 @@ class Model extends SuperModel {
         $this->connection->escape_stringDirect($token);
         $timestamp = date("Y-m-d H:i:s", time() + 3600 * 12); // 12h
         
-        $this->connection->straightQuery("INSERT IGNORE INTO blog_token(token, userId, expire) VALUES('$token', $userId, TIMESTAMP('$timestamp'));");
+        $this->connection->straightQuery("INSERT IGNORE INTO blog_token(token, userId, expire) VALUES('$token', '$userId', TIMESTAMP('$timestamp'));");
         
         \ChromePhp::info("Created new access token for user $userId: '$token'");
         
@@ -302,7 +307,7 @@ class Model extends SuperModel {
      */
     public function getToken($userId) {
         $this->cleanTokens();
-        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_token WHERE userId=$userId AND expire IS NOT NULL;");
+        $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_token WHERE userId='$userId' AND expire IS NOT NULL;");
         if ($result == null)
             return $this->addAuthToken($userId, null, false);
         
@@ -322,6 +327,8 @@ class Model extends SuperModel {
      */
     public function getExpirationDate($token) {
         $this->cleanTokens();
+        
+        $this->connection->escape_stringDirect($token);
         $result = $this->connection->selectAssociativeValues("SELECT * FROM blog_token WHERE token='$token' ORDER BY STR_TO_DATE(expire, '%Y-%m-%d %T');");
         if ($result == null) {
             \ChromePhp::info("Tried to get expiration date of token '$token' but it does not exist.");

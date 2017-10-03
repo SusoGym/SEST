@@ -26,6 +26,7 @@ class Model extends \Model {
      *read datafields from database
      *
      * @param bool $student
+     *
      * @return array datafield names
      */
     public function readDBFields($student) {
@@ -39,13 +40,14 @@ class Model extends \Model {
     /**
      *check if data exist in database
      *
-     * @param int $id
+     * @param int  $id
      * @param bool $student
+     *
      * @return bool existence
      */
     public function checkDBData($student, $id) {
         ($student) ? $table = "schueler" : $table = "lehrer";
-        $data = self::$connection->selectValues("SELECT id FROM $table where ASV_ID=\"$id\" ");
+        $data = self::$connection->selectValues("SELECT id FROM $table where ASV_ID='$id' ");
         if (count($data) > 0) {
             return true;
         } else {
@@ -65,16 +67,18 @@ class Model extends \Model {
         ($student) ? $table = "schueler" : $table = "lehrer";
         $string = null;
         foreach ($line as $key => $value) {
+            $key = self::$connection->escape_string($key);
+            $value = self::$connection->escape_string($value);
             $key = trim($key);
             $value = trim($value);
             $value = addslashes($value);
             if (isset($string)) {
-                $string = $string . ",$key=\"$value\" ";
+                $string = $string . ",$key='$value' ";
             } else {
-                $string = "$key=\"$value\" ";
+                $string = "$key='$value' ";
             }
         }
-        $string = $string . ",upd=1 WHERE ASV_ID=\"$id\" ";
+        $string = $string . ",upd=1 WHERE ASV_ID='$id' ";
         $string = "UPDATE $table SET " . $string;
         
         //echo $string.'<br>';
@@ -92,6 +96,8 @@ class Model extends \Model {
         $fieldstring = null;
         $valuestring = null;
         foreach ($line as $key => $value) {
+            $key = self::$connection->escape_string($key);
+            $value = self::$connection->escape_string($value);
             $key = trim($key);
             $value = trim($value);
             $value = addslashes($value);
@@ -118,6 +124,7 @@ class Model extends \Model {
      * delete unused data from DB
      *
      * @param bool $student
+     *
      * @return int amount of deletions
      */
     public function deleteDataFromDB($student) {
@@ -163,10 +170,11 @@ class Model extends \Model {
     /**
      * connect teacher with form
      *
-     * @param array(int) with teacher Ids
+     * @param        array (int) with teacher Ids
      * @param string $form class
      */
     public function setTeacherToForm($teacher, $form) {
+        $form = self::$connection->escape_string($form);
         
         $data = self::$connection->selectAssociativeValues("SELECT * FROM unterricht WHERE klasse='$form'");
         
@@ -219,12 +227,14 @@ class Model extends \Model {
      * get teachers in form
      *
      * @param string $form
+     *
      * @return array[teacherId](array(form) )
      */
     public function getTeachersOfForm($form) {
+        $form = self::$connection->escape_string($form);
         $teachersOfForm = array();
         $teachers = array();
-        $tchrs = self::$connection->selectValues("SELECT lid FROM unterricht WHERE klasse=\"$form\" ");
+        $tchrs = self::$connection->selectValues("SELECT lid FROM unterricht WHERE klasse='$form' ");
         if (count($tchrs) > 0) {
             foreach ($tchrs as $t) {
                 $teachers[] = $t[0];
@@ -246,7 +256,7 @@ class Model extends \Model {
      * @param int slotId
      */
     public function deleteSlot($id) {
-        self::$connection->straightQuery("DELETE FROM time_slot WHERE id=$id");
+        self::$connection->straightQuery("DELETE FROM time_slot WHERE id='$id'");
     }
     
     /**
@@ -289,6 +299,7 @@ class Model extends \Model {
      *create DateTime Format
      *
      * @param string
+     *
      * @return DateTime
      */
     private function makeDateTime($string) {
@@ -326,7 +337,9 @@ class Model extends \Model {
      */
     public function updateOptions($data) {
         foreach ($data as $key => $value) {
-            self::$connection->straightQuery("UPDATE options SET value =\"$value\" WHERE type=\"$key\" ");
+            $key = self::$connection->escape_string($key);
+            $value = self::$connection->escape_string($value);
+            self::$connection->straightQuery("UPDATE options SET value ='$value' WHERE type='$key' ");
         }
     }
     
@@ -357,10 +370,12 @@ class Model extends \Model {
      * Returns all users which email are starting with $startingWith
      *
      * @param string $startingWith
+     *
      * @return array
      */
     public function getUsers($startingWith) {
         $arr = array();
+        $startingWith = self::$connection->escape_string($startingWith);
         $data = self::$connection->selectAssociativeValues("SELECT email FROM user WHERE email LIKE '$startingWith%'");
         if ($data != null && !empty($data))
             foreach ($data as $d)
@@ -368,8 +383,8 @@ class Model extends \Model {
         
         return $arr;
     }
-	
-	    
+    
+    
 }
 
 
