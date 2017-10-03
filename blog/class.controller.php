@@ -57,6 +57,17 @@ class Controller extends SuperController {
     
     /**
      * / Action function \
+     * Returns the requested post
+     * @param postId int the requested post
+     * @return \blog\Post|null
+     */
+    protected function fetchPost()
+    {
+        $params = $this->handleParameters("postId");
+        return $this->model->getPost(intval($params['postId']));
+    }
+    /**
+     * / Action function \
      * Pushes new news post to database
      *
      * Permission: PERMISSION_ADD_POST
@@ -317,8 +328,10 @@ class Controller extends SuperController {
         } else {
             $this->missingArgs("user_auth_token' or 'userId' or 'username");
         }
+    
+        $executor = $this->getTokenUser($params['auth_token']);
         
-        if (!$this->getTokenUser($params['auth_token'])->hasPermission(PERMISSION_CHANGE_PERMISSION)) {
+        if (!$executor->hasPermission(PERMISSION_CHANGE_PERMISSION) && !$executor->hasPermission(PERMISSION_CHANGE_ALL_PERMISSION)) {
             $this->unauthorized();
         }
         
@@ -326,6 +339,13 @@ class Controller extends SuperController {
             
             $this->code = 404;
             $this->message = "Invalid user identifier given!";
+            die();
+        }
+        
+        if(!$executor->hasPermission(intval($params['permission'])) && !$executor->hasPermission(PERMISSION_CHANGE_ALL_PERMISSION))
+        {
+            $this->code = 401;
+            $this->message = "Executor has to have the desired permission!";
             die();
         }
         

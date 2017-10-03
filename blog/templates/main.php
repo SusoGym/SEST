@@ -73,7 +73,7 @@
     
     <div class="container" style="padding-top: 10px;">
         
-        <ul id="createPost" class="collapsible" data-collapsible="accordion" permission="PERMISSION_ADD_POST">
+        <ul id="createPost" class="collapsible" data-collapsible="accordion" permission="PERMISSION_ADD_POST PERMISSION_VIEW_EDITOR_PANEL">
             <li>
                 <div class="collapsible-header"><i class="material-icons">create</i>Beitrag verfassen</div>
                 <div class="collapsible-body white">

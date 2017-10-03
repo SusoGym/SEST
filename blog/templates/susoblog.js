@@ -31,7 +31,7 @@ var Suso = {
         var plugins = ['videoembed', 'niftytimers', 'chart', 'autocorrect', 'autogrow', 'emojione', 'floating-tools', 'lineheight', 'wordcount'];
         var dependencies = ['widgetselection', 'lineutils', 'widget'];
 
-        CKEDITOR.config.removePlugins = "print,newpage,preview,div,flash,forms,iframe,smiley,maximize,language";
+        CKEDITOR.config.removePlugins = "print,newpage,preview,div,flash,forms,smiley,maximize,language";
 
         CKEDITOR.scayt_multiLanguageMode = true;
         CKEDITOR.config.scayt_sLang = "de_DE";
@@ -63,10 +63,10 @@ var Suso = {
         this._initializeOnClick();
 
         CKEDITOR.replace('createText', {
-            extraPlugins: pluginStr, language: 'de'
+            extraPlugins: pluginStr, language: 'de', extraAllowedContent: 'br'
         });
         CKEDITOR.replace('editText', {
-            extraPlugins: pluginStr, language: 'de'
+            extraPlugins: pluginStr, language: 'de', extraAllowedContent: 'br'
         });
     },
     /** Modals **/
@@ -75,11 +75,19 @@ var Suso = {
         $('#confirmdelete').modal('open');
     },
     editModal: function (id) {
-        $('#editPost #editBtn').attr('onclick', 'Suso.editPost(' + id + ')');
-        $('#editPost #editTitle').val($('#entry' + id + ' #title').text());
-        Materialize.updateTextFields();
-        CKEDITOR.instances.editText.setData($('#entry' + id + ' #body').html());
-        $('#editPost').modal('open');
+        SusoBlogAPI.fetchPost(function (data) {
+
+            var subject = data.subject;
+            var body = data.body;
+
+            $('#editPost #editBtn').attr('onclick', 'Suso.editPost(' + id + ')');
+            $('#editPost #editTitle').val(subject);
+            CKEDITOR.instances.editText.setData(body);
+
+            $('#editPost').modal('open');
+
+            Materialize.updateTextFields();
+        }, {postId: id});
     },
     /** Utility **/
     _initializeOnClick: function () {
@@ -88,7 +96,7 @@ var Suso = {
         $('.suso-replace#createForm').attr('onSubmit', 'Suso.createPost()');
         $('.suso-replace#delete').attr('onClick', 'Suso.deletePost()');
         $('.suso-replace#edit').attr('onClick', 'Suso.editPost()');
-        $('.suso-replace#logout').attr('onClick', 'Suso.logout()')
+        $('.suso-replace#logout').attr('onClick', 'Suso.logout()');
     },
     _putDivAroundIframe: function (txt) {
 
@@ -153,8 +161,6 @@ var Suso = {
     },
     _setAuthToken: function (token, expire) {
         if (token !== null && (typeof token) !== "undefined") {
-            console.info("setting " + token);
-
             var cookie = {token: token, expire: expire};
 
             Cookies.set('auth', cookie);
@@ -366,7 +372,8 @@ var Suso = {
                         if (permKey === "PERMISSION_EVERYTHING") {
                             $('[permission]').show();
                         }
-                        $('[permission="' + permKey + '"]').show();
+                        var fields = $('[permission~="' + permKey + '"]');
+                        fields.show();
                         $('.modal').modal();
 
                     }

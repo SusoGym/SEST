@@ -1,13 +1,14 @@
 <?php namespace blog;
 
-define('PERMISSION_EVERYTHING', 1);
-define('PERMISSION_ADD_POST', 2);
-define('PERMISSION_VIEW_EDITOR_PANEL', 4);
-define('PERMISSION_DELETE_POST', 8);
-define('PERMISSION_EDIT_POST', 16);
-define('PERMISSION_CHANGE_PERMISSION', 32);
-define('PERMISSION_CHANGE_DISPLAYNAME', 64);
-define('PERMISSION_CHANGE_DISPLAYNAME_OTHER', 128);
+define('PERMISSION_EVERYTHING', 1); // all other permission
+define('PERMISSION_ADD_POST', 2); // allowed to post
+define('PERMISSION_VIEW_EDITOR_PANEL', 4); // do we need this?
+define('PERMISSION_DELETE_POST', 8); // allowed to delete post
+define('PERMISSION_EDIT_POST', 16); // allowed to edit post
+define('PERMISSION_CHANGE_PERMISSION', 32); // allowed to change permission if executor has the permission to be changed
+define('PERMISSION_CHANGE_ALL_PERMISSION', 64); // allowed to change permission even if does not have same permission
+define('PERMISSION_CHANGE_DISPLAYNAME', 128); // allowed to change own display-name
+define('PERMISSION_CHANGE_DISPLAYNAME_OTHER', 256); // allowed to change other display-name
 
 class User implements \JsonSerializable {
     

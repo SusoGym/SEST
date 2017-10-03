@@ -34,6 +34,16 @@ var SusoBlogAPI =
             }, data);
 
         },
+        /**
+         * Fetches a single post
+         * @param callback function
+         * @param data array {postId}
+         */
+        fetchPost: function (callback, data) {
+          this._doApiRequest("fetchPost", function (data) {
+              callback(data.payload);
+          }, data);
+        },
 
         /**
          * Edits an existing post
