@@ -282,6 +282,7 @@ class Connection {
      * @throws MySQLException
      */
     function straightMultiQuery($query) {
+        ChromePhp::logSQL("MultiQuery:  \"$query\" from " . $this->getCaller());
         $mysqli = $this->connID;
         $result = $mysqli->multi_query($query);
         
@@ -327,8 +328,10 @@ class Connection {
      *
      * @param $string
      */
-    function escape_stringDirect(&$string) {
-        $string = $this->escape_string($string);
+    function escape_stringDirect(&...$string) {
+        foreach ($string as &$str) {
+            $str = $this->escape_string($str);
+        }
     }
     
     /**
