@@ -936,6 +936,9 @@ class Model {
         $name = self::$connection->escape_string($name);
         $surname = self::$connection->escape_string($surname);
         $email = self::$connection->escape_string($email);
+    
+        $getnews = $getnews == "true" ? 1 : 0;
+        $htmlnews = $htmlnews == "true" ? 1 : 0;
         
         
         $check = self::$connection->selectValues("SELECT * FROM `user` WHERE email='$email' AND NOT id='$usrId'");
