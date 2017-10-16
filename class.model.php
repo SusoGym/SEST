@@ -945,10 +945,11 @@ class Model {
         
         if (isset($check[0]))
             return false;
-        
+       
+		
         self::$connection->straightMultiQuery("UPDATE user SET email='$email' WHERE id='$usrId';
 		UPDATE eltern SET vorname='$name', name='$surname', receive_news = '$getnews', htmlnews = '$htmlnews' WHERE userid='$usrId';");
-        
+
         
         return true;
     }
@@ -1030,12 +1031,18 @@ class Model {
      * @param bool $vpview
      * @param bool $vpmail
      * @param bool $newsmail
-     *
+     * @param bool $newshatml
      * @return bool
      */
     public function updateTeacherData($usrId, $vpview, $vpmail, $newsmail, $newshtml) {
-        self::$connection->straightQuery("update lehrer set receive_vpmail = '$vpmail', vpview_all = '$vpview', receive_news = '$newsmail', htmlnews = '$newshtml' WHERE  id = '$usrId'");
+        $vpview = $vpview == "true" ? 1 : 0;
+        $newshatml = $newshatml == "true" ? 1 : 0;
+		$newsmail= $newsmail == "true" ? 1 : 0;
+		$vpmail= $vpmail == "true" ? 1 : 0;
+		self::$connection->straightQuery("update lehrer set receive_vpmail = '$vpmail', vpview_all = '$vpview', receive_news = '$newsmail', htmlnews = '$newshtml' WHERE  id = '$usrId'");
         
+       
+	  
         return true;
     }
     
