@@ -77,10 +77,12 @@
 <script src="./templates/susoblog.js"></script>
 <script type="text/javascript">
     $(".button-collapse").sideNav();
-    Suso.initialize();
-    Suso.loadPage();
+
     $.get("templates/navbar.html", function (data) {
         $('nav').append(data);
-    })
+        Suso.initialize();
+        Suso.loadPage();
+    });
+    
 </script>
 </html>
