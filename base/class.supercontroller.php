@@ -66,10 +66,10 @@ class SuperController extends SuperUtility {
     /**
      * Starts the process of data processing
      */
-    public function start() {
+    public function start($template = null) {
         
         if (!$this->console) {
-            $template = self::getOrFallBack($this->data, 'template', SuperUtility::$DEFAULT_TEMPLATE);
+            $template = self::getOrFallBack($this->data, 'template', $template == null ? SuperUtility::$DEFAULT_TEMPLATE : $template);
             self::displayTemplate($template);
             
             return;

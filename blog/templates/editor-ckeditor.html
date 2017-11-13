@@ -1,0 +1,26 @@
+<ul id="createPost" class="collapsible" data-collapsible="accordion" permission="PERMISSION_ADD_POST PERMISSION_VER_EDITOR PANEL">
+    <li>
+        <div class="collapsible-header">
+            <i class="material-icons">create</i>Beitrag verfassen
+        </div>
+        <div class="collapsible-body white">
+            <form id="createForm" action="javascript:void(0);" class="row suso-replace" style="margin:0px">
+                <div class="input-field col s12">
+                    <i class="material-icons left prefix">title</i> <input id="createTitle" type="text" required>
+                    <label for="createTitle">Title</label>
+                </div>
+                <div class="input-field col s12">
+                    <textarea id="createText" placeholder="Text" class="materialize-textarea"></textarea>
+                </div>
+                <div class="right">
+                    <button type="button" class="btn teal left" style="margin:10px;" id="createDraft">
+                        <i class="material-icons right">send</i>Als Entwurf speichern
+                    </button>
+                    <button type="submit" class="btn teal right" style="margin:10px;" id="publish">
+                        <i class="material-icons right">send</i>Veröffentlichen
+                    </button>
+                </div>
+            </form>
+        </div>
+    </li>
+</ul>

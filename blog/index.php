@@ -32,4 +32,4 @@ SuperUtility::setExceptionHandler($data);
 \ChromePhp::info("Input: " . json_encode($data));
 
 $controller = new Controller($data);
-$controller->start();
+$controller->start("index.html");

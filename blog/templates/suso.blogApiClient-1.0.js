@@ -40,9 +40,9 @@ var SusoBlogAPI =
          * @param data array {postId}
          */
         fetchPost: function (callback, data) {
-          this._doApiRequest("fetchPost", function (data) {
-              callback(data.payload);
-          }, data);
+            this._doApiRequest("fetchPost", function (data) {
+                callback(data.payload);
+            }, data);
         },
 
         /**
@@ -177,6 +177,95 @@ var SusoBlogAPI =
                 callback(data.payload);
             }, data);
         },
+        /**
+         * Adds a draft save
+         * @param callback function
+         * @param data array {[subject], [body], [author], [auth_token]}
+         */
+        addDraft: function (callback, data) {
+            if (this.accessToken !== null) {
+                data.auth_token = this.accessToken;
+            }
+            this._doApiRequest("addDraft", function (data) {
+                callback(data.payload);
+            }, data);
+        },
+        /**
+         * Edits a saved draft
+         * @param callback function
+         * @param data array {draftId, [subject], [body], [author], [auth_token]}
+         */
+        editDraft: function (callback, data) {
+            if (this.accessToken !== null) {
+                data.auth_token = this.accessToken;
+            }
+            this._doApiRequest("editDraft", function (data) {
+                callback(data.payload);
+            }, data);
+        },
+        /**
+         * fetches all drafts
+         * @param callback function
+         */
+        fetchDrafts: function (callback) {
+
+            var data = {auth_token: this.accessToken};
+            this._doApiRequest("fetchDrafts", function (data) {
+                callback(data.payload);
+            }, data);
+        },
+        /**
+         * fetches a specific draft
+         * @param callback function
+         * @param data array {displayName, draftId, [auth_token]}
+         */
+        fetchDraft: function (callback, data) {
+            if (this.accessToken !== null) {
+                data.auth_token = this.accessToken;
+            }
+            this._doApiRequest("fetchDraft", function (data) {
+                callback(data.payload);
+            }, data);
+        },
+        /**
+         * Deletes a draft
+         * @param callback function
+         * @param data array {draftId, [auth_token]}
+         */
+        deleteDraft: function (callback, data) {
+            if (this.accessToken !== null) {
+                data.auth_token = this.accessToken;
+            }
+            this._doApiRequest("deleteDraft", function (data) {
+                callback(data.payload);
+            }, data);
+        },
+        /**
+         * Publishes a draft as a post
+         * @param callback function
+         * @param data array {draftId, [auth_token]}
+         */
+        publishDraft: function (callback, data) {
+            if (this.accessToken !== null) {
+                data.auth_token = this.accessToken;
+            }
+            this._doApiRequest("publishDraft", function (data) {
+                callback(data.payload);
+            }, data);
+        },
+        /**
+         * Searches the user table for a name matching a given string
+         * @param callback function
+         * @param data array {searchUsers, [auth_token]}
+         */
+        searchUsers: function (callback, data) {
+            if (this.accessToken !== null) {
+                data.auth_token = this.accessToken;
+            }
+            this._doApiRequest("searchUsers", function (data) {
+                callback(data.payload);
+            }, data);
+        },
 
 
         /** Private Methods **/
@@ -206,7 +295,14 @@ var SusoBlogAPI =
                 data: parameters
             }).done(function (data) {
                 if (data.code !== 200 && !parameters._raw) {
-                    api._handleError(data.code, data.message, "APIRequest to " + url);
+                    var payloadMsg = "";
+
+                    if(data.payload.type !== null && data.payload.message !== null)
+                    {
+                        payloadMsg = data.payload.type + ": " + data.payload.message;
+                    }
+
+                    api._handleError(data.code, data.message + (payloadMsg !== "" ? " (" + payloadMsg + ")" : ""), "APIRequest to " + url);
                 } else {
                     callback(data);
                 }
