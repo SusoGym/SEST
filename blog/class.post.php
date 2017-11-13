@@ -153,3 +153,108 @@ class Post implements \JsonSerializable {
     }
     
 }
+
+class Draft implements \JsonSerializable {
+    
+    /**
+     * @var $id      int
+     * @var $subject string
+     * @var $body    string
+     * @var $author  int
+     */
+    private $id, $subject, $body, $author;
+    
+    public function __construct($id, $subject, $body, $author) {
+        $this->id = $id;
+        $this->subject = $subject;
+        $this->body = $body;
+        $this->author = $author;
+    }
+    
+    /**
+     * @return int
+     */
+    public function getId() {
+        return $this->id;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getSubject() {
+        return $this->subject;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getBody() {
+        return $this->body;
+    }
+    
+    /**
+     * @return int
+     */
+    public function getAuthor() {
+        return $this->author;
+    }
+    
+    /**
+     * @return \blog\User
+     */
+    public function getAuthorObject() {
+        return Model::getInstance()->getUserById($this->getAuthor());
+    }
+    
+    /**
+     * @param int $author
+     */
+    public function setAuthor($author) {
+        $this->author = $author;
+    }
+    
+    /**
+     * @param string $body
+     */
+    public function setBody($body) {
+        $this->body = $body;
+    }
+    
+    /**
+     * @param int $id
+     */
+    public function setId($id) {
+        $this->id = $id;
+    }
+    
+    /**
+     * @param string $subject
+     */
+    public function setSubject($subject) {
+        $this->subject = $subject;
+    }
+    
+    public function publish()
+    {
+        Model::getInstance()->publishDraft($this);
+    }
+    
+    public function delete()
+    {
+        Model::getInstance()->deleteDraft($this);
+    }
+    
+    public function push()
+    {
+        if ($this->getId() == null) {
+            Model::getInstance()->addDraft($this);
+        } else {
+            Model::getInstance()->updateDraft($this);
+        }
+    }
+    
+    
+    public function jsonSerialize() {
+        return array("id" => $this->getId(), "subject" => $this->getSubject(), "body" => $this->getBody(), "authorId" => $this->getAuthor(), "authorObject" => $this->getAuthorObject());
+    }
+}

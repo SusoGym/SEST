@@ -9,7 +9,9 @@ define('PERMISSION_CHANGE_PERMISSION', 32); // allowed to change permission if e
 define('PERMISSION_CHANGE_ALL_PERMISSION', 64); // allowed to change permission even if does not have same permission
 define('PERMISSION_CHANGE_DISPLAYNAME', 128); // allowed to change own display-name
 define('PERMISSION_CHANGE_DISPLAYNAME_OTHER', 256); // allowed to change other display-name
-
+define('PERMISSION_HANDLE_DRAFT', 512);
+define('PERMISSION_VIEW_DRAFT', 1024);
+define('PERMISSION_PUBLISH_DRAFT', 2048);
 class User implements \JsonSerializable {
     
     /** @var $id int */
@@ -66,8 +68,8 @@ class User implements \JsonSerializable {
      *
      * @return bool
      */
-    public function hasPermission($permission) {
-        if ($permission != PERMISSION_EVERYTHING && $this->hasPermission(PERMISSION_EVERYTHING))
+    public function hasPermission($permission, $ignoreWildcard = false) {
+        if ($permission != PERMISSION_EVERYTHING && (!$ignoreWildcard && $this->hasPermission(PERMISSION_EVERYTHING)))
             return true;
         
         return (($this->getPermission()) & $permission) == $permission;

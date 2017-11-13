@@ -1,0 +1,95 @@
+<!-- POST MODALS -->
+<div id="confirmdelete" class="modal">
+    <div class="modal-content">
+        <h4 class="red-text">Beitrag löschen?</h4>
+        <p>Diese Aktion kann nicht rückgängig gemacht werden!</p>
+    </div>
+    <div class="modal-footer">
+        <a id="deletebtn" href="javascript:void(0);"
+           class="modal-action modal-close waves-effect waves-light btn red">Löschen<i
+                class="material-icons right">delete</i></a>
+        <a href="javascript:void(0);" class="modal-action modal-close waves-effect waves-light btn-flat">Abbrechen</a>
+    </div>
+</div>
+
+<div id="editPost" class="modal modal-fixed-footer">
+    <div class="modal-content">
+        <h4>Post bearbeiten</h4>
+        <div class="row">
+            <div class="input-field col s12">
+                
+                <i class="material-icons left prefix">title</i> <input id="editTitle" type="text">
+                <label for="editTitle">Titel</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12">
+                <textarea id="editText"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a id="editBtn" href="javascript:void(0);"
+           class="modal-action modal-close waves-effect waves-light btn amber">Bearbeiten<i
+                class="material-icons right">edit</i></a>
+        <a href="javascript:void(0);" class="modal-action modal-close waves-effect waves-light btn-flat">Abbrechen</a>
+    </div>
+</div>
+<!-- DRAFT MODALS -->
+<div id="confirmdeletedraft" class="modal">
+    <div class="modal-content">
+        <h4 class="red-text">Beitrag löschen?</h4>
+        <p>Diese Aktion kann nicht rückgängig gemacht werden!</p>
+    </div>
+    <div class="modal-footer">
+        <a id="deletedraftbtn" href="javascript:void(0);"
+           class="modal-action modal-close waves-effect waves-light btn red">Löschen<i
+                class="material-icons right">delete</i></a>
+        <a href="javascript:void(0);" class="modal-action modal-close waves-effect waves-light btn-flat">Abbrechen</a>
+    </div>
+</div>
+
+<div id="publishdraft" class="modal">
+    <div class="modal-content">
+        <h4 class="teal-text">Beitrag veröffentlichen?</h4>
+        <p>Der Beitrag wird für die Öffentlichkeit lesbar sein!</p>
+    </div>
+    <div class="modal-footer">
+        <a id="publishdraftbtn" href="javascript:void(0);"
+           class="modal-action modal-close waves-effect waves-light btn teal">Veröffentlichen<i
+                class="material-icons right">public</i></a>
+        <a href="javascript:void(0);" class="modal-action modal-close waves-effect waves-light btn-flat">Abbrechen</a>
+    </div>
+</div>
+
+<div id="editDraft" class="modal modal-fixed-footer">
+    <div class="modal-content">
+        <h4>Post bearbeiten</h4>
+        <div class="row">
+            <div class="input-field col s12">
+                
+                <i class="material-icons left prefix">title</i> <input id="editDraftTitle" type="text">
+                <label for="editDraftTitle">Titel</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12">
+                <textarea id="editDraftText"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a id="editDraftBtn" href="javascript:void(0);"
+           class="modal-action modal-close waves-effect waves-light btn amber">Bearbeiten<i
+                class="material-icons right">edit</i></a>
+        <a href="javascript:void(0);" class="modal-action modal-close waves-effect waves-light btn-flat">Abbrechen</a>
+    </div>
+</div>
+
+
+<div class="fixed-action-btn" permission="PERMISSION_VIEW_DRAFTS">
+    <a class="btn-floating btn-large teal waves-effect suso-replace visibility-changer tooltipped" data-position="left" data-tooltip="Entwürfe anzeigen" id="publish">
+        <i class="large material-icons">archive</i> </a>
+    <a class="btn-floating btn-large teal waves-effect suso-replace visibility-changer tooltipped" data-position="left" data-tooltip="Veröffentlichungen anzeigen" id="draft">
+        <i class="large material-icons">public</i> </a>
+</div>

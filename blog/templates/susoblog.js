@@ -1,4 +1,7 @@
 var Suso = {
+
+    permissions: [],
+
     /** Basic stuff **/
     initialize: function () {
         String.prototype.replaceAll = function (target, replacement) {
@@ -23,80 +26,42 @@ var Suso = {
             removeCookie();
             Cookies.remove('PHPSESSID');
             window.location = "./";
+            return;
         }
 
-        this._initializeCKEditor();
-    },
-    _initializeCKEditor: function () {
-        var plugins = ['videoembed', 'niftytimers', 'chart', 'autocorrect', 'autogrow', 'emojione', 'floating-tools', 'lineheight', 'wordcount'];
-        var dependencies = ['widgetselection', 'lineutils', 'widget'];
+        this.loadPage(true);
 
-        CKEDITOR.config.removePlugins = "print,newpage,preview,div,flash,forms,smiley,maximize,language";
+        if (SusoBlogAPI.accessToken === null) {
 
-        CKEDITOR.scayt_multiLanguageMode = true;
-        CKEDITOR.config.scayt_sLang = "de_DE";
-        CKEDITOR.config.scayt_autoStartup = true;
-
-        CKEDITOR.config.niftyTimer = {widgetKey: '2e27b278-02ad-4e86-96bb-074dd2cad79c'};
-
-        var baseDir = '/blog/ckeditor/';
-
-        var pluginStr = '';
-        dependencies.forEach(function (value) {
-            var url = baseDir + value + '/';
-            CKEDITOR.plugins.addExternal(value, url, 'plugin.js');
-        });
-
-        plugins.forEach(function (value) {
-            var url = baseDir + value + '/';
-            CKEDITOR.plugins.addExternal(value, url, 'plugin.js');
-
-            if (pluginStr !== '') {
-                pluginStr += ',';
-            }
-
-            pluginStr += value;
-
-        });
-
+            Suso.loadPage(false);
+        } else {
+            this.loadHtmlByPermission();
+        }
 
         this._initializeOnClick();
 
-        CKEDITOR.replace('createText', {
-            extraPlugins: pluginStr, language: 'de', extraAllowedContent: 'br'
-        });
-        CKEDITOR.replace('editText', {
-            extraPlugins: pluginStr, language: 'de', extraAllowedContent: 'br'
-        });
-    },
-    /** Modals **/
-    confirmDeleteModal: function (id) {
-        $('#confirmdelete #deletebtn').attr('onclick', 'Suso.deletePost(' + id + ')');
-        $('#confirmdelete').modal('open');
-    },
-    editModal: function (id) {
-        SusoBlogAPI.fetchPost(function (data) {
 
-            var subject = data.subject;
-            var body = data.body;
-
-            $('#editPost #editBtn').attr('onclick', 'Suso.editPost(' + id + ')');
-            $('#editPost #editTitle').val(subject);
-            CKEDITOR.instances.editText.setData(body);
-
-            $('#editPost').modal('open');
-
-            Materialize.updateTextFields();
-        }, {postId: id});
     },
     /** Utility **/
     _initializeOnClick: function () {
         $('.suso-replace#login_form').attr('onSubmit', 'Suso._createTokenLogin()');
         $('.suso-replace#login_btn').attr('onClick', 'Suso._createTokenLogin()');
-        $('.suso-replace#createForm').attr('onSubmit', 'Suso.createPost()');
-        $('.suso-replace#delete').attr('onClick', 'Suso.deletePost()');
-        $('.suso-replace#edit').attr('onClick', 'Suso.editPost()');
         $('.suso-replace#logout').attr('onClick', 'Suso.logout()');
+    },
+    loadHtmlByPermission: function () {
+        var permissions = "1,2,4,8,16,512,1024,2048";
+
+        SusoBlogAPI.hasPermission(function (data) {
+            var success = data.success; // we have power!
+            if (success) {
+                $.loadScript("templates/susoblog-editor.js", function () {
+                    SusoEditor.initialize();
+                });
+            } else {
+                Suso.loadPage(false);
+            }
+
+        }, {permission: permissions});
     },
     _putDivAroundIframe: function (txt) {
 
@@ -118,14 +83,19 @@ var Suso = {
 
         return txt;
     },
-    loadPage: function () {
-        this._checkOrCreateToken();
+
+    loadPage: function (minifiy) {
+        this._checkOrCreateToken(minifiy);
         this._fetchPosts();
-        $('#entry').hide();
-        $('#newdate').hide();
-        $('[permission]').hide();
-        $('.modal').modal();
-        $('.collapsible').collapsible();
+
+        if (minifiy === undefined || minifiy == false) {
+            $('#entry').hide();
+            $('#newdate').hide();
+            $('[permission]').hide();
+            $('.modal').modal();
+            $('.collapsible').collapsible();
+        }
+
     },
     logout: function () {
         this._removeCookie();
@@ -133,31 +103,6 @@ var Suso = {
         Materialize.toast('Erfolgreich abgemeldet!', 2000);
 
         this._checkOrCreateToken();
-    },
-    _toMYSQLDate: function (d) {
-
-        a = d.getFullYear();
-        b = d.getMonth();
-        if (b < 10) {
-            b = '0' + b;
-        }
-        c = d.getDate();
-        if (c < 10) {
-            c = '0' + c;
-        }
-        e = d.getHours();
-        if (e < 10) {
-            e = '0' + e;
-        }
-        f = d.getMinutes();
-        if (f < 10) {
-            f = '0' + f;
-        }
-        g = d.getSeconds();
-        if (g < 10) {
-            g = '0' + g;
-        }
-        return a + '-' + b + '-' + c + ' ' + e + ':' + f + ':' + g;
     },
     _setAuthToken: function (token, expire) {
         if (token !== null && (typeof token) !== "undefined") {
@@ -221,7 +166,7 @@ var Suso = {
                     newdate.attr('id', 'newdate' + element.id);
 
                     placeHolder.append(newdate);
-                    $('#newdate' + element.id + ' #date').text(date.getDate() + '. ' + (date.getMonth() + 1) + '. ' + date.getFullYear() + ':');
+                    $('#newdate' + element.id + ' #dateText').text(date.getDate() + '. ' + (date.getMonth() + 1) + '. ' + date.getFullYear() + ':');
 
                     $('#newdate' + element.id).show();
 
@@ -233,8 +178,10 @@ var Suso = {
 
                 var body = instance._putDivAroundIframe(element.body);
 
-                if (element.authorObject.displayName === null || element.authorObject.displayName === "") {
+                if (element.authorObject == null) {
                     $('#entry' + element.id + ' #author').text("Unknown");
+                } else if (element.authorObject.displayName == null) {
+                    $('#entry' + element.id + ' #author').text(element.authorObject.username);
                 } else {
                     $('#entry' + element.id + ' #author').text(element.authorObject.displayName);
                 }
@@ -255,8 +202,8 @@ var Suso = {
                 $('#entry' + element.id + ' #date').text(datestring);
                 $('#entry' + element.id + ' #title').text(element.subject);
                 $('#entry' + element.id + ' #body').html(body);
-                $('#entry' + element.id + ' #delete').attr('onclick', 'Suso.confirmDeleteModal(' + element.id + ')');
-                $('#entry' + element.id + ' #edit').attr('onclick', 'Suso.editModal(' + element.id + ')');
+                $('#entry' + element.id + ' #delete').attr('onClick', 'SusoEditor.confirmDeleteModal(' + element.id + ')');
+                $('#entry' + element.id + ' #edit').attr('onClick', 'SusoEditor.editModal(' + element.id + ')');
 
                 $('#entry' + element.id).show();
 
@@ -265,39 +212,7 @@ var Suso = {
             });
         })
     },
-    createPost: function () {
-        var title = $('#createTitle').val();
-        var text = CKEDITOR.instances.createText.getSnapshot();
-        var releaseDate = this._toMYSQLDate(new Date());
-
-        SusoBlogAPI.addPost(function () {
-            Materialize.toast('Post hinzugefügt', 2000);
-            $('#createForm').find("input[type=text], textarea").val("");
-            if (CKEDITOR.instances.createText) {
-
-                CKEDITOR.instances.createText.setData('');
-            }
-            $('.collapsible').collapsible('close', 0);
-            Suso._fetchPosts();
-        }, {subject: title, body: text, releaseDate: releaseDate});
-    },
-    editPost: function (id) {
-        var title = $('#editPost#editTitle').val();
-        var text = '';
-        CKEDITOR.instances.editText.getSnapshot();
-
-        SusoBlogAPI.editPost(function () {
-            Materialize.toast('Post erfolgreich bearbeitet', 2000);
-            Suso._fetchPosts();
-        }, {subject: title, body: text, postId: id});
-    },
-    deletePost: function (id) {
-        SusoBlogAPI.deletePost(function () {
-            Materialize.toast('Post erfolgreich gelöscht', 2000);
-            Suso._fetchPosts();
-        }, {postId: id});
-    },
-    _checkOrCreateToken: function () {
+    _checkOrCreateToken: function (minify) {
 
         var token = this._getAuthToken();
         if (token === null) {
@@ -306,7 +221,7 @@ var Suso = {
                 var expire = new Date(data.expire);
                 Suso._setAuthToken(token, expire, false);
             }, true);
-        } else {
+        } else if (!minify === undefined || !minify) {
             this._managePermissionToSee();
         }
     },
@@ -340,17 +255,16 @@ var Suso = {
                 $('label[for="pwd_login"]').removeClass("active");
             }
 
-            Suso.loadPage();
+            Suso.loadHtmlByPermission();
         }, {username: usr, password: pwd}, true);
     },
     _managePermissionToSee: function () {
         $('[permission]').hide();
-        var permissions = [];
 
         SusoBlogAPI.getPermissions(function (perms) {
             for (var key in perms) {
                 if (perms.hasOwnProperty(key)) {
-                    permissions[key] = perms[key];
+                    Suso.permissions[key] = perms[key];
                 }
             }
 
@@ -361,8 +275,8 @@ var Suso = {
 
                     var userPermission = data.payload.permission;
 
-                    for (var permKey in permissions) {
-                        var permVal = permissions[permKey];
+                    for (var permKey in Suso.permissions) {
+                        var permVal = Suso.permissions[permKey];
                         var hasPermission = (userPermission & permVal) === permVal;
 
                         if (!hasPermission) {

@@ -20,7 +20,7 @@
 
         dynamicDate: false,
         timezone: '',
-        locale: '',
+        locale: 'de_DE',
 
         onError: function (errorObj) {
 

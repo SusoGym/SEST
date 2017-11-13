@@ -122,12 +122,15 @@ class SuperUtility {
      * @param null $fallBack string
      */
     static function displayTemplate($template, $fallBack = null) {
-        $templateFile = self::$TEMPLATE_DIR . DIRECTORY_SEPARATOR . $template . '.php';
+        
+        $suffix = strpos($template, ".html") === false;
+        
+        $templateFile = self::$TEMPLATE_DIR . DIRECTORY_SEPARATOR . $template . ($suffix ? '.php' : "");
         $exists = file_exists($templateFile);
         
         if (!$exists && $fallBack != null) {
-            $templateFile = self::$TEMPLATE_DIR . DIRECTORY_SEPARATOR . $template . '.php';
-            $exists = file_exists($templateFile);
+            $templateFile = self::$TEMPLATE_DIR . DIRECTORY_SEPARATOR . $fallBack . ($suffix ? '.php' : "");
+            $exists = file_exists($fallBack);
         }
         
         if (!$exists) {

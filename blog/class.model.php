@@ -368,4 +368,170 @@ class Model extends SuperModel {
         return $id;
     }
     
+    /**
+     * @return array
+     */
+    public function getDrafts() {
+        $db = $this->connection->selectAssociativeValues("SELECT * FROM blog_drafts");
+        
+        $drafts = array();
+        
+        if (!isset($db[0]))
+            return $drafts;
+        
+        foreach ($db as $set) {
+            array_push($drafts, new Draft($set['id'], $set['subject'], $set['body'], $set['author']));
+        }
+        
+        return $drafts;
+        
+    }
+    
+    /**
+     * @param $id int
+     *
+     * @return \blog\Draft
+     */
+    public function getDraft($id) {
+        $db = $this->connection->selectAssociativeValues("SELECT * FROM blog_drafts WHERE id=$id");
+        
+        if (isset($db[0])) {
+            $set = $db[0];
+            
+            return new Draft($set['id'], $set['subject'], $set['body'], $set['author']);
+        }
+        
+        return null;
+    }
+    
+    /**
+     * @param $draft \blog\Draft
+     *
+     * @return \blog\Draft
+     */
+    public function addDraft($draft) {
+        $body = $draft->getBody();
+        $subject = $draft->getSubject();
+        $authorId = $draft->getAuthor();
+        
+        $this->connection->escape_stringDirect($body, $subject);
+        
+        $comma = false;
+        
+        $fields = "";
+        $values = "";
+        
+        if ($body != null) {
+            $fields .= "body";
+            $values .= "'$body'";
+            $comma = true;
+        }
+        
+        if ($subject != null) {
+            if ($comma) {
+                $fields .= ",";
+                $values .= ",";
+            }
+            
+            $fields .= "subject";
+            $values .= "'$subject'";
+            $comma = true;
+        }
+        
+        if ($authorId != null) {
+            if ($comma) {
+                $fields .= ",";
+                $values .= ",";
+            }
+            
+            $fields .= "author";
+            $values .= "'$authorId'";
+            $comma = true;
+        }
+        
+        $id = $this->connection->insertValues("INSERT INTO blog_drafts($fields) VALUES ($values)");
+        
+        $draft->setId($id);
+        
+        return $draft;
+    }
+    
+    /**
+     * @param $draft \blog\Draft
+     */
+    public function updateDraft($draft) {
+        
+        $body = $draft->getBody();
+        $id = $draft->getId();
+        $subject = $draft->getSubject();
+        $authorId = $draft->getAuthor();
+        
+        $this->connection->escape_stringDirect($body, $subject);
+        
+        $old = $this->getDraft($id);
+        
+        $query = "";
+        $bef = false;
+        
+        if ($old->getBody() != $body) {
+            $query .= "body='$body'";
+            $bef = true;
+        }
+        
+        if ($old->getSubject() != $subject) {
+            if ($bef) {
+                $query .= ", ";
+            }
+            $query .= "subject='$subject'";
+            $bef = true;
+        }
+        
+        if ($old->getAuthor() != $authorId) {
+            if ($bef) {
+                $query .= ", ";
+            }
+            
+            $query .= "author='$authorId'";
+        }
+        
+        if ($query != "") {
+            $this->connection->straightQuery("UPDATE blog_drafts SET $query WHERE id='$id'");
+        }
+        
+    }
+    
+    /**
+     * @param $draft \blog\Draft
+     */
+    public function publishDraft($draft) {
+        $body = $draft->getBody();
+        $id = $draft->getId();
+        $subject = $draft->getSubject();
+        $authorId = $draft->getAuthor();
+        
+        $this->connection->escape_stringDirect($body, $subject);
+        
+        throw new \Exception("Not implemented yet");
+        //TODO
+    }
+    
+    
+    /**
+     * @param $draft \blog\Draft
+     */
+    public function deleteDraft($draft) {
+        $id = $draft->getId();
+        $this->connection->straightQuery("DELETE FROM blog_drafts WHERE id=$id");
+    }
+    
+    /**
+     * @param $str string
+     *
+     * @return array
+     */
+    public function searchUsers($str) {
+        $this->connection->escape_stringDirect($str);
+        
+        return $this->connection->selectAssociativeValues("SELECT * FROM `blog_user` WHERE username LIKE '%$str%' OR displayname LIKE '%$str%'");
+    }
 }

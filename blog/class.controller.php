@@ -58,14 +58,17 @@ class Controller extends SuperController {
     /**
      * / Action function \
      * Returns the requested post
+     *
      * @param postId int the requested post
+     *
      * @return \blog\Post|null
      */
-    protected function fetchPost()
-    {
+    protected function fetchPost() {
         $params = $this->handleParameters("postId");
+        
         return $this->model->getPost(intval($params['postId']));
     }
+    
     /**
      * / Action function \
      * Pushes new news post to database
@@ -299,6 +302,26 @@ class Controller extends SuperController {
             die();
         }
         
+        if(strpos($params['permission'], ',') !== false)
+        {
+            $perms = explode(",", $params['permission']);
+            $bool = false;
+            $resp = array();
+            foreach ($perms as $p)
+            {
+                $suc = $user->hasPermission($p, true);
+                array_push($resp, array("permission" => intval($p), "success" => $suc));
+                if($suc)
+                {
+                    $bool = true;
+                }
+            }
+            
+            return array("permission" => $perms, "success" => $bool, "user" => $user, "data" => $resp);
+            
+            
+        }
+        
         return array("permission" => intval($params['permission']), "success" => $user->hasPermission($params['permission']), "user" => $user);
         
     }
@@ -328,7 +351,7 @@ class Controller extends SuperController {
         } else {
             $this->missingArgs("user_auth_token' or 'userId' or 'username");
         }
-    
+        
         $executor = $this->getTokenUser($params['auth_token']);
         
         if (!$executor->hasPermission(PERMISSION_CHANGE_PERMISSION) && !$executor->hasPermission(PERMISSION_CHANGE_ALL_PERMISSION)) {
@@ -342,8 +365,7 @@ class Controller extends SuperController {
             die();
         }
         
-        if(!$executor->hasPermission(intval($params['permission'])) && !$executor->hasPermission(PERMISSION_CHANGE_ALL_PERMISSION))
-        {
+        if (!$executor->hasPermission(intval($params['permission'])) && !$executor->hasPermission(PERMISSION_CHANGE_ALL_PERMISSION)) {
             $this->code = 401;
             $this->message = "Executor has to have the desired permission!";
             die();
@@ -380,10 +402,10 @@ class Controller extends SuperController {
             $this->missingArgs("user_auth_token' or 'userId' or 'username");
         }
         
-        $executer = $this->getTokenUser($params['auth_token']);
+        $executor = $this->getTokenUser($params['auth_token']);
         
         
-        if (($executer != $user && !$executer->hasPermission(PERMISSION_CHANGE_DISPLAYNAME_OTHER)) || ($executer == $user && !$executer->hasPermission(PERMISSION_CHANGE_DISPLAYNAME)))
+        if (($executor != $user && !$executor->hasPermission(PERMISSION_CHANGE_DISPLAYNAME_OTHER)) || ($executor == $user && !$executor->hasPermission(PERMISSION_CHANGE_DISPLAYNAME)))
             $this->unauthorized();
         
         if ($user == null) {
@@ -398,4 +420,136 @@ class Controller extends SuperController {
         return array("displayName" => $params['displayName'], "success" => $user->pushChanges(), "user" => $user);
         
     }
+    
+    /**
+     * / Action function \
+     */
+    protected function addDraft() {
+        $params = array_merge($this->handleOptionalParameters("subject", "body", "author"), $this->handleParameters("auth_token"));
+        
+        if (!$this->getTokenUser($params['auth_token'])->hasPermission(PERMISSION_HANDLE_DRAFT)) {
+            $this->unauthorized();
+        }
+        
+        if ($params['subject'] == null && $params['body'] == null && $params['author'] == null) {
+            $this->code = 404;
+            $this->message = "At least one parameter (subject, body or author) has to be given";
+            die();
+        }
+        
+        $d = new Draft(null, $params['subject'], $params['body'], $params['author']);
+        
+        $d->push();
+        
+        return $d;
+    }
+    
+    /**
+     * / Action function \
+     */
+    protected function editDraft() {
+        $params = array_merge($this->handleOptionalParameters("subject", "body", "author"), $this->handleParameters("auth_token", "draft_id"));
+        
+        if (!$this->getTokenUser($params['auth_token'])->hasPermission(PERMISSION_HANDLE_DRAFT)) {
+            $this->unauthorized();
+        }
+        
+        
+        if ($params['subject'] == null && $params['body'] == null && $params['author'] == null) {
+            $this->code = 404;
+            $this->message = "At least one parameter (subject, body or author) has to be given";
+            die();
+        }
+        
+        $draft = $this->model->getDraft($params['draft_id']);
+        
+        if ($params['subject'] != null) {
+            $draft->setSubject($params['subject']);
+        }
+        
+        if ($params['body'] != null) {
+            $draft->setBody($params['body']);
+        }
+        
+        if ($params['author'] != null) {
+            $draft->setAuthor($params['author']);
+        }
+        
+        $draft->push();
+        
+        return $draft;
+        
+    }
+    
+    /**
+     * / Action function \
+     */
+    protected function fetchDrafts() {
+        $params = array_merge($this->handleParameters("auth_token"));
+        
+        if (!$this->getTokenUser($params['auth_token'])->hasPermission(PERMISSION_VIEW_DRAFT)) {
+            $this->unauthorized();
+        }
+        
+        $news = $this->model->getDrafts();
+        
+        return $news;
+    }
+    
+    /**
+     * / Action function \
+     */
+    protected function fetchDraft() {
+        $params = array_merge($this->handleParameters("auth_token", "draft_id"));
+        
+        if (!$this->getTokenUser($params['auth_token'])->hasPermission(PERMISSION_VIEW_DRAFT)) {
+            $this->unauthorized();
+        }
+        
+        return $this->model->getDraft($params['draft_id']);
+    }
+    
+    /**
+     * / Action function \
+     */
+    protected function deleteDraft() {
+        $params = array_merge($this->handleParameters("auth_token", "draft_id"));
+        
+        $user = $this->getTokenUser($params['auth_token']);
+        
+        if (!$user->hasPermission(PERMISSION_HANDLE_DRAFT)) {
+            $this->unauthorized();
+        }
+        $this->model->deleteDraft(new Draft($params['draft_id'], null, null, null));
+    }
+    
+    /**
+     * / Action function \
+     */
+    protected function publishDraft() {
+        $params = array_merge($this->handleParameters("auth_token", "draft_id"));
+        
+        $user = $this->getTokenUser($params['auth_token']);
+        
+        if (!$user->hasPermission(PERMISSION_VIEW_DRAFT) || !$user->hasPermission(PERMISSION_PUBLISH_DRAFT) || !$user->hasPermission(PERMISSION_ADD_POST)) {
+            $this->unauthorized();
+        }
+        
+        $this->model->publishDraft($this->model->getDraft($params['draft_id']));
+        
+    }
+    
+    protected function searchUsers() {
+        $params = array_merge($this->handleParameters("auth_token", "query"));
+        
+        $user = $this->getTokenUser($params['auth_token']);
+        
+        if (!$user->hasPermission(PERMISSION_EDIT_POST) || !$user->hasPermission(PERMISSION_CHANGE_DISPLAYNAME_OTHER) || !$user->hasPermission(PERMISSION_CHANGE_PERMISSION) || !$user->hasPermission(PERMISSION_CHANGE_ALL_PERMISSION)) {
+            $this->unauthorized();
+        }
+        
+        return $this->model->searchUsers($params['query']);
+    }
+    
+    
 }
