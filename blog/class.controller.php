@@ -535,7 +535,7 @@ class Controller extends SuperController {
             $this->unauthorized();
         }
         
-        $this->model->publishDraft($this->model->getDraft($params['draft_id']));
+        $this->model->publisshDraft($this->model->getDraft($params['draft_id']));
         
     }
     
