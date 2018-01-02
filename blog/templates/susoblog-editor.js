@@ -3,9 +3,9 @@ var SusoEditor = {
 
     initialize: function () {
 
-        $.get('templates/editor.html', function (data) {
+        $.get('templates/module-editor.html', function (data) {
             $('body').append(data);
-            $.get('templates/editor-ckeditor.html', function (data) {
+            $.get('templates/module-editor-ckeditor.html', function (data) {
                 $('.container').prepend(data);
                 SusoEditor._initializeCKEditor();
                 SusoEditor._initializeOnClick();
@@ -201,9 +201,9 @@ var SusoEditor = {
 
                 $('#entry' + element.id + ' #body').html(body);
 
-                $('#entry' + element.id + ' #delete').attr('onclick', 'SusoEditor.confirmDeleteDraftModal(' + element.id + ')');//TODO
-                $('#entry' + element.id + ' #edit').attr('onclick', 'SusoEditor.editDraftModal(' + element.id + ')'); //TODO
-                submit.attr('onclick', 'SusoEditor.publishDraftModal(' + element.id + ')'); //TODO
+                $('#entry' + element.id + ' #delete').attr('onclick', 'SusoEditor.confirmDeleteDraftModal(' + element.id + ')');
+                $('#entry' + element.id + ' #edit').attr('onclick', 'SusoEditor.editDraftModal(' + element.id + ')');
+                submit.attr('onclick', 'SusoEditor.publishDraftModal(' + element.id + ')');
 
                 submit.show();
 

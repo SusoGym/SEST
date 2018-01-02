@@ -151,33 +151,24 @@ class SuperUtility {
      * @return bool correct login data
      */
     static function verifyLogin($username, $pwd) {
-        $url = "https://" . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
-        
-        $pos = strrpos($url, "/blog");
-        
-        if ($pos !== false) {
-            $url = substr_replace($url, "", $pos, strlen($url));
-        } else {
-            $url = "https://" . $_SERVER['HTTP_HOST'];
-        }
-        
-        $url .= "/index.php";
-        
-        /** @var resource $ch */
+    
+        $apiUrl = "https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php"; // hardcoded...
+    
+        $headers = array('Authorization: Basic ' . base64_encode("$username:$pwd"));
+    
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_URL, $apiUrl);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array("login[mail]" => $username, "login[password]" => $pwd, "console" => true, "type" => "login")));
-        
-        $result = utf8_decode(curl_exec($ch));
-        $length = strlen($result);
-        
-        $result = substr($result, 1, $length); // but why????
-        
-        \ChromePhp::info("Checking login integrity from " . $url . "... Result is: " . $result);
-        
-        return $result == "true";
+    
+        $result = utf8_encode(curl_exec($ch));
+        if (curl_errno($ch) || $result == null) {
+            return false;
+        }
+    
+        $res = json_decode($result);
+    
+        return true;
     }
 }
 

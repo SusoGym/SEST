@@ -23,7 +23,7 @@ var Suso = {
         };
 
         if (new URLSearchParams(window.location.search).has("destroy")) {
-            removeCookie();
+            this._removeCookie();
             Cookies.remove('PHPSESSID');
             window.location = "./";
             return;
@@ -31,9 +31,20 @@ var Suso = {
 
         this.loadPage(true);
 
-        if (SusoBlogAPI.accessToken === null) {
+        console.info(SusoBlogAPI.accessToken);
 
-            Suso.loadPage(false);
+        if (SusoBlogAPI.accessToken === null) {
+            console.info("No accessToken");
+            var blog = this;
+
+            SusoBlogAPI.createTokenFromSession(function (data) {
+                if(data.code === 200)
+                {
+                    SusoBlogAPI.accessToken = data.payload.authToken;
+                } else {
+                    Suso.loadPage(false);
+                }
+            });
         } else {
             this.loadHtmlByPermission();
         }

@@ -95,14 +95,11 @@ var SusoBlogAPI =
          * @param callback function
          * @param raw bool returns raw api response
          */
-        createTokenFromSession: function (callback, raw) {
+        createTokenFromSession: function (callback) {
+
             this._doApiRequest("createTokenFromSession", function (data) {
-                if (!raw) {
-                    callback(data.payload);
-                } else {
                     callback(data);
-                }
-            }, {_raw: raw});
+            }, {_raw: true});
         },
         /**
          * Generates an access token from input
