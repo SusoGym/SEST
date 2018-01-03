@@ -3,16 +3,21 @@ var SusoEditor = {
 
     initialize: function () {
 
-        $.get('templates/module-editor.html', function (data) {
-            $('body').append(data);
-            $.get('templates/module-editor-ckeditor.html', function (data) {
-                $('.container').prepend(data);
-                SusoEditor._initializeCKEditor();
-                SusoEditor._initializeOnClick();
-                SusoEditor.loadPage(false);
+        if (!$('#confirmdelete').length) { // check if exists
+            $.get('templates/module-editor.html', function (data) {
+                $('body').append(data);
+                $.get('templates/module-editor-ckeditor.html', function (data) {
+                    $('.container').prepend(data);
+                    SusoEditor._initializeCKEditor();
+                    SusoEditor._initializeOnClick();
+                    SusoEditor.loadPage(false);
+                });
             });
-        });
-
+        } else {
+            SusoEditor._initializeCKEditor();
+            SusoEditor._initializeOnClick();
+            SusoEditor.loadPage(false);
+        }
 
     },
     _initializeCKEditor: function () {

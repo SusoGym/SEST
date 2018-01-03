@@ -1,0 +1,29 @@
+<!-- ADMIN -->
+<!-- ADMIN MODALS -->
+<div id="admin-choosemodal" class="modal">
+    <div class="modal-content">
+        <h4>Nutzer bearbeiten</h4>
+        <p>Bitte geben sie den Namen für den zu editierenden Nutzer ein: </p>
+        <div class="input-field">
+            <input type="text" id="admin-autocomplete-name"> <label for="admin-autocomplete-name">Nutzername</label>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a id="chooseuserbtn" href="javascript:void(0);" onclick="SusoAdmin.editUser()" class="waves-effect waves-light btn-flat teal white-text">Editieren</a>
+    </div>
+</div>
+<div id="admin-editusermodal" class="modal">
+    <div class="modal-content">
+        <h4><span id="edituser-username"></span> editieren</h4>
+        <span id="hiddenusername" style="visibility: hidden;"></span>
+        <div class="row" id="displayname">
+            <div class="col s12 input-field"><label for="displayname-field" id="displayname-field-label">Displayname</label><input id="displayname-field" type="text"></div>
+        </div>
+        <div class="row" id="userpermissions">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a id="canclebutton" href="javascript:void(0);" class="waves-effect waves-light btn-flat teal white-text modal-action modal-close">Abbrechen</a>
+        <a id="edituserbtn" href="javascript:void(0);" onclick="SusoAdmin.sendEditUser()" class="waves-effect waves-light btn-flat amber">Editieren</a>
+    </div>
+</div>

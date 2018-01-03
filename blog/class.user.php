@@ -94,8 +94,8 @@ class User implements \JsonSerializable {
      *
      * @return string
      */
-    public function getDisplayName() {
-        if ($this->displayName == null)
+    public function getDisplayName($pure = false) {
+        if ($this->displayName == null && !$pure)
             return $this->username;
         
         return $this->displayName;

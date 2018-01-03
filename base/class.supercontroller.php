@@ -19,6 +19,7 @@ class SuperController extends SuperUtility {
     protected $responseData = null;
     /** @var string */
     protected $action = null;
+    protected $outputArray = array();
     
     
     /**
@@ -46,10 +47,10 @@ class SuperController extends SuperUtility {
         if (!self::$errorless_exit)
             return;
         
-        $outputArray = array();
+        $outputArray = $this->outputArray;
         
         if ($this->action != null) {
-            $outputArray = array("action" => $this->action);
+            $outputArray = array_merge($outputArray, array("action" => $this->action));
         }
         
         $outputArray = array_merge($outputArray, array("code" => $this->code, "message" => $this->message));

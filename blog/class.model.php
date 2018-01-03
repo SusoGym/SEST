@@ -245,7 +245,8 @@ class Model extends SuperModel {
         
         $username = $user->getUsername();
         $id = $user->getId();
-        $displayName = $user->getDisplayName();
+        $displayName = $user->getDisplayName(true);
+        
         $permission = $user->getPermission();
         
         $this->connection->escape_stringDirect($username);
