@@ -79,7 +79,15 @@ var SusoBlogAPI =
          */
         getUserInfo: function (callback, data, raw) {
 
-            data._raw = raw;
+            if (typeof data === 'undefined') {
+                data = {};
+            }
+
+            if (typeof  raw !== 'undefined') {
+                data._raw = raw;
+            } else {
+                data._raw = false;
+            }
 
             this._doApiRequest("getUserInfo", function (data) {
                 if (raw) {
@@ -98,7 +106,7 @@ var SusoBlogAPI =
         createTokenFromSession: function (callback) {
 
             this._doApiRequest("createTokenFromSession", function (data) {
-                    callback(data);
+                callback(data);
             }, {_raw: true});
         },
         /**
@@ -156,7 +164,7 @@ var SusoBlogAPI =
                 data.auth_token = this.accessToken;
             }
 
-            this._doApiRequest("changePermissions", function (data) {
+            this._doApiRequest("changePermission", function (data) {
                 callback(data.payload);
             }, data);
 
@@ -294,8 +302,7 @@ var SusoBlogAPI =
                 if (data.code !== 200 && !parameters._raw) {
                     var payloadMsg = "";
 
-                    if(data.payload.type !== null && data.payload.message !== null)
-                    {
+                    if (typeof data.payload !== 'undefined' && data.payload !== null && typeof data.payload.type !== 'undefined' && typeof data.payload.message !== 'undefined') {
                         payloadMsg = data.payload.type + ": " + data.payload.message;
                     }
 

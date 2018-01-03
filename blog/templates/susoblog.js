@@ -41,6 +41,9 @@ var Suso = {
                 if(data.code === 200)
                 {
                     SusoBlogAPI.accessToken = data.payload.authToken;
+                    var expire = new Date(data.payload.expire);
+                    blog._setAuthToken(SusoBlogAPI.accessToken, expire);
+                    blog.loadHtmlByPermission();
                 } else {
                     Suso.loadPage(false);
                 }
@@ -67,6 +70,20 @@ var Suso = {
             if (success) {
                 $.loadScript("templates/susoblog-editor.js", function () {
                     SusoEditor.initialize();
+                });
+            } else {
+                Suso.loadPage(false);
+            }
+
+        }, {permission: permissions});
+
+        permissions = "1,32,64,128,256";
+
+        SusoBlogAPI.hasPermission(function (data) {
+            var success = data.success; // we have power!
+            if (success) {
+                $.loadScript("templates/susoblog-administration.js", function () {
+                    SusoAdmin.initialize();
                 });
             } else {
                 Suso.loadPage(false);

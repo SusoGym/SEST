@@ -302,17 +302,14 @@ class Controller extends SuperController {
             die();
         }
         
-        if(strpos($params['permission'], ',') !== false)
-        {
+        if (strpos($params['permission'], ',') !== false) {
             $perms = explode(",", $params['permission']);
             $bool = false;
             $resp = array();
-            foreach ($perms as $p)
-            {
+            foreach ($perms as $p) {
                 $suc = $user->hasPermission($p, true);
                 array_push($resp, array("permission" => intval($p), "success" => $suc));
-                if($suc)
-                {
+                if ($suc) {
                     $bool = true;
                 }
             }
@@ -535,7 +532,7 @@ class Controller extends SuperController {
             $this->unauthorized();
         }
         
-        $this->model->publisshDraft($this->model->getDraft($params['draft_id']));
+        $this->model->publishDraft($this->model->getDraft($params['draft_id']));
         
     }
     
@@ -544,11 +541,35 @@ class Controller extends SuperController {
         
         $user = $this->getTokenUser($params['auth_token']);
         
-        if (!$user->hasPermission(PERMISSION_EDIT_POST) || !$user->hasPermission(PERMISSION_CHANGE_DISPLAYNAME_OTHER) || !$user->hasPermission(PERMISSION_CHANGE_PERMISSION) || !$user->hasPermission(PERMISSION_CHANGE_ALL_PERMISSION)) {
+        if (!$user->hasPermission(PERMISSION_CHANGE_DISPLAYNAME) && !$user->hasPermission(PERMISSION_CHANGE_DISPLAYNAME_OTHER) && !$user->hasPermission(PERMISSION_CHANGE_PERMISSION) && !$user->hasPermission(PERMISSION_CHANGE_ALL_PERMISSION)) {
             $this->unauthorized();
         }
         
-        return $this->model->searchUsers($params['query']);
+        $query = strtolower($params['query']);
+        
+        $data = $this->model->searchUsers($query);
+        $names = array();
+        if ($data != null) {
+            foreach ($data as $user) {
+                $username = $user['username'];
+                $displayname = $user['displayname'];
+                
+                if (strpos(strtolower($username), $query) !== false) {
+                    array_push($names, $username);
+                }
+                
+                if (strpos(strtolower($displayname), $query) !== false) {
+                    
+                    array_push($names, $displayname);
+                }
+                
+                
+            }
+        }
+        $this->outputArray = array("suggestions" => $names);
+        
+        
+        return $data;
     }
     
     
