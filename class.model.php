@@ -786,6 +786,30 @@ class Model {
         
         return true;
     }
+	
+	
+	/**
+	* raise count to disable account after 3 failures
+	* @param int userId
+	* @return int amount of failed attempts
+	*/
+	public function raiseLockedCount($id) {
+	$data = self::$connection->selectValues("SELECT disabled_count FROM user WHERE id=".$id);
+	if($data) {
+		$disabledCount = $data[0][0];
+		self::$connection->straightQuery("UPDATE user SET disabled_count = disabled_count+1 WHERE id = ".$id );
+		if ($disabledCount == 2) {
+			$now = date('ymd H:i:s');
+			self::$connection->straightQuery('UPDATE user SET disabled_date = "'.$now.'" WHERE id = '.$id );
+			}
+		$disabledCount++;
+		return $disabledCount;
+		} else {
+		return false;
+		}		
+	
+	
+	}
     
     /**
      * @param $usr string novell user
