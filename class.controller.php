@@ -998,11 +998,19 @@ class Controller {
         
         if ($success) {
             /** @var Guardian $parent */
-            $parent = self::$user;
-            $success = $this->model->parentAddStudents($parent->getParentId(), $studentIds);
+			$failure = $this->model->raiseLockedCount(self::$user->getId());
+			if ($failure >2) {
+				$success = false;
+				array_push($notification, "zu viele Fehlversuche - Funktion deaktiviert!" );
+			} else {
+				$parent = self::$user;
+				$success = $this->model->parentAddStudents($parent->getParentId(), $studentIds);
+			}			
+			
+             ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
         }
         
-        ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
+       
         
         if (isset($this->input['console'])) {
             $output = array("success" => $success);
