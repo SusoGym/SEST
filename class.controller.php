@@ -968,7 +968,7 @@ class Controller {
                     
                     if ($studentObj == null) {
 						$failure = $this->model->raiseLockedCount(self::$user->getId() );
-						$notifyText = ($failure > 2) ? "zu viele Fehlversuche - Funktion deaktiviert!" : "Bitte überprüfen Sie die angegebenen Schülerdaten!";
+						$notifyText = ($failure > 2) ? "zu viele Fehlversuche - Funktion für 5 Minuten deaktiviert!" : "Bitte überprüfen Sie die angegebenen Schülerdaten!";
                         array_push($notification, $notifyText);
                         ChromePhp::info("Invalid student data!");
                         $success = false;
@@ -983,7 +983,7 @@ class Controller {
                     
                     if ($eid != null) {
                         $failure = $this->model->raiseLockedCount(self::$user->getId());
-						$notifyText = ($failure >2) ? "zu viele Fehlversuche - Funktion deaktiviert!" : "Dem Schüler $name $surname ist bereits ein Elternteil zugeordnet!";
+						$notifyText = ($failure >2) ? "zu viele Fehlversuche - Funktion für 5 Minuten deaktiviert!" : "Dem Schüler $name $surname ist bereits ein Elternteil zugeordnet!";
                        	array_push($notification, $notifyText);
                         ChromePhp::info("Student already has parent!");
                         $success = false;
@@ -998,7 +998,7 @@ class Controller {
         
         if ($success) {
             /** @var Guardian $parent */
-			$failure = $this->model->raiseLockedCount(self::$user->getId());
+			$failure = $this->model->raiseLockedCount(self::$user->getId(), false);
 			if ($failure >2) {
 				$success = false;
 				array_push($notification, "zu viele Fehlversuche - Funktion deaktiviert!" );

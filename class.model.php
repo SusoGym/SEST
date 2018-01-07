@@ -786,30 +786,52 @@ class Model {
         
         return true;
     }
-	
-	
-	/**
-	* raise count to disable account after 3 failures
-	* @param int userId
-	* @return int amount of failed attempts
-	*/
-	public function raiseLockedCount($id) {
-	$data = self::$connection->selectValues("SELECT disabled_count FROM user WHERE id=".$id);
-	if($data) {
-		$disabledCount = $data[0][0];
-		self::$connection->straightQuery("UPDATE user SET disabled_count = disabled_count+1 WHERE id = ".$id );
-		if ($disabledCount == 2) {
-			$now = date('ymd H:i:s');
-			self::$connection->straightQuery('UPDATE user SET disabled_date = "'.$now.'" WHERE id = '.$id );
-			}
-		$disabledCount++;
-		return $disabledCount;
-		} else {
-		return false;
-		}		
-	
-	
-	}
+    
+    
+    /**
+     * raise count to disable account after 3 failures
+     *
+     * @param $id        int userId
+     * @param $increment bool whether or not to increase
+     *
+     * @return int amount of failed attempts
+     */
+    public function raiseLockedCount($id, $increment = true) {
+        $data = self::$connection->selectValues("SELECT disabled_count, disabled_date FROM user WHERE id=" . $id);
+        
+        $resetTime = 5 * 60; // time in sec until unblock
+        
+        if ($data) {
+            $disabledCount = $data[0][0];
+            $disabledDate = $data[0][1];
+            $d = DateTime::createFromFormat("ymd H:i:s", $disabledDate);
+            
+            if ($d instanceof DateTime) {
+                $d = $d->getTimestamp();
+            }
+            
+            if ($disabledCount > 0 && $disabledDate !== null && ($d + $resetTime - time()) <= 0) {
+                self::$connection->straightQuery("UPDATE user SET disabled_count=0, disabled_date=NULL WHERE id = " . $id);
+                $disabledCount = 0;
+            } else {
+                if ($increment) {
+                    $disabledCount++;
+                    self::$connection->straightQuery("UPDATE user SET disabled_count = disabled_count+1 WHERE id = " . $id);
+                    if ($disabledCount >= 3) {
+                        $now = date('ymd H:i:s');
+                        self::$connection->straightQuery('UPDATE user SET disabled_date = "' . $now . '" WHERE id = ' . $id);
+                    }
+                }
+            }
+            
+            return $disabledCount;
+        }
+        
+        return 0;
+        
+        
+        
+    }
     
     /**
      * @param $usr string novell user
