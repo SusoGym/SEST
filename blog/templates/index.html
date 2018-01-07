@@ -73,15 +73,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.4/js.cookie.min.js"></script>
 <script src="//cdn.ckeditor.com/4.7.3/full/ckeditor.js"></script>
-<script src="./templates/suso.blogApiClient-1.0.js"></script>
 <script src="./templates/susoblog.js"></script>
 <script type="text/javascript">
-    $(".button-collapse").sideNav();
 
     $.get("templates/module-navbar.html", function (data) {
         $('nav').append(data);
+        $(".button-collapse").sideNav();
         Suso.initialize();
-        Suso.loadPage();
     });
     
 </script>

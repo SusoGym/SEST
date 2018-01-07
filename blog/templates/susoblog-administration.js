@@ -17,6 +17,7 @@ var SusoAdmin = {
 
             if (!$('#open_adminarea').length) {
                 $('#right-nav').prepend("<li id='open_adminarea' style='display: list-item;' permission='PERMISSION_CHANGE_PERMISSION PERMISSION_CHANGE_ALL_PERMISSION PERMISSION_CHANGE_DISPLAYNAME PERMISSION_CHANGE_DISPLAYNAME_OTHER'><a href='javascript:void(0);' onclick='SusoAdmin.open()'><span>Admin Area</span><i class='material-icons right'>adb</i> </a></li>");
+                $('#homeMobile').after("<li id='open_adminarea_mobile' style='display: list-item;' permission='PERMISSION_CHANGE_PERMISSION PERMISSION_CHANGE_ALL_PERMISSION PERMISSION_CHANGE_DISPLAYNAME PERMISSION_CHANGE_DISPLAYNAME_OTHER'><a href='javascript:void(0);' onclick='SusoAdmin.open()'><span>Admin Area</span><i class='material-icons left'>adb</i> </a>");
             }
             /*$('#admin-autocomplete-name').devbridgeAutocomplete({serviceUrl:"index.php?console&action=searchUsers&raw=true&auth_token=" + SusoBlogAPI.accessToken, type:'GET', onSelect: function () {
 
@@ -35,6 +36,7 @@ var SusoAdmin = {
 
         },
         open: function () {
+            $(".button-collapse").sideNav("hide");
             SusoBlogAPI.getUserInfo(function (data) {
                 var perms = data.permission;
 
@@ -104,7 +106,7 @@ var SusoAdmin = {
                     for (var perm in permissions) {
 
                         var name = perm.substring(11).replaceAll("_", " ");
-                        grid.append('<div class="col s6"><input type="checkbox" id="' + perm + '" value="' + perm + '" /><label class="black-text" for="' + perm + '">' + name + '</label></div>');
+                        grid.append('<div class="col s6" style="margin-bottom: 15px"><input type="checkbox" id="' + perm + '" value="' + perm + '" /><label class="black-text align-center" for="' + perm + '">' + name + '</label></div>');
 
                         var permVal = permissions[perm];
 

@@ -2,17 +2,7 @@ var Suso = {
 
     permissions: [],
 
-    /** Basic stuff **/
-    initialize: function () {
-        String.prototype.replaceAll = function (target, replacement) {
-            return this.split(target).join(replacement);
-        };
-
-        SusoBlogAPI._handleError = function (code, message, ctx) {
-            Materialize.toast('[' + code + '] ' + message, 2000);
-            console.error('Error while doing ' + ctx + ' [' + code + '] ' + message);
-        };
-
+    initializeJS: function (callback) {
         jQuery.loadScript = function (url, callback) {
             jQuery.ajax({
                 url: url,
@@ -21,40 +11,60 @@ var Suso = {
                 async: true
             });
         };
+        String.prototype.replaceAll = function (target, replacement) {
+            return this.split(target).join(replacement);
+        };
+        $.loadScript("templates/suso.blogApiClient-1.0.js", function () {
+            callback();
+        });
+    },
 
-        if (new URLSearchParams(window.location.search).has("destroy")) {
-            this._removeCookie();
-            Cookies.remove('PHPSESSID');
-            window.location = "./";
-            return;
+    /** Basic stuff **/
+    initialize: function () {
+
+        function executable() {
+
+            SusoBlogAPI._handleError = function (code, message, ctx) {
+                Materialize.toast('[' + code + '] ' + message, 2000);
+                console.error('Error while doing ' + ctx + ' [' + code + '] ' + message);
+            };
+
+
+            if (new URLSearchParams(window.location.search).has("destroy")) {
+                Suso._removeCookie();
+                Cookies.remove('PHPSESSID');
+                window.location = "./";
+                return;
+            }
+
+            Suso.loadPage(true);
+
+
+            if (SusoBlogAPI.accessToken === null) {
+                SusoBlogAPI.createTokenFromSession(function (data) {
+                    if (data.code === 200) {
+                        SusoBlogAPI.accessToken = data.payload.authToken;
+                        var expire = new Date(data.payload.expire);
+                        Suso._setAuthToken(SusoBlogAPI.accessToken, expire);
+                        Suso.loadHtmlByPermission();
+                    } else {
+                        Suso.loadPage(false);
+                    }
+                });
+            } else {
+                Suso.loadHtmlByPermission();
+            }
+
+            Suso._initializeOnClick();
+
         }
 
-        this.loadPage(true);
 
-        console.info(SusoBlogAPI.accessToken);
-
-        if (SusoBlogAPI.accessToken === null) {
-            console.info("No accessToken");
-            var blog = this;
-
-            SusoBlogAPI.createTokenFromSession(function (data) {
-                if(data.code === 200)
-                {
-                    SusoBlogAPI.accessToken = data.payload.authToken;
-                    var expire = new Date(data.payload.expire);
-                    blog._setAuthToken(SusoBlogAPI.accessToken, expire);
-                    blog.loadHtmlByPermission();
-                } else {
-                    Suso.loadPage(false);
-                }
-            });
+        if (typeof $.loadScript === "undefined") {
+            Suso.initializeJS(executable);
         } else {
-            this.loadHtmlByPermission();
+            executable();
         }
-
-        this._initializeOnClick();
-
-
     },
     /** Utility **/
     _initializeOnClick: function () {
