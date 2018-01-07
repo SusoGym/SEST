@@ -221,9 +221,8 @@ var SusoEditor = {
         })
     },
     _toMYSQLDate: function (d) {
-
         a = d.getFullYear();
-        b = d.getMonth();
+        b = d.getMonth()+1; // returns 0 - 11
         if (b < 10) {
             b = '0' + b;
         }
