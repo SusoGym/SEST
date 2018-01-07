@@ -13,46 +13,14 @@ class Connection {
      */
     public static $configFile = "cfg.ini";
     /**
-     * @var string database ip
+     * @var array parameters stored in cfg.ini
      */
-    private $server;
-    /**
-     * @var string database user
-     */
-    private $user;
-    /**
-     * @var string database password
-     */
-    private $pass;
-    /**
-     * @var string filesystem path
-     */
-    private $basepath;
-    /**
-     * @var string download folder
-     */
-    private $download;
-    /**
-     * @var string ics filename
-     */
-    private $icsfile;
-    /**
-     * @var string ldap link
-     */
-    private $ldap;
-    /**
-     * @var string
-     */
-    private $firebaseKey;
+    private $iniParams = array();
     /**
      * @var \mysqli database connection instance
      */
     
     private $connID;
-    /**
-     * @var string database name
-     */
-    private $database;
     
     
     /**
@@ -73,38 +41,9 @@ class Connection {
         while (!feof($f)) {
             $line = fgets($f);
             $larr = explode("=", $line);
-            switch ($larr[0]) {
-                case "SERVER":
-                    $this->server = trim($larr[1]);
-                    break;
-                case "USER":
-                    $this->user = trim($larr[1]);
-                    break;
-                case "PASS":
-                    $this->pass = trim($larr[1]);
-                    break;
-                case "DB":
-                    $this->database = trim($larr[1]);
-                    break;
-                case "DOWNLOAD":
-                    $this->download = trim($larr[1]);
-                    break;
-                case "FILEBASE":
-                    $this->basepath = trim($larr[1]);
-                    break;
-                case "ICS":
-                    $this->icsfile = trim($larr[1]);
-                    break;
-                case "ldap":
-                    $this->ldap = trim($larr[1]);
-                    break;
-                case "firebase_key":
-                    $this->firebaseKey = trim($larr[1]);
-                    break;
-                
-            }
+            if(sizeof($larr) < 2){continue;}
+            $this->iniParams[strtolower(trim($larr[0]))] = trim($larr[1]);
         }
-        
         fclose($f);
     }
     
@@ -114,7 +53,7 @@ class Connection {
      * @return array(string)
      */
     public function getIniParams() {
-        return array("download" => $this->download, "basepath" => $this->basepath, "icsfile" => $this->icsfile, "ldap" => $this->ldap, "firebase_key" => $this->firebaseKey);  // could be much more versatile
+        return $this->iniParams;
     }
     
     
@@ -124,8 +63,11 @@ class Connection {
     private function connect() {
         
         $reporting = error_reporting(0);
-        ChromePhp::info("Connecting to " . $this->user . "@" . $this->server . ":" . $this->database);
-        $mysqli = $this->connID = new \mysqli($this->server, $this->user, $this->pass, $this->database);
+        
+        $params = $this->getIniParams();
+        
+        ChromePhp::info("Connecting to " . $params['user'] . "@" . $params['server'] . ":" . $params['db']);
+        $mysqli = $this->connID = new \mysqli($params['server'], $params['user'], $params['pass'], $params['db']);
         error_reporting($reporting);
         
         if ($mysqli->connect_errno) {
