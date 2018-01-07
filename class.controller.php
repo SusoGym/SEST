@@ -967,7 +967,9 @@ class Controller {
                     $studentObj = $this->model->getStudentByName($name, null, $bday);
                     
                     if ($studentObj == null) {
-                        array_push($notification, "Bitte überprüfen Sie die angegebenen Schülerdaten!");
+						$failure = $this->model->raiseLockedCount(self::$user->getId() );
+						$notifyText = ($failure > 2) ? "zu viele Fehlversuche - Funktion deaktiviert!" : "Bitte überprüfen Sie die angegebenen Schülerdaten!";
+                        array_push($notification, $notifyText);
                         ChromePhp::info("Invalid student data!");
                         $success = false;
                         break;
@@ -980,7 +982,9 @@ class Controller {
                     ChromePhp::info("Student: $name $surname, born on " . $bday . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($eid == null ? "no parents set" : "parent with id $eid")));
                     
                     if ($eid != null) {
-                        array_push($notification, "Dem Schüler $name $surname ist bereits ein Elternteil zugeordnet!");
+                        $failure = $this->model->raiseLockedCount(self::$user->getId());
+						$notifyText = ($failure >2) ? "zu viele Fehlversuche - Funktion deaktiviert!" : "Dem Schüler $name $surname ist bereits ein Elternteil zugeordnet!";
+                       	array_push($notification, $notifyText);
                         ChromePhp::info("Student already has parent!");
                         $success = false;
                     } else {
@@ -994,11 +998,19 @@ class Controller {
         
         if ($success) {
             /** @var Guardian $parent */
-            $parent = self::$user;
-            $success = $this->model->parentAddStudents($parent->getParentId(), $studentIds);
+			$failure = $this->model->raiseLockedCount(self::$user->getId());
+			if ($failure >2) {
+				$success = false;
+				array_push($notification, "zu viele Fehlversuche - Funktion deaktiviert!" );
+			} else {
+				$parent = self::$user;
+				$success = $this->model->parentAddStudents($parent->getParentId(), $studentIds);
+			}			
+			
+             ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
         }
         
-        ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
+       
         
         if (isset($this->input['console'])) {
             $output = array("success" => $success);
