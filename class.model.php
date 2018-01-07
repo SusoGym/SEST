@@ -1153,9 +1153,10 @@ class Model {
         $add = $isTeacher ? "" : "AND tag<3"; // how lovely
         $allDays = array();
         $data = self::$connection->selectValues("SELECT DISTINCT datum FROM vp_vpdata WHERE tag>0 $add ORDER BY datum ASC");
-        
-        foreach ($data as $day) {
-            $allDays[] = array("timestamp" => $day[0], "dateAsString" => $this->getDateString($day[0]));
+        if ($data != null) {
+            foreach ($data as $day) {
+                $allDays[] = array("timestamp" => $day[0], "dateAsString" => $this->getDateString($day[0]));
+            }
         }
         
         return $allDays;
@@ -1180,14 +1181,14 @@ class Model {
      * @return String
      */
     private function getWeekday($date) {
-        $weekdays = array('So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa');
-        $month = $date[4] . $date[5];
-        $day = $date[6] . $date[7];
-        $year = $date[0] . $date[1] . $date[2] . $date[3];
-        $date = getdate(mktime(0, 0, 0, $month, $day, $year));
-        $dayOfWeek = $date['wday'];
+        $date = getdate(DateTime::createFromFormat("Ynd", $date)->getTimestamp());
         
-        return $weekdays[$dayOfWeek];
+        $weekdays = array('So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa');
+        $dayOfWeek = $date['weekday'];
+        
+        
+        
+        return $weekdays[$date['wday']];
     }
     
     

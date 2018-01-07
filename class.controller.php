@@ -610,7 +610,7 @@ class Controller {
         
         $usr = self::getUser();
         
-        if ($usr == null && isset($this->input['user']) && isset($this->input['pwd'])) {
+        if (isset($this->input['user']) && isset($this->input['pwd'])) {
             $usr = $this->model->getLdapUserByLdapNameAndPwd($this->input['user'], $this->input['pwd']);
         }
         
