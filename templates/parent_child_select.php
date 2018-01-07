@@ -81,7 +81,7 @@ include("header.php");
 
 <script type="application/javascript">
     function submitStudentForm() {
-        var url_param = "?console&type=addstudent";
+		var url_param = "?console&type=addstudent";
 
         var studentNodes = document.getElementsByClassName("student_instance");
 
@@ -98,7 +98,7 @@ include("header.php");
         }
 
         if (numValidStudents == 0) {// No valid Students...
-            Materialize.toast("Bitte geben sie mindestens einen Schüler an.");
+            Materialize.toast("Bitte geben sie mindestens einen Schüler an.",4000);
             return;
         }
 
@@ -109,7 +109,7 @@ include("header.php");
                     location.reload();
                 }
                 else { // oh no! ;-;
-                    var notifications = data.notifications; //myData['notifications'];
+					var notifications = data.notifications; //myData['notifications'];
                     notifications.forEach(function (data) {
                         Materialize.toast(data, 4000);
                     });
