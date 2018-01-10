@@ -11,7 +11,7 @@ class Connection {
     /**
      * @var string configuration file
      */
-    public static $configFile = "cfg.ini";
+    public static $configFile = "internini.php";
     /**
      * @var string database ip
      */
@@ -101,6 +101,8 @@ class Connection {
                 case "firebase_key":
                     $this->firebaseKey = trim($larr[1]);
                     break;
+				default:
+					break;
                 
             }
         }
