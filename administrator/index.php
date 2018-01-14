@@ -19,7 +19,7 @@ require "../class.newsletter.php";
 
 
 
-\Connection::$configFile = "../cfg.ini";
+// \Connection::$configFile = "../cfg.ini"; - config data hardcoded in class.connect.php
 
 require "administrator.controller.class.php";
 require "administrator.model.class.php";

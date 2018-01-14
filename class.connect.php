@@ -11,7 +11,7 @@ class Connection {
     /**
      * @var string configuration file
      */
-    public static $configFile = "internini.php";
+    //public static $configFile = "internini.php";
     /**
      * @var string database ip
      */
@@ -31,11 +31,11 @@ class Connection {
     /**
      * @var string download folder
      */
-    private $download;
+    private $download = null;
     /**
      * @var string ics filename
      */
-    private $icsfile;
+    private $icsfile = null;
     /**
      * @var string ldap link
      */
@@ -43,7 +43,7 @@ class Connection {
     /**
      * @var string
      */
-    private $firebaseKey;
+    private $firebaseKey = null;
     /**
      * @var \mysqli database connection instance
      */
@@ -66,49 +66,26 @@ class Connection {
     
     
     /**
-     * Ermittelt die Serververbindung, benutzer und Passwort zur Basisdatenbank
+    * Ermittelt die Serververbindung, benutzer und Passwort zur Basisdatenbank
+	* SERVER=localhost
+	* USER=root
+	* PASS=
+	* DB=susointern
+	* ldap=https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php
      */
     private function getCredentials() {
-        $f = fopen(self::$configFile, "r");
-        while (!feof($f)) {
-            $line = fgets($f);
-            $larr = explode("=", $line);
-            switch ($larr[0]) {
-                case "SERVER":
-                    $this->server = trim($larr[1]);
-                    break;
-                case "USER":
-                    $this->user = trim($larr[1]);
-                    break;
-                case "PASS":
-                    $this->pass = trim($larr[1]);
-                    break;
-                case "DB":
-                    $this->database = trim($larr[1]);
-                    break;
-                case "DOWNLOAD":
-                    $this->download = trim($larr[1]);
-                    break;
-                case "FILEBASE":
-                    $this->basepath = trim($larr[1]);
-                    break;
-                case "ICS":
-                    $this->icsfile = trim($larr[1]);
-                    break;
-                case "ldap":
-                    $this->ldap = trim($larr[1]);
-                    break;
-                case "firebase_key":
-                    $this->firebaseKey = trim($larr[1]);
-                    break;
-				default:
-					break;
-                
-            }
+       	$this->server = "localhost";
+		$this->user = "root";
+		$this->pass = "";
+		$this->database = "susointern";
+		$this->ldap = "https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php";
+		//$this->download = trim($larr[1]);
+		//$this->basepath = https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php;
+		//$this->icsfile = trim($larr[1]);
+		//$this->firebaseKey = trim($larr[1]);
+		
+		
         }
-        
-        fclose($f);
-    }
     
     /**
      * returns values from ini
