@@ -25,7 +25,9 @@ if ($userObj == null) {
 } else if ($userObj instanceof Teacher) {
     if ($est && $data['est_date'] < $today && $data['assign_end'] < $today) {
         $est = false;
-    }
+    } else if ($est && $data['assign_start'] > $today) {
+	$est = false;
+	}
 } else if ($userObj instanceof StudentUser) {
     
     $est = false;
