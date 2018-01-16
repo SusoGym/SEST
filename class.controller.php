@@ -664,6 +664,7 @@ class Controller {
             $lessons = array();
             
             try {
+		if (isset($this->infoToView['VP_coverLessons']) ) {
                 foreach ($this->infoToView['VP_coverLessons'] as $date => $data) {
                     
                     $coverLessonsThisDay = array();
@@ -677,7 +678,7 @@ class Controller {
                     }
                     
                     $lessons[$date] = $coverLessonsThisDay;
-                    
+                    }
                     
                 }
             } catch (Exception $e) {
