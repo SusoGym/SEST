@@ -31,7 +31,6 @@ class SuperModel {
      * @param $configPath string path to config file
      */
     public function __construct($configPath) {
-        \Connection::$configFile = $configPath;
         $this->connection = new \Connection();
         self::$instance = $this;
     }
