@@ -13,46 +13,14 @@ class Connection {
      */
     //public static $configFile = "internini.php";
     /**
-     * @var string database ip
+     * @var array parameters stored in cfg.ini
      */
-    private $server;
-    /**
-     * @var string database user
-     */
-    private $user;
-    /**
-     * @var string database password
-     */
-    private $pass;
-    /**
-     * @var string filesystem path
-     */
-    private $basepath;
-    /**
-     * @var string download folder
-     */
-    private $download = null;
-    /**
-     * @var string ics filename
-     */
-    private $icsfile = null;
-    /**
-     * @var string ldap link
-     */
-    private $ldap;
-    /**
-     * @var string
-     */
-    private $firebaseKey = null;
+    private $iniParams = array();
     /**
      * @var \mysqli database connection instance
      */
     
     private $connID;
-    /**
-     * @var string database name
-     */
-    private $database;
     
     
     /**
@@ -66,26 +34,18 @@ class Connection {
     
     
     /**
-    * Ermittelt die Serververbindung, benutzer und Passwort zur Basisdatenbank
-	* SERVER=localhost
-	* USER=root
-	* PASS=
-	* DB=susointern
-	* ldap=https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php
+     * Ermittelt die Serververbindung, benutzer und Passwort zur Basisdatenbank
      */
     private function getCredentials() {
-       	$this->server = "localhost";
-		$this->user = "root";
-		$this->pass = "";
-		$this->database = "susointern";
-		$this->ldap = "https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php";
-		//$this->download = trim($larr[1]);
-		//$this->basepath = https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php;
-		//$this->icsfile = trim($larr[1]);
-		//$this->firebaseKey = trim($larr[1]);
-		
-		
+        $f = fopen(self::$configFile, "r");
+        while (!feof($f)) {
+            $line = fgets($f);
+            $larr = explode("=", $line);
+            if(sizeof($larr) < 2){continue;}
+            $this->iniParams[strtolower(trim($larr[0]))] = trim($larr[1]);
         }
+        fclose($f);
+    }
     
     /**
      * returns values from ini
@@ -93,7 +53,7 @@ class Connection {
      * @return array(string)
      */
     public function getIniParams() {
-        return array("download" => $this->download, "basepath" => $this->basepath, "icsfile" => $this->icsfile, "ldap" => $this->ldap, "firebase_key" => $this->firebaseKey);  // could be much more versatile
+        return $this->iniParams;
     }
     
     
@@ -103,8 +63,11 @@ class Connection {
     private function connect() {
         
         $reporting = error_reporting(0);
-        ChromePhp::info("Connecting to " . $this->user . "@" . $this->server . ":" . $this->database);
-        $mysqli = $this->connID = new \mysqli($this->server, $this->user, $this->pass, $this->database);
+
+        $params = $this->getIniParams();
+
+        ChromePhp::info("Connecting to " . $params['user'] . "@" . $params['server'] . ":" . $params['db']);
+        $mysqli = $this->connID = new \mysqli($params['server'], $params['user'], $params['pass'], $params['db']);
         error_reporting($reporting);
         
         if ($mysqli->connect_errno) {

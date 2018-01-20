@@ -8,6 +8,7 @@
     <meta name="google-site-verification" content="afR-m_0mxdzKpJL4S5AM5JnImHvvDpxGw5WxU6S1zDk"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+</head>
 <body class="container teal">
     <div class="row">
         <div class="col s12 m8 l4 offset-m2 offset-l4" style="margin-top: 100px;">
@@ -18,7 +19,8 @@
                     <div class="collapsible-header active"><i class="material-icons">person</i>Anmelden</div>
                     <div class="collapsible-body">
                         <form autocomplete="off" onsubmit="submitLogin()" action="javascript:void(0);" class="row"
-                              style="margin: 20px;">
+                              style="margin: 20px;" id="login_form">
+                            <input type="hidden" id="captcha_login" class="g-recaptcha-response">
                             <div class="input-field col s12">
                                 <i class="material-icons prefix">person</i>
                                 <input id="usr_login" type="text" class="" required>
@@ -33,7 +35,7 @@
                             </span>
                             </div>
                             <div class="row" style="margin-bottom: 0;">
-                                <button class="btn-flat right waves-effect waves-teal" id="btn_login" type="submit">
+                                <button class="btn-flat right waves-effect waves-teal g-recaptcha invisible-recaptcha" id="btn_login" type="submit">
                                     Submit<i
                                             class="material-icons right">send</i></button>
                             </div>
@@ -44,7 +46,8 @@
                     <div class="collapsible-header"><i class="material-icons">person_add</i>Registrieren</div>
                     <div class="collapsible-body">
                         <form method="post" onsubmit="submitRegister()" action="javascript:void(0);" autocomplete="off"
-                              class="row" style="margin: 20px;">
+                              class="row" style="margin: 20px;" id="register_form">
+                            <input type="hidden" id="captcha_register" class="g-recaptcha-response">
                             <div class="input-field col s6">
                                 <i class="material-icons prefix">account_circle</i>
                                 <input id="name_register" name="name" type="text" required>
@@ -70,7 +73,7 @@
                                 <label for="pwdrep_register" class="truncate">Passwort wiederholen</label>
                             </div>
                             <div class="row" style="margin-bottom: 0;">
-                                <button class="btn-flat right waves-effect waves-teal" id="btn_register" type="submit">
+                                <button class="btn-flat right waves-effect waves-teal g-recaptcha invisible-recaptcha" id="btn_register">
                                     Submit<i
                                             class="material-icons right">send</i></button>
                             </div>
@@ -92,8 +95,7 @@
             <div class="modal-content">
                 <h4>Passwort vergessen?</h4>
                 <div class="forgotform input-field">
-                    <input id="mail_forgot" type="email" class="validate">
-                    <label for="mail_forgot">Email</label>
+                    <input id="mail_forgot" type="email" class="validate"> <label for="mail_forgot">Email</label>
                 </div>
                 <p id="forgottext" class="center" style="display:none;"></p>
             </div>
@@ -116,11 +118,31 @@
                 echo "console.info('Toast: " . $not['msg'] . "');";
             }
         
-        if (isset($_GET['s']))
-            echo "Materialize.toast('Bitte nutzen sie zur Anmeldung ihre Schul-Zugangsdaten.');";
-        
         ?>
 
+        var captchas = [];
+
+        var onLoadCaptcha = function () {
+            $(".g-recaptcha").each(function () {
+                var el = $(this);
+                captchas[el.attr("id")] =
+                    grecaptcha.render($(el).attr("id"), {
+                        "sitekey": "<?php echo $data['captcha'];?>",
+                        "callback": function (token) {
+                            $('.g-recaptcha-response').val(token);
+                            $(el).find(".g-recaptcha-response").val(token);
+                            $(el).parent().submit();
+                            grecaptcha.reset(captchas[el.attr("id")]);
+                        }
+                    });
+            });
+        };
+
+
+        function validate(type) {
+            alert(type);
+
+        }
 
         function forgot() {
             var mail = $('#mail_forgot').val();
@@ -140,8 +162,15 @@
         function submitLogin() {
             var pwd = $('#pwd_login').val();
             var usr = $('#usr_login').val().replace(/ /g, '');
+            var captcha = $('#captcha_login').val();
 
-            $.post("", {'type': 'login', 'console': '', 'login[password]': pwd, 'login[mail]': usr}, function (data) {
+            $.post("", {
+                'type': 'login',
+                'console': '',
+                'login[password]': pwd,
+                'login[mail]': usr,
+                'captcha': captcha
+            }, function (data) {
                 if (data == true) {
                     location.reload();
                 } else if (data == false) {
@@ -151,7 +180,8 @@
                     $('label[for="pwd_login"]').removeClass("active");
                 } else {
                     Materialize.toast("Unexpected response: " + data, 4000);
-                    console.info("Unexcpected response: " + data);
+                    console.info("Unexcpected response: ");
+                    console.info(data);
                     $('#pwd_login').val("");
 
                     $('label[for="pwd_login"]').removeClass("active");
@@ -171,6 +201,8 @@
             var nameVal = $('#name_register').val().replace(/ /g, '');
             var surnameVal = $('#surname_register').val().replace(/ /g, '');
 
+            var captcha = $('#captcha_register').val();
+
             if (pwd.val() != pwdrep.val()) {
                 pwd.val("");
                 pwdrep.val("");
@@ -189,7 +221,8 @@
                 'register[pwd]': pwd.val(),
                 'register[mail]': mail,
                 'register[name]': nameVal,
-                'register[surname]': surnameVal
+                'register[surname]': surnameVal,
+                'captcha': captcha
             }, function (data) {
 
                 try {
@@ -213,5 +246,7 @@
         }
     
     </script>
+    
+    <script src="https://www.google.com/recaptcha/api.js?onload=onLoadCaptcha&render=explicit" async defer></script>
 </body>
 </html>

@@ -67,6 +67,11 @@ class Controller {
             }
         }
         
+        if(isset($this->input['debugcaptcha']))
+        {
+            Model::$debugCaptcha = true;
+        }
+        
         if (!isset($this->input['type']))
             $this->input['type'] = null;
         if ($this->handleCoverLessonDataTransmission()) {
@@ -359,6 +364,7 @@ class Controller {
         
         $input = $this->input;
         
+        
         if (!isset($input['login']['mail']) || !isset($input['login']['password'])) {
             ChromePhp::info("No mail || pwd in input[]");
             $this->notify('Keine Email-Addresse oder Passwort angegeben');
@@ -368,10 +374,11 @@ class Controller {
         
         $pwd = $input['login']['password'];
         $mail = $input['login']['mail'];
+        $captcha = isset($input['captcha']) ? $input['captcha'] : '';
         
         if (isset($input['console'])) // used to only get raw login state -> can be used in js
         {
-            die($this->checkLogin($mail, $pwd) ? "true" : "false");
+            die($this->checkCaptcha($captcha, true) && $this->checkLogin($mail, $pwd) ? "true" : "false");
         }
         
         if ($this->checkLogin($mail, $pwd)) {
@@ -730,6 +737,21 @@ class Controller {
             ChromePhp::info("Email bereits registriert mit id $id");
             $success = false;
         }
+        if ($success && !isset($input['captcha'])) {
+            $success = false;
+            ChromePhp::error("No captcha given!");
+            array_push($notification, "Das Captcha wurde nicht ausgeführt!");
+        }
+        
+        if ($success) {
+            $success = $this->checkCaptcha($input['captcha']);
+            if (!$success) {
+                ChromePhp::error("Invalid captcha!");
+                array_push($notification, "Das ist invalide!");
+                
+            }
+        }
+        
         
         ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
         
@@ -807,6 +829,14 @@ class Controller {
         $this->infoToView['usr'] = self::$user;
         //set Module activity
         $this->infoToView['modules'] = array("vplan" => true, "events" => true, "news" => true);
+        
+        if(isset($this->model->getIniParams()['captcha_public_debug']) && Model::$debugCaptcha)
+        {
+            $this->infoToView['captcha'] = $this->model->getIniParams()['captcha_public_debug'];
+        } else {
+            $this->infoToView['captcha'] = $this->model->getIniParams()['captcha_public'];
+        }
+        
         
         if (isset($_SESSION['notifications'])) {
             if (!isset($this->infoToView['notifications']))
@@ -968,8 +998,8 @@ class Controller {
                     $studentObj = $this->model->getStudentByName($name, null, $bday);
                     
                     if ($studentObj == null) {
-						$failure = $this->model->raiseLockedCount(self::$user->getId() );
-						$notifyText = ($failure > 2) ? "zu viele Fehlversuche - Funktion für 5 Minuten deaktiviert!" : "Bitte überprüfen Sie die angegebenen Schülerdaten!";
+                        $failure = $this->model->raiseLockedCount(self::$user->getId());
+                        $notifyText = ($failure > 2) ? "zu viele Fehlversuche - Funktion für 5 Minuten deaktiviert!" : "Bitte überprüfen Sie die angegebenen Schülerdaten!";
                         array_push($notification, $notifyText);
                         ChromePhp::info("Invalid student data!");
                         $success = false;
@@ -984,8 +1014,8 @@ class Controller {
                     
                     if ($eid != null) {
                         $failure = $this->model->raiseLockedCount(self::$user->getId());
-						$notifyText = ($failure >2) ? "zu viele Fehlversuche - Funktion für 5 Minuten deaktiviert!" : "Dem Schüler $name $surname ist bereits ein Elternteil zugeordnet!";
-                       	array_push($notification, $notifyText);
+                        $notifyText = ($failure > 2) ? "zu viele Fehlversuche - Funktion für 5 Minuten deaktiviert!" : "Dem Schüler $name $surname ist bereits ein Elternteil zugeordnet!";
+                        array_push($notification, $notifyText);
                         ChromePhp::info("Student already has parent!");
                         $success = false;
                     } else {
@@ -999,19 +1029,19 @@ class Controller {
         
         if ($success) {
             /** @var Guardian $parent */
-			$failure = $this->model->raiseLockedCount(self::$user->getId(), false);
-			if ($failure >2) {
-				$success = false;
-				array_push($notification, "zu viele Fehlversuche - Funktion deaktiviert!" );
-			} else {
-				$parent = self::$user;
-				$success = $this->model->parentAddStudents($parent->getParentId(), $studentIds);
-			}			
-			
-             ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
+            $failure = $this->model->raiseLockedCount(self::$user->getId(), false);
+            if ($failure > 2) {
+                $success = false;
+                array_push($notification, "zu viele Fehlversuche - Funktion deaktiviert!");
+            } else {
+                $parent = self::$user;
+                $success = $this->model->parentAddStudents($parent->getParentId(), $studentIds);
+            }
+            
+            ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
         }
         
-       
+        
         
         if (isset($this->input['console'])) {
             $output = array("success" => $success);
@@ -1276,6 +1306,20 @@ class Controller {
             $cont = null;
         }
         $this->model->writeToVpLog("*****************************************************");
+    }
+    
+    public function checkCaptcha($token, $ignoreEmpty = false) {
+        
+        
+        if ($token == null || $token == "" && $ignoreEmpty) {
+            ChromePhp::info("Empty Captcha passing through...");
+            
+            return true;
+        }
+        
+        $resp = $this->model->checkCaptcha($token);
+        
+        return $resp->success == 1;
     }
     
     
