@@ -13,6 +13,8 @@ class Model {
      */
     protected static $model;
     
+    public static $debugCaptcha = false;
+    
     /**
      * @var monate
      */
@@ -55,7 +57,7 @@ class Model {
     /**
      * get values from ini-file
      *
-     * @return string
+     * @return array
      */
     public function getIniParams() {
         return self::$connection->getIniParams();
@@ -870,6 +872,42 @@ class Model {
         return $res;
         
         
+    }
+    
+    /**
+     * @param $token string captcha token
+     *
+     *                      Checks captcha response w/ google
+     *
+     * @return mixed response from api
+     * @throws \Exception unsuccessful api connection
+     */
+    public function checkCaptcha($token) {
+        $apiUrl = "https://www.google.com/recaptcha/api/siteverify";
+        $key = $this->getIniParams()['captcha_private'];
+        
+        if(isset($this->getIniParams()['captcha_private_debug']) && self::$debugCaptcha)
+        {
+            $key = $this->getIniParams()['captcha_private_debug'];
+        }
+        
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $apiUrl);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "secret=$key&response=$token");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        
+        $result = utf8_encode(curl_exec($ch));
+        if (curl_errno($ch)) {
+            throw new Exception(curl_error($ch));
+        }
+        if ($result == false) {
+            throw new Exception("Captcha response was empty!");
+        }
+        ChromePhp::info("Response from reCAPTCHA: $result");
+        $result = json_decode($result);
+        return $result;
     }
     
     

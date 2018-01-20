@@ -5,5 +5,8 @@ USER=root
 PASS=
 DB=susointern
 ldap=https://intranet.suso.schulen.konstanz.de/gpuntis/susointern.php
+firebase_key=
+captcha_public=
+captcha_private=
 */
 ?>
