@@ -3,7 +3,6 @@ $data = $this->getDataForView();
 
 $selectionActive = $est = $vplan = $events = $news = $editData = $childSel = true;
 $blog = false;
-$today = date("Ymd");
 
 $userObj = Controller::getUser();
 
@@ -18,14 +17,14 @@ if ($userObj == null) {
         $selectionActive = false;
         
     }
-    if ($est && (isset($data['est_date']) && $data['est_date'] < $today) || (isset($data['book_start']) && $data['book_start'] > $today)) {
+    if ($est && (isset($data['est_date']) && $data['est_date'] < date('Ymd')) || (isset($data['book_start']) && $data['book_start'] > date('Ymd H:i')) ){
         ChromePhp::info("No children selected by guardian or booking time expired");
         $est = false;
     }
 } else if ($userObj instanceof Teacher) {
-    if ($est && $data['est_date'] < $today && $data['assign_end'] < $today) {
+    if ($est && $data['est_date'] < date('Ymd') ) {
         $est = false;
-    } else if ($est && $data['assign_start'] > $today) {
+    } else if ($est && $data['assign_start'] > date('Ymd H:i')) {
 	$est = false;
 	}
 } else if ($userObj instanceof StudentUser) {

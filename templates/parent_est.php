@@ -3,7 +3,7 @@ $data = $this->getDataForView();
 /** @var Guardian $user */
 $user = $data['user'];
 
-$today = date("Ymd");
+$today = date("Ymd H:i");
 include("header.php");
 $day = date_format(date_create($data['estdate']), 'd.m.Y');
 
