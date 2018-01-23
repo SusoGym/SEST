@@ -338,7 +338,7 @@ class Model extends \Model {
     public function updateOptions($data) {
         foreach ($data as $key => $value) {
             $key = self::$connection->escape_string($key);
-            $value = self::$connection->escape_string($value);
+            $value = trim(self::$connection->escape_string($value)," ");
             self::$connection->straightQuery("UPDATE options SET value ='$value' WHERE type='$key' ");
         }
     }

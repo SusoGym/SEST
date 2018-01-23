@@ -4,7 +4,7 @@ include("header.php");
 $data = $this->getDataForView();
 /** @var Teacher $usr */
 $usr = $data['usr'];
-$today = date("Ymd");
+$today = date("Ymd H:i");
 if ($today > $data['assign_end']) {
     $enabled = false;
 } else {
