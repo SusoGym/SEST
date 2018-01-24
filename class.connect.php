@@ -40,7 +40,13 @@ class Connection
      */
     private function getCredentials()
     {
-        $f = fopen(self::$configFile, "r");
+        @$f = fopen(self::$configFile, "r");
+
+        if(!$f)
+        {//error?
+            die("Error: could not load intermini.php ; please try refreshing this page or contact your system admin");
+        }
+
         while (!feof($f)) {
             $line = fgets($f);
             if (strpos($line, '=') === false) {
