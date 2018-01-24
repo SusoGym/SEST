@@ -119,4 +119,4 @@ fabric.properties
 *.ftpconfig
 *.ini
 /.gtm/
-cfg.ini
+internini.php
