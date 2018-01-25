@@ -50,7 +50,7 @@ class Model extends SuperModel {
         
         $this->connection->straightQuery("DELETE FROM fcm_registration WHERE fcm_token='$token'");
         
-        $query = "INSERT INTO fcm_registration(userId, userType, fcm_token, verification_client, verification_server) VALUES ('$userId', '$userType', '$token', '$tkn1', '$tkn2')";
+        $query = "REPLACE INTO fcm_registration(userId, userType, fcm_token, verification_client, verification_server) VALUES ('$userId', '$userType', '$token', '$tkn1', '$tkn2')";
         
         $this->connection->insertValues($query);
         
@@ -80,7 +80,7 @@ class Model extends SuperModel {
             return "Invalid verification";
         }
         
-        $insertQuery = "INSERT INTO fcm_token(token, userId, userType) VALUES ('$token', $userId, $userType)";
+        $insertQuery = "REPLACE INTO fcm_token(token, userId, userType) VALUES ('$token', $userId, $userType)";
         
         $this->connection->straightMultiQuery("DELETE FROM fcm_registration WHERE fcm_token='$token'; DELETE FROM fcm_token WHERE token='$token'");
         $this->connection->insertValues($insertQuery);
@@ -102,7 +102,7 @@ class Model extends SuperModel {
         
         $this->connection->straightQuery("DELETE FROM fcm_registration WHERE fcm_token='$token'");
         
-        $query = "INSERT INTO fcm_deletion(fcm_token, verification_client, verification_server) VALUES ('$token', '$tkn1', '$tkn2')";
+        $query = "REPLACE INTO fcm_deletion(fcm_token, verification_client, verification_server) VALUES ('$token', '$tkn1', '$tkn2')";
         
         $this->connection->insertValues($query);
         
