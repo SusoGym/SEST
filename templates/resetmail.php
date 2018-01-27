@@ -1,5 +1,5 @@
 <?php 
-$url = (!isset($url) ) ?  "#" : "https://www.".$url; 
+$url = (!isset($url) ) ?  "#" : "https://".$url; 
 
 
 ?>
