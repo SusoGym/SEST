@@ -327,7 +327,7 @@ class Controller {
         $this->infoToView['slots_to_show'] = $teacher->getSlotListToAssign();
         
         //To show final bookings appointments of teacher must be read
-        if (date('Ymd') > $this->infoToView['assign_end']) {
+        if (date('Ymd H:i') > $this->infoToView['assign_end']) {
             $this->infoToView['teacher_classes'] = $teacher->getTaughtClasses();
             $this->infoToView['teacher_appointments'] = $teacher->getAppointmentsOfTeacher();
             $this->infoToView['card_title'] = "Ihre Termine am Elternsprechtag";
@@ -522,9 +522,9 @@ class Controller {
             $this->notify("Um diese Seite aufrufen zu können, müssen sie ein Elternteil sein!");
             
             return $this->getDashBoardName();
-        } else if (($open = $this->getOption("open", "20000101")) > ($today = date("Ymd"))) {
+        } else if (($open = $this->getOption("open", "20000101")) > ($today = date("Ymd H:i"))) {
             
-            $date = DateTime::createFromFormat("Ymd", $open);
+            $date = DateTime::createFromFormat("Ymd H:i", $open);
             if ($date == false)
                 $this->notify("Diese Seite kann noch nicht aufgerufen werden!");
             else
@@ -541,7 +541,7 @@ class Controller {
             $action = $this->input['action'];
             
             if ($bookingTimeIsOver) {
-                $date = DateTime::createFromFormat("Ymd", $open);
+                $date = DateTime::createFromFormat("Ymd H:i", $open);
                 
                 $this->notify("Es ist nicht länger möglich zu buchen" . ($date != false ? ". Die Frist war bis zum " . date("d.m.Y", $date->getTimestamp()) : "") . '!');
             } else if ($this->model->parentOwnsAppointment($guardian->getParentId(), $slot)) {
