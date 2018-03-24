@@ -2055,7 +2055,7 @@ class Model {
             }
         }
         //get Parents
-        $data = self::$connection->selectValues("SELECT userid,eltern.id,htmlnews,email FROM eltern,user,schueler
+        $data = self::$connection->selectValues("SELECT DISTINCT userid,eltern.id,htmlnews,email FROM eltern,user,schueler
 	WHERE userid = user.id
 	AND eltern.id = schueler.eid
 	AND receive_news = 1");
