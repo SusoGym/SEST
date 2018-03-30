@@ -127,6 +127,7 @@ class Controller {
                     
                     return $this->getDashBoardName();
                 }
+				$this->infoToView['user'] = self::$user;
                 $template = "parent_child_select";
                 break;
             case "login":
@@ -141,6 +142,9 @@ class Controller {
             case "addstudent":
                 $this->addStudent();
                 break;
+			case "requestkey":
+				$this->requestKey();
+				break;
             case "parent_editdata":
                 $template = $this->handleParentEditData();
                 break;
@@ -992,10 +996,8 @@ class Controller {
                 $success = false;
             } else {
                 foreach ($this->input['students'] as $student) {
-                    $student = explode(":", $student);
-                    $name = $student[0];
-                    $bday = $student[1];
-                    $studentObj = $this->model->getStudentByName($name, null, $bday);
+                    
+                    $studentObj = $this->model->getStudentByASVId($student);
                     
                     if ($studentObj == null) {
                         $failure = $this->model->raiseLockedCount(self::$user->getId());
@@ -1010,7 +1012,7 @@ class Controller {
                     $surname = $studentObj->getSurname();
                     $name = $studentObj->getName();
                     
-                    ChromePhp::info("Student: $name $surname, born on " . $bday . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($eid == null ? "no parents set" : "parent with id $eid")));
+                    ChromePhp::info("Student with ASV Id " . $student . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($eid == null ? "no parents set" : "parent with id $eid")));
                     
                     if ($eid != null) {
                         $failure = $this->model->raiseLockedCount(self::$user->getId());
@@ -1054,6 +1056,37 @@ class Controller {
         die("Why are you here again? I think you don't like javascript, do you?");
         
     }
+	
+	/**
+	* parent requests registration key for children
+	* will send emails to admin
+	*/
+	protected function requestKey(){
+	require("PHPMailer.php");
+	$email = $this->input['email'];
+	$name = $this->input['student'];
+	$klasse = $this->input['kl']; 
+	$bday = $this->input['dob']; 
+	$now = date('d.m.Y');
+	
+	$body = mb_convert_encoding("Sie haben am ".$now." einen Registrierungsschlüssel für ".$name." (".$klasse.
+	") geboren am: ".$bday." unter dieser Emailadresse angefordert. Ihre Anfrage wird bearbeitet. Bitte haben Sie etwas Geduld bis Sie den Schlüssel erhalten.
+	 <br><br>Sollten Sie diese Anforderung nicht getätigt haben und die Vermutung haben, dass jemand Ihre Email Adresse benutzt hat, 
+	 kontaktieren Sie bitte die Direktion unter direktion@suso.konstanz.de.",'UTF-8'); 
+	
+	$adminbody = mb_convert_encoding("Registrierungskey-Anfrage durch ".$email."für Schüler: ".$name." (".$klasse.
+	"), geboren am: ".$bday,'UTF-8');
+	$adminmail = "hartleitner@suso.konstanz.de";
+	if(isset($this->input['console'])){
+	$success = $this->sendKeyRequestMail($email,$body);
+	$success = $this->sendKeyRequestMail($adminmail,$adminbody);
+	$notify = (!$success) ? array("Something went wrong") : array("Email sent");
+	$output = array("success" => $success,"notifications"=>$notify );
+	echo  json_encode($output);
+    }
+	
+	die;
+	}
     
     /**
      * Sorts array by the state if a teacher has slots available or not (/w slots first then without slots
@@ -1241,6 +1274,33 @@ class Controller {
         
     }
     
+	
+	 /**
+     *
+     * send request registration key Email
+     * @param string email
+	 * @param string content
+     */
+    private function sendKeyRequestMail($email,$content) {
+        
+        //sending emails
+        $phpmail = new PHPMailer();
+        $phpmail->setFrom("direktion@suso.konstanz.de", "Suso-Intern");
+		$phpmail->CharSet = "UTF-8";
+		$phpmail->isHTML();
+		$phpmail->AddAddress($email);
+		$phpmail->Subject = date('d.m.Y - H:i:s') . "Suso-Intern Ihre Registrierungsanfrage";
+		$phpmail->Body = $content;
+			
+		$send = true;
+		
+		//Senden
+		if (!$phpmail->Send()) {
+			$send = false;
+		} 
+		
+		return $send;
+        }
     
     
     /**

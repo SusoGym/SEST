@@ -89,6 +89,20 @@ class Model {
         
         return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid']);
     }
+	
+	/**
+	* @param string (the ID provided from external source, i.e. school administration software
+	* @return student
+	*/
+	public function getStudentByASVId($asvId) {
+		$data = self::$connection->selectAssociativeValues('SELECT * FROM schueler WHERE ASV_ID = "'.$asvId.'"');
+        if ($data == null)
+            return null;
+        
+        $data = $data[0];
+        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid']);
+    	
+	}
     
     /**
      * @param $uid int
