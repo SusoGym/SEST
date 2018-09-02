@@ -1,15 +1,43 @@
 <?php
 include("header.php");
 $data = $this->getDataForView();
+$cover_lessons = $data['VP_coverLessons'];
 ?>
-<div class="container">
-    <div class="card white">
+
+<div class="row">
+<div class="col s12">
+    <div class="card white ">
         <div class="card-content">
-            <span class="card-title">Startseite</span>
+            <span class="card-title">Hinweise</span>
             <p><?php echo $data['welcomeText']; ?></p>
         </div>
     </div>
-    <div class="card white">
+</div>
+<!--
+<div class="col l6 s12 m6">
+	<div class="card white ">
+        <div class="card-content">
+            <span class="card-title">Blog</span>
+            <p>Keine neuen Nachrichten</p>
+        </div>
+    </div>
+</div>
+-->
+<div class="col l6 s12 m6">
+	<div class="card white ">
+        <div class="card-content">
+            <span class="card-title">Vertretungen</span>
+            <p><?php echo count($cover_lessons)." aktuelle Vertretungen" ?></p>
+        
+		<div class="card-action">
+			<a class="secondary-content action" href="?type=vplan">zum Vertretungsplan</a>
+		</div>
+		</div>
+		
+    </div>
+</div>
+<div class="col l6 s12 m6">
+    <div class="card white ">
         <div class="card-content">
             <span class="card-title">Demnächst</span>
             <?php
@@ -42,6 +70,8 @@ $data = $this->getDataForView();
         </div>
     </div>
 </div>
+</div>
+
 
 
 <?php include("js.php"); ?>

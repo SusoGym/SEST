@@ -94,8 +94,9 @@ class Controller {
         $this->sendOptions();
         
         if (self::$user instanceof Guardian) {
-            $this->infoToView['welcomeText'] = str_replace("\\n", "<br>", str_replace("\\r\\n", "<br>", $this->getOption('welcomeparent', '')));
-            $this->infoToView['children'] = self::$user->getChildren();
+            //$this->infoToView['welcomeText'] = str_replace("\\n", "<br>", str_replace("\\r\\n", "<br>", $this->getOption('welcomeparent', '')));
+            $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomeparent');
+			$this->infoToView['children'] = self::$user->getChildren();
         } else if (self::$user instanceof Teacher) {
             $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcometeacher');
             
@@ -809,16 +810,32 @@ class Controller {
             return $_SESSION['board_type'] . '_dashboard';
         } else if ($user instanceof Teacher) {
             $this->infoToView['upcomingEvents'] = $this->model->getNextDates(true);
+			$this->infoToView['VP_allDays'] = $this->model->getVPDays(true);
+            $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessons(false, $user, $this->infoToView['VP_allDays']);
             
             return "teacher_dashboard";
         } else if ($user instanceof StudentUser) {
             $this->infoToView['upcomingEvents'] = $this->model->getNextDates(false);
-            
+			
             return "student_dashboard";
         } else {
+			//Parent user
             $this->infoToView['upcomingEvents'] = $this->model->getNextDates(false);
-            
-            return "parent_dashboard";
+			//Test
+			$this->infoToView['VP_coverLessons'] = null;
+			$isStaff = false;
+			$this->infoToView['VP_allDays'] = $this->model->getVPDays(false);
+			
+            if (isset($this->infoToView["children"])  )  {
+				if (count($this->infoToView["children"])  ) {
+					$classes = array();
+					foreach ($this->infoToView["children"] as $child) {
+						$classes[] = $child->getClass();
+					}
+					$this->infoToView['VP_coverLessons'] = (count($classes > 0) ) ? $this->model->getAllCoverLessonsParents($classes, $this->infoToView['VP_allDays']) : null;
+					}
+				}
+			return "parent_dashboard";
         }
         
     }
@@ -1074,9 +1091,9 @@ class Controller {
 	 <br><br>Sollten Sie diese Anforderung nicht getätigt haben und die Vermutung haben, dass jemand Ihre Email Adresse benutzt hat, 
 	 kontaktieren Sie bitte die Direktion unter direktion@suso.konstanz.de.",'UTF-8'); 
 	
-	$adminbody = mb_convert_encoding("Registrierungskey-Anfrage durch ".$email."für Schüler: ".$name." (".$klasse.
+	$adminbody = mb_convert_encoding("Registrierungskey-Anfrage durch ".$email." für Schüler: ".$name." (".$klasse.
 	"), geboren am: ".$bday,'UTF-8');
-	$adminmail = "hartleitner@suso.konstanz.de";
+	$adminmail = "hartleitner@suso.schulen.konstanz.de";
 	if(isset($this->input['console'])){
 	$success = $this->sendKeyRequestMail($email,$body);
 	$success = $this->sendKeyRequestMail($adminmail,$adminbody);
