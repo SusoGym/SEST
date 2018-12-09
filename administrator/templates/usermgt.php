@@ -107,6 +107,11 @@
                             if (val !== '') {
                                 try {
                                     data = JSON.parse(data);
+									//catch timeout an reload page (back to login)
+									if (null != data['time']  && data['time'] === "out") {
+										Materialize.toast(data['message'],"4000");
+										location.reload();
+									}
                                 } catch (e) {
                                     return; // no valid response
                                 }

@@ -103,6 +103,19 @@ class Model {
         return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid']);
     	
 	}
+	
+	/**
+	* get student's ASV ID
+	* @param int id
+	* @return string ASVId
+	*/
+	public function getASVId($id){
+	$data = self::$connection->selectValues('SELECT ASV_ID FROM schueler WHERE id = '.$id);	
+	if ($data == null)
+            return null;
+     else   
+		return $data[0][0];
+	}
     
     /**
      * @param $uid int
@@ -117,7 +130,7 @@ class Model {
             return null;
         if (isset($data[0]))
             $data = $data[0];
-        
+
         $type = $data['user_type'];
         
         switch ($type) {
@@ -125,7 +138,7 @@ class Model {
                 return new Admin($data['id'], $data['email']);
                 break;
             case 1: // Parent / Guardian
-                $data2 = self::$connection->selectAssociativeValues("SELECT * FROM eltern WHERE userid=$uid")[0];
+			    $data2 = self::$connection->selectAssociativeValues("SELECT * FROM eltern WHERE userid=$uid")[0];
                 
                 return new Guardian($data['id'], $data['email'], $data2['id'], $data2['name'], $data2['vorname']);
             case 2:
@@ -152,6 +165,60 @@ class Model {
         
         return $this->getUserById($data[0]['id'], $data);
     }
+	
+	
+	/**
+	* get user's dsgvo status
+	* @param int id
+	* @return string date of acceptance
+	*/
+	public function getDsgvoStatus($user) {
+	if ($user instanceof Guardian) {
+			$table = "eltern";
+			$id = $user->getParentId();
+	}
+	if ($user instanceof Teacher) {
+			$table = "lehrer";
+			$id = $user->getId();
+	}
+	if ($user instanceof StudentUser) {
+			$table = "schueler";
+			$id = $user->getId();
+	}
+	$dsgvoStatus = null;
+	//When admin is logged in, there won't be an ID for Guardian object etc.
+	if (isset($id)) {
+		$data = self::$connection->selectValues("SELECT dsgvo FROM $table WHERE id = $id");
+		if ($data) {
+				$dsgvoStatus = $data[0][0];
+		}
+	}	
+	
+	
+	return $dsgvoStatus;
+	}
+	
+	/*
+	**accept dsgvo and enter in DB
+	* @param user
+	*/
+	public function acceptDsgvo($user) {
+		$table = "";
+		$id = $user->getId();
+		if ($user instanceof Guardian) {
+			$table = "eltern";
+			$id = $user->getParentId();
+		}
+		if ($user instanceof Teacher) {
+				$table = "lehrer";
+				$id = $user->getId();
+		}
+		if ($user instanceof StudentUser) {
+				$table = "schueler";
+				$id = $user->getId();
+		}
+		$data = self::$connection->straightQuery("UPDATE $table set dsgvo = CURRENT_TIMESTAMP WHERE id = $id");
+	}
     
     /**
      * @param int $tchrId
@@ -379,7 +446,12 @@ class Model {
         return $this->getLdapUserByLdapNameAndPwd($ldapName, $pwd);
     }
     
-    
+    /**
+	* studentUser
+	* used to get courses list
+	* @param int id
+	* @return StudentUser object
+	*/
     public function getStudentUserById($id) {
         $data = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE id='$id'");
         
@@ -391,6 +463,8 @@ class Model {
         return new StudentUser($data['id'], $data['name'], $data['vorname'], $data['klasse'], $data['gebdatum'], $data['eid'], $data['kurse']);
         
     }
+	
+	
     
     /**
      * @param $ldapName
@@ -534,7 +608,6 @@ class Model {
     
     /**
      * @param $eid int parentId
-     *
      * @return Guardian
      */
     public function getParentByParentId($eid) {
@@ -545,6 +618,37 @@ class Model {
         
         return $this->getUserById($data['userid']);
     }
+	
+	/**
+	* getParentUserByParentId - not sure if above function is working properly
+	* @param int eid
+	* @return array
+	*/
+	public function getParentUserByParentId($eid){
+	$data = self::$connection->selectAssociativeValues("SELECT name, vorname, user.email AS email, user.id AS uid 
+	FROM eltern, user 
+	WHERE eltern.id=$eid
+	AND user.id = eltern.userid");
+        if ($data == null)
+            return null;
+        $data = $data[0];
+        
+        //return new Guardian($data['uid'],$data['email'],$eid,$data['name'],$data['vorname']);
+		return array("fullname"=>$data['name'].", ".$data['vorname'],"email"=>$data['email'] );
+	}
+	/**
+	* getParentByEmailAdress
+	* @param String email
+	* @return Guardian
+	*/
+	public function getUserByEmail($email){
+	$data = self::$connection->selectAssociativeValues("SELECT id FROM user WHERE email='$email'");
+        if ($data == null)
+            return null;
+        $data = $data[0];
+        return $this->getUserById($data['id']);
+    }	
+	
     
     /**
      * @param int $slotId
@@ -1124,6 +1228,40 @@ class Model {
         
         return $data[0][0];
     }
+	
+	/**
+	* returns all pupils whose surname starts with $startingWith
+	* @param string 
+	* @param int
+	* @return array(StudentObject);
+	*/
+	public function getAllTaughtPupils($id,$startingWith) {
+	$arr = array();
+        $startingWith = self::$connection->escape_string($startingWith);
+        $query = 'SELECT schueler.id,vorname,name,gebdatum,schueler.klasse FROM schueler,unterricht 
+		WHERE unterricht.lid ='. $id.
+		' AND unterricht.klasse = schueler.klasse 
+		AND name LIKE "'.$startingWith.'%"';
+		$data = self::$connection->selectAssociativeValues($query);
+        if ($data != null && !empty($data))
+            foreach ($data as $d) {
+				//get the absence status of the student and add it to the array
+			    $student = new Student($d['id'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum']);
+				$absenceState = (!empty($student->getAbsenceState()) ) ? true : false;
+				
+				$arr[] = array("absent" => $absenceState,"student" => $student );
+			}
+        return $arr;	
+	}
+	
+	/**
+	* get student absence state
+	* @param int student id
+	* @return bool
+	*/
+	public function getStudentAbsenceState($id) {
+		return self::$connection->selectValues('SELECT aid FROM absenzen WHERE sid ='.$id.' AND ende >"'.date('Y-m-d').'"'); 	
+		}
     
     /** Change teacherData
      *
@@ -1238,6 +1376,22 @@ class Model {
     public function cleanUpPwdReset() {
         self::$connection->straightQuery("DELETE FROM pwd_reset WHERE validuntil < NOW();");
     }
+	
+	
+	/**
+	* enter keyrequest in Database for further processing
+	* @param string email
+	* @param string surname
+	* @param string birthday
+	* param string klasse
+	*/
+	public function enterKeyRequestIntoDB($email, $name = null, $dob = null, $klasse = null){
+	$user =	$this->getUserByEmail($email);
+	$eid = $user->getParentId(); // this is the wrong ID (userID) -- fix it!
+	self::$connection->straightQuery("INSERT INTO registration_request (`requestId`,`email`,`eid`,`name`,`dob`,`klasse`,`request_date`)
+	VALUES ('','$email','$eid','$name','$dob','$klasse',CURRENT_TIMESTAMP)");
+	return $user;
+	}
     
     /*************************************************
      ********methods only used in CoverLesson module***
@@ -1603,9 +1757,7 @@ class Model {
     
     /**
      *get Primary key and email by Teacher untisname
-     *
      * @param String $short
-     *
      * @return array(String, Int)
      */
     public function getTeacherDataByShortName($short) {
@@ -1644,6 +1796,371 @@ class Model {
         
         return $courses;
     }
+	
+	/**
+	* get achildren of parent and absence state
+	* @param array(StudentObject)
+	* @return JSON array
+	*/
+	public function getChildrenAbsenceState($children) {
+		$childrenArr = array();
+		foreach ($children as $child) {
+		$data = self::$connection->selectAssociativeValues('SELECT * FROM absenzen 
+		WHERE sid='.$child->getId().
+		' AND ende >="'.date('Y-m-d').'"');
+		if ($data) {
+			$d = $data[0];
+			$childrenArr[] = array("id"=>$child->getId(),
+			"name"=>$child->getFullName(),
+			"klasse"=>$child->getClass(),
+			"absenceId" => $d['aid'],
+			"absent"=>"true",
+			"beginn" => $d['beginn'],
+			"ende" => $d['ende'],
+			"adminMeldung" => $d['adminMeldung'],
+			"adminMeldungDatum" => $d['adminMeldungDatum'],
+			"adminMeldungTyp" => $d['adminMeldungTyp'],
+			"lehrerMeldung" => $d['lehrerMeldung'],
+			"lehrerMeldungDatum" => $d['lehrerMeldungDatum'],
+			"elternMeldung" => $d['elternMeldung'],
+			"elternMeldungDatum" => $d['elternMeldungDatum'],
+			"entschuldigt" => $d['entschuldigt']
+			);	
+			} else {
+			$childrenArr[] = 	array("id"=>$child->getId(),
+			"name"=>$child->getFullName(),
+			"klasse"=>$child->getClass(),
+			"absent"=>"false");
+			}
+		}
+		
+		return json_encode($childrenArr);
+	}
+	
+	/**
+	* get leave of absence cases
+	* @return JSON Array
+	*/
+	public function getLeaveOfAbsenceStudents(){
+	$loaPupils = array();
+	$data = self::$connection->selectAssociativeValues('SELECT * FROM absenzen,schueler 
+	WHERE absenzen.sid = schueler.id
+	AND beurlaubt = 1
+	AND ende > "'.date('Y-m-d').'"' );
+	if (!empty($data) ) {
+		foreach ($data as $d) {
+			//$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid']);
+			array_push($loaPupils, array("type" =>"absent",
+			"absenceId" => $d['aid'],
+			"id"=>$d['sid'],
+			"name" => $d['name'].', '.$d['vorname'],
+			"klasse" => $d['klasse'],
+			"beginn" => $d['beginn'],
+			"ende" => $d['ende'],
+			"beurlaubt" => $d['beurlaubt'],
+			"kommentar" => $d['kommentar'],
+			"adminMeldung" => $d['adminMeldung'],
+			"adminMeldungDatum" => $d['adminMeldungDatum']
+			)
+			);
+		}	
+	}
+	return json_encode($loaPupils);	
+	}
+	
+	
+	/**
+	* get absent students of current day
+	* @return JSON array
+	*/
+	public function getAbsentStudents() {
+		$absentPupils = array();
+		$today = date('Y-m-d');
+		$data = self::$connection->selectAssociativeValues('SELECT * FROM absenzen,schueler 
+		WHERE absenzen.sid = schueler.id
+		AND beginn <="'.$today.'" AND ende >="'.$today.'" ORDER BY schueler.name,schueler.vorname');
+		if($data) {
+				foreach ($data as $d) {
+					$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid']);
+					array_push($absentPupils, array("type" =>"absent",
+					"absenceId" => $d['aid'],
+					"id"=>$d['sid'],
+					"name" => $d['name'].', '.$d['vorname'],
+					"klasse" => $d['klasse'],
+					"beginn" => $d['beginn'],
+					"ende" => $d['ende'],
+					"beurlaubt" => $d['beurlaubt'],
+					"kommentar" => $d['kommentar'],
+					"adminMeldung" => $d['adminMeldung'],
+					"adminMeldungDatum" => $d['adminMeldungDatum'],
+					"adminMeldungTyp" => $d['adminMeldungTyp'],
+					"lehrerMeldung" => $d['lehrerMeldung'],
+					"lehrerMeldungDatum" => $d['lehrerMeldungDatum'],
+					"elternMeldung" => $d['elternMeldung'],
+					"elternMeldungDatum" => $d['elternMeldungDatum'],
+					"entschuldigt" => $d['entschuldigt']
+					)
+					);
+				}
+		}
+		return $absentPupils;
+		
+	}
+	
+	/**
+	* get missing absence excuse
+	* @return json
+	*/
+	public function getMissingExcuses() {
+		
+		$absentPupils = array();
+		$today = date('Y-m-d');
+		$data = self::$connection->selectAssociativeValues('SELECT * FROM absenzen,schueler 
+		WHERE absenzen.sid = schueler.id
+		AND ende <"'.$today.'" AND entschuldigt = "0000-00-00" ORDER BY schueler.name,schueler.vorname');	
+		if($data) {
+				foreach ($data as $d) {
+					$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid']);
+					array_push($absentPupils, array("type" =>"missingExcuse",
+					"absenceId" => $d['aid'],
+					"id"=>$d['sid'],
+					"name" => $d['name'].', '.$d['vorname'],
+					"klasse" => $d['klasse'],
+					"beginn" => $d['beginn'],
+					"ende" => $d['ende'],
+					"kommentar" => $d['kommentar'],
+					"adminMeldung" => $d['adminMeldung'],
+					"adminMeldungDatum" => $d['adminMeldungDatum'],
+					"adminMeldungTyp" => $d['adminMeldungTyp'],
+					"lehrerMeldung" => $d['lehrerMeldung'],
+					"lehrerMeldungDatum" => $d['lehrerMeldungDatum'],
+					"elternMeldung" => $d['elternMeldung'],
+					"elternMeldungDatum" => $d['elternMeldungDatum'],
+					"entschuldigt" => $d['entschuldigt']
+					)
+					);
+				}
+		}
+		return $absentPupils;
+			
+	}
+	
+	
+	/**
+	* check if absence existed the previouzs day
+	* @param int pupilId
+	* @param string date
+	*/
+	public function getPreviousDayAbsence($id,$date) {
+	$dayBefore = date('Y-m-d',(strtotime ( '-1 day' , strtotime ( $date) ) ));
+	$data = self::$connection->selectValues('SELECT aid FROM absenzen 
+	WHERE sid ='. $id .' AND ende >= "'.$dayBefore.'"');
+	
+	
+	if ($data) {
+	return $data[0][0];	
+	} else {
+	return null;	
+	}
+	}
+	
+	/**
+	* add to existing absence - prolong
+	* @param int aid
+	* @param string startdate
+	* @param string enddate
+	* @user int optinal
+	* @user int mode
+	*/
+	public function addToAbsence($aid,$end,$user = null,$mode = false) {
+		//must consider user who enters and in case of admin also type
+	if ($user) {
+	if ($mode)  {
+		//admin
+		$query = 'UPDATE absenzen set ende = "'.$end.'",adminMeldung='.$user.',adminMeldungTyp ="'.$mode.'" WHERE aid = '.$aid;
+	} else {
+		//teacher
+		$query = 'UPDATE absenzen set ende = "'.$end.'",lehrerMeldung='.$user.' WHERE aid = '.$aid;
+	}
+	} else {
+		//parent
+	$query = 'UPDATE absenzen set ende = "'.$end.'" WHERE aid = '.$aid;	
+	}
+	
+	self::$connection->straightQuery($query); 
+		
+	}
+	/**
+	* enter absent student
+	* @param int sid
+	* @param int notice method
+	* @param string end date
+	* @param string comment
+	* @param int user id
+	* @param int user type
+	*/
+	public function enterAbsentPupil($id ,$start,$end,$comment, $userId,$method = null,$who = 1,$loa = 0) {
+	$modus = false;
+	switch($who) {
+		case 1://admin
+		$whoField = "adminMeldung";
+		$whenField = "adminMeldungDatum";
+		$modus = true;
+		break;
+		case 2:
+		$whoField = "elternMeldung";
+		$whenField = "elternMeldungDatum";
+		break;
+		case 3:
+		$whoField = "lehrerMeldung";
+		$whenField = "lehrerMeldungDatum";
+		break;
+	}
+	if ($end == 0) 
+		$end = $start;
+	if($modus) {
+		$queryAdd = ',`adminMeldungTyp`)';	
+		$valueAdd = ",'$method')";
+		} else {
+		$queryAdd = $valueAdd = ')';
+		}	
+	
+	$query = "INSERT INTO absenzen (`aid`,`sid`,`beginn`,`ende`,`kommentar`,`beurlaubt`,`".$whoField."`,`".$whenField."`".
+	$queryAdd. 
+	"VALUES ('','$id','$start','$end','$comment','$loa','$userId',CURRENT_TIMESTAMP".
+	$valueAdd;
+	self::$connection->straightQuery($query);	
+	return true;
+	}
+	/**
+	* enter excuse for absence
+	* @param int id primary key
+	* @param string excuss in date
+	* @param string comment
+	*/
+	public function enterExcuse($id,$date,$comment) {
+	Debug::writeDebugLog(__method__,'UPDATE absenzen SET entschuldigt = "'.$date.'", ekommentar = "'.$comment.'" WHERE aid ='. $id);
+	self::$connection->straightQuery('UPDATE absenzen SET entschuldigt = "'.$date.'", ekommentar = "'.$comment.'" WHERE aid ='. $id);
+	}
+	
+	/**
+	*edit absence entry
+	* @param int aid
+	* @param string start date
+	* @param string end date
+	* @param string comment
+	* @param int notice method
+	* @param int user id
+	*/
+	public function editAbsence($aid,$start,$end,$comment,$method,$id){
+	
+	
+	$queryAdd = '';
+	$whoField = "adminMeldung";
+	$whenField = "adminMeldungDatum";
+	$queryAdd = ',adminMeldungTyp = '.$method;	
+	
+	if ($end == 0) 
+		$end = $start;
+	
+	$query = 'UPDATE absenzen set beginn="'.$start.'",ende="'.$end.
+	'",kommentar="'.$comment.'",'.$whoField.'='.$id.','.$whenField.'=CURRENT_TIMESTAMP'.$queryAdd.' WHERE aid='.$aid;
+	
+	Debug::writeDebugLog(__method__,$query);
+	self::$connection->straightQuery($query);
+	
+	}	
+	
+	/**
+	* delete pupil absence - not revertable
+	* @param int id
+	*/
+	public function deleteAbsence($id) {
+	self::$connection->straightQuery("DELETE FROM absenzen WHERE aid = $id"); 	
+	}
+	
+	/**
+	* get single student Data Set from absenzen
+	* @param string type
+	* @param int absenceId
+	* @return array
+	*/
+	public function getStudentDataSet($type,$aid) {
+	$data = self::$connection->selectAssociativeValues('SELECT * FROM absenzen,schueler 
+		WHERE absenzen.sid = schueler.id
+		AND aid ='.$aid);
+	$d = $data[0];
+	return array("type" =>$type,
+		"absenceId" => $d['aid'],
+		"id"=>$d['sid'],
+		"name" => $d['name'].', '.$d['vorname'],
+		"klasse" => $d['klasse'],
+		"beginn" => $d['beginn'],
+		"ende" => $d['ende'],
+		"kommentar" => $d['kommentar'],
+		"adminMeldung" => $d['adminMeldung'],
+		"adminMeldungDatum" => $d['adminMeldungDatum'],
+		"adminMeldungTyp" => $d['adminMeldungTyp'],
+		"lehrerMeldung" => $d['lehrerMeldung'],
+		"lehrerMeldungDatum" => $d['lehrerMeldungDatum'],
+		"elternMeldung" => $d['elternMeldung'],
+		"elternMeldungDatum" => $d['elternMeldungDatum'],
+		"entschuldigt" => $d['entschuldigt']
+		);
+	}
+	
+	/**
+	* get taught students of a teacher including all absence data
+	* @param int teacherId
+	* @return array
+	*/
+	public function getTaughtStudentsOfTeacher($id) {
+	$students = array();
+	$data = self::$connection->selectAssociativeValues('SELECT schueler.id,name,vorname,schueler.klasse 
+	FROM schueler,unterricht
+	WHERE schueler.klasse = unterricht.klasse
+	AND unterricht.lid ='.$id.'
+	ORDER BY schueler.name,schueler.vorname');
+	if (!empty($data)) {
+			foreach ($data as $d) {
+			//get absence state
+			$absentData = self::$connection->selectAssociativeValues('SELECT * FROM absenzen 
+			WHERE sid ='.$d['id'].
+			' AND beginn<="'.date('Y-m-d').'" 
+			AND ende >="'.date('Y-m-d').'"');
+			if (!empty($absentData)) {
+				$absentData = $absentData[0];
+				$absent = true;
+				$students[] = array("absent"=>true,
+				"id"=>$d['id'],
+				"name" => $d['name'].', '.$d['vorname'],
+				"klasse" => $d['klasse'],
+				"absenceId" => $absentData['aid'],
+				"beginn" => $absentData['beginn'],
+				"ende" => $absentData['ende'],
+				"adminMeldung" => $absentData['adminMeldung'],
+				"adminMeldungDatum" => $absentData['adminMeldungDatum'],
+				"adminMeldungTyp" => $absentData['adminMeldungTyp'],
+				"elternMeldung" => $absentData['elternMeldung'],
+				"elternMeldungDatum" => $absentData['elternMeldungDatum'],
+				"lehrerMeldung" => $absentData['lehrerMeldung'],
+				"lehrerMeldungDatum" => $absentData['lehrerMeldungDatum'],
+				"entschuldigt" =>$absentData['entschuldigt']);
+				
+				} else {
+				$absent = false;
+				$students[] = array("absent"=>false,
+				"id"=>$d['id'],
+				"name" => $d['name'].', '.$d['vorname'],
+				"klasse" => $d['klasse']);				
+				}
+			
+			}
+		return $students;
+	} else 
+		return null;
+	
+	}
     
     
     /**********************************************************
@@ -2183,7 +2700,54 @@ class Model {
         return $text;
     }
     
-    
+    /*
+	*APP only related functions
+	*/
+	
+	/*
+	*enter active appUser into DB
+	* @param User Object
+	*/
+	public function enterAppUser($user){
+		$userData = $this->getUserDataForAppMgt($user); 
+		$userId= $userData[0];
+		$userName = $userData[1];
+		
+		self::$connection->straightQuery("INSERT INTO appuser 
+		(`auid`,`uid`,`user`,`logintime`)
+		VALUES ('','$userId','$userName',CURRENT_TIMESTAMP)" );
+		
+		}
+	/*
+	*end active user's session
+	* @param User Object
+	*/
+	public function endAppUserSession($user){
+	$userData = $this->getUserDataForAppMgt($user); 
+	$userId= $userData[0];
+	$userName = $userData[1];
+	self::$connection->straightQuery('DELETE FROM appuser WHERE uid='.$userId);
+	
+	}
+	
+	/*
+	* get user data for app management - to be saved in DB
+	* @param User Object
+	* @return array
+	*/
+	private function getUserDataForAppMgt($user){
+		//adapt if desired for different data, e.g. Email for parents etc.
+		if ($user instanceof Teacher) {
+			return array($user->getId(),$user->getFullName());	
+		} elseif ($user instanceof StudentUser) {
+			return array($user->getId(),$user->getFullName());
+		} elseif  ($user instanceof Guardian) {
+			return array($user->getId(),$user->getEmail());
+		} elseif ($user instanceof Admin) {
+			return array($user->getId(),$user->getEmail());
+		}
+	return false;
+	}
 }
 
 

@@ -56,8 +56,10 @@ class Controller {
     protected function handleLogic() {
         
         
-        if (isset($this->input['console']))
+        if (isset($this->input['console'])) {
             header('Content-Type: text/json');
+			
+			}
         
         // handles login verification and creation of user object
         if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd'])) {
@@ -97,11 +99,13 @@ class Controller {
             //$this->infoToView['welcomeText'] = str_replace("\\n", "<br>", str_replace("\\r\\n", "<br>", $this->getOption('welcomeparent', '')));
             $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomeparent');
 			$this->infoToView['children'] = self::$user->getChildren();
+			$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
         } else if (self::$user instanceof Teacher) {
             $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcometeacher');
-            
+            $this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
         } else if (self::$user instanceof StudentUser) {
             $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomestudent');
+			$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
         }
         switch ($this->input['type']) {
             case "public":
@@ -175,6 +179,99 @@ class Controller {
                 $this->infoToView["newsletter"] = $newsletter;
                 $this->display("viewnews");
                 break;
+			case "handledsgvo":
+				$status = array();
+				
+				if (isset($this->input['console']) ) {
+					if (isset($this->input['decline']) ) {
+						$status = array("status" => "declined");
+						} else if (isset($this->input['accept'])) {
+						$status = array("status" => "accepted");
+						//fill db
+						self::$user->acceptDsgvo();
+						}
+					
+					die();
+				}
+				
+				break;
+			case "pupilsrch":
+				//for Teacher User - detect all students taucght by a teacher including absence state
+				if (isset($this->input['console']) && isset($this->input['partname'])) {
+					$taughtStudents = self::$user->getAllTaughtPupilsByName($this->input['partname']);
+					$students = array();
+					foreach($taughtStudents as $stud) {
+						$students[]= array("absent" => $stud['absent'],
+						"id" => $stud['student']->getId(),
+						"name" => $stud['student']->getFullName(),
+						"klasse" => $stud['student']->getClass());
+					}
+					die(json_encode($students) );
+                }
+				break;
+			case "markabsent":
+				if (isset($this->input['console']) ) {
+				if (self::$user instanceof Guardian) {
+					$this->model->enterAbsentPupil($this->input['id'],$this->input['start'],$this->input['end'],$this->input['comment'],self::$user->getParentId(),null,2);
+					$arr = array("status"=>"absenceEntered","id"=>$this->input['id'],"children" => $this->model->getChildrenAbsenceState($this->infoToView["children"]) );
+					} else if (self::$user instanceof Teacher) {
+					$this->model->enterAbsentPupil($this->input['id'],$this->input['start'],$this->input['end'],$this->input['comment'],self::$user->getId(),null,3);
+					$arr = array("status"=>"absenceEntered",
+					"id"=>$this->input['id'],
+					"children" => json_encode($this->model->getTaughtStudentsOfTeacher(self::$user->getId())) );
+					} 
+				echo json_encode($arr);
+				die;
+				}
+				break;
+			case "checkprevabs":
+				//check if absence one day before startdate exists
+				if(isset($this->input['console'])) {
+				$previousDayAbsence = $this->model->getPreviousDayAbsence($this->input['id'],$this->input['date']);	
+				$arr = array("status" => "previousDayAbsence","aid" => $previousDayAbsence); 
+					die(json_encode($arr));
+				}
+				break;
+			case "addtoabsence":
+				if(isset($this->input['console'])) {
+				$this->model->addToAbsence($this->input['aid'],$this->input['end']);
+				if (self::$user instanceof Guardian) {
+				$arr = array("status" => "absenceProlonged",
+				"children" => $this->model->getChildrenAbsenceState($this->infoToView["children"])); 
+				} else if (self::$user instanceof Teacher) {
+					$this->model->addToAbsence($this->input['aid'],$this->input['end'],self::$user->getId());
+					$arr = array("status" => "absenceProlonged",
+					"children" => json_encode($this->model->getTaughtStudentsOfTeacher(self::$user->getId())));
+				}
+				die(json_encode($arr));
+				}
+				break;
+			case "deleteabsence":
+				if(isset($this->input['console'])) {
+						$this->model->deleteAbsence($this->input['aid']);
+						$arr = array("status" => "absenceDeleted","aid" => $this->input['aid']); 
+						die(json_encode($arr));
+				}
+				break;
+			case "excuse":
+				if(isset($this->input['console'])) {
+				$this->model->enterExcuse($this->input['aid'],$this->input['date'],$this->input['comment']);
+				$arr = array("status" => "absenceExcused",
+				"aid" =>$this->input['aid'],
+				"excused" => $this->input['date'],
+				"children" => json_encode($this->model->getTaughtStudentsOfTeacher(self::$user->getId())) );
+				die(json_encode($arr));
+				}
+				break;
+			case "editabsence":
+				if(isset($this->input['console'])) {
+				$editedDataSet = $this->model->editAbsence($this->input['aid'],$this->input['start'],$this->input['end'],$this->input['ecomment'],$this->input['evia'],self::$user->getId());
+				$arr = array("status" => "absenceEdited",
+				"aid" => $this->input['aid'],
+				"children" => json_encode($this->model->getTaughtStudentsOfTeacher(self::$user->getId()))  );
+					die(json_encode($arr));
+				}
+				break;
             default:
                 if (self::$user instanceof Teacher) {
                     /** @var Teacher $user */
@@ -348,12 +445,15 @@ class Controller {
      * @return void
      */
     protected function logout() {
-        session_destroy();
+		
+        if(isset($_SESSION['app'])) {
+				$this->model->endAppUserSession(self::$user);
+			}
+		session_destroy();
         session_start();
         ChromePhp::info("set!");
         
         $_SESSION['logout'] = true; // notify about logout after reloading the page to delete all $_POST data
-        
         if (!isset($this->input["console"])) {
             header("Location: ./");
         }
@@ -387,6 +487,10 @@ class Controller {
         }
         
         if ($this->checkLogin($mail, $pwd)) {
+			if($input['app'] == 1) {
+				$_SESSION['app'] = true;
+				
+				}
             return $this->getDashBoardName();
         } else {
             
@@ -800,23 +904,39 @@ class Controller {
     protected function getDashBoardName() {
         $this->createUserObject(); // create user obj if not already done
         $user = self::getUser();
-        
-        
+        $this->infoToView['user'] = $user;
+        if(isset($_SESSION['app']) ) {
+			//enter user into DB
+				$this->model->enterAppUser($user);	
+			}
+			
         if ($user instanceof Admin) {
             if (!isset($_SESSION['board_type'])) {
                 $_SESSION['board_type'] = 'parent';
             }
+			
+			
             
             return $_SESSION['board_type'] . '_dashboard';
         } else if ($user instanceof Teacher) {
             $this->infoToView['upcomingEvents'] = $this->model->getNextDates(true);
 			$this->infoToView['VP_allDays'] = $this->model->getVPDays(true);
             $this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessons(false, $user, $this->infoToView['VP_allDays']);
-            
-            return "teacher_dashboard";
+            $this->infoToView['taughtstudents'] = $this->model->getTaughtStudentsOfTeacher($user->getId());
+			$this->infoToView['taughtclasses'] = $this->model->getTaughtClasses($user->getId());
+			//When app is used the welcome text needs to be available right with login
+			if(isset($_SESSION['app'])) {
+				$this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcometeacher');
+				$this->infoToView['dsgvo'] = $user->getDsgvo($user);
+				}
+			return "teacher_dashboard";
         } else if ($user instanceof StudentUser) {
             $this->infoToView['upcomingEvents'] = $this->model->getNextDates(false);
-			
+			//When app is used the welcome text needs to be available right with login
+			if(isset($_SESSION['app'])) {
+				$this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomestudent');
+				$this->infoToView['dsgvo'] = $user->getDsgvo($user);
+				}
             return "student_dashboard";
         } else {
 			//Parent user
@@ -825,16 +945,24 @@ class Controller {
 			$this->infoToView['VP_coverLessons'] = null;
 			$isStaff = false;
 			$this->infoToView['VP_allDays'] = $this->model->getVPDays(false);
-			
-            if (isset($this->infoToView["children"])  )  {
+			$this->infoToView["children"] = $this->model->getChildrenByParentUserId($user->getId());
+            if (isset($this->infoToView["children"]))   {
 				if (count($this->infoToView["children"])  ) {
 					$classes = array();
 					foreach ($this->infoToView["children"] as $child) {
 						$classes[] = $child->getClass();
-					}
+						}
 					$this->infoToView['VP_coverLessons'] = (count($classes > 0) ) ? $this->model->getAllCoverLessonsParents($classes, $this->infoToView['VP_allDays']) : null;
 					}
+				//get all children with their current state (ill, excused etc) as JSON for dashboard	
+				$this->infoToView["dashboard_children"] = $this->model->getChildrenAbsenceState($this->infoToView["children"]); 	
+				
 				}
+			if(isset($_SESSION['app'])) {
+				$this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomestudent');
+				$this->infoToView['dsgvo'] = $user->getDsgvo($user);
+				}	
+			
 			return "parent_dashboard";
         }
         
@@ -902,11 +1030,12 @@ class Controller {
      * @return string
      */
     public function getHeaderFix() {
-        $q0 = array(base64_decode('XHUwMDYy'), base64_decode('XHUwMDc5IA=='), base64_decode('XHUwMDRh'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDcw'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc1'), base64_decode('XHUwMDc0'));
+        $q0 = array(base64_decode('XHUwMDYy'),base64_decode('XHUwMDYy'), base64_decode('XHUwMDc5IA=='), base64_decode('XHUwMDRh'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDcw'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc1'), base64_decode('XHUwMDc0'));
         $q0 = array_merge(array(base64_decode('XHUwMDNj'), base64_decode('XHUwMDIx'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJkIA=='), base64_decode('XHUwMDQz'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc0'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDY0IA==')), $q0);
         $q0 = array_merge($q0, array(base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDYx'), base64_decode('XHUwMDZl'), base64_decode('XHUwMDY0IA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDY5IA=='), base64_decode('XHUwMDQy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDdh'), base64_decode('XHUwMDY5'), base64_decode('XHUwMDZlIA=='), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDNl')));
-        
         return json_decode(base64_decode('Ig==') . implode($q0) . base64_decode('Ig=='));
+		
+		
     }
     
     
@@ -937,7 +1066,10 @@ class Controller {
         $type = null;
         
         if ($email == 'teacher@teacher' && DEBUG) // test account
-            $email = 'muster@suso.schulen.konstanz.de';
+			{
+				echo "Testaccount!";
+				$email = 'muster@suso.schulen.konstanz.de';
+			}
         if ($inTime) {
             $this->createUserObject();
             $type = self::getUser()->getType();
@@ -956,7 +1088,9 @@ class Controller {
                 $schoolMail = strpos($email, '@suso.schulen.konstanz.de') !== false;
                 
                 $userObj = $schoolMail ? $model->getTeacherByEmailAndLdapPwd($email, $pwd) : $model->getLdapUserByLdapNameAndPwd($email, $pwd);
-                if ($userObj == null) {
+                //Testaccount when offline using Email and no password
+				//$userObj = new Teacher("hartleitner@suso.schulen.konstanz.de",30);
+				if ($userObj == null) {
                     // nope
                     $success = false;
                 } else {
@@ -1033,7 +1167,7 @@ class Controller {
                     
                     if ($eid != null) {
                         $failure = $this->model->raiseLockedCount(self::$user->getId());
-                        $notifyText = ($failure > 2) ? "zu viele Fehlversuche - Funktion für 5 Minuten deaktiviert!" : "Dem Schüler $name $surname ist bereits ein Elternteil zugeordnet!";
+                        $notifyText = ($failure > 2) ? "zu viele Fehlversuche - Funktion für 5 Minuten deaktiviert!" : "Dem Schüler ist bereits ein Elternteil zugeordnet!";
                         array_push($notification, $notifyText);
                         ChromePhp::info("Student already has parent!");
                         $success = false;
@@ -1079,7 +1213,7 @@ class Controller {
 	* will send emails to admin
 	*/
 	protected function requestKey(){
-	require("PHPMailer.php");
+	
 	$email = $this->input['email'];
 	$name = $this->input['student'];
 	$klasse = $this->input['kl']; 
@@ -1095,10 +1229,13 @@ class Controller {
 	"), geboren am: ".$bday,'UTF-8');
 	$adminmail = "hartleitner@suso.schulen.konstanz.de";
 	if(isset($this->input['console'])){
+		
 	$success = $this->sendKeyRequestMail($email,$body);
 	$success = $this->sendKeyRequestMail($adminmail,$adminbody);
 	$notify = (!$success) ? array("Something went wrong") : array("Email sent");
 	$output = array("success" => $success,"notifications"=>$notify );
+	//enter request into db
+	$this->model->enterKeyRequestIntoDB($email,$name,$bday,$klasse);
 	echo  json_encode($output);
     }
 	
@@ -1298,9 +1435,9 @@ class Controller {
      * @param string email
 	 * @param string content
      */
-    private function sendKeyRequestMail($email,$content) {
-        
-        //sending emails
+    protected function sendKeyRequestMail($email,$content) {
+		require_once("PHPMailer.php");
+		//sending emails
         $phpmail = new PHPMailer();
         $phpmail->setFrom("direktion@suso.konstanz.de", "Suso-Intern");
 		$phpmail->CharSet = "UTF-8";
@@ -1319,6 +1456,8 @@ class Controller {
 		return $send;
         }
     
+	
+	
     
     /**
      *
