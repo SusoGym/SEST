@@ -22,13 +22,21 @@
                 <?php
                     if (isset($data["menueItems"]))
                     {
+					?>
+			<ul >
+					<?php
                     foreach ($data["menueItems"] as $m)
                     { ?>
-            <div class="row">
+            <!--<div class="row">-->
+			<li class="collapsible-header">
+			
                 <a class="mdl-navigation__link teal-text btn-flat" id="menueItem"
                    href="<?php echo $m['link']; ?>"><?php echo $m['entry']; ?></a>
-            </div>
-
+			
+			
+            <!--</div>-->
+			</li>
+			</ul>
             <?php
                 }
                 } ?>

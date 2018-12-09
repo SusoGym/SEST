@@ -14,7 +14,7 @@ $dashboardChildren = "null";
 }
 $shownotice = "true";
 if (isset($children) ) {
-if (if strlen($data['welcomeText'])>15)) {
+if (strlen($data['welcomeText'])>15) {
 	$welcomeText = $data['welcomeText'];
 	} else {
 	$welcomeText = null;

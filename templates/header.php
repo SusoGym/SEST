@@ -9,7 +9,7 @@
 	<meta http-equiv="Expires" content="0" />
     <meta name="google-site-verification" content="afR-m_0mxdzKpJL4S5AM5JnImHvvDpxGw5WxU6S1zDk"/>
     <title>Suso-Gymnasium</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0"/>
     <!--suppress HtmlUnknownTarget -->
     <link rel="icon" type="image/ico" href="favicon.ico">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
