@@ -59,6 +59,8 @@ class Controller extends \Controller {
      */
     private $existingSlots = null;
     
+	
+	
     /**
      * Konstruktor
      *
@@ -84,8 +86,14 @@ class Controller extends \Controller {
      */
     protected function handleLogic() {
         
+		
         
         $input = $this->input;
+		
+		if (isset($input['console']) && !isset($_SESSION['user']) ) {
+		// timed out on javascript based operations
+		die(json_encode(array("time"=>"out","message"=>"Anmeldung abgelaufen!") )) ;
+		}
         
         $loggedIn = isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd']) && $this->checkLogin($_SESSION['user']['mail'], $_SESSION['user']['pwd']) == 1;
         
@@ -266,13 +274,97 @@ class Controller extends \Controller {
         switch ($input['type']) {
             //User Management
             case "usrmgt":
-                $this->title = "Benutzerverwaltung";
                 if (isset($input['console']) && isset($input['partname'])) {
                     $arr = $this->model->getUsers($input['partname']);
                     die(json_encode($arr));
                 }
-                $this->display("usermgt");
+				if(isset( $input['unused']) )  {
+					if (isset($input['del']) ) {
+					$delete = $input['del'];
+					$deletedParent = Model::getInstance()->deleteParentUser($delete);
+					$_SESSION['dataForView']['notifications'][] = array("msg" => "Benutzer ".$deletedParent['vorname']." ".
+					$deletedParent['name']." wurde gelöscht!", "time" => 4000);
+				    }
+					$this->infoToView['unused'] = $this->model->getUsersWithoutKids();
+					/*header('Content-Type: application/json');
+					echo json_encode($unused,JSON_PRETTY_PRINT);
+					die;*/
+					
+					$this->display("unused");					
+					} else if (isset($input['search']) )  {
+						$this->title = "Eltern suchen (Email)";
+						$this->display("usermgt");
+					} else {
+					$this->title = "Benutzerverwaltung";
+					$this->addMenueItem("?type=usrmgt&unused=true", "Zeige Benutzer ohne Schülerzuordnung");
+					$this->addMenueItem("?type=usrmgt&search=true", "Eltern suchen");
+					$this->addMenueItem("?type=pupilmgt", "Schüler suchen");
+					$this->addMenueItem("?type=handleregister", "Registrierungsanfragen bearbeiten");
+					$this->addMenueItem("?type=leaveofabsence", "Beurlaubungen");
+					$this->display("simple_menue");
+					}
+                			
+                
                 break;
+			case "pupilmgt":
+			if (isset($input['console']) && isset($input['partname'])) {
+					$absenceManagement = (isset($input['absence']) && $input['absence'] === "true") ? true : false ;
+                    $arr = $this->model->getPupils($input['partname'],$absenceManagement);
+					die(json_encode($arr));
+                }
+			//evtl Funktion zum Löschen eines Schülers
+			$this->backButton = "?type=usrmgt";
+			$this->title = "Schüler suchen";
+			$this->display("pupilmgt");
+			break;
+			case "handleregister":
+			if(isset($input['console'])) {
+				//handle actions
+				if (isset($input['delete'])) {
+					$this->model->deleteRegistrationRequest($input['id']);
+					die(json_encode(array("status"=>"request_deleted","message"=>"Anfrage gelöscht!","id"=>$input['id']) ) );
+					}
+				if (isset($input['confirm'])) {
+					if ($mailData = $this->model->finishRegistrationRequest($input['request'] , $input['pupil']) ) {
+						\Debug::writeDebugLog(__method__,"Anfrage Nr: ".$input['request']." von Email: ".$mailData['email']);
+						$studentToRegister = $this->model->getStudentById($input['pupil']);
+						//send mail with mailData array
+						$body = mb_convert_encoding("Sie haben am ".$mailData['date']." einen Registrierungscode für ".
+						$studentToRegister->getFullName()." (".$studentToRegister->getClass().") angefordert. 
+						<br>Registrieren Sie Ihr Kind mit dem Code ". $studentToRegister->getASVId().
+						'<br><br>Diese Nachricht wurde automatisch generiert!','UTF-8'); 
+						\Debug::writeDebugLog(__method__,"Mail an: ".$mailData['email']." mit Nachricht\n".$body);
+						if ($this->sendKeyRequestMail($mailData['email'],$body) ) {
+						//sending successful
+						$status = "email_sent"; $message = "Registrierungscode gesendet!";
+						} else {
+						//error sending
+						$status = "error"; $message = "Senden fehlgeschlagen!";
+						}
+						die(json_encode(array("status"=>$status,"message"=>$message,"id"=>$input['request']) ));
+					} else {
+						die(json_encode(array("status"=>"error","message"=>"something went wrong!")));
+					}
+					}
+				}
+			$this->backButton = "?type=usrmgt";
+			$this->title = "Registrierungsanfragen bearbeiten";
+			$this->infoToView['requests'] = Model::getInstance()->getRegistrationRequests();
+			$this->display('handleregistration');
+			
+			break;
+			case "leaveofabsence":
+			//enter  a student absence as leave of absence
+			if(isset($input['console'])) {
+					$this->model->enterAbsentPupil($input['id'],$input['start'],$input['end'],$input['comment'],$_SESSION['user']['id'],0,1,1); 
+					$arr = array("status" => "loaEntered",
+					"id" => $input['id'],
+					"studentList" => $this->model->getLeaveOfAbsenceStudents() ); 
+					die(json_encode($arr)); //DOES NOT COME ACROSS WHY????
+				}
+			$this->infoToView['studentList'] = $this->model->getLeaveOfAbsenceStudents(); 	
+			$this->display('leaveofabsence');
+			break;
             case "usredit":
                 $usr = $input['name'];
                 $usr = $this->model->getUserByMail($usr);
@@ -309,9 +401,10 @@ class Controller extends \Controller {
                 $this->title = "Edit: " . $usr->getEmail();
                 $this->backButton = "?type=usrmgt";
                 $this->infoToView['user'] = $usr;
+				$this->infoToView['kids'] = $usr->getChildren();
                 $this->display("usredit");
                 break;
-            //Settings
+			//Settings
             case "settings":
                 $this->title = "Einstellungen";
                 $this->addMenueItem("?type=sestconfig", "Elternsprechtag konfigurieren");
@@ -376,8 +469,7 @@ class Controller extends \Controller {
 					$newsletter->createFromId($input['nl']);
 					}
 				//Ermittle Empfänger
-			    // to be done - must be function of Model
-				$list = $this->model->getNewsRecipients();
+			    $list = $this->model->getNewsRecipients();
 				$this->sendNewsletterMails($list,$newsletter);
 				$this->getNewsletters();
 				$this->display("newsarchive");
@@ -409,7 +501,7 @@ class Controller extends \Controller {
                 $this->actionType = "eventchoose";
                 $this->display("update");
                 break;
-            
+           
             
             //student file upload
             case "utchoose":
@@ -542,12 +634,87 @@ class Controller extends \Controller {
             case "slots":
                 
                 break;
+			
             case "novell":
                 $this->model->checkNovellLogin("GrossA", "12345");
                 break;
+			case "checkprevabs":
+				//check if absence one day before startdate exists
+				if(isset($input['console'])) {
+				$previousDayAbsence = $this->model->getPreviousDayAbsence($input['id'],$input['date']);	
+				$arr = array("status" => "previousDayAbsence","aid" => $previousDayAbsence); 
+					die(json_encode($arr));
+				}
+				break;
+			case "addtoabsence":
+				if(isset($input['console'])) {
+				$this->model->addToAbsence($input['aid'],$input['end'],$_SESSION['user']['id'],$input['via']);
+				$arr = array("status" => "absenceProlonged",
+				"studentList" => json_encode(array_merge($this->model->getAbsentStudents(),$this->model->getMissingExcuses()))); 
+				
+				die(json_encode($arr));
+				}
+				break;
+			case "markabsent":
+				if(isset($input['console'])) {
+					$this->model->enterAbsentPupil($input['id'],$input['start'],$input['end'],$input['comment'],$_SESSION['user']['id'],$input['via']); 
+					$arr = array("status" => "absenceEntered","id" => $input['id'],
+					"studentList" => json_encode(array_merge($this->model->getAbsentStudents(),$this->model->getMissingExcuses()))); 
+					die(json_encode($arr));
+				}
+				else {
+					die("What are you doing here!");
+				}
+				break;
+			case "editabsence":
+				if(isset($input['console'])) {
+				$editedDataSet = $this->model->editAbsence($input['aid'],$input['start'],$input['end'],$input['ecomment'],$input['evia'],$_SESSION['user']['id']);
+				if ($input['loa'] == "true") {
+					$arr = array("status" => "loaEdited",
+					"aid" => $input['aid'],
+					"studentList" => $this->model->getLeaveOfAbsenceStudents());
+				} else {
+				
+					$arr = array("status" => "absenceEdited",
+					"aid" => $input['aid'],
+					"studentList" => json_encode(array_merge($this->model->getAbsentStudents(),$this->model->getMissingExcuses())) );
+						/*"id" => $input['id'],
+						"missingStudents" => $this->model->getAbsentStudents(),
+						"missingExcuses" => $this->model->getMissingExcuses());*/
+				}
+				die(json_encode($arr));
+				}
+				break;
+			case "deleteabsence":
+				if(isset($input['console'])) {
+						$this->model->deleteAbsence($input['aid']);
+						$arr = array("status" => "absenceDeleted","aid" => $input['aid']); 
+						die(json_encode($arr));
+				}
+				break;
+			case "excuse":
+				if(isset($input['console'])) {
+				$this->model->enterExcuse($input['aid'],$input['date'],$input['comment']);
+				$arr = array("status" => "absenceExcused",
+				"aid" => $input['aid'],
+				"excused" => $input['date'],
+				"studentList" => json_encode(array_merge($this->model->getAbsentStudents(),$this->model->getMissingExcuses())) );
+				die(json_encode($arr));
+				}
+				
+				break;
             default:
+				//Landing Page 
                 $this->title = "Startseite";
                 unset($_SESSION['file']);
+				//get startpage data
+				//missing students for the day
+				$this->infoToView['missingStudents'] =  json_encode($this->model->getAbsentStudents());
+				$this->infoToView['missingExcuses'] =  json_encode($this->model->getMissingExcuses());
+				$this->infoToView['studentList'] = json_encode(array_merge($this->model->getAbsentStudents(),$this->model->getMissingExcuses()));
+				$this->infoToView['isadmin'] = "true";
+				
+				
                 $this->display("main");
                 break;
             
@@ -732,7 +899,7 @@ class Controller extends \Controller {
         //sending emails
         $timestamp = time();
         $datum = date("Y-m-d  H:i:s", $timestamp);
-        /** @var User $$userObj */
+		/** @var User $$userObj */
         foreach ($list as $userObj) {
             /** @var PHPMailer $phpmail */
             $phpmail = new \PHPMailer();
@@ -753,7 +920,7 @@ class Controller extends \Controller {
                 //echo "mail gesendet an: " . $userObj->getEmail() . '<br>';
                 //Eintrag des Sendeprotokolls
                 $currentTime = date('d.m.Y H:i:s');
-                //$this->model->writeToVpLog($l->getEmail() . " " . $currentTime);
+                //$this->model->writeToVpLog($userObj->getEmail() . " " . $currentTime);
                 
                 //Inhalt
                 //$this->model->writeToVpLog("....success");
@@ -765,6 +932,8 @@ class Controller extends \Controller {
         //Enter Send Date
 		$this->model->enterNewsSentDate($newsletter->getId());
     }
+	
+	
 	
 	    
 }

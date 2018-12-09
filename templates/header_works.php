@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-
+<?php $dsgvo = ($this->getDataForView()['dsgvo'] == null) ? 'undefined' : $this->getDataForView()['dsgvo']; ?>
 <html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-	<meta http-equiv="Pragma" content="no-cache" />
-	<meta http-equiv="Expires" content="0" />
     <meta name="google-site-verification" content="afR-m_0mxdzKpJL4S5AM5JnImHvvDpxGw5WxU6S1zDk"/>
     <title>Suso-Gymnasium</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -46,7 +43,11 @@
             text-align: left !important;
         }
 		
-		
+		#dsgvo_accept {
+			position: fixed; z-index: 999;left: 10%; width: 80%; 
+			bottom: 20%; height: 60%; background-color: rgba(0,80,80,0.8); display:none;
+			padding: 10px;
+		}
     </style>
 </head>
 
@@ -67,7 +68,7 @@
                 <ul class="left hide-on-med-and-down">
                     <?php include("navbar.php"); ?>
                 </ul>
-                <?php if (Controller::getUser() != null && !isset($_SESSION['app']) ): //if logged in ?>
+                <?php if (Controller::getUser() != null): //if logged in ?>
                     <ul class="right hide-on-med-and-down">
                         <li>
                             <a id="logout" href="?type=logout" title="Logout">
@@ -96,6 +97,54 @@
         </li>
     </ul>
 	
-<?php require("dsgvo.php"); ?>	
+	
+	<?php include("dsgvo.php"); ?>
+	<div id="dsgvo_accept">
+	<span style="font: Arial,Helvetica; font-size: 18px; font-weight: bold; color: #ffffff">Informationen zum Datenschutz</span><br><br>
+	<span style="font: Arial,Helvetica; font-size: 14px; color: #ffffff">In dieser Anwendung werden persönliche Daten automatisiert verarbeitet. Ihr Name wird je nach Anwendungsfunktion anderen Nutzern angezeigt. 
+	Ihre Emailadresse wird verwendet, um vergessene Passwörter zurückzusetzen oder weiter Hilfsinformationen an die hinterlegte Emailadresse zu senden. Ihre Daten werden in keinem Falle außerhalb dieser Anwendung genutzt oder an Dritte weitergegeben.</span>
+	<table width = "20%" align="right">
+	<tr>
+	<td width="50%"><a class="btn red right" onClick="decline();">Ablehnen und verlassen</a></td>
+	<td width="50%"><a class="btn green right" onClick="accept();">Akzeptieren und Meldung schließen</a></td>
+	</tr>
+	</table>
+	</div>
 	
 	
+	
+	<script type="text/javascript">
+	var xhttp = new XMLHttpRequest();
+	
+	var dsgvo = <?php echo $dsgvo; ?>;
+	if (typeof dsgvo === 'undefined' || dsgvo === 'null') {
+		document.getElementById('dsgvo_accept').style.display = 'inline';
+	}
+	
+	
+	xhttp.addEventListener('load', function(event) {
+	content = "";
+	
+	if (this.responseText) {
+		console.log(this.responseText);
+		data = $.parseJSON(this.responseText);
+		
+		if (data['status'] === "declined"){
+				location.replace("?type=logout");
+			} else if (data['status'] === "accepted") {
+			document.getElementById('dsgvo_accept').style.display = 'none';	
+			}
+		} 
+	
+	} );
+	
+	function decline(){
+	xhttp.open("POST", "?type=handledsgvo&console&decline", true);
+	xhttp.send();
+	}
+	
+	function accept(){
+	xhttp.open("POST", "?type=handledsgvo&console&accept", true);
+	xhttp.send();
+	}
+	</script>

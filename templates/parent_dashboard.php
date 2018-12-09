@@ -3,68 +3,29 @@ include("header.php");
 $data = $this->getDataForView();
 $cover_lessons_text = isset($data['VP_coverLessons']) ? "es liegen Vertretungen vor" : "keine Vertretungen";
 $cover_lessons_link = isset($data['VP_coverLessons']) ? true : false;
-$children = (count($data['children']) > 0) ? $data['children'] : null;
-$welcomeText = (isset($children) ) ? $data['welcomeText'] : "Sie müssen zunächst Ihre Kinder registrieren, bevor Sie die Angebote nutzen können!";
+if (isset($data['children'])) {
+$children = (count($data['children']) > 0) ? $data['children'] : "null";
+}
+
+if(isset($data['dashboard_children'])) {
+$dashboardChildren = $data['dashboard_children'];	
+} else {
+$dashboardChildren = "null";	
+}
+$shownotice = "true";
+if (isset($children) ) {
+if ($data['welcomeText'] ) {
+	$welcomeText = $data['welcomeText'];
+	} else {
+	$welcomeText = null;
+	$shownotice = "false";
+	}	
+} else {
+$welcomeText = "Sie müssen zunächst Ihre Kinder registrieren, bevor Sie die Angebote nutzen können!";
+}
 ?>
 
     <div class="row">
-		<div class="col s12 ">
-			<div class="card white">
-				<div class="card-content">
-					<span class="card-title">Hinweise</span>
-					<p ><?php echo $welcomeText; ?></p>
-				</div>
-			</div>
-		</div>
-		
-		<?php if (isset($children) ) { ?>
-		<div class="col l6 s12 m6">
-			<div class="card white ">
-				<div class="card-content">
-					<span class="card-title">Ihre Kinder</span>
-					
-					<?php foreach ($children as $child) { ?>
-					<div id="<?php echo $child->getId(); ?>">
-					<table>
-					<tr>
-						
-						<td>
-						<?php echo $child->getSurname().', '.$child->getName().' ('.$child->getClass().')' ; ?>
-						</td>
-						<!-- Abwesenheitsmeldung Testphase
-						<td>
-						<a class="secondary-content action" href="#" onClick="illNote('<?php echo $child->getId(); ?>');"><i class="material-icons right">chat</i></a>
-						<span class="secondary-content info grey-text">Abwesenheit melden</span>
-						</td>
-						-->
-						
-					</tr>
-					</table>
-					<div id="<?php echo "ill_".$child->getId(); ?>" style="display:none;"></div>
-						
-					</div>
-					<?php } ?>
-					
-				</div>
-			</div>
-		</div>
-		<?php } ?>
-		<?php if (isset($children) ) { ?>
-		<div class="col l6 s12 m6">
-			<div class="card white ">
-				<div class="card-content">
-					<span class="card-title">Vertretungen</span>
-					<p><?php echo $cover_lessons_text ?></p>
-        		<?php if ($cover_lessons_link) { ?>
-				<div class="card-action">
-					<a class="secondary-content action" href="?type=vplan">zum Vertretungsplan</a>
-				</div>
-				<?php } ?>
-			</div>
-		
-			</div>
-		</div>
-		<?php } ?>
 		<?php if (isset($children) ) { ?>
 		<div class="col s12 ">
 			<div class="card white">
@@ -98,18 +59,65 @@ $welcomeText = (isset($children) ) ? $data['welcomeText'] : "Sie müssen zunäch
 			</div>
 		</div>
 		<?php } ?>
+		
+		<?php if (isset($children) ) { ?>
+		<div class="col l6 s12 m6">
+			
+			<div class="card white ">
+				<span class="card-title">Ihre Kinder</span>
+				<div class="card-content">
+					<ul class="collapsible" id="childrenlist"></ul>	
+				</div>
+			</div>
+			
+			<!-- blueprint for collapsible list -->
+			<li id="row_blueprint" style="display: none;">
+			  <div class="collapsible-header" ></div>
+			  <div class="collapsible-body" ></div>
+			</li>
+			
+		</div>
+		<?php include("parent_dashboard_modals.php"); ?>
+		<?php } ?>
+		<?php if (isset($children) ) { ?>
+		<div class="col l6 s12 m6">
+			<div class="card white ">
+				<div class="card-content">
+					<span class="card-title">Vertretungen</span>
+					<p><?php echo $cover_lessons_text ?></p>
+        		<?php if ($cover_lessons_link) { ?>
+				<div class="card-action">
+					<a class="secondary-content action" href="?type=vplan">zum Vertretungsplan</a>
+				</div>
+				<?php } ?>
+			</div>
+		
+			</div>
+		</div>
+		<?php } ?>
+		
 	</div>
 
 
-
-<?php include("js.php"); ?>
+<?php 
+include("js.php"); 
+?>
 <script type="text/javascript">
-//Abwesenheitsmeldung Testphase
-function illNote(id) {
-document.getElementById('ill_'+id).style.display = "block";
-document.getElementById('ill_'+id).innerHTML = "Krankmeldung";
-	
-}
+<?php
+include("absence_mgt.js"); 
+?>
+shownotice = <?php echo $shownotice ?>;
+document.addEventListener("DOMContentLoaded", function(event) {
+    if (shownotice) {
+	$('#notes').modal();
+	$('#notes').modal('open');
+	}
+		
+  });
+studentList = <?php echo $dashboardChildren; ?>;
+createStudentList(studentList);
+createChildrenList();
+
 </script>
 
 </body>

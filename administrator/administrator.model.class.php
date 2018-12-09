@@ -383,6 +383,143 @@ class Model extends \Model {
         
         return $arr;
     }
+	
+	/**
+	* returns all pupils whose surname starts with $startingWith
+	* @param string 
+	* @param string
+	* @return array
+	*/
+	public function getPupils($startingWith) {
+	$arr = array();
+        $startingWith = self::$connection->escape_string($startingWith);
+        $query = "SELECT * FROM schueler WHERE name LIKE '$startingWith%'";	
+		$data = self::$connection->selectAssociativeValues($query);
+        if ($data != null && !empty($data))
+            foreach ($data as $d) {
+				if (isset($d['eid'])) {
+				//get parent name
+				$parent = \Model::getParentUserByParentId($d['eid']);
+				$parentFullname = $parent['fullname'];
+				$parentEmail = $parent['email'];
+				//Debug::writeDebugLog(__method__,$parent->getFullname() );
+				} else {
+				$parentFullname = $parentEmail = null;
+				}
+                $arr[] = array("id"=>$d['id'],"asvId"=>$d['ASV_ID'],"dob"=>$d['gebdatum'],
+				"name"=>$d['name'],"vorname"=>$d['vorname'],"klasse"=>$d['klasse'],
+				"eid"=>$d['eid'],"parent"=>$parentFullname,"mail"=>$parentEmail ); 
+			}
+        return $arr;	
+	}
+	
+	
+	
+	/**
+	* returns all users without registered children
+	* @return array()
+	*/
+	public function getUsersWithoutKids() {
+		$users = array();
+		$data = self::$connection->selectValues("SELECT email,name,vorname,registered,user.id,eltern.id 
+		FROM user,eltern 
+		WHERE user.id = eltern.userid order by registered");
+		if ($data) {
+		foreach ($data as $d) {
+				$users[] = array("name"=>$d[1],"vorname"=>$d[2],"mail"=>$d[0],
+				"registered"=>$d[3],"id"=>$d[4],"eid"=>$d[5]);
+				}		
+			}
+
+		$unused = array();
+		foreach ($users as $u) {
+			$data = self::$connection->selectValues("SELECT id FROM schueler WHERE eid = ".$u['eid']);
+			if (!$data[0][0] ) {
+				array_push($unused,$u);
+				}
+			}
+	
+		return $unused;
+	}
+	
+	/**
+	* delete Parent User
+	* used when no kids have been assigned
+	* @param int
+	*/
+	public function deleteParentUser($id) {
+		$data = self::$connection->selectValues("SELECT id,name,vorname from eltern WHERE userid = $id");
+		$parent = $data[0][0];
+		self::$connection->straightQuery("DELETE FROM eltern where id = $parent");
+		self::$connection->straightQuery("DELETE FROM user where id = $id");
+		return array("name"=>$data[0][1],"vorname"=>$data[0][2]);
+	}
+
+
+	/**
+	* get rergistration requests
+	* @return array
+	*/
+	public function getRegistrationRequests(){
+		$requests = null;
+		$data = self::$connection->selectAssociativeValues("SELECT * FROM registration_request ORDER BY request_date");
+		if ($data) {
+			foreach ($data as $d) {
+			//get Parent Data
+			//$parent = $this->getUserById($d['eid'],array("user_type"=>1,"email"=>$d['email'],"id"=>$d['eid']) ) ;
+			$parent = $this->getParentByParentId($d['eid']);
+
+			
+			$requests[] = array("id"=>$d['requestId'],
+			"parentName"=>$parent->getFullname(),
+			"name"=>$d['name'],
+			"klasse"=>$d['klasse'],
+			"dob"=>$d['dob'],
+			"email"=>$d['email'],
+			"requestDate"=>$d['request_date']);
+			}
+		}
+	return $requests;	
+	}
+	
+	/**
+	* finish Registration Request
+	* @param int requestId
+	* @param pupilId
+	*/
+	public function finishRegistrationRequest($requestId, $pupilId) {
+	$registrationData = array();
+	$data = self::$connection->selectAssociativeValues("SELECT * from registration_request WHERE requestId = $requestId");
+	if ($data) {
+		$data = $data[0];
+		\Debug::writeDebugLog(__method__,"ermittelte Email für Anfrage ".$requestId." : ".$data['email']);
+		//get pupil's registration data
+		$pdata = self::$connection->selectAssociativeValues("SELECT * FROM schueler WHERE id = ". $pupilId);
+		if($pdata) {
+			$pdata = $pdata[0];
+			$registrationData = array("email"=>$data['email'],
+									"name"=>$data['name'],
+									"date"=>$data['request_date'],
+									"asvId"=>$pdata['ASV_ID'] );
+			return $registrationData;
+			}
+		} else {
+			return false;
+		}
+
+	 	
+	}
+	
+	/**
+	* delete a registration requestDate
+	* @param int id
+	*/
+	public function deleteRegistrationRequest($id) {
+	self::$connection->straightQuery("DELETE FROM registration_request WHERE requestId = $id");	
+	}
+	
+	
+	
     
     
 }

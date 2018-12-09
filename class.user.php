@@ -34,6 +34,11 @@ class User extends Printable {
      * @var bool $HTMLNews
      */
     protected $HTMLNews;
+	
+	/**
+	* @var string $dsgvo
+	*/
+	protected $dsgvo = null;
     
     
     /**
@@ -51,6 +56,7 @@ class User extends Printable {
         $this->email = $email;
         $this->name = $name;
         $this->surname = $surname;
+		
     }
     
     /**
@@ -101,6 +107,13 @@ class User extends Printable {
     public function getReceiveNewsMail() {
         return $this->receiveNewsMail;
     }
+	
+	/*
+	*
+	*/
+	public function acceptDsgvo(){
+		Model::getInstance()->acceptDsgvo($this);
+	}
     
     /**
      * get NewsMail HTML status
@@ -110,6 +123,14 @@ class User extends Printable {
     public function getNewsStatus() {
         return $this->HTMLNews;
     }
+	
+	/**
+	* get dsgvo status
+	* @return string
+	*/
+	public function getDsgvo(){
+		return $this->dsgvo;
+	}
     
     /**
      * set receive News Mail Status
@@ -204,6 +225,7 @@ class Guardian extends User {
         parent::__construct($id, 1, $email, $name, $surname);
         $this->parentId = $parentId;
         $this->children = Model::getInstance()->getChildrenByParentUserId($this->id);
+		$this->dsgvo = Model::getInstance()->getDsgvoStatus($this);
     }
     
     /**
@@ -425,6 +447,8 @@ class Teacher extends User {
         if (isset($rawData["shortName"])) {
             $this->shortName = $rawData["shortName"];
         }
+		
+		$this->dsgvo = Model::getInstance()->getDsgvoStatus($this);
         
     }
     
@@ -622,6 +646,15 @@ class Teacher extends User {
         
         return $model->getTaughtClasses($this->id);
     }
+	
+	/**
+	* get all taught students of teacher
+	* @param string initial letters
+	* @return array(Student Object)
+	*/
+	public function getAllTaughtPupilsByName($initial) {
+			return Model::getInstance()->getAllTaughtPupils($this->id,$initial);
+	}
     
     /**
      * returns appointments of teacher
@@ -683,10 +716,12 @@ class StudentUser extends User {
      */
     function __construct($id, $name, $surname, $class, $bday, $parent, $courses = null) {
         parent::__construct($id, 3, null, $name, $surname);
-        $this->class = $class;
+        //$this->id = $id;//entered 20181209 when trying to realise appLogin
+		$this->class = $class;
         $this->bday = $bday;
         $this->parent = $parent;
         //$this->courses = $courses;  -- 
+		$this->dsgvo = Model::getInstance()->getDsgvoStatus($this);
     }
     
     /**
@@ -772,6 +807,8 @@ class Student extends Printable {
         $this->bday = $bday;
         $this->eid = $eid;
     }
+	
+	
     
     /**
      * Returns student id
@@ -842,6 +879,14 @@ class Student extends Printable {
     public function getClassType() {
         return "Student";
     }
+	
+	/**
+	* get absence state
+	* return boolean
+	*/
+	public function getAbsenceState() {
+		return Model::getInstance()->getStudentAbsenceState($this->getId());
+	}
     
     /**
      * Get all teachers teaching this student
@@ -865,6 +910,17 @@ class Student extends Printable {
     private function getAllCourses() {
         $this->courses = Model::getInstance()->getCoursesOfStudent($this->Id);
     }
+	
+	/**
+	* get ASV_ID of student
+	* @return string 
+	*/
+	public function getASVId() {
+			return Model::getInstance()->getASVId($this->id);
+	}
+	
+	
+
 }
 
 ?>

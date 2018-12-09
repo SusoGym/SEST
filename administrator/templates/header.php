@@ -55,7 +55,7 @@
                             class="material-icons left">input</i>Datenabgleich</a></li>
             <li><a href="?type=settings" title="Einstellungen" class="waves-effect"><i class="material-icons left">settings</i>Einstellungen</a>
             </li>
-            <li><a href="?type=usrmgt" title="Benutzerverwaltung" class="waves-effect"><i class="material-icons left">people</i>Benutzerverwaltung</a>
+            <li><a href="?type=usrmgt" title="Benutzerverwaltung" class="waves-effect"><i class="material-icons left">people</i>Verwaltung</a>
             </li>
             <li><a href="?type=news" title="Newslettereintrag" class="waves-effect"><i class="material-icons left">comment</i>Newsletter</a>
             </li>
@@ -75,7 +75,7 @@
                 Admin</font></a></li>
     <li><a class="waves-effect" href="?type=updmgt"><i class="material-icons">input</i>Datenabgleich</a></li>
     <li><a class="waves-effect" href="?type=settings"><i class="material-icons">settings</i>Einstellungen</a></li>
-    <li><a class="waves-effect" href="?type=usrmgt"><i class="material-icons">people</i>Benutzerverwaltung</a></li>
+    <li><a class="waves-effect" href="?type=usrmgt"><i class="material-icons">people</i>Verwaltung</a></li>
     <li><a class="waves-effect" href="?type=news"><i class="material-icons">comment</i>Newsletter</a></li>
     <li><a class="waves-effect" href="?type=home"><i class="material-icons">home</i>Home</a></li>
     <div class="divider"></div>
