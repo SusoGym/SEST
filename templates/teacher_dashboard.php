@@ -4,7 +4,7 @@ $data = $this->getDataForView();
 $cover_lessons = $data['VP_coverLessons'];
 $taughtStudents = $data['taughtstudents'];
 $taughtClasses = $data['taughtclasses'];
-if ($data['welcomeText']) {
+if (strlen($data['welcomeText'])>15) {
 $shownotice = "true";
 $welcomeText = $data['welcomeText'];	
 } else {
