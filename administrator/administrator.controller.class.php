@@ -296,10 +296,10 @@ class Controller extends \Controller {
 						$this->display("usermgt");
 					} else {
 					$this->title = "Benutzerverwaltung";
-					$this->addMenueItem("?type=usrmgt&unused=true", "Zeige Benutzer ohne Schülerzuordnung");
+					$this->addMenueItem("?type=usrmgt&unused=true", "Benutzer ohne Schüler");
 					$this->addMenueItem("?type=usrmgt&search=true", "Eltern suchen");
 					$this->addMenueItem("?type=pupilmgt", "Schüler suchen");
-					$this->addMenueItem("?type=handleregister", "Registrierungsanfragen bearbeiten");
+					$this->addMenueItem("?type=handleregister", "Registrierungsanfragen");
 					$this->addMenueItem("?type=leaveofabsence", "Beurlaubungen");
 					$this->display("simple_menue");
 					}
@@ -407,16 +407,16 @@ class Controller extends \Controller {
 			//Settings
             case "settings":
                 $this->title = "Einstellungen";
-                $this->addMenueItem("?type=sestconfig", "Elternsprechtag konfigurieren");
-                $this->addMenueItem("?type=newsconfig", "Newsletter konfigurieren");
+                $this->addMenueItem("?type=sestconfig", "Elternsprechtag");
+                $this->addMenueItem("?type=newsconfig", "Newsletter");
                 $this->addMenueItem("?type=options", "Optionen");
                 $this->display("simple_menue");
                 break;
             //call Newsletter function
             case "news":
                 $this->title = "Newslettermanagement";
-				$this->addMenueItem("?type=archive", "Newsletter Archiv");
-                $this->addMenueItem("?type=enternews", "neuen Newsletter erstellen");
+				$this->addMenueItem("?type=archive", "Archiv");
+                $this->addMenueItem("?type=enternews", "neuer Newsletter");
                 $this->display("simple_menue");
                 break;
 			//view existing news
@@ -477,9 +477,9 @@ class Controller extends \Controller {
             //Select update options
             case "updmgt":
                 $this->title = "Datenabgleich";
-                $this->addMenueItem("?type=update_s", "Ableich Schülerdaten");
-                $this->addMenueItem("?type=update_t", "Abgleich Lehrerdaten");
-                $this->addMenueItem("?type=upload_e", "Upload Terminedatei");
+                $this->addMenueItem("?type=update_s", "Schülerdaten");
+                $this->addMenueItem("?type=update_t", "Lehrerdaten");
+                $this->addMenueItem("?type=upload_e", "Terminedatei");
                 $this->display("simple_menue");
                 break;
             //Update teacher data

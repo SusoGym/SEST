@@ -915,9 +915,9 @@ class Controller {
                 $_SESSION['board_type'] = 'parent';
             }
 			
-			
+			header("Location: ./administrator");
             
-            return $_SESSION['board_type'] . '_dashboard';
+            //return $_SESSION['board_type'] . '_dashboard';
         } else if ($user instanceof Teacher) {
             $this->infoToView['upcomingEvents'] = $this->model->getNextDates(true);
 			$this->infoToView['VP_allDays'] = $this->model->getVPDays(true);
