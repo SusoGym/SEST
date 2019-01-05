@@ -86,7 +86,7 @@ xhttp.addEventListener('load', function(event) {
 				createMissingExcuseList();
 				} else if (data['status'] == "loaEdited") {
 				//console.log(data);
-				Materialize.toast("Daten der Berulaubung geändert" ,"2000");
+				Materialize.toast("Daten der Beurlaubung geändert" ,"2000");
 				activeElement = null;
 				$('#editabsence').modal('close');
 				//refresh studentList
@@ -118,9 +118,11 @@ xhttp.addEventListener('load', function(event) {
 				createMissingExcuseList();
 				$('#markabsent').modal('close');
 				
-			}else if  (data['status'] == "error") {
+			} else if (data['status'] == "pdfready"){
+				window.open('templates/pdfabsentees.php');		
+			} else if  (data['status'] == "error") {
 				Materialize.toast(data['message'],"4000");
-			}else {
+			} else {
 				// enter the search request result into an array to keep it after further requests
 				searchList = [];
 				absenteeList = studentList.filter(dta => dta.type == "absent");
@@ -307,6 +309,13 @@ this.rowClone.style.display="block";
 x++;	
 });
 //MUST INCLUDE SHOWING NO ABSENCES
+if (absentees.length == 0) {
+document.getElementById("absenteelist").ClassName = "green-text";
+document.getElementById("absenteelist").innerHTML = "keine Abwesenheiten";
+	
+} else {
+document.getElementById('printit').style.display = "block";
+}
 }
 
 
@@ -358,6 +367,16 @@ if (loas.length == 0) {
 	}
 
 }
+
+/**
+* prepare file as basis for PDF creation
+*/
+function printAbsence() {
+xhttp.open("POST", "?type=printabsence", true);
+xhttp.send();	
+
+}
+
 
 
 /**

@@ -72,10 +72,10 @@ class FileHandler {
     }
     
     
-    /**
-     *Quelldatei mit Termindaten auslesen
-     * @ return array(Termine)
-     */
+	/**
+	*Quelldatei mit Termindaten auslesen
+	* @return array(Termine)
+	*/
     public function readEventSourceFile() {
         $events = array();
         $fh = fopen($this->file, "r");
@@ -90,6 +90,24 @@ class FileHandler {
         fclose($fh);
         
         return $events;
+    }
+	
+	/**
+	* read sourc efile with lessons
+	* @return array()
+	*/
+    public function readLessonsSourceFile() {
+        $lessons = array();
+        $fh = fopen($this->file, "r");
+        $x = 0;
+        while (!feof($fh)) {
+            $line = trim(fgets($fh));
+            $lineArr = explode(";", $line);
+            $lessons[$x] = array("class"=>$lineArr[0],"subject"=>$lineArr[1],"teacher"=>$lineArr[2]);
+            $x++;
+        }
+        fclose($fh);
+        return $lessons;
     }
     
     /**
@@ -159,6 +177,126 @@ class FileHandler {
         }
         fclose($f);
     }
+	
+	/**
+     * create html-file
+     *
+     * @param string filename
+     * @param array (array(string)) data
+	 * @param int maxPeriod (in workdays)
+     */
+    public function createHTML($data,$maxPeriod) {
+		//Define two arrays used in the process
+		$absenceDays = array(); //array including all days of the time period to show
+		for ($x = $maxPeriod; $x >= 0; $x--) {
+			$wd = $this->getGermanWeekday(date("w", strtotime('-'.$x.' weekdays') ));
+			array_push($absenceDays,array(	"calcdate"=>date("Y-m-d", strtotime('-'.$x.' weekdays') ),
+											"showdate"=>$wd.' '.date("d.m.Y", strtotime('-'.$x.' weekdays') ) 
+											)
+						);	
+			}
+		$absenteeForms = $data['formsWithAbsences']; //Array including all forms with absent pupils
+		$f = fopen($this->file, "w");
+
+		
+		foreach ($absenceDays as $day) {
+		//filter Results  by individual Days and Forms
+		$dayData = array_filter($data['absentPupils'],$this->filter_datum($day['calcdate']) );
+			
+			//Write Day as header
+			$line = '<p style="font-size: 19px;font-weight:bold">'.$day['showdate'].'</p>';
+			$line .= "\r\n";
+			fwrite($f, $line); 
+			$colCount = 1;
+			$line = "<table>\r\n<tbody>\r\n";
+			fwrite($f, $line);
+			foreach($absenteeForms as $form) {
+				
+				//Filter by forms with absent students
+				$dayDataForms = array_filter($dayData,$this->filter_klasse($form) );
+				if (!empty($dayDataForms) ) {
+					
+					if ($colCount == 1) {
+					$line = "<tr>\r\n";
+					fwrite($f, $line);
+					}
+					//Write form as subheader
+					$line = '<td><span style="font-size: 16px;font-weight:bold">'.$form.'</span><br>';
+					$line .= "\r\n";
+					fwrite($f, $line);
+					foreach ($dayDataForms as $dataset) {
+						//Write Students
+						$line = '<span style="font-size:12px">'.$dataset['name']; //.' ('.$dataset['klasse'].') ';	
+						if($dataset['beurlaubt'] == 1) 
+							$line .= '<b style="font-size:8px">&nbsp;[beurl.]</b>';
+						$line .= "</span><br/>\r\n";
+						fwrite($f,$line);
+						
+						}
+				$line = "</td>\r\n";
+				fwrite($f, $line);
+				if ($colCount == 3) {
+					$line = "</tr>\r\n";
+					fwrite($f, $line);
+					$colCount = 1;
+					} else {
+					$colCount ++;
+					}					
+				}
+			}
+		if  ($colCount != 1) {
+				$line = "</tr>\r\n";
+				fwrite($f, $line);	
+				}
+		fwrite($f,"</tbody></table>\r\n<hr>\r\n");	
+		}
+		fclose($f);
+			
+    }
+	
+	/**
+	* callback for PHP array_filter function used in this class
+	*/
+	private function filter_klasse($value) {				
+		return function ($v) use ($value) {
+			return $v['klasse'] == $value;
+			};
+		}	
+	
+	/**
+	* callback for PHP array_filter function used in this class
+	*/
+	private function filter_datum($value) {				
+		return function ($v) use ($value) {
+			return $v['ende'] >= $value && $v['beginn']<= $value;
+			};
+		}	
+	/**
+	* return german Weekday
+	* @param int
+	* @return string
+	*/
+	private function getGermanWeekday($numericWeekday) {
+	$wd = null;
+	switch ($numericWeekday) {
+			case 1:
+				$wd = "Montag, ";
+				break;
+			case 2:
+				$wd = "Dienstag, ";
+				break;
+			case 3:
+				$wd = "Mittwoch, ";
+				break;
+			case 4:
+				$wd = "Donnerstag, ";
+				break;
+			case 5:
+				$wd = "Freitag, ";
+				break;
+			};
+	return $wd;
+	}	
     
 }
 
