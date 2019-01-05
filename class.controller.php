@@ -61,6 +61,20 @@ class Controller {
 			
 			}
         
+		
+		//==================================
+		//will only use the users id and the class type as session Variables 
+		//name and Password no longer stored in session
+		if (isset($_SESSION['user'])) {
+			//a valid login is stored
+			//check  the current login for timeout
+            if (!$this->checkLoginTimeout() {
+                unset($_SESSION['user']);
+                ChromePhp::info("User login has expired due to inactivity");
+            }
+        }
+		
+		/*
         // handles login verification and creation of user object
         if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd'])) {
             if (!$this->checkLogin($_SESSION['user']['mail'], $_SESSION['user']['pwd'])) {
@@ -68,11 +82,14 @@ class Controller {
                 ChromePhp::info("Tried to log in with invalid user-data");
             }
         }
+		*/
         
-        if(isset($this->input['debugcaptcha']))
+        //can't we get rid of that???
+		if(isset($this->input['debugcaptcha']))
         {
             Model::$debugCaptcha = true;
         }
+		//can we?
         
         if (!isset($this->input['type']))
             $this->input['type'] = null;
@@ -80,6 +97,7 @@ class Controller {
             echo "Nothing to Do!";
             die;
         }
+		//this is where the action starts
         $this->display($this->handleType());
     }
     
@@ -1125,6 +1143,14 @@ class Controller {
         
         return $success;
     }
+	
+	/**
+	* check if login is timed out
+	* @return bool
+	*/
+	protected function checkLoginTimeout() {
+		//check in database if user of this group has a valid login token
+	}
     
     /**
      * Adds new student as child to logged in parent
