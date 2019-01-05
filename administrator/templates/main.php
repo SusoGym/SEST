@@ -35,8 +35,11 @@ $admin = $data['isadmin'];
 				<!-- <div id="absenteelist"> -->
 					<ul class="collapsible" id="absenteelist"></ul>	
 					<!-- <span class="row" id="row_blueprint" style="display: none;"></span> -->
-				</div>
-				
+			<div id="printit" class="card-action" style="display:none;">
+			<a class="btn-flat teal-text" href="#" onClick="printAbsence()">Abwesenheiten drucken</a>
+			</div>		
+			</div>
+					
 			</div>
 		</div>
 	</div>
@@ -87,6 +90,7 @@ studentList = <?php echo $studentList ?>;
 createStudentList(studentList);
 createAbsenteeList();
 //createMissingExcuseList();
+
 
 
 </script>

@@ -410,6 +410,7 @@ class Controller extends \Controller {
                 $this->addMenueItem("?type=sestconfig", "Elternsprechtag");
                 $this->addMenueItem("?type=newsconfig", "Newsletter");
                 $this->addMenueItem("?type=options", "Optionen");
+				$this->addMenueItem("?type=admpwd", "Passwort ändern");
                 $this->display("simple_menue");
                 break;
             //call Newsletter function
@@ -479,6 +480,7 @@ class Controller extends \Controller {
                 $this->title = "Datenabgleich";
                 $this->addMenueItem("?type=update_s", "Schülerdaten");
                 $this->addMenueItem("?type=update_t", "Lehrerdaten");
+				$this->addMenueItem("?type=upload_u", "Unterrichtsdaten");
                 $this->addMenueItem("?type=upload_e", "Terminedatei");
                 $this->display("simple_menue");
                 break;
@@ -501,12 +503,18 @@ class Controller extends \Controller {
                 $this->actionType = "eventchoose";
                 $this->display("update");
                 break;
-           
+           //lessons file upload
+            case "upload_u":
+                $this->title = "Upload Unterrichtsdaten";
+                $this->actionType = "lessonchoose";
+                $this->display("update");
+                break;
             
-            //student file upload
+            //file upload
             case "utchoose":
             case "uschoose":
             case "eventchoose":
+			case "lessonchoose":
                 $student = $input['type'] == "uschoose";
                 //von mir hinzugefügt
                 $input['type'] == "uschoose" ? $student = true : $student = false;
@@ -563,12 +571,24 @@ class Controller extends \Controller {
                 $this->display("update2");
                 break;
             
-            //
+            // Update Events
             case "dispupdateevents":
                 $this->manageEvents();
                 $this->title = "Termine";
                 $this->infoToView['cardtext'] = "Termine aktualisiert und ics-Dateien erzeugt";
                 $this->display("events");
+                break;
+			// Update classes taught by teacher
+            case "dispupdatelessons":
+				$error = $this->manageLessons();
+                if (isset($error) ) {
+					$this->notify("Fehler - falsches Lehrerkürzel ".$error." gefunden!");
+				} else {
+					$this->notify("Unterrichtsdaten erfolgreich aktualisiert!");
+				}
+                $this->title = "Unterrichtszuordnung";
+                $this->infoToView['cardtext'] = "Unterrichtszuordnung aktualisiert";
+                $this->display("lessons");
                 break;
             //SEST configuration
             case "sestconfig":
@@ -603,7 +623,29 @@ class Controller extends \Controller {
                 $this->infoToView['options'] = $this->model->getOptionsForAdmin();
                 $this->display("options");
                 break;
-            //Set SEST classes/teachers
+            // change admin user Password
+			case "admpwd":
+				$this->backButton = "?type=settings";
+				if (isset($input['console'])) {
+                    $data = $input['data'];
+					$pwd = $data['pwd'];
+					$oldpwd = $data['oldpwd'];
+					//change Password
+					if ($oldpwd == "") {
+						die(json_encode(array("success" => false, "notifications" => array("Bitte geben sie ihr altes Passwort an!"))));
+						} else if (!$this->model->passwordValidate(self::getUser()->getEmail(), $oldpwd)) {
+							die(json_encode(array("success" => false, "notifications" => array("Ihr altes Passwort ist nicht korrekt!"), "resetold" => true)));
+						}
+					if ($pwd != "") {
+						$this->model->changePwd(self::$user->getId(), $pwd);
+						$_SESSION['user']['pwd'] = $pwd;
+						die(json_encode(array("success" => true, "notifications" => array("Passwort geändert!"))));
+					}
+                }
+				$this->infoToView['user'] = self::$user;
+				$this->display("admincreds");
+				die;
+			//Set SEST classes/teachers manually
             case "setclasses":
                 $this->allTeachers = $this->model->getTeachers();
                 $this->allForms = $this->model->getForms();
@@ -703,6 +745,12 @@ class Controller extends \Controller {
 				}
 				
 				break;
+			case "printabsence":
+				//create a text file of absentees as basis for print
+				$this->makeAbsenteesFile();
+				$arr = array("status" => "pdfready");
+				die(json_encode($arr));
+				break;
             default:
 				//Landing Page 
                 $this->title = "Startseite";
@@ -710,6 +758,7 @@ class Controller extends \Controller {
 				//get startpage data
 				//missing students for the day
 				$this->infoToView['missingStudents'] =  json_encode($this->model->getAbsentStudents());
+				
 				$this->infoToView['missingExcuses'] =  json_encode($this->model->getMissingExcuses());
 				$this->infoToView['studentList'] = json_encode(array_merge($this->model->getAbsentStudents(),$this->model->getMissingExcuses()));
 				$this->infoToView['isadmin'] = "true";
@@ -813,6 +862,20 @@ class Controller extends \Controller {
         $tmanager->createICS($events, true); //create StaffVersion
         
     }
+	
+	/**
+	* assign teachers to classes 
+	*/
+	private function manageLessons() {
+	$filehandler = new FileHandler($_SESSION['file']);
+	$lessons = $filehandler->readLessonsSourceFile();
+	$error = $this->model->setLessons($lessons);
+	if (isset($error)) {
+		return $error;
+		} else {
+		return null;	
+		}
+	}
     
     /**
      * Adds Menu Item
@@ -861,7 +924,7 @@ class Controller extends \Controller {
     private function checkTeacherAssignments() {
         $params = $this->model->getIniParams();
         $fileName = "teacherassignments.csv";
-        $path = $params['basepath'] . '/' . $params['download'] . '/' . $fileName;
+        $path = $params['filebase'] . '/' . $params['download'] . '/' . $fileName;
         $teachers = $this->model->getTeachers();
         $data = array();
         $line = "Lehrer;Deputat;Anzahl zu vergebender Termine;Anzahl noch zu vergebender Termine;Vergebene Termine\n";
@@ -885,6 +948,16 @@ class Controller extends \Controller {
         $filehandler->createCSV($data);
         $this->notify("Datei " . $fileName . " erzeugt");
     }
+	
+	/**
+	* create absentees basis file to print out
+	*/
+	private function makeAbsenteesFile(){
+	$maxPeriod = 3; // workdays
+	$absentees = $this->model->getAbsenteeListData($maxPeriod);
+	$filehandler = new Filehandler("./templates/absentees.txt");
+	$filehandler->createHTML($absentees,$maxPeriod);
+	}
 		
 	/**
      *

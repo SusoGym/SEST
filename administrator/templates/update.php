@@ -62,6 +62,7 @@ $data = \View::getInstance()->getDataForView();
         else {
             var student = <?php echo (\View::getInstance()->getDataForView()['action'] == "uschoose") ? "true" : "false"; ?>;
             var teacher = <?php echo (\View::getInstance()->getDataForView()['action'] == "utchoose") ? "true" : "false"; ?>;
+			var lessons = <?php echo (\View::getInstance()->getDataForView()['action'] == "lessonchoose") ? "true" : "false"; ?>;
 
             //var type = student ? "dispsupdate1" : "disptupdate1";
             var type;
@@ -69,7 +70,9 @@ $data = \View::getInstance()->getDataForView();
                 type = "dispsupdate1";
             } else if (teacher) {
                 type = "disptupdate1";
-            } else {
+            } else if (lessons) {
+				type = "dispupdatelessons";
+			} else {
                 type = "dispupdateevents";
             }
 

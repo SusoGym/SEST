@@ -291,7 +291,7 @@ class Model {
      */
     public function getTeachersByClass($class) {
         $class = self::$connection->escape_string($class);
-        $data = self::$connection->selectValues("SELECT lehrer.id FROM lehrer, unterricht WHERE unterricht.klasse='$class' AND unterricht.lid=lehrer.id"); // returns data[n][data]
+        $data = self::$connection->selectValues("SELECT DISTINCT lehrer.id FROM lehrer, unterricht WHERE unterricht.klasse='$class' AND unterricht.lid=lehrer.id"); // returns data[n][data]
         
         if ($data == null)
             return null;
@@ -305,6 +305,23 @@ class Model {
         return $ids;
         
     }
+	
+	/**
+	* get Teacher Id by short name
+	* @param string 
+	* @return int
+	*/
+	public function getTeacherIdByShortName($short) {
+	$teacher = null;
+	$data = self::$connection->selectValues('SELECT id from lehrer WHERE kuerzel="'.$short.'"');
+		if (!empty($data) ) {
+		$teacher = $data[0][0];
+		return $teacher;	
+		} else {
+		return false;
+		}
+	
+	}
     
     /**
      * Returns all Teachers
@@ -1906,6 +1923,51 @@ class Model {
 		return $absentPupils;
 		
 	}
+	
+	/**
+	* get data for absentee list to print out
+	* @param int maximum Period to show (in workdays before current date)
+	* @return JSON array
+	*/
+	public function getAbsenteeListData($maxPeriod) {
+		$absentPupils = array();
+		$absenteeForms = array();
+		$data = self::$connection->selectAssociativeValues('SELECT * FROM absenzen,schueler 
+		WHERE absenzen.sid = schueler.id
+		AND ende >="'.date("Y-m-d", strtotime('-'.$maxPeriod.' weekdays') ).
+		'" ORDER BY schueler.klasse,schueler.name,schueler.vorname');
+		if(!empty($data)) {
+				foreach ($data as $d) {
+					if (!in_array($d['klasse'],$absenteeForms) ) {
+						array_push($absenteeForms,$d['klasse']);	
+						}
+					$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid']);
+					array_push($absentPupils, array("type" =>"absent",
+					"absenceId" => $d['aid'],
+					"id"=>$d['sid'],
+					"name" => $d['name'].', '.$d['vorname'],
+					"klasse" => $d['klasse'],
+					"beginn" => $d['beginn'],
+					"ende" => $d['ende'],
+					"beurlaubt" => $d['beurlaubt']/*,
+					"kommentar" => $d['kommentar'],
+					"adminMeldung" => $d['adminMeldung'],
+					"adminMeldungDatum" => $d['adminMeldungDatum'],
+					"adminMeldungTyp" => $d['adminMeldungTyp'],
+					"lehrerMeldung" => $d['lehrerMeldung'],
+					"lehrerMeldungDatum" => $d['lehrerMeldungDatum'],
+					"elternMeldung" => $d['elternMeldung'],
+					"elternMeldungDatum" => $d['elternMeldungDatum'],
+					"entschuldigt" => $d['entschuldigt']*/
+					)
+					);
+				}
+		}
+		
+		return array("formsWithAbsences" => $absenteeForms,"absentPupils" => $absentPupils);
+		
+	}
+	
 	
 	/**
 	* get missing absence excuse

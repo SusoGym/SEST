@@ -166,10 +166,30 @@ class Model extends \Model {
         
     }
     
+	
+	/**
+	* connect teachers to classes
+	* @param array
+	*/
+	public function setLessons($lessons) {
+	//truncate table
+	self::$connection->straightQuery("TRUNCATE TABLE unterricht");
+	foreach($lessons as $l) {
+			$klasse = $l['class'];
+			$lid = $this->getTeacherIdByShortName($l['teacher']);
+			if (!$lid) {
+				return $l['teacher'];
+			}
+			//enter data into DB
+			self::$connection->insertValues("INSERT INTO unterricht (`id`,`lid`,`klasse`) VALUES ('','$lid','$klasse')");
+			
+		}
+	return null;
+	}
     
     /**
      * connect teacher with form
-     *
+     * in individual mode
      * @param        array (int) with teacher Ids
      * @param string $form class
      */
@@ -516,6 +536,18 @@ class Model extends \Model {
 	*/
 	public function deleteRegistrationRequest($id) {
 	self::$connection->straightQuery("DELETE FROM registration_request WHERE requestId = $id");	
+	}
+	
+	/**
+	* get absences for pdf print
+	* @return array
+	*/
+	public function getLastDaysAbsences(){
+	$lastday = 3;
+	$maxdate = date(Y-m-d) - $lastday;
+	//self::$connection->getAssociativeValues();
+	$absentees = array();
+	return $absentees;
 	}
 	
 	
