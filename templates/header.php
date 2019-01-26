@@ -96,6 +96,10 @@
         </li>
     </ul>
 	
-<?php require("dsgvo.php"); ?>	
+<?php 
+if(!isset($data['public_access']) ) {
+require("dsgvo.php"); 
+}
+?>	
 	
 	

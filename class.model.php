@@ -122,7 +122,7 @@ class Model {
      *
      * @return User | Teacher | Admin | Guardian
      */
-    public function getUserById($uid, $data = null) {
+    public function getUserById($uid,$data = null) {
         
         if ($data == null)
             $data = self::$connection->selectAssociativeValues("SELECT * FROM user WHERE id=$uid");
@@ -132,18 +132,15 @@ class Model {
             $data = $data[0];
 
         $type = $data['user_type'];
-        
+        //Debug::writeDebugLog(__method__,"User ".$uid." Type: ".$type);
         switch ($type) {
             case 0: // Admin
                 return new Admin($data['id'], $data['email']);
                 break;
             case 1: // Parent / Guardian
 			    $data2 = self::$connection->selectAssociativeValues("SELECT * FROM eltern WHERE userid=$uid")[0];
-                
+                //Debug::writeDebugLog(__method__,"Create Guardian");
                 return new Guardian($data['id'], $data['email'], $data2['id'], $data2['name'], $data2['vorname']);
-            case 2:
-                // non-existend
-                die("Why are we here?!");
             default:
                 return null;
                 break;
@@ -159,11 +156,10 @@ class Model {
     public function getUserByMail($email) {
         $email = self::$connection->escape_string($email);
         $data = self::$connection->selectAssociativeValues("SELECT * FROM user WHERE email='$email'");
-        
-        if ($data == null)
+        if (empty($data))
             return null;
-        
-        return $this->getUserById($data[0]['id'], $data);
+        else 
+			return $this->getUserById($data[0]['id'], $data);
     }
 	
 	
@@ -497,7 +493,7 @@ class Model {
         if ($data == null) {
             
             $novelData = $this->checkNovellLogin($ldapName, $pwd);
-            
+            //Debug::writeDebugLog(__method__,$ldapName." -- ".$pwd." : ".$novelData);
             if (!isset($novelData->{'code'}) || !isset($novelData->{'type'}) || $novelData->{'code'} != "200" || $novelData->{'type'} != 'Teacher') {
                 ChromePhp::info(json_encode($novelData));
                 if (isset($novelData->{'type'}) && $novelData->{'type'} == "student" && $novelData->{'code'} == "200") {
@@ -1541,7 +1537,7 @@ class Model {
 			$add
 			ORDER BY $order ASC");
             
-            if (count($data) > 0) {
+            if (is_array($data) ) {
                 foreach ($data as $dayData) {
                     $coverLesson = new CoverLesson();
                     $coverLesson->constructFromDB($dayData);
@@ -1634,7 +1630,7 @@ class Model {
 			ORDER BY datum,stunde,klassen ASC";
             
             $data = self::$connection->selectAssociativeValues($query);
-            if (count($data) > 0) {
+            if (is_array($data) ) {
                 foreach ($data as $d) {
                     $coverLesson = new CoverLesson();
                     $coverLesson->constructFromDB($d);
@@ -1762,7 +1758,7 @@ class Model {
         $tchrData = array();
         $untisName = self::$connection->escape_string($untisName);
         $data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE untisName='$untisName'");
-        if (count($data) > 0) {
+        if (is_array($data) ) {
             $tchrData = array("email" => $data[0][0], "id" => $data[0][1]);
             
             return $tchrData;
@@ -1781,7 +1777,7 @@ class Model {
         $tchrData = array();
         $short = self::$connection->escape_string($short);
         $data = self::$connection->selectValues("SELECT email,id FROM lehrer WHERE kuerzel='$short' ");
-        if (count($data) > 0) {
+        if (is_array($data) ) {
             $tchrData = array("email" => $data[0][0], "id" => $data[0][1]);
             
             return $tchrData;
@@ -1834,6 +1830,7 @@ class Model {
 			"absent"=>"true",
 			"beginn" => $d['beginn'],
 			"ende" => $d['ende'],
+			"kommentar" => $d['kommentar'],
 			"adminMeldung" => $d['adminMeldung'],
 			"adminMeldungDatum" => $d['adminMeldungDatum'],
 			"adminMeldungTyp" => $d['adminMeldungTyp'],
@@ -1949,8 +1946,8 @@ class Model {
 					"klasse" => $d['klasse'],
 					"beginn" => $d['beginn'],
 					"ende" => $d['ende'],
-					"beurlaubt" => $d['beurlaubt']/*,
-					"kommentar" => $d['kommentar'],
+					"beurlaubt" => $d['beurlaubt'],
+					"kommentar" => $d['kommentar']/*,
 					"adminMeldung" => $d['adminMeldung'],
 					"adminMeldungDatum" => $d['adminMeldungDatum'],
 					"adminMeldungTyp" => $d['adminMeldungTyp'],
@@ -2101,7 +2098,7 @@ class Model {
 	* @param string comment
 	*/
 	public function enterExcuse($id,$date,$comment) {
-	Debug::writeDebugLog(__method__,'UPDATE absenzen SET entschuldigt = "'.$date.'", ekommentar = "'.$comment.'" WHERE aid ='. $id);
+	//Debug::writeDebugLog(__method__,'UPDATE absenzen SET entschuldigt = "'.$date.'", ekommentar = "'.$comment.'" WHERE aid ='. $id);
 	self::$connection->straightQuery('UPDATE absenzen SET entschuldigt = "'.$date.'", ekommentar = "'.$comment.'" WHERE aid ='. $id);
 	}
 	
@@ -2128,7 +2125,7 @@ class Model {
 	$query = 'UPDATE absenzen set beginn="'.$start.'",ende="'.$end.
 	'",kommentar="'.$comment.'",'.$whoField.'='.$id.','.$whenField.'=CURRENT_TIMESTAMP'.$queryAdd.' WHERE aid='.$aid;
 	
-	Debug::writeDebugLog(__method__,$query);
+	//Debug::writeDebugLog(__method__,$query);
 	self::$connection->straightQuery($query);
 	
 	}	
@@ -2200,6 +2197,7 @@ class Model {
 				"absenceId" => $absentData['aid'],
 				"beginn" => $absentData['beginn'],
 				"ende" => $absentData['ende'],
+				"kommentar" => $absentData['kommentar'],
 				"adminMeldung" => $absentData['adminMeldung'],
 				"adminMeldungDatum" => $absentData['adminMeldungDatum'],
 				"adminMeldungTyp" => $absentData['adminMeldungTyp'],

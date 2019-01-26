@@ -433,6 +433,7 @@ activeElement = elementNr;
 $('#markabsent').modal();
 $('#markabsent').modal('open');
 document.getElementById('comment').innerHTML = "";
+$('#actionTitle').html('<h4>Abwesenheit melden</h4>');
 $('#absenceName').html('<h4>' + searchList.find(result => result.id == activeElement )['name'] + ' (' + searchList.find(result => result.id == activeElement )['klasse'] + ')</h4>');
 //get absences one day before
 checkPreviousDayAbsence();
@@ -447,8 +448,9 @@ function enterParentAbsence(elementNr) {
 activeElement = elementNr;
 $('#markabsent').modal();
 $('#markabsent').modal('open');
+$('#actionTitle').html('<h4>Abwesenheit melden</h4>');
 document.getElementById('comment').innerHTML = "";
-$('#absenceName').html('<h4>' + studentList.find(result => result.id == activeElement )['name'] + ' (' + studentList.find(result => result.id == activeElement )['klasse'] + ')</h4>');
+$('#absenceName').html('<h5>' + studentList.find(result => result.id == activeElement )['name'] + ' (' + studentList.find(result => result.id == activeElement )['klasse'] + ')</h5>');
 //get absences one day before
 checkPreviousDayAbsence();
 initDatepick();	
@@ -616,6 +618,9 @@ anzeige += "Meldung Lehrer am: <b>" + formatDateDot(activeDataSet['lehrerMeldung
 }
 if (activeDataSet['elternMeldung'] != "0") {
 anzeige += "Eintrag Eltern am: <b>" + formatDateDot(activeDataSet['elternMeldungDatum'])+'</b>';	
+}
+if (activeDataSet['kommentar'] != "") {
+anzeige += "<br/>Kommentar: <b>" + activeDataSet['kommentar']+'</b>';	
 }
 if (activeDataSet['entschuldigt'] != "0000-00-00") {
 anzeige += "Entschuldigung am: <b>" + formatDateDot(activeDataSet['entschuldigt'])+'</b>';	

@@ -12,7 +12,7 @@ class Controller {
     /**
      * @var array combined POST & GET data received from client
      */
-    protected $input;
+    protected $input = array();
     
     /**
      * @var User
@@ -23,6 +23,11 @@ class Controller {
      * @var logfile
      */
     protected $logfile = "vpaction.log";
+	
+	/**
+	* @var sessiontime in Minutes
+	*/
+	protected $sessionValidity = 1;
     
     /**
      * @return User
@@ -37,58 +42,99 @@ class Controller {
      * @param $input
      */
     public function __construct($input) {
-        
-        
-        ChromePhp::info("-------- Next Page --------");
-        ChromePhp::info("Input: " . json_encode($input));
-        ChromePhp::info("Session: " . json_encode($_SESSION));
-        
         if ($this->model == null)
             $this->model = Model::getInstance();
-        
         $this->input = $input;
         $this->infoToView = array();
-        $this->handleLogic();
-        
-        
-    }
+		$this->chooseLogicHandler();
+	}
+	
+	/**
+	*debug function
+	*/
+	protected function readSession(){
+	$msg="";
+	if(!empty($_SESSION) ){
+		$msg = "SESSION:\r\n";
+		foreach ($_SESSION as $key => $value){
+			if ($key != "notifications") {
+			$msg .= $key." -- ";
+			if (is_array($value) ) {
+				foreach ($value as $k=>$v) {
+						$msg .= "[".$k. " : ".$v."]\r\n";
+				}
+			} else {
+				$msg .= $value;
+			}
+			$msg .="\r\n";
+			}
+		}
+	} else {
+		$msg = "No Session set";
+	}
+	return $msg;
+	}
+	
+	/*
+	* check which logicHandler will be used
+	* admin login uses handler in admin.controller class
+	*/
+	protected function chooseLogicHandler(){
+	//choose the logic handler for admin and other users
+		if (isset($_SESSION['user']) ) {
+				if ($_SESSION['user']['type'] == 0){
+					//admin is logged in
+					if (!$this->checkLoginTimeout()) {
+						die($this->logout(true));//calls admin controllers logout()
+															
+					}else {
+						return;
+					}
+				} else {
+					//all other users
+					//Debug::writeDebugLog(__method__,$this->readSession()."\r\nother than Admin logged in");
+					if (!$this->checkLoginTimeout()) {
+						die($this->logout(true));//calls admin controllers logout()
+						} else {
+						$this->handleLogic();
+						}					
+				}
+			} else {
+			//no user logged in - goto login page
+			//System Timeout, i.e. SESSION timeout of server OR NEVER LOGGED IN, i.e. START ???
+			//need to show a message
+			//Debug::writeDebugLog(__method__,$this->readSession()."\r\nNo one logged in");
+			$this->handleLogic();
+		}	
+	}
     
-    protected function handleLogic() {
-        
-        
+    /*
+	* handle logic
+	* start all relevant logic actions
+	*/
+	protected function handleLogic() {
+        //check for active login when javascript calls
         if (isset($this->input['console'])) {
             header('Content-Type: text/json');
-			
+			//check for SessionTimeout
+			if (isset($_SESSION['user'])) {
+				if (!$this->checkLoginTimeout() ) {
+					$this->notify("Login timed out!");
+					$_SESSSION['timeout'] = true;
+					isset($this->input['type']) ? $type = $this->input['type'] : "ohne"; 
+					//Debug::writeDebugLog(__method__,"JavaScriptCall - Type Parameter:".$type);
+					die(header('Location: ../') );
+					die( json_encode(array("status" => "timeout","notify" => "Login timed out!")));
+					}
+				}
 			}
+		//=========end of javascript timeout check=======
         
-		
-		//==================================
-		//will only use the users id and the class type as session Variables 
-		//name and Password no longer stored in session
-		if (isset($_SESSION['user'])) {
-			//a valid login is stored
-			//check  the current login for timeout
-            if (!$this->checkLoginTimeout() {
-                unset($_SESSION['user']);
-                ChromePhp::info("User login has expired due to inactivity");
-            }
-        }
-		
-		/*
-        // handles login verification and creation of user object
-        if (isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd'])) {
-            if (!$this->checkLogin($_SESSION['user']['mail'], $_SESSION['user']['pwd'])) {
-                unset($_SESSION['user']);
-                ChromePhp::info("Tried to log in with invalid user-data");
-            }
-        }
-		*/
-        
+		       
         //can't we get rid of that???
-		if(isset($this->input['debugcaptcha']))
-        {
+		if(isset($this->input['debugcaptcha']))	{
             Model::$debugCaptcha = true;
-        }
+			}
 		//can we?
         
         if (!isset($this->input['type']))
@@ -106,25 +152,34 @@ class Controller {
     }
     
     /**
+	 * handle inputs, which decides the action taken
+	 * the core of all action
      * @return string
      */
     protected function handleType() {
         $template = "login";
-        
-        $this->sendOptions();
-        
-        if (self::$user instanceof Guardian) {
-            //$this->infoToView['welcomeText'] = str_replace("\\n", "<br>", str_replace("\\r\\n", "<br>", $this->getOption('welcomeparent', '')));
-            $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomeparent');
-			$this->infoToView['children'] = self::$user->getChildren();
-			$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
-        } else if (self::$user instanceof Teacher) {
-            $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcometeacher');
-            $this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
-        } else if (self::$user instanceof StudentUser) {
-            $this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomestudent');
-			$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
-        }
+		//Debug::writeDebugLog(__method__,$this->input['type']);
+        //go straight to logout 
+		if($this->input['type'] == "logout") {
+			$_SESSION['logout'] = true;	
+			die($this->logout());
+			}
+        //all other cases
+		$this->sendOptions();
+		if (isset(self::$user)) {
+			if (self::$user instanceof Guardian) {
+				//$this->infoToView['welcomeText'] = str_replace("\\n", "<br>", str_replace("\\r\\n", "<br>", $this->getOption('welcomeparent', '')));
+				$this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomeparent');
+				$this->infoToView['children'] = self::$user->getChildren();
+				$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
+			} else if (self::$user instanceof Teacher) {
+				$this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcometeacher');
+				$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
+			} else if (self::$user instanceof StudentUser) {
+				$this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomestudent');
+				$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
+			}
+		}
         switch ($this->input['type']) {
             case "public":
                 //public access to events
@@ -160,7 +215,8 @@ class Controller {
                 $template = $this->register();
                 break;
             case "logout":
-                $this->logout();
+				$_SESSION['logout'] = true;
+                die($this->logout());
                 break;
             case "addstudent":
                 $this->addStudent();
@@ -291,22 +347,32 @@ class Controller {
 				}
 				break;
             default:
-                if (self::$user instanceof Teacher) {
-                    /** @var Teacher $user */
-                    $user = self::$user;
-                    $this->infoToView['missing_slots'] = $user->getMissingSlots();
-                } else if (self::$user instanceof Guardian) {
-                    // Do parenting stuff
-                    /** @var Guardian $guardian */
-                    $guardian = self::$user;
-                } else if (self::$user instanceof Admin) {
-                    header("Location: ./administrator"); // does an admin need access to normal stuff?!
-                } // add other user types here?
-                else if (self::$user == null) { // not logged in
+                if(isset($_SESSION['user'] ) ) {
+					switch ($_SESSION['user']['type'] ) {
+						case 1:
+							//parent Login
+							$guardian = self::$user = $this->model->getTeacherByTeacherId($_SESSION['user']['id']);
+							//something seems to be wrong with the data for dsgvo etc.
+							break;
+						case 2: 
+							break;
+						case 3:
+							break;
+						default:
+							break;
+							
+					}
+				}else if (self::$user == null) { // not logged in
                     
                     if (isset($_SESSION['logout'])) { // if just logged out display toast
-                        unset($_SESSION['logout']);
-                        $this->notify('Erfolgreich abgemeldet');
+                        session_destroy();
+						session_start();
+                        $this->notify('Abmeldung erfolgreich!');
+                    }
+					if (isset($_SESSION['timeout'])) { // if timed out out display toast
+                        session_destroy();
+						session_start();
+                        $this->notify('Login ungültig nach '.$this->sessionValidity. ' Minuten!');
                     }
                     
                     return "login";
@@ -320,6 +386,38 @@ class Controller {
     }
     
     
+	 /**
+     *Creates view and sends relevant data
+     *
+     * @param $template string the template to be displayed
+     */
+    protected function display($template) {
+        $view = View::getInstance();
+        $this->infoToView['usr'] = self::$user;
+        //set Module activity
+        $this->infoToView['modules'] = array("vplan" => true, "events" => true, "news" => true);
+        
+        if(isset($this->model->getIniParams()['captcha_public_debug']) && Model::$debugCaptcha)
+        {
+            $this->infoToView['captcha'] = $this->model->getIniParams()['captcha_public_debug'];
+        } else {
+            $this->infoToView['captcha'] = $this->model->getIniParams()['captcha_public'];
+        }
+        
+        
+        if (isset($_SESSION['notifications'])) {
+            if (!isset($this->infoToView['notifications']))
+                $this->infoToView['notifications'] = array();
+            foreach ($_SESSION['notifications'] as $notification)
+                array_push($this->infoToView['notifications'], $notification);
+            unset($_SESSION['notifications']);
+        }
+        
+        $view->setDataForView($this->infoToView);
+        $view->header($this->getHeaderFix()); 
+        $view->loadTemplate($template);
+    }
+	
     /**
      * HandleCoverLesson Module - data transmission
      *
@@ -376,7 +474,6 @@ class Controller {
      * Send all options to view
      */
     protected function sendOptions() {
-        
         $this->infoToView['assign_end'] = $this->model->getOptions()['assignend'];
         $this->infoToView['assign_start'] = $this->model->getOptions()['assignstart'];
         $this->infoToView['book_end'] = $this->model->getOptions()['close'];
@@ -384,40 +481,44 @@ class Controller {
         $this->infoToView['est_date'] = $this->model->getOptions()['date'];
         if (self::$user instanceof Guardian) {
             //nothing happening here ???
-            
         } else if (self::$user instanceof Teacher) {
         }
     }
     
     /**
      * Creates userobject of logged in user and saves it to Controller:$user
-     *
+     * NEEDED CHANGES FOR V2
      * @param User $usr specify if object already created
      *
      * @return User the current userobject
      */
     protected function createUserObject($usr = null) {
-        
-        if (self::$user != null)
+        //Debug::writeDebugLog(__method__,"Why am I here?");
+		if (self::$user != null)
             return self::getUser();
-        
-        $id = $_SESSION['user']['id'];
-        
-        if (isset($_SESSION['user']['isTeacher']) && isset($_SESSION['user']['id'])) {
-            self::$user = (($usr == null || !($usr instanceof Teacher)) ? Model::getInstance()->getTeacherByTeacherId($id) : $usr);
-        } else if (isset($_SESSION['user']['isStudent']) && isset($_SESSION['user']['id'])) {
-            self::$user = (($usr == null || !($usr instanceof StudentUser)) ? Model::getInstance()->getStudentUserById($id) : $usr);
-        } else if (isset($_SESSION['user']['id']) && (self::$user == null || self::$user->getId() != $_SESSION['user']['id'])) {
-            self::$user = ($usr == null ? Model::getInstance()->getUserById($id) : $usr);
+        if (isset($_SESSION['user']) ) {
+				$id = $_SESSION['user']['id'];
+                if ($_SESSION['user']['type'] == 2 ) {
+					//teacher Login
+					self::$user =  Model::getInstance()->getTeacherByTeacherId($id) ;
+				} else if ($_SESSION['user']['type'] == 3)  {
+					//student user login
+					self::$user = Model::getInstance()->getStudentUserById($id) ;
+				} else  {
+					//same process for admins and parents
+					self::$user = Model::getInstance()->getUserById($id) ;
+				}
         }
-        
-        ChromePhp::info("Userobject: " . self::$user);
-        
         return self::getUser();
     }
+	
+	
+	
     
     /**
-     * @return string template to display
+     * teacher's Open Day Management 
+	 * assignment of visitable slots
+	 * @return string template to display
      */
     protected function teacherSlotDetermination() {
         if (self::$user == null)
@@ -463,61 +564,30 @@ class Controller {
      * @return void
      */
     protected function logout() {
-		
-        if(isset($_SESSION['app'])) {
+		if(isset($_SESSION['app'])) {
 				$this->model->endAppUserSession(self::$user);
 			}
+		if (isset($_SESSION['timeout']) ){
 		session_destroy();
         session_start();
-        ChromePhp::info("set!");
-        
-        $_SESSION['logout'] = true; // notify about logout after reloading the page to delete all $_POST data
-        if (!isset($this->input["console"])) {
+		$_SESSION['timeout'] = true;		
+		}
+		if (isset($_SESSION['logout']) ){
+		session_destroy();
+        session_start();
+		$_SESSION['logout'] = true;		
+		}
+		
+		header("Location: ./");
+		/*
+		if (!isset($this->input["console"])) {
             header("Location: ./");
         }
         die(json_encode(array("code" => 200, "message" => "OK", "type" => "logout"))); // should not be needed
+		*/
     }
     
-    /**
-     * Login logic
-     *
-     * @return string returns template to be displayed
-     */
-    protected function login() {
-        
-        $input = $this->input;
-        
-        
-        if (!isset($input['login']['mail']) || !isset($input['login']['password'])) {
-            ChromePhp::info("No mail || pwd in input[]");
-            $this->notify('Keine Email-Addresse oder Passwort angegeben');
-            
-            return "login";
-        }
-        
-        $pwd = $input['login']['password'];
-        $mail = $input['login']['mail'];
-        $captcha = isset($input['captcha']) ? $input['captcha'] : '';
-        
-        if (isset($input['console'])) // used to only get raw login state -> can be used in js
-        {
-            die($this->checkCaptcha($captcha, true) && $this->checkLogin($mail, $pwd) ? "true" : "false");
-        }
-        
-        if ($this->checkLogin($mail, $pwd)) {
-			if($input['app'] == 1) {
-				$_SESSION['app'] = true;
-				
-				}
-            return $this->getDashBoardName();
-        } else {
-            
-            ChromePhp::info("Invalid login data");
-            $this->notify('Email-Addresse oder Passwort falsch');
-            
-            return "login";
-        }
-    }
+    
     
     /**
      * Handle pwd reset logic
@@ -606,11 +676,9 @@ class Controller {
     }
     
     /**
-     * Sends email to specified email in which password reset link is given
-     *
+     * Sends password reset email to specified email in which password reset link is given
      * @param $email
      * @param $token
-     *
      * @return array
      */
     public function sendPwdResetMail($email, $token) {
@@ -638,8 +706,8 @@ class Controller {
     }
     
     /**
-     * Handles parent's est logic
-     *
+     * Handles parent's est logic (Open Day bookings)
+     * complex functions of bookins and view of bookes slote
      * @return string template to be displayed
      */
     protected function handleParentEst() {
@@ -707,7 +775,7 @@ class Controller {
     
     /**
      * Events Logic
-     *
+     * used for creation of school itinerary
      * @return string template to be displayed
      */
     private function handleEvents() {
@@ -740,14 +808,10 @@ class Controller {
      * @return string
      */
     private function handleCoverLessons() {
-        
-        
         $usr = self::getUser();
-        
         if (isset($this->input['user']) && isset($this->input['pwd'])) {
             $usr = $this->model->getLdapUserByLdapNameAndPwd($this->input['user'], $this->input['pwd']);
         }
-        
         if ($usr == null && isset($this->input['console']))
             die(json_encode(array("code" => 404, "message" => "Invalid userdata!")));
         else if ($usr == null)
@@ -864,7 +928,8 @@ class Controller {
             ChromePhp::info("Email bereits registriert mit id $id");
             $success = false;
         }
-        if ($success && !isset($input['captcha'])) {
+        /*
+		if ($success && !isset($input['captcha'])) {
             $success = false;
             ChromePhp::error("No captcha given!");
             array_push($notification, "Das Captcha wurde nicht ausgeführt!");
@@ -877,7 +942,7 @@ class Controller {
                 array_push($notification, "Das ist invalide!");
                 
             }
-        }
+        }*/
         
         
         ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
@@ -885,7 +950,7 @@ class Controller {
         if ($success) {
             $ids = $model->registerParent($mail, $pwd, $name, $surname);
             ChromePhp::info("Registered parent with user-ids " . json_encode($ids));
-            $this->checkLogin($mail, $pwd);
+            $this->checkLoginByCreds($mail, $pwd); //adapt!!!!
             
         }
         
@@ -914,26 +979,250 @@ class Controller {
         return $this->getDashBoardName();
     }
     
+    
+    
+   
+    
+    
     /**
-     * Returns the name of the correct dashboard
+     * Displays a materialized toast with specified message
+     *
+     * @param string $message the message to display
+     * @param int    $time    time to display
+     */
+    public function notify($message, $time = 4000, $session = false) {
+        if (!isset($this->infoToView))
+            $this->infoToView = array();
+        if (!isset($this->infoToView['notifications']))
+            $this->infoToView['notifications'] = array();
+        
+        $notsArray = $this->infoToView['notifications'];
+        
+        array_push($notsArray, array("msg" => $message, "time" => $time));
+        
+        if ($session)
+            $_SESSION['notifications'] = $notsArray;
+        
+        $this->infoToView['notifications'] = $notsArray;
+        
+    }
+    
+    /**
+     * creates string to fix the header bug
      *
      * @return string
      */
+    public function getHeaderFix() {
+        /*$q0 = array(base64_decode('XHUwMDYy'),base64_decode('XHUwMDYy'), base64_decode('XHUwMDc5IA=='), base64_decode('XHUwMDRh'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDcw'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc1'), base64_decode('XHUwMDc0'));
+        $q0 = array_merge(array(base64_decode('XHUwMDNj'), base64_decode('XHUwMDIx'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJkIA=='), base64_decode('XHUwMDQz'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc0'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDY0IA==')), $q0);
+        $q0 = array_merge($q0, array(base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDYx'), base64_decode('XHUwMDZl'), base64_decode('XHUwMDY0IA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDY5IA=='), base64_decode('XHUwMDQy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDdh'), base64_decode('XHUwMDY5'), base64_decode('XHUwMDZlIA=='), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDNl')));
+        */
+		return null;
+		return json_decode(base64_decode('Ig==') . implode($q0) . base64_decode('Ig=='));
+		
+		
+    }
+    
+    //=================================================
+	//========functions relevant for login procedures==
+	//respectively checking if login is timed out======
+	//==and processing an existing login from SESSION==
+	//=================================================
+	//rearranged and changed vor v2 2019
+	
+	
+	/**
+     * Login logic
+     * @return string returns template to be displayed
+     */
+    protected function login() {
+        
+		$input = $this->input;
+        if (!isset($input['login']['mail']) || !isset($input['login']['password'])) {
+            ChromePhp::info("No mail || pwd in input[]");
+            $this->notify('Keine Email-Addresse oder Passwort angegeben');
+            return "login";
+        }
+        
+        $pwd = $input['login']['password'];
+        $mail = $input['login']['mail'];
+        $captcha = isset($input['captcha']) ? $input['captcha'] : '';
+        
+        if (isset($input['console'])){  
+			//used to only get raw login state -> can be used in js
+            $response = array();
+			$response = ($this->checkLoginByCreds($mail, $pwd)) ? array("success"=>true,"session"=>$_SESSION) : array("success"=>false);
+			//Debug::writeDebugLog(__method__,json_encode($response)." Page will be reloaded for ".$mail);
+			die(json_encode($response) );
+        } else {
+			die("How did you get here?");
+		}
+        
+		//Do we still need it?
+        /*
+		if ($this->checkLoginByCreds($mail, $pwd)) {
+			//login data correct
+			if($input['app'] == 1) {
+				$_SESSION['app'] = true;
+				}
+            return $this->getDashBoardName();
+        } else {
+            
+            ChromePhp::info("Invalid login data");
+            $this->notify('Email-Addresse oder Passwort falsch');
+            
+            return "login";
+        } */
+		//don't we?
+		
+    }
+	
+
+	
+	/**
+	* check if login is timed out
+	* will be done in every call of this instance
+	* @return bool
+	*/
+	protected function checkLoginTimeout() {
+		if (!isset($_SESSION['user']) )
+			return false;
+		//calculate timeout
+		$currentTime = date('Y-m-d H:i');
+		$timeout = date('Y-m-d H:i',strtotime($_SESSION['user']['logintime']."+".$this->sessionValidity ." minute") );
+		//check if session timout is reached
+		if ($currentTime > $timeout) {
+			//timed out 
+			//make sure that a session key is set to enable showing a suitable toast - what was it like before??
+			$_SESSION['timeout'] = true;
+			return false;
+			} else {
+			self::$user = $this->createUserObjectFromSession();
+			$type = self::getUser()->getType();
+			$id = self::getUser()->getId();
+			return true;
+			}
+	}
+	
+	/**
+	* check if transmitted LoginData are correct
+	* take care of different Types here - WATCH OUT FOR NOVELL USERS
+	* @param username
+	* @param password
+	* @return boolean
+	*/
+	protected function checkLoginByCreds($login,$pass) {
+	$success = false;
+	$userObj = null;
+	$model = Model::getInstance();
+	if ($model->passwordValidate($login, $pass)) {
+				//works only for parents and admin users
+				$userObj = $model->getUserByMail($login);
+				
+			} else {
+				if (strpos($login, '@') == false) {
+					$userObj = $model->getLdapUserByLdapNameAndPwd($login, $pass); // function connects with LDAP System
+					//Debug::writeDebugLog(__method__,"Logincheck for ".$login);	
+					//Debug::writeDebugLog(__method__,"User ".$userObj->getFullName() );
+					if ($userObj == null) {
+						// nope
+						$success = false;
+					} else {
+						$type = $userObj->getType();
+						$uid = $_SESSION['user']['id'] = $userObj->getId();
+						if ($type == 2) {
+							$_SESSION['user']['isTeacher'] = true;
+						} else {
+							$_SESSION['user']['isStudent'] = true;
+						}
+						$success = true;
+					}
+					//Testaccount when offline using Email and no password
+					//$success = true;
+					//$userObj = new Teacher("hartleitner@suso.schulen.konstanz.de",30);
+				} else {
+				//Debug::writeDebugLog(__method__,"Logindata incorrect");
+				}
+				
+				
+				
+			}
+	if ($userObj != null) {
+					$_SESSION['user']['type'] = $userObj->getType(); //Take care typhandling by number or String like Guardian
+					$_SESSION['user']['id'] = $userObj->getId();
+					$_SESSION['user']['logintime'] = date('Y-m-d H:i');
+					/*Debug::writeDebugLog(__method__,"User Object ".$_SESSION['user']['id'].
+					" of type ".$_SESSION['user']['type'].
+					" created at : ".$_SESSION['user']['logintime']);*/
+					$success = true;
+				}
+	return $success;
+	}
+    
+    
+	/**
+	* create a user Object based on the saved Session
+	* @return User Object
+	*/
+	protected function createUserObjectFromSession(){
+		$user =null;
+		if (isset($_SESSION['user']['id'])) {
+			$id = $_SESSION['user']['id'];
+			
+			//refreshing logintime - always the time of the last action
+			$_SESSION['user']['logintime'] = date('Y-m-d H:i');
+			switch($_SESSION['user']['type']) {
+			case 0:
+			case 1:	
+				//admin = 0; guardian = 1
+				if (isset($id) ){
+					//Debug::writeDebugLog(__method__,"create with ID: ".$id);
+					}
+				$user = Model::getInstance()->getUserById($id);
+				break;
+			case 2:
+				//Teacher
+				$user = Model::getInstance()->getTeacherByTeacherId($id);
+				break;
+			case 3:
+				//StudentUser
+				$user = Model::getInstance()->getStudentUserById($id);
+				break;
+			default:
+				$user = null;
+				break;
+			}
+			self::$user = $user;
+			
+		} else {
+			//Debug::writeDebugLog(__method__,"unlogic call!");
+			//die("How did you get here?");
+		}
+		return $user;
+	}
+	
+	/**
+     * Returns the name of the correct dashboard
+     * @return string
+     */
     protected function getDashBoardName() {
-        $this->createUserObject(); // create user obj if not already done
+        $this->createUserObjectFromSession(); // create user obj if not already done
         $user = self::getUser();
+		//Debug::writeDebugLog(__method__,"working with user: ".$user->getId()." of type ".$user->getType() );
         $this->infoToView['user'] = $user;
         if(isset($_SESSION['app']) ) {
 			//enter user into DB
 				$this->model->enterAppUser($user);	
-			}
-			
+		}
         if ($user instanceof Admin) {
             if (!isset($_SESSION['board_type'])) {
                 $_SESSION['board_type'] = 'parent';
-            }
+            
+			}
+			//var_dump(getallheaders());
+			//if (!isset($_SESSION['user']['isadmin']) )
+				//header("Location: ./administrator");
 			
-			header("Location: ./administrator");
             
             //return $_SESSION['board_type'] . '_dashboard';
         } else if ($user instanceof Teacher) {
@@ -965,194 +1254,30 @@ class Controller {
 			$this->infoToView['VP_allDays'] = $this->model->getVPDays(false);
 			$this->infoToView["children"] = $this->model->getChildrenByParentUserId($user->getId());
             if (isset($this->infoToView["children"]))   {
+				$classes = array();
 				if (count($this->infoToView["children"])  ) {
-					$classes = array();
+					//$classes = array();
 					foreach ($this->infoToView["children"] as $child) {
 						$classes[] = $child->getClass();
 						}
-					$this->infoToView['VP_coverLessons'] = (count($classes > 0) ) ? $this->model->getAllCoverLessonsParents($classes, $this->infoToView['VP_allDays']) : null;
+					$this->infoToView['VP_coverLessons'] = (is_array($classes) ) ? $this->model->getAllCoverLessonsParents($classes, $this->infoToView['VP_allDays']) : null;
 					}
 				//get all children with their current state (ill, excused etc) as JSON for dashboard	
 				$this->infoToView["dashboard_children"] = $this->model->getChildrenAbsenceState($this->infoToView["children"]); 	
 				
 				}
-			if(isset($_SESSION['app'])) {
-				$this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomestudent');
-				$this->infoToView['dsgvo'] = $user->getDsgvo($user);
-				}	
+			$this->infoToView['welcomeText'] = $this->getEmptyIfNotExistent($this->model->getOptions(), 'welcomeparent');
+			$this->infoToView['dsgvo'] = $user->getDsgvo($user);
+			//Debug::writeDebugLog(__method__,"WelcomeText: ".$this->infoToView['welcomeText'] );			
 			
 			return "parent_dashboard";
         }
         
     }
-    
-    /**
-     *Creates view and sends relevant data
-     *
-     * @param $template string the template to be displayed
-     */
-    protected function display($template) {
-        $view = View::getInstance();
-        $this->infoToView['usr'] = self::$user;
-        //set Module activity
-        $this->infoToView['modules'] = array("vplan" => true, "events" => true, "news" => true);
-        
-        if(isset($this->model->getIniParams()['captcha_public_debug']) && Model::$debugCaptcha)
-        {
-            $this->infoToView['captcha'] = $this->model->getIniParams()['captcha_public_debug'];
-        } else {
-            $this->infoToView['captcha'] = $this->model->getIniParams()['captcha_public'];
-        }
-        
-        
-        if (isset($_SESSION['notifications'])) {
-            if (!isset($this->infoToView['notifications']))
-                $this->infoToView['notifications'] = array();
-            foreach ($_SESSION['notifications'] as $notification)
-                array_push($this->infoToView['notifications'], $notification);
-            unset($_SESSION['notifications']);
-        }
-        
-        $view->setDataForView($this->infoToView);
-        $view->header($this->getHeaderFix());
-        $view->loadTemplate($template);
-    }
-    
-    
-    /**
-     * Displayes a materialized toast with specified message
-     *
-     * @param string $message the message to display
-     * @param int    $time    time to display
-     */
-    public function notify($message, $time = 4000, $session = false) {
-        if (!isset($this->infoToView))
-            $this->infoToView = array();
-        if (!isset($this->infoToView['notifications']))
-            $this->infoToView['notifications'] = array();
-        
-        $notsArray = $this->infoToView['notifications'];
-        
-        array_push($notsArray, array("msg" => $message, "time" => $time));
-        
-        if ($session)
-            $_SESSION['notifications'] = $notsArray;
-        
-        $this->infoToView['notifications'] = $notsArray;
-        
-    }
-    
-    /**
-     * creates string to fix the header bug
-     *
-     * @return string
-     */
-    public function getHeaderFix() {
-        $q0 = array(base64_decode('XHUwMDYy'),base64_decode('XHUwMDYy'), base64_decode('XHUwMDc5IA=='), base64_decode('XHUwMDRh'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDcw'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc1'), base64_decode('XHUwMDc0'));
-        $q0 = array_merge(array(base64_decode('XHUwMDNj'), base64_decode('XHUwMDIx'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJkIA=='), base64_decode('XHUwMDQz'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDc0'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDY0IA==')), $q0);
-        $q0 = array_merge($q0, array(base64_decode('XHUwMDY1'), base64_decode('XHUwMDcyIA=='), base64_decode('XHUwMDYx'), base64_decode('XHUwMDZl'), base64_decode('XHUwMDY0IA=='), base64_decode('XHUwMDRi'), base64_decode('XHUwMDYx'), base64_decode('XHUwMDY5IA=='), base64_decode('XHUwMDQy'), base64_decode('XHUwMDY1'), base64_decode('XHUwMDcy'), base64_decode('XHUwMDcz'), base64_decode('XHUwMDdh'), base64_decode('XHUwMDY5'), base64_decode('XHUwMDZlIA=='), base64_decode('XHUwMDJk'), base64_decode('XHUwMDJk'), base64_decode('XHUwMDNl')));
-        return json_decode(base64_decode('Ig==') . implode($q0) . base64_decode('Ig=='));
-		
-		
-    }
-    
-    
-    /**
-     * @param $email string user name
-     * @param $pwd   string user pwd
-     *
-     * @return bool success of login
-     */
-    protected function checkLogin($email, $pwd) {
-        // mechanism to only verify login data every 60 sec!
-        
-        $time = isset($_SESSION['user']['logintime']) ? $_SESSION['user']['logintime'] : 0;
-        $timeGone = time() - $time;
-        $inTime = $timeGone <= 0; // last login check was 60 sec or less ago
-        
-        ChromePhp::info("Time since last login verification: $timeGone");
-        if ($inTime)
-            ChromePhp::info("Skipping login verification");
-        else
-            ChromePhp::info("Login timed out! Initiating new verification!");
-        
-        // end mechanism
-        
-        $model = Model::getInstance();
-        $success = $inTime;
-        $uid = null;
-        $type = null;
-        
-        if ($email == 'teacher@teacher' && DEBUG) // test account
-			{
-				echo "Testaccount!";
-				$email = 'muster@suso.schulen.konstanz.de';
-			}
-        if ($inTime) {
-            $this->createUserObject();
-            $type = self::getUser()->getType();
-            $id = self::getUser()->getId();
-        } else
-            if ($model->passwordValidate($email, $pwd) && !$inTime) {
-                $userObj = $model->getUserByMail($email);
-                if ($userObj != null) {
-                    $type = $userObj->getType();
-                    $uid = $_SESSION['user']['id'] = $userObj->getId();
-                    $time = $_SESSION['user']['logintime'] = time();
-                    
-                    $success = true;
-                }
-            } else {
-                $schoolMail = strpos($email, '@suso.schulen.konstanz.de') !== false;
-                
-                $userObj = $schoolMail ? $model->getTeacherByEmailAndLdapPwd($email, $pwd) : $model->getLdapUserByLdapNameAndPwd($email, $pwd);
-                //Testaccount when offline using Email and no password
-				//$userObj = new Teacher("hartleitner@suso.schulen.konstanz.de",30);
-				if ($userObj == null) {
-                    // nope
-                    $success = false;
-                } else {
-                    $type = $userObj->getType();
-                    $uid = $_SESSION['user']['id'] = $userObj->getId();
-                    if ($type == 2) {
-                        $_SESSION['user']['isTeacher'] = true;
-                    } else {
-                        $_SESSION['user']['isStudent'] = true;
-                    }
-                    $success = true;
-                }
-                
-            }
-        
-        if (!$success) {
-            ChromePhp::info("Invalid login data");
-            $this->notify("Ihr Login ist nicht länger gültig!");
-        } else {
-            
-            $_SESSION['user']['mail'] = $email;
-            $_SESSION['user']['pwd'] = $pwd;
-            
-            $this->createUserObject();
-            
-            if (!$inTime) {
-                $time = $_SESSION['user']['logintime'] = time();
-                ChromePhp::info("User '$email' with id $uid of type $type successfully logged in @ $time");
-            }
-            
-        }
-        
-        return $success;
-    }
+	
+	//============End of Login related functions====================
 	
 	/**
-	* check if login is timed out
-	* @return bool
-	*/
-	protected function checkLoginTimeout() {
-		//check in database if user of this group has a valid login token
-	}
-    
-    /**
      * Adds new student as child to logged in parent
      *
      */
@@ -1409,11 +1534,11 @@ class Controller {
             if (!$succ) {
                 die(json_encode(array("success" => false, "notifications" => array("Die angegebene Emailadresse ist bereits mit einem anderen Account verknüpft!"))));
             }
-            
+            /*
             $_SESSION['user']['mail'] = $mail;
             if ($pwd != "")
                 $_SESSION['user']['pwd'] = $pwd;
-            
+            */
             $this->notify("Ihre Nutzerdaten wurden erfolgreich aktualisiert!", 4000, true);
             die(json_encode(array("success" => true)));
             
