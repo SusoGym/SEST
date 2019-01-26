@@ -24,7 +24,33 @@ if (strlen($data['welcomeText'])>15) {
 $welcomeText = "Sie müssen zunächst Ihre Kinder registrieren, bevor Sie die Angebote nutzen können!";
 }
 ?>
-
+	<?php if ($shownotice) { ?>
+	<div class="row">
+		
+		<div class="col s12 ">
+			<div class="card white">
+				<div class="card-content">
+				<!--
+					<span class="card-title">aktuelle Hinweise
+						<a class="btn-flat teal-text " onClick="showNotice();"><i id="button" class="material-icons">expand_more</i></a> 
+					</span>
+					 
+					
+					<div id="notice" style="display: none;">
+					<?php echo $welcomeText; ?>
+					</div>
+				-->
+				<ul class="collapsible">
+				<li>
+				  <div class="collapsible-header card-title">aktuelle Hinweise</div>
+				  <div id ="notes" class="collapsible-body"></div>
+				</li>
+				</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php } ?>
     <div class="row">
 		<?php if (isset($children) ) { ?>
 		<div class="col s12 ">
@@ -106,14 +132,29 @@ include("js.php");
 <?php
 include("absence_mgt.js"); 
 ?>
-shownotice = <?php echo $shownotice ?>;
+/*shownotice = <?php echo $shownotice ?>;
 document.addEventListener("DOMContentLoaded", function(event) {
     if (shownotice) {
 	$('#notes').modal();
 	$('#notes').modal('open');
 	}
 		
-  });
+  });*/
+var shownote = false;
+document.getElementById('notes').innerHTML="<?php echo $welcomeText; ?>";
+/*
+function showNotice() {
+if (shownote == false) {
+	shownote = true;
+	document.getElementById('button').innerHTML="expand_less";
+	document.getElementById('notice').style.display="block";
+	} else {
+	shownote = false;
+	document.getElementById('button').innerHTML="expand_more";
+	document.getElementById('notice').style.display="none";
+	}	
+}
+*/
 studentList = <?php echo $dashboardChildren; ?>;
 createStudentList(studentList);
 createChildrenList();

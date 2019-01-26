@@ -70,11 +70,9 @@ class Controller extends \Controller {
         if (!isset($input['type'])) {
             $input['type'] = "default";
         }
-        
-        $this->model = Model::getInstance();
-        
-        parent::__construct($input);
-        
+		$this->model = Model::getInstance();
+		parent::__construct($input);
+        $this->handleLogic(); //the administrator Controllers logic
         
     }
     
@@ -85,82 +83,60 @@ class Controller extends \Controller {
      * Handles logic
      */
     protected function handleLogic() {
-        
-		
-        
         $input = $this->input;
-		
-		if (isset($input['console']) && !isset($_SESSION['user']) ) {
-		// timed out on javascript based operations
-		die(json_encode(array("time"=>"out","message"=>"Anmeldung abgelaufen!") )) ;
+		//=====================================================
+		//check for timeouts and logout
+		//-----------------------------------------------------
+		//handle all javascript actions firsthand
+		if (isset($input['console'])  ) {
+			// timed out in javascript based operations
+			if (!isset($_SESSION['user'])){ 
+				//no user
+				$_SESSION['timeout'] = true;
+				$this->logout(true,true); //should now be showing a toast with timeout 
+			} else {
+				if (!$this->checkLoginTimeout()) {
+					die(json_encode(array("time"=>"out","message"=>"Anmeldung abgelaufen!") )) ;
+					$_SESSION['timeout'] = true;
+					//die($this->logout(true,true)); //should now be showing a toast with timeout 
+					//needs js return and action there!
+					}
+			}
 		}
-        
-        $loggedIn = isset($_SESSION['user']['mail']) && isset($_SESSION['user']['pwd']) && $this->checkLogin($_SESSION['user']['mail'], $_SESSION['user']['pwd']) == 1;
-        
+        //-------------end of javascript handling------------
+		$loggedIn = false;
+		if (isset($_SESSION['timeout']))
+			die($this->logout(true));
+		if (isset($_SESSION['logout']))
+			die($this->logout());
+        if (!isset($_SESSION['user']))
+			die($this->logout());
+		//=======end of timeout and logout check================
+		
         switch ($input['type']) {
             case 'logout':
-                $this->logout();
+                $_SESSION['logout'] = true;
+				die($this->logout());
                 break;
             case 'login':
                 if (!$loggedIn) {
-                    $this->login();
+                    header('Location: ../?type=logout'); //go back to main Login
+					//$this->login();
                     break;
                 }
             default:
-                if ($loggedIn) { // a.k.a logged in
+				$this->handleInput();
+                /*
+				if ($loggedIn) { // a.k.a logged in
                     $this->handleInput();
                 } else {
                     $this->display("adminlogin");
-                }
+                }*/
                 break;
         }
     }
     
-    /**
-     * Handles login logic
-     *
-     * @param $input array input data
-     * @return string template to be displayed
-     */
-    protected function login() {
-        $input = $this->input;
-        
-        if (!isset($input['login']['mail']) || !isset($input['login']['password'])) {
-            \ChromePhp::info("No username || pwd in input[]");
-            $this->notify('Kein Benutzername oder Passwort angegeben');
-            
-            return "adminlogin";
-        }
-        
-        $pwd = $input['login']['password'];
-        $usr = $input['login']['mail'];
-        
-        \ChromePhp::error("login()");
-        $state = $this->checkLogin($usr, $pwd);
-        
-        \ChromePhp::info("Login Success: $state");
-        
-        if (isset($input['console'])) { // used to only get raw login state -> can be used in js
-            die(strval($state));
-        }
-        
-        // things after here should not naturally happen
-        
-        if ($state == 1) {
-            
-            $this->title = "Startseite";
-            
-            return "main";
-        } else if ($state == 2) {
-            \ChromePhp::info("No Admin Permission");
-            $this->notify('Ungenügende Berechtigung!');
-        } else {
-            $this->notify("Falsche Benutzername Passwort Kombination!");
-        }
-        
-        return "adminlogin";
-    }
-    
+
     /**
      *Creates view and sends relevant data
      *
@@ -207,58 +183,21 @@ class Controller extends \Controller {
      *
      * @return void
      */
-    protected function logout() {
-        session_destroy();
-        session_start();
-        
-        $_SESSION['logout'] = true; // notify about logout after reloading the page to delete all $_POST data
-        
-        header("Location: ../");
+    protected function logout($timeout = null,$console = null) {
+        if (isset($_SESSION['timeout']) && $_SESSION['timeout'] == true ) {
+			$sessionKey = "timeout";
+		} elseif (isset($_SESSION['logout']) && $_SESSION['logout'] == true ) { 
+			$sessionKey = "logout"; 
+		}
+		if (isset($console) ) {
+			die(json_encode(array("time"=>"out","message"=>"Anmeldung nach ".$this->sessionValidity." Minuten Inaktivität abgelaufen!\r\n Weiterleitung zur Login Seite erfolgt!") )) ;
+		} else {
+			session_destroy();
+			session_start();
+			$_SESSION[$sessionKey] = true;
+			die(header("location: ../"));
+		}
     }
-    
-    /**
-     *check login
-     *
-     * @param string $mail
-     * @param string $pwd
-     * @return int 1 => success, 2 => no permission, 0 => invalid login data
-     */
-    protected function checkLogin($mail, $pwd) {
-        $model = Model::getInstance();
-        if ($model->passwordValidate($mail, $pwd)) {
-            
-            $usr = $model->getUserByMail($mail);
-            if (($uid = $usr->getId()) == null) {
-                $this->notify("Database error!");
-                $this->display("adminlogin");
-                
-                \ChromePhp::error("Unexpected database response! requested uid = null!");
-                exit();
-            }
-            $type = $usr->getType();
-            
-            //admin login MUST be type 0
-            if ($type == 0) {
-                
-                $_SESSION['user']['id'] = $uid;
-                $time = $_SESSION['user']['logintime'] = time();
-                $_SESSION['user']['pwd'] = $pwd;
-                $_SESSION['user']['mail'] = $mail;
-                
-                $this->createUserObject($usr);
-                
-                \ChromePhp::info("User '$mail' with id $uid of type $type successfully logged in @ $time");
-                unset($_SESSION['logout']);
-                
-                return 1;
-            } else {
-                return 2;
-            }
-        }
-        
-        return 0;
-    }
-    
     
     // --- End overriding \Controller ---
     
@@ -326,7 +265,7 @@ class Controller extends \Controller {
 					}
 				if (isset($input['confirm'])) {
 					if ($mailData = $this->model->finishRegistrationRequest($input['request'] , $input['pupil']) ) {
-						\Debug::writeDebugLog(__method__,"Anfrage Nr: ".$input['request']." von Email: ".$mailData['email']);
+						// \Debug::writeDebugLog(__method__,"Anfrage Nr: ".$input['request']." von Email: ".$mailData['email']);
 						$studentToRegister = $this->model->getStudentById($input['pupil']);
 						//send mail with mailData array
 						$body = mb_convert_encoding("Sie haben am ".$mailData['date']." einen Registrierungscode für ".
@@ -773,7 +712,7 @@ class Controller extends \Controller {
     }
     
     /**
-     *uploading a file to server
+     * uploading a file to server
      *
      * @return array[]
      */

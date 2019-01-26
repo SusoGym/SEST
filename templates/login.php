@@ -119,9 +119,37 @@
             }
         
         ?>
-
-        var captchas = [];
-
+		
+		var xhttp = new XMLHttpRequest();
+        //var captchas = [];
+		
+		xhttp.addEventListener('load', function(event) {
+			console.log(xhttp.responseText);
+			var response = JSON.parse(xhttp.responseText);
+			if (xhttp.status >= 200 && xhttp.status < 300) {
+			   if (response['success'] == true) {
+				  if(response['session']['user']['type'] == 0) { 
+					window.location.href = './administrator';
+				  }else{ 
+					//console.log("ParentLogin");
+					location.reload();
+				  }
+			  } else {
+				 console.log("no session sent");
+				 $('#pwd_login').val('');
+				 Materialize.toast("Fehler bei der Anmeldung!", 4000);
+				 
+					
+			  }
+		   } else {
+			  console.warn(xhttp.statusText, xhttp.responseText);
+		   }
+		});
+		
+		
+		
+		
+		/*
         var onLoadCaptcha = function () {
             $(".g-recaptcha").each(function () {
                 var el = $(this);
@@ -137,7 +165,7 @@
                     });
             });
         };
-
+		*/
 
         function validate(type) {
             alert(type);
@@ -162,8 +190,13 @@
         function submitLogin() {
             var pwd = $('#pwd_login').val();
             var usr = $('#usr_login').val().replace(/ /g, '');
-            var captcha = $('#captcha_login').val();
-
+            
+			//var captcha = $('#captcha_login').val();
+			
+			xhttp.open("POST","?type=login&console=true&login[password]=" + pwd +"&login[mail]=" + usr);
+			xhttp.send();
+			
+			/*
             $.post("", {
                 'type': 'login',
                 'console': '',
@@ -171,6 +204,8 @@
                 'login[mail]': usr,
                 'captcha': captcha
             }, function (data) {
+				 Materialize.toast("Data sent", 4000);
+				console.log(data);
                 if (data == true) {
                     location.reload();
                 } else if (data == false) {
@@ -187,7 +222,7 @@
                     $('label[for="pwd_login"]').removeClass("active");
                 }
             });
-
+				*/
             return false;
         }
 
@@ -201,8 +236,9 @@
             var nameVal = $('#name_register').val().replace(/ /g, '');
             var surnameVal = $('#surname_register').val().replace(/ /g, '');
 
-            var captcha = $('#captcha_register').val();
-
+            //var captcha = $('#captcha_register').val();
+			var captcha = null;
+			
             if (pwd.val() != pwdrep.val()) {
                 pwd.val("");
                 pwdrep.val("");
@@ -221,8 +257,8 @@
                 'register[pwd]': pwd.val(),
                 'register[mail]': mail,
                 'register[name]': nameVal,
-                'register[surname]': surnameVal,
-                'captcha': captcha
+                'register[surname]': surnameVal//,
+                //'captcha': captcha
             }, function (data) {
 
                 try {
@@ -247,6 +283,6 @@
     
     </script>
     
-    <script src="https://www.google.com/recaptcha/api.js?onload=onLoadCaptcha&render=explicit" async defer></script>
+    <!-- <script src="https://www.google.com/recaptcha/api.js?onload=onLoadCaptcha&render=explicit" async defer></script> -->
 </body>
 </html>

@@ -4,35 +4,34 @@ $data = $this->getDataForView();
 $cover_lessons = $data['VP_coverLessons'];
 $taughtStudents = $data['taughtstudents'];
 $taughtClasses = $data['taughtclasses'];
+$welcomeText = null;
+$shownotice = false;
 if (strlen($data['welcomeText'])>15) {
 $shownotice = "true";
 $welcomeText = $data['welcomeText'];	
-} else {
-$shownotice = "false";	
-}
+} 
 ?>
-
+<?php if ($shownotice) { ?>
+	<div class="row">
+		
+		<div class="col s12 ">
+			<div class="card white">
+				<div class="card-content">
+					<span class="card-title">aktuelle Hinweise
+						<a class="btn-flat teal-text " onClick="showNotice();"><i id="button" class="material-icons">expand_more</i></a>
+					</span>
+									
+					<div id="notice" style="display: none;">
+					<?php echo $welcomeText; ?>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php } ?>
 <div class="row">
-<!--
-<div class="col s12 m6 l6">
-    <div class="card white ">
-        <div class="card-content">
-            <span class="card-title">Hinweise</span>
-            <p><?php echo $data['welcomeText']; ?></p>
-        </div>
-    </div>
-</div>
--->
-<!--
-<div class="col l6 s12 m6">
-	<div class="card white ">
-        <div class="card-content">
-            <span class="card-title">Blog</span>
-            <p>Keine neuen Nachrichten</p>
-        </div>
-    </div>
-</div>
--->
+
 <div class="col l6 s12 m6">
 	<div class="card white ">
         <div class="card-content">
@@ -130,21 +129,24 @@ $shownotice = "false";
 <script type="text/javascript">
 
 <?php include("absence_mgt.js"); ?>
-shownotice = <?php echo $shownotice; ?>;
-document.addEventListener("DOMContentLoaded", function(event) {
-    if (shownotice){
-	$('#notes').modal();
-	$('#notes').modal('open');
-	}
-		
-  });
+var shownote = false;
+function showNotice() {
+if (shownote == false) {
+	shownote = true;
+	document.getElementById('button').innerHTML="expand_less";
+	document.getElementById('notice').style.display="block";
+	} else {
+	shownote = false;
+	document.getElementById('button').innerHTML="expand_more";
+	document.getElementById('notice').style.display="none";
+	}	
+}
 
 
 teacherUser = 1;
 requestReady = true;
 studentList = <?php echo json_encode($taughtStudents); ?>;
 classList = <?php echo json_encode($taughtClasses); ?>;
-console.log(studentList);
 createStudentList(studentList);
 createClassList();
 createAbsenteeList();
