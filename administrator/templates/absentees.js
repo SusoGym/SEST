@@ -22,7 +22,6 @@ xhttp.addEventListener('load', function(event) {
 		//console.log(this.responseText);
 		try{
 			data = $.parseJSON(this.responseText);
-			
 			//catch timeout an reload page (back to login)
 				if (null != data['time']  && data['time'] === "out") {
 					Materialize.toast(data['message'],"4000");
@@ -127,11 +126,14 @@ xhttp.addEventListener('load', function(event) {
 				searchList = [];
 				absenteeList = studentList.filter(dta => dta.type == "absent");
 				for(x=0;x<data.length;x++) {
-					if (absenteeList.findIndex(dta => dta.id === data[x]['id']) == -1){
-						//only enter the students not in absenteelist
-						searchList.push(data[x]);	
-						}
-						
+					if (leaveOfAbsence != "true") {
+						if (absenteeList.findIndex(dta => dta.id === data[x]['id']) == -1){
+							//only enter the students not in absenteelist when not in leave of absence mode
+							searchList.push(data[x]);	
+							}
+					} else {
+						searchList.push(data[x]);
+					}					
 					}
 				//console.log(searchList);
 				activeElement = null;
@@ -566,7 +568,7 @@ function saveloa(){
 activeElementDiv = 'p' + activeElement;
 sickend = formatDateDash(document.getElementById("loaend").value);
 sickstart = formatDateDash(document.getElementById("loastart").value);
-comment = document.getElementById("comment").value;
+comment = document.getElementById("loacomment").value;
 //console.log("send to ?type=leaveofabsence&console&id="+activeElement+"&start="+sickstart+"&end="+sickend+"&comment="+comment);
 xhttp.open("POST", "?type=leaveofabsence&console&id="+activeElement+"&start="+sickstart+"&end="+sickend+"&comment="+comment, true);
 xhttp.send();
@@ -649,6 +651,9 @@ anzeige += "Meldung Lehrer am: " + formatDateDot(activeDataSet['lehrerMeldungDat
 if (activeDataSet['elternMeldung'] != "0") {
 anzeige += "Eintrag Eltern am: " + formatDateDot(activeDataSet['elternMeldungDatum']);	
 }
+if (activeDataSet['kommentar'] != "0") {
+anzeige += "Kommentar: " + formatDateDot(activeDataSet['kommentar']);	
+}
 content += '<br/>' + anzeige;
 
 return content;	
@@ -687,7 +692,9 @@ if (activeDataSet['beurlaubt'] == 0) {
 	anzeige += "Entschuldigung am: <b>" + formatDateDot(activeDataSet['entschuldigt'])+'</b>';	
 	}	
 }
-
+if (activeDataSet['kommentar'] != "") {
+anzeige += "Kommentar: " + activeDataSet['kommentar'];	
+}
 content += '<br/>' + anzeige;
 
 return content;	
@@ -730,13 +737,15 @@ $('#markexcuse').modal('close');
 * aborting asence
 */
 function abortAbsence() {
-$('#markabsent').modal('close');	
+$('#markabsent').modal('close');
+document.getElementById('comment').value = "";	
 }
 
 /**
 * aborting leaveofabsence
 */
 function abortloa() {
+document.getElementById('loacomment').value = "";
 $('#leaveofabsence').modal('close');	
 }
 
