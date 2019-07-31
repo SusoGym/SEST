@@ -27,7 +27,7 @@ class Controller {
 	/**
 	* @var sessiontime in Minutes
 	*/
-	protected $sessionValidity = 1;
+	protected $sessionValidity = 20;
     
     /**
      * @return User
@@ -82,7 +82,8 @@ class Controller {
 	protected function chooseLogicHandler(){
 	//choose the logic handler for admin and other users
 		if (isset($_SESSION['user']) ) {
-				if ($_SESSION['user']['type'] == 0){
+			   
+			   if ($_SESSION['user']['type'] == 0){
 					//admin is logged in
 					if (!$this->checkLoginTimeout()) {
 						die($this->logout(true));//calls admin controllers logout()
@@ -180,6 +181,8 @@ class Controller {
 				$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
 			}
 		}
+		if (self::$user != null || $this->input['type'] == "app" || $this->input['type'] == "public" || $this->input['type'] == "login" || $this->input['type'] == "register" || isset($_SESSION['timeout']) || isset($_SESSION['logout']) || $this->input['type'] == "pwdreset" ) // those cases work without login
+		{
         switch ($this->input['type']) {
             case "public":
                 //public access to events
@@ -194,7 +197,7 @@ class Controller {
                 break;
             case "events":
                 //Modul Termine
-                if (isset($this->input['all'])) $this->infoToView['showAllEvents'] = true;
+				if (isset($this->input['all'])) $this->infoToView['showAllEvents'] = true;
                 $template = $this->handleEvents();
                 break;
             case "childsel":
@@ -237,9 +240,11 @@ class Controller {
                 $template = $this->handleCoverLessons();
                 break;
             case "pwdreset":
-                $template = $this->handlePwdReset();
+				$template = $this->handlePwdReset();
                 break;
             case "news":
+				if (self::$user == null)
+                    break;
                 $template = "newsletter";
                 $this->infoToView['user'] = self::$user;
                 $this->getNewsletters();
@@ -262,7 +267,8 @@ class Controller {
 						} else if (isset($this->input['accept'])) {
 						$status = array("status" => "accepted");
 						//fill db
-						self::$user->acceptDsgvo();
+						if(isset(self::$user))
+							self::$user->acceptDsgvo();
 						}
 					
 					die();
@@ -285,17 +291,52 @@ class Controller {
 				break;
 			case "markabsent":
 				if (isset($this->input['console']) ) {
+					$single = (isset($this->input['single']) ) ? $this->input['single'] : null;
+					if (isset($single) ) {
+						$text = "";
+					foreach ($this->input as $key => $value) {
+					$text .= "*".$key;	
+					}
+					$this->input['id']." -- ";
+					foreach ($single as $s) {
+						$text .= $s;
+					}
+						Debug::writeDebugLog(__method__,$text);
+					
+					}
+					
+			
 				if (self::$user instanceof Guardian) {
-					$this->model->enterAbsentPupil($this->input['id'],$this->input['start'],$this->input['end'],$this->input['comment'],self::$user->getParentId(),null,2);
+					$this->model->enterAbsentPupil($this->input['id'],$this->input['start'],$this->input['end'],$this->input['comment'],self::$user->getParentId(),null,2,null,$single);
 					$arr = array("status"=>"absenceEntered","id"=>$this->input['id'],"children" => $this->model->getChildrenAbsenceState($this->infoToView["children"]) );
 					} else if (self::$user instanceof Teacher) {
-					$this->model->enterAbsentPupil($this->input['id'],$this->input['start'],$this->input['end'],$this->input['comment'],self::$user->getId(),null,3);
+					$this->model->enterAbsentPupil($this->input['id'],$this->input['start'],$this->input['end'],$this->input['comment'],self::$user->getId(),null,3,null,$single);
 					$arr = array("status"=>"absenceEntered",
 					"id"=>$this->input['id'],
 					"children" => json_encode($this->model->getTaughtStudentsOfTeacher(self::$user->getId())) );
-					} 
+					}
+				Debug::writeDebugLog(__method__,json_encode($arr));		
 				echo json_encode($arr);
 				die;
+				}
+				break;
+			case "entersingleabsence":
+				if(isset($this->input['console']) ) {
+					$absenceState = null;
+					$aid = ($this->input['aid'] != "" ) ? $this->input['aid']  : null;
+					$sid = $this->input['sid'];
+					$period = $this->input['period'];
+					$comment = $this->input['comment'];
+					$absenceState = $this->model->enterSingleLessonAbsence(self::$user,$aid,$sid,$this->input['start'],$period,$comment);
+					$arr = array("status" => $absenceState['action'],"aid" => $absenceState['aid'],"period" => $period,"sid" => $sid, "comment" => $comment, "missingPeriods" => $absenceState['missingPeriods']);
+					Debug::writeDebugLog(__method__, json_encode($arr) );
+					die(json_encode($arr) );
+					}
+				break;
+			case "getsingleabsencestate":
+				if(isset($this->input['console']) ){
+				//$this->model->getSingleAbsenceState($this->input['aid']);
+				die(json_encode(array("status"=>"singleabsencestate")));
 				}
 				break;
 			case "checkprevabs":
@@ -308,7 +349,6 @@ class Controller {
 				break;
 			case "addtoabsence":
 				if(isset($this->input['console'])) {
-				$this->model->addToAbsence($this->input['aid'],$this->input['end']);
 				if (self::$user instanceof Guardian) {
 				$arr = array("status" => "absenceProlonged",
 				"children" => $this->model->getChildrenAbsenceState($this->infoToView["children"])); 
@@ -316,8 +356,18 @@ class Controller {
 					$this->model->addToAbsence($this->input['aid'],$this->input['end'],self::$user->getId());
 					$arr = array("status" => "absenceProlonged",
 					"children" => json_encode($this->model->getTaughtStudentsOfTeacher(self::$user->getId())));
+				} else {
+					//admin enters
+					$this->model->addToAbsence($this->input['aid'],$this->input['end'],self::$user->getId(),true);	
 				}
+				
+				$text = "";
+				foreach ($arr as $a) {
+				$text .= $a	;
+				}				
+				
 				die(json_encode($arr));
+				
 				}
 				break;
 			case "deleteabsence":
@@ -351,8 +401,8 @@ class Controller {
 					switch ($_SESSION['user']['type'] ) {
 						case 1:
 							//parent Login
-							$guardian = self::$user = $this->model->getTeacherByTeacherId($_SESSION['user']['id']);
-							//something seems to be wrong with the data for dsgvo etc.
+							$guardian = self::$user = $this->model->getTeacherByTeacherId($_SESSION['user']['id']); //Can That Be true? getTeacher?????
+							//is it needed at all, because ist will be null?????
 							break;
 						case 2: 
 							break;
@@ -381,6 +431,9 @@ class Controller {
                 return $this->getDashBoardName();
                 break;
         }
+		} else {
+				return "login";
+		}
         
         return $template;
     }
@@ -565,7 +618,7 @@ class Controller {
      */
     protected function logout() {
 		if(isset($_SESSION['app'])) {
-				$this->model->endAppUserSession(self::$user);
+				//$this->model->endAppUserSession(self::$user);
 			}
 		if (isset($_SESSION['timeout']) ){
 		session_destroy();
@@ -594,7 +647,6 @@ class Controller {
      */
     public function handlePwdReset() {
         $this->model->cleanUpPwdReset();
-        
         if (isset($this->input['token'])) {
             $token = $this->input['token'];
             $validToken = $this->model->checkPasswordResetToken($token);
@@ -639,7 +691,6 @@ class Controller {
                 if ($validEmail) {
                     
                     $isUser = ($usr = $this->model->getUserByMail($email)) != null && $usr->getType() == 1;
-                    
                     if (!$isUser) {
                         $message = "Diese Email ist mit keinem Benutzer verknüpft!";
                         $success = false;
@@ -759,6 +810,7 @@ class Controller {
             $limit = $this->getOption('limit', 10);
             $teachers = $guardian->getTeachersOfAllChildren($limit);
             $this->sortByAppointment($teachers);
+			$this->infoToView['parents'] = $this->model->identifySecondParent($guardian->getParentId() );
             $this->infoToView['teachers'] = $teachers;
             $this->infoToView['maxAppointments'] = $this->getOption('allowedbookings', 3) * count($guardian->getESTChildren($limit));
             $this->infoToView['appointments'] = $guardian->getAppointments();
@@ -1049,31 +1101,25 @@ class Controller {
         $captcha = isset($input['captcha']) ? $input['captcha'] : '';
         
         if (isset($input['console'])){  
-			//used to only get raw login state -> can be used in js
+		
+		//used to only get raw login state -> can be used in js
             $response = array();
 			$response = ($this->checkLoginByCreds($mail, $pwd)) ? array("success"=>true,"session"=>$_SESSION) : array("success"=>false);
 			//Debug::writeDebugLog(__method__,json_encode($response)." Page will be reloaded for ".$mail);
 			die(json_encode($response) );
-        } else {
-			die("How did you get here?");
-		}
-        
-		//Do we still need it?
-        /*
-		if ($this->checkLoginByCreds($mail, $pwd)) {
-			//login data correct
+        } else if ($this->checkLoginByCreds($mail, $pwd)) {
+			//login via app (no javascript used!) and data correct
 			if($input['app'] == 1) {
 				$_SESSION['app'] = true;
 				}
-            return $this->getDashBoardName();
+				return $this->getDashBoardName();
         } else {
             
             ChromePhp::info("Invalid login data");
             $this->notify('Email-Addresse oder Passwort falsch');
             
             return "login";
-        } */
-		//don't we?
+        } 
 		
     }
 	
@@ -1212,7 +1258,7 @@ class Controller {
         $this->infoToView['user'] = $user;
         if(isset($_SESSION['app']) ) {
 			//enter user into DB
-				$this->model->enterAppUser($user);	
+				//$this->model->enterAppUser($user);	
 		}
         if ($user instanceof Admin) {
             if (!isset($_SESSION['board_type'])) {
@@ -1220,10 +1266,8 @@ class Controller {
             
 			}
 			//var_dump(getallheaders());
-			//if (!isset($_SESSION['user']['isadmin']) )
-				//header("Location: ./administrator");
-			
-            
+			if(isset($_SESSION['app']) ) 
+				header("Location: ./administrator");
             //return $_SESSION['board_type'] . '_dashboard';
         } else if ($user instanceof Teacher) {
             $this->infoToView['upcomingEvents'] = $this->model->getNextDates(true);
@@ -1311,12 +1355,14 @@ class Controller {
                     }
                     $pid = $studentObj->getId();
                     $eid = $studentObj->getEid();
+                    $eid = $studentObj->getEid();
+                    $eid2 = $studentObj->getEid2();
                     $surname = $studentObj->getSurname();
                     $name = $studentObj->getName();
                     
                     ChromePhp::info("Student with ASV Id " . $student . " " . ($pid == null ? "does not exist" : "with id $pid and " . ($eid == null ? "no parents set" : "parent with id $eid")));
                     
-                    if ($eid != null) {
+                    if ($eid != null && $eid2 != null) {
                         $failure = $this->model->raiseLockedCount(self::$user->getId());
                         $notifyText = ($failure > 2) ? "zu viele Fehlversuche - Funktion für 5 Minuten deaktiviert!" : "Dem Schüler ist bereits ein Elternteil zugeordnet!";
                         array_push($notification, $notifyText);

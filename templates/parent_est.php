@@ -7,6 +7,19 @@ $today = date("Ymd H:i");
 include("header.php");
 $day = date_format(date_create($data['estdate']), 'd.m.Y');
 
+//identify potential second parent
+$parents = $data['parents'];
+$secondParent = null;
+if (isset($parents[0]) && isset($parents[1]) ) {
+	if ($user->getParentId() == $parents[0] ) {
+		$secondParent = $parents[1];
+		} 
+	else if ($user->getParentId() == $parents[1]  ) {
+		$secondParent = $parents[0];
+		}
+}
+
+
 ?>
 
 <div class="container col s4 m4 l4">

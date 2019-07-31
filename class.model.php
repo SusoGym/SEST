@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The model class
+ * The original model class
  */
 class Model {
     /**
@@ -87,7 +87,7 @@ class Model {
         
         $data = $data[0];
         
-        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid']);
+        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid'], $data['eid2']);
     }
 	
 	/**
@@ -100,7 +100,7 @@ class Model {
             return null;
         
         $data = $data[0];
-        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid']);
+        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid'], $data['eid2']);
     	
 	}
 	
@@ -230,8 +230,8 @@ class Model {
         
         $surname = isset($data["name"]) ? $data["name"] : null;
         $name = isset($data["vorname"]) ? $data["vorname"] : null;
-        
-        return array("name" => $name, "surname" => $surname);
+        $shortName = isset($data["kuerzel"]) ? $data["kuerzel"] : null;
+        return array("name" => $name, "surname" => $surname, 'krzl' => $shortName);
     }
     
     
@@ -242,9 +242,13 @@ class Model {
      */
     public function getChildrenByParentUserId($usrId, $limit = null) {
         if (isset($limit)) {
-            $query = "SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId AND schueler.klasse < $limit"; //a bit crude, isn't it
+            $query = "SELECT schueler.* FROM schueler, eltern WHERE 
+            ( schueler.eid=eltern.id OR  schueler.eid2 = eltern.id )
+            AND eltern.userid=$usrId AND schueler.klasse < $limit"; //a bit crude, isn't it
         } else {
-            $query = "SELECT schueler.* FROM schueler, eltern WHERE schueler.eid=eltern.id AND eltern.userid=$usrId";
+            $query = "SELECT schueler.* FROM schueler, eltern WHERE 
+            ( schueler.eid=eltern.id OR  schueler.eid2 = eltern.id )
+            AND eltern.userid=$usrId";
         }
         
         $data = self::$connection->selectAssociativeValues($query);
@@ -264,6 +268,7 @@ class Model {
     }
     
     /**
+     * get a student by its id
      * @param $studentId int
      *
      * @return Student
@@ -277,10 +282,11 @@ class Model {
         
         $data = $data[0];
         
-        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid']);
+        return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid'], $data['eid2']);
     }
     
     /**
+     * get all teachers of a class
      * @param string $class
      *
      * @return array[Teacher] array with teacherIds
@@ -337,6 +343,7 @@ class Model {
     }
     
     /**
+     * get a teachwer by its it
      * @param $tchrId int teacherId
      *
      * @return Teacher
@@ -356,6 +363,7 @@ class Model {
     }
     
     /**
+     * get teachers LDAPName
      * @param $teacherId
      * @param $rawData
      *
@@ -375,6 +383,7 @@ class Model {
     }
     
     /**
+     * get teacher's UntisName
      * @param $teacherId
      * @param $rawData
      *
@@ -398,6 +407,7 @@ class Model {
     }
     
     /**
+     * get teacher's short name
      * @param $teacherId
      * @param $rawData
      *
@@ -420,6 +430,7 @@ class Model {
     }
     
     /**
+     * get a teacher's amount of lessons taught
      * @param $teacherId int
      *
      * @return int
@@ -433,6 +444,7 @@ class Model {
     }
     
     /**
+     * get a teacher by email and pwd
      * @param $email
      * @param $pwd
      *
@@ -473,7 +485,7 @@ class Model {
         }
         $data = $data[0];
         
-        return new StudentUser($data['id'], $data['name'], $data['vorname'], $data['klasse'], $data['gebdatum'], $data['eid'], $data['kurse']);
+        return new StudentUser($data['id'], $data['name'], $data['vorname'], $data['klasse'], $data['gebdatum'], $data['eid'],$data['eid2'], $data['kurse']);
         
     }
 	
@@ -518,7 +530,7 @@ class Model {
                     }
                     $data = $data[0];
                     
-                    return new StudentUser($data['id'], $data['name'], $data['vorname'], $data['klasse'], $data['gebdatum'], $data['eid'], $data['kurse']);
+                    return new StudentUser($data['id'], $data['name'], $data['vorname'], $data['klasse'], $data['gebdatum'], $data['eid'],$data['eid2'], $data['kurse']);
                     
                 } else {
                     return null;
@@ -664,6 +676,7 @@ class Model {
 	
     
     /**
+     * add a parent - teacher appointment
      * @param int $slotId
      * @param int $userId
      * @param int $teacherId
@@ -675,6 +688,7 @@ class Model {
     }
     
     /**
+     * delete a teacher-parent appointment
      * @param int $appointment
      */
     public function bookingDelete($appointment) {
@@ -742,9 +756,22 @@ class Model {
      */
     public function getAppointmentsOfParent($parentId) {
         $appointments = array();
-        $data = self::$connection->selectValues("SELECT time_slot.id,bookable_slot.id,bookable_slot.lid FROM time_slot,bookable_slot
+		//make sure that appointments in total are divided between two parents
+		//i.e. second registered parent must be identified 
+		$parents = $this->identifySecondParent($parentId);
+		if (isset($parents[0]) && isset($parents[1]) ) {
+		$parentQuery = '(bookable_slot.eid='.$parents[0].' OR bookable_slot.eid='.$parents[1].')';
+		} else {
+		if (isset($parents[0])) {
+			$parentQuery = 'bookable_slot.eid='.$parents[0];
+			}elseif (isset($parents[1])) {
+			$parentQuery = 'bookable_slot.eid='.$parents[1];
+			}
+		}
+        $data = self::$connection->selectValues('SELECT time_slot.id,bookable_slot.id,bookable_slot.lid FROM time_slot,bookable_slot
 			WHERE time_slot.id=bookable_slot.slotid
-			AND bookable_slot.eid='$parentId' ORDER BY anfang");
+			AND '.$parentQuery.' ORDER BY anfang');
+		
         if (isset($data)) {
             foreach ($data as $d) {
                 $appointments[] = array("slotId" => $d[0], "bookingId" => $d[1], "teacherId" => $d[2]);
@@ -753,6 +780,30 @@ class Model {
         
         return $appointments;
     }
+
+	/**
+	* identify second parent of a child
+	* @param int eid
+	* @return array(int)
+	*/
+	public function identifySecondParent($parentId) {
+	$parents = array();
+	$data = self::$connection->selectValues('SELECT DISTINCT eid,eid2 from schueler WHERE eid='.$parentId.' OR eid2 = '.$parentId);
+	if (!empty($data) ) {
+	$dataset = $data[0];
+	if (isset($dataset[1]) ) {
+		//2 parents registered
+		array_push($parents ,$dataset[0]);
+		array_push($parents ,$dataset[1]);
+		} else {
+		//1 parent registered
+		array_push($parents ,$dataset[0]);
+		}
+	}
+	
+	return $parents;
+	}
+
     
     /**
      * returns taught classes of teacher
@@ -832,6 +883,7 @@ class Model {
     
     
     /**
+     * login check for internal users (i.e., parents and admins)
      * @param $email
      * @param $password
      *
@@ -889,7 +941,8 @@ class Model {
     
     /**
      * Adds new student as child to parent
-     *
+     * NEEDS TO BE IMPLEMENTED:
+     * check if eid is already set, then use eid2
      * @param $parentId   int Parent ID
      * @param $studentIds array Student ID
      *
@@ -911,8 +964,17 @@ class Model {
             $student = $this->getStudentById($id);
             if ($student == null)
                 return false;
-            
-            $query = "UPDATE schueler SET eid=$parentId WHERE id='$id';";
+            //check if a registration has already been made
+            $data = self::$connection->selectValues("SELECT eid FROM schueler
+            WHERE id='$id' AND eid is not null");
+            if (!empty($data)){
+                //one parent has already registered the pupil, 
+                //so the second parent field needs to be entered
+                    $fieldToUse = "eid2"; 
+                } else {
+                    $fieldToUse = "eid";
+                }
+            $query = "UPDATE schueler SET $fieldToUse=$parentId WHERE id='$id';";
             self::$connection->straightQuery($query);
         }
         
@@ -1148,7 +1210,7 @@ class Model {
      *
      * @return bool success
      */
-    public function updateUserData($usrId, $name, $surname, $email, $getnews, $htmlnews) {
+    public function updateUserData($usrId, $name, $surname, $email, $getnews = false, $htmlnews = false) {
         
         $name = self::$connection->escape_string($name);
         $surname = self::$connection->escape_string($surname);
@@ -1834,11 +1896,12 @@ class Model {
 			"adminMeldung" => $d['adminMeldung'],
 			"adminMeldungDatum" => $d['adminMeldungDatum'],
 			"adminMeldungTyp" => $d['adminMeldungTyp'],
-			"lehrerMeldung" => $d['lehrerMeldung'],
+			"lehrerMeldung" => ($d['lehrerMeldung'] != 0 ) ? $this->getTeachernameByTeacherId($d['lehrerMeldung'])['krzl'] : 0,
 			"lehrerMeldungDatum" => $d['lehrerMeldungDatum'],
 			"elternMeldung" => $d['elternMeldung'],
 			"elternMeldungDatum" => $d['elternMeldungDatum'],
-			"entschuldigt" => $d['entschuldigt']
+			"entschuldigt" => $d['entschuldigt'],
+			"single" => $d['single']
 			);	
 			} else {
 			$childrenArr[] = 	array("id"=>$child->getId(),
@@ -1895,7 +1958,7 @@ class Model {
 		AND beginn <="'.$today.'" AND ende >="'.$today.'" ORDER BY schueler.name,schueler.vorname');
 		if($data) {
 				foreach ($data as $d) {
-					$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid']);
+					$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid'], $d['eid2']);
 					array_push($absentPupils, array("type" =>"absent",
 					"absenceId" => $d['aid'],
 					"id"=>$d['sid'],
@@ -1905,14 +1968,15 @@ class Model {
 					"ende" => $d['ende'],
 					"beurlaubt" => $d['beurlaubt'],
 					"kommentar" => $d['kommentar'],
-					"adminMeldung" => $d['adminMeldung'],
+					"adminMeldung" => ($d['adminMeldung'] != 0) ? $this->getUserById($d['adminMeldung'])->getEmail() : 0,
 					"adminMeldungDatum" => $d['adminMeldungDatum'],
 					"adminMeldungTyp" => $d['adminMeldungTyp'],
-					"lehrerMeldung" => $d['lehrerMeldung'],
+					"lehrerMeldung" => ($d['lehrerMeldung'] != 0) ? $this->getTeacherNameByTeacherId($d['lehrerMeldung'])['krzl'] : 0,
 					"lehrerMeldungDatum" => $d['lehrerMeldungDatum'],
 					"elternMeldung" => $d['elternMeldung'],
 					"elternMeldungDatum" => $d['elternMeldungDatum'],
-					"entschuldigt" => $d['entschuldigt']
+					"entschuldigt" => $d['entschuldigt'],
+					"single" => $d['single']
 					)
 					);
 				}
@@ -1938,7 +2002,7 @@ class Model {
 					if (!in_array($d['klasse'],$absenteeForms) ) {
 						array_push($absenteeForms,$d['klasse']);	
 						}
-					$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid']);
+					$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid'], $d['eid2']);
 					array_push($absentPupils, array("type" =>"absent",
 					"absenceId" => $d['aid'],
 					"id"=>$d['sid'],
@@ -1947,7 +2011,8 @@ class Model {
 					"beginn" => $d['beginn'],
 					"ende" => $d['ende'],
 					"beurlaubt" => $d['beurlaubt'],
-					"kommentar" => $d['kommentar']/*,
+					"kommentar" => $d['kommentar'],
+					"single" => $d['single']/*,
 					"adminMeldung" => $d['adminMeldung'],
 					"adminMeldungDatum" => $d['adminMeldungDatum'],
 					"adminMeldungTyp" => $d['adminMeldungTyp'],
@@ -1979,7 +2044,8 @@ class Model {
 		AND ende <"'.$today.'" AND entschuldigt = "0000-00-00" ORDER BY schueler.name,schueler.vorname');	
 		if($data) {
 				foreach ($data as $d) {
-					$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid']);
+					
+					$pupil = new Student($d['sid'],$d['klasse'],$d['name'],$d['vorname'],$d['gebdatum'],$d['eid'], $d['eid2']);
 					array_push($absentPupils, array("type" =>"missingExcuse",
 					"absenceId" => $d['aid'],
 					"id"=>$d['sid'],
@@ -1991,11 +2057,12 @@ class Model {
 					"adminMeldung" => $d['adminMeldung'],
 					"adminMeldungDatum" => $d['adminMeldungDatum'],
 					"adminMeldungTyp" => $d['adminMeldungTyp'],
-					"lehrerMeldung" => $d['lehrerMeldung'],
+					"lehrerMeldung" => (isset($d['lehrerMeldung'])) ? $this->getTeacherNameByTeacherId($d['lehrerMeldung'])['krzl'] : 0,
 					"lehrerMeldungDatum" => $d['lehrerMeldungDatum'],
 					"elternMeldung" => $d['elternMeldung'],
 					"elternMeldungDatum" => $d['elternMeldungDatum'],
-					"entschuldigt" => $d['entschuldigt']
+					"entschuldigt" => $d['entschuldigt'],
+					"single" => $d['single']
 					)
 					);
 				}
@@ -2013,7 +2080,7 @@ class Model {
 	public function getPreviousDayAbsence($id,$date) {
 	$dayBefore = date('Y-m-d',(strtotime ( '-1 day' , strtotime ( $date) ) ));
 	$data = self::$connection->selectValues('SELECT aid FROM absenzen 
-	WHERE sid ='. $id .' AND ende >= "'.$dayBefore.'"');
+	WHERE sid ='. $id .' AND ende >= "'.$dayBefore.'" AND beurlaubt = 0');
 	
 	
 	if ($data) {
@@ -2036,19 +2103,29 @@ class Model {
 	if ($user) {
 	if ($mode)  {
 		//admin
-		$query = 'UPDATE absenzen set ende = "'.$end.'",adminMeldung='.$user.',adminMeldungTyp ="'.$mode.'" WHERE aid = '.$aid;
+		$query = 'UPDATE absenzen set ende = "'.$end.'",adminMeldung='.$user.',adminMeldungTyp ="'.$mode.'",adminMeldungDatum="'.date('Y-m-d H:m:s').'" WHERE aid = '.$aid;
 	} else {
 		//teacher
-		$query = 'UPDATE absenzen set ende = "'.$end.'",lehrerMeldung='.$user.' WHERE aid = '.$aid;
+		$query = 'UPDATE absenzen set ende = "'.$end.'",lehrerMeldung='.$user.',lehrerMeldungDatum="'.date('Y-m-d H:m:s').'" WHERE aid = '.$aid;
 	}
 	} else {
 		//parent
-	$query = 'UPDATE absenzen set ende = "'.$end.'" WHERE aid = '.$aid;	
+		$query = 'UPDATE absenzen set ende = "'.$end.'" WHERE aid = '.$aid;	
 	}
 	
 	self::$connection->straightQuery($query); 
 		
 	}
+	
+	/**
+	* add to single lesson absence
+	* @param int aid
+	* @param array(int) lessons
+	*/
+	public function addToSingleAbsence($aid, $missingLessons) {
+		//add every missing lesson as individual dataset
+	}
+	
 	/**
 	* enter absent student
 	* @param int sid
@@ -2058,7 +2135,16 @@ class Model {
 	* @param int user id
 	* @param int user type
 	*/
-	public function enterAbsentPupil($id ,$start,$end,$comment, $userId,$method = null,$who = 1,$loa = 0) {
+	public function enterAbsentPupil($id ,$start,$end,$comment, $userId,$method = null,$who = 1,$loa = 0,$single = null) {
+	if	(isset($single) ) {
+		$insert = "";
+					foreach ($single as $s) {
+						$insert .= ",`p".$s."`";
+						$value .= ",'1'";
+					}
+						Debug::writeDebugLog(__method__,"Insert ".$insert." Value". $value);
+	}
+	
 	$modus = false;
 	switch($who) {
 		case 1://admin
@@ -2083,14 +2169,122 @@ class Model {
 		} else {
 		$queryAdd = $valueAdd = ')';
 		}	
+		
 	
+	/*$singleMark = (isset($single) ) ? true : false;
+	$query = "INSERT INTO absenzen (`aid`,`sid`,`single`,`beginn`,`ende`,`kommentar`,`beurlaubt`,`".$whoField."`,`".$whenField."`".
+	$queryAdd. 
+	"VALUES ('','$id','$singleMark','$start','$end','$comment','$loa','$userId',CURRENT_TIMESTAMP".
+	$valueAdd;*/
+	$now = date('Y-m-d H:m:s');
 	$query = "INSERT INTO absenzen (`aid`,`sid`,`beginn`,`ende`,`kommentar`,`beurlaubt`,`".$whoField."`,`".$whenField."`".
 	$queryAdd. 
-	"VALUES ('','$id','$start','$end','$comment','$loa','$userId',CURRENT_TIMESTAMP".
+	"VALUES ('','$id','$start','$end','$comment','$loa','$userId','$now'".
 	$valueAdd;
+	
 	self::$connection->straightQuery($query);	
+	/*if ($singleMark) {
+		//Add the single lessons to database
+	}*/
+	Debug::writeDebugLog(__method__,"INSERT INTO absenzen (`aid`,`sid`,`beginn`,`ende`,`kommentar`,`beurlaubt`,`".$whoField."`,`".$whenField."`".
+	$queryAdd. 
+	"VALUES ('','$id','$start','$end','$comment','$loa','$userId',CURRENT_TIMESTAMP".
+	$valueAdd);
 	return true;
 	}
+	
+	/**
+	* enterSingleLessonAbsence
+	* @param int userId  // use Object instead???
+	* @param int id
+	* @param int sid (studentId)
+	* @param string start
+	* @param int period
+	* @param int comment
+	* @return array
+	*/
+	public function enterSingleLessonAbsence($user,$id,$sid,$start,$period,$comment) {
+	
+	$absenceState = array();
+	$absenceState['action'] = "enter";
+	$data = null;
+	$userId = $user->getId();
+	if ($user instanceOf Teacher) {
+			$enteredBy = 'lehrerMeldung';
+			$enteredAt = 'lehrerMeldungDatum';
+			} elseif ($user instanceOf Admin) {
+			$enteredBy = 'adminMeldung';
+			$enteredAt = 'adminMeldungDatum';	
+			}
+			$enteredAtValue = date('Y-m-d H:m:s');
+	
+	//check if general absence is already entered7
+	if(isset($id)) {
+	$data = self::$connection->selectAssociativeValues('SELECT * FROM absenzen 
+	WHERE aid = '.$id.' 
+	AND beginn = "'.$start.'" 
+	AND single = 1');
+	}
+	if (isset($data) ) {
+		Debug::writeDebugLog(__method__,"aid single exists");
+		//Absence alread entered in table absenzen
+		$absenceId = $data[0]['aid'];
+		
+		//check if already existing then delete
+		$absence = self::$connection->selectAssociativeValues("SELECT said FROM absenzen_single 
+		WHERE aid = $absenceId AND period = $period");
+		if (!empty($absence) ) {
+			Debug::writeDebugLog(__method__,"absence for this very period exists,i.e. will be deleted");
+			//needs to be deleted
+			self::$connection->straightQuery('DELETE FROM absenzen_single WHERE said = ' . $absence[0]['said'] );
+			$absenceState['action'] = "delete";
+			} else {
+			Debug::writeDebugLog(__method__,"single absence will be entered on basis of existing aid by ". $userId);	
+			//enter absence into single_absence table
+				
+			self::$connection->straightQuery("INSERT INTO absenzen_single (`said`,`aid`,`period`,
+			`$enteredBy`,`$enteredAt`) VALUES
+			('','$absenceId','$period','$userId','$enteredAtValue')");
+			}
+		} else {
+		
+		//New absence needs to be created, i.e. this single lesson absence is the first at that date
+		//enter general absence into absenzen table	
+		Debug::writeDebugLog(__method__,"new entry in absenzen will be made");	
+		$absenceId = self::$connection->insertValues("INSERT INTO absenzen (`aid`,`sid`,`beginn`,`ende`,`single`,`kommentar`) 
+		VALUES ('','$sid','$start','$start','1','$comment')");
+		//enter absence into single_absence table
+		Debug::writeDebugLog(__method__,"new entry in absenzen_single will be made with aid = ".$absenceId);	
+		self::$connection->straightQuery("INSERT INTO absenzen_single (`said`,`aid`,`period`,
+		`$enteredBy`,`$enteredAt`) VALUES
+		('','$absenceId','$period','$userId','$enteredAtValue')");
+		
+		}
+	
+	//read all absent lessons from absence
+	$absenceState['aid'] = $absenceId;
+	$absences = self::$connection->selectAssociativeValues("SELECT * FROM absenzen_single WHERE aid = $absenceId");
+	if (!empty($absences) ) {
+	$absenceState['missingPeriods'] = array();
+	foreach ($absences as $a) {
+		array_push($absenceState['missingPeriods'],array(
+		"period" => $a['period'],
+		"lehrerMeldung" => (isset($a['lehrerMeldung'])) ? $this->getTeacherNameByTeacherId($a['lehrerMeldung'])['krzl'] : 0,
+		"lehrerMeldungDatum" => $a['lehrerMeldungDatum'],
+		"adminMeldung" => $a['adminMeldung'],
+		"adminMeldungDatum" => $a['adminMeldungDatum'])
+		);
+		}
+	}else {
+	return null;	
+	}
+	
+	return $absenceState;	
+	}
+	
+	
+	
+	
 	/**
 	* enter excuse for absence
 	* @param int id primary key
@@ -2188,7 +2382,10 @@ class Model {
 			' AND beginn<="'.date('Y-m-d').'" 
 			AND ende >="'.date('Y-m-d').'"');
 			if (!empty($absentData)) {
+				
 				$absentData = $absentData[0];
+				$absTeacher = ($absentData['lehrerMeldung'] != 0 ) ? $this->getTeacherNameByTeacherId($absentData['lehrerMeldung'])['krzl'] : 0 ;
+				
 				$absent = true;
 				$students[] = array("absent"=>true,
 				"id"=>$d['id'],
@@ -2203,9 +2400,11 @@ class Model {
 				"adminMeldungTyp" => $absentData['adminMeldungTyp'],
 				"elternMeldung" => $absentData['elternMeldung'],
 				"elternMeldungDatum" => $absentData['elternMeldungDatum'],
-				"lehrerMeldung" => $absentData['lehrerMeldung'],
+				"lehrerMeldung" => $absTeacher,
 				"lehrerMeldungDatum" => $absentData['lehrerMeldungDatum'],
-				"entschuldigt" =>$absentData['entschuldigt']);
+				"entschuldigt" =>$absentData['entschuldigt'],
+				"single" =>$absentData['single'])
+				;
 				
 				} else {
 				$absent = false;
@@ -2216,6 +2415,7 @@ class Model {
 				}
 			
 			}
+			
 		return $students;
 	} else 
 		return null;

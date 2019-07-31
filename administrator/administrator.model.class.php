@@ -423,12 +423,23 @@ class Model extends \Model {
 				$parentFullname = $parent['fullname'];
 				$parentEmail = $parent['email'];
 				//Debug::writeDebugLog(__method__,$parent->getFullname() );
+				if(isset($d['eid2'])) {
+					//get parent2 name
+					$parent2 = \Model::getParentUserByParentId($d['eid2']);
+					$parent2Fullname = $parent2['fullname'];
+					$parent2Email = $parent2['email'];
+					} else {
+					$parent2Fullname = $parent2Email = null;
+					}
+					
 				} else {
 				$parentFullname = $parentEmail = null;
+				$eid2 = $parent2Fullname = $parent2Email = null;
 				}
                 $arr[] = array("id"=>$d['id'],"asvId"=>$d['ASV_ID'],"dob"=>$d['gebdatum'],
 				"name"=>$d['name'],"vorname"=>$d['vorname'],"klasse"=>$d['klasse'],
-				"eid"=>$d['eid'],"parent"=>$parentFullname,"mail"=>$parentEmail ); 
+				"eid"=>$d['eid'],"parent"=>$parentFullname,"mail"=>$parentEmail, 
+				"eid2" => $d['eid2'],"parent2" => $parent2Fullname, "mail2" => $parent2Email ); 
 			}
         return $arr;	
 	}

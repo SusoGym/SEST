@@ -91,13 +91,22 @@
                                     $symbolColor = "green-text";
                                     $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=del'";
                                     $showSlot = true;
-                                }
+                                } else if (isset($secondParent)) {
+									if($slot['eid'] == $secondParent) {
+									//slot is booked by parent partner
+                                    $symbol = "check";
+                                    $text = "gebucht von zweitem Elternteil";
+                                    $symbolColor = "green-text";
+                                    $link = "href='?type=eest&slot=" . $slot['bookingId'] . "&action=del'";
+                                    $showSlot = true;
+									}
+								}
                                 ?>
                                 
                                 <li class="collection-item">
                                     <div>
                     <span class="teal-text ">
-                      <?php echo $anfang . " - " . $ende; ?>
+                      <?php echo $anfang . " - " . $ende ."--".$text; ?>
                     </span>
                                         <a <?php echo $link; ?> class="secondary-content action">
                                             <i class="material-icons <?php echo $symbolColor; ?>">

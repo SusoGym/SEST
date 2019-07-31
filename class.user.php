@@ -204,7 +204,7 @@ class User extends Printable {
 /**
  * Guardian class as subclass of User class representing parents
  */
-class Guardian extends User {
+class Guardian  extends User  {
     /**
      * @var array
      */
@@ -228,6 +228,24 @@ class Guardian extends User {
 		$this->dsgvo = Model::getInstance()->getDsgvoStatus($this);
     }
     
+	/*
+	* return a json String of the object
+	*/
+	public function getJSON() {
+		$array = array(
+		"status"=>200,
+		"id"=>$this->getId(),
+		"children"=>$this->getChildren(),
+		"parentId"=>$this->getParentId(),
+		"surname"=>$this->getSurname(),
+		"name"=>$this->getName(),
+		"type"=>$this->getType(),
+		"email"=>$this->getEmail()
+		); 
+		return json_encode($array);
+	}
+
+
     /**
      *Returns child(ren)'s id(s)
      *
@@ -348,6 +366,8 @@ class Guardian extends User {
     public function getAppointments() {
         $model = Model::getInstance();
         $appointments = array();
+		//make sure that appointments in total are divided between two parents
+		//i.e. second registered parent must be identified - done in model function
         $appointmentData = $model->getAppointmentsOfParent($this->parentId);
         foreach ($appointmentData as $a) {
             $appointments[] = $a['slotId'];
@@ -701,6 +721,7 @@ class StudentUser extends User {
     protected $class;
     protected $bday;
     protected $parent;
+    protected $parent2;
     
     
     /**
@@ -714,12 +735,13 @@ class StudentUser extends User {
      * @param int         $parent
      * @param string      $courses
      */
-    function __construct($id, $name, $surname, $class, $bday, $parent, $courses = null) {
+    function __construct($id, $name, $surname, $class, $bday, $parent, $parent2,  $courses = null) {
         parent::__construct($id, 3, null, $name, $surname);
         //$this->id = $id;//entered 20181209 when trying to realise appLogin
 		$this->class = $class;
         $this->bday = $bday;
         $this->parent = $parent;
+        $this->parent2 = $parent2;
         //$this->courses = $courses;  -- 
 		$this->dsgvo = Model::getInstance()->getDsgvoStatus($this);
     }
@@ -743,6 +765,12 @@ class StudentUser extends User {
      */
     public function getParent() {
         return $this->parent;
+    }
+    /**
+     * @return int
+     */
+    public function getParent2() {
+        return $this->parent2;
     }
     
     /**
@@ -790,6 +818,10 @@ class Student extends Printable {
      * @var int parent ID
      */
     protected $eid;
+    /*
+    * @var int parent2 ID
+    */
+   protected $eid2;
     /**
      * @var string student's birthday
      */
@@ -799,13 +831,14 @@ class Student extends Printable {
      */
     protected $courses;
     
-    public function __construct($id, $class, $surname, $name, $bday, $eid = null) {
+    public function __construct($id, $class, $surname, $name, $bday, $eid = null,$eid2 = null) {
         $this->id = intval($id);
         $this->class = $class;
         $this->surname = $surname;
         $this->name = $name;
         $this->bday = $bday;
         $this->eid = $eid;
+        $this->eid2 = $eid2;
     }
 	
 	
@@ -845,6 +878,13 @@ class Student extends Printable {
      */
     public function getEid() {
         return $this->eid;
+    }
+
+    /**
+     * @return int
+     */
+    public function getEid2() {
+        return $this->eid2;
     }
     
     public function getFullName() {
