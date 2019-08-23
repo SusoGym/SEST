@@ -563,9 +563,52 @@ class Model extends \Model {
 	
 	
 	
-    
-    
+   /**
+   * get all hired out lockers
+   * @return JSON 
+   */
+   public function getLockerList() {
+   $hiredOut = array();
+   $empty = array();
+   $data = self::$connection->selectValues("SELECT * FROM lockers ORDER BY nr");
+   if (!empty($data) ){
+		foreach($data as $d) {
+			if ($d[1] !== null) {
+				//locker is hired out
+				$student = \Model::getStudentById($d[1]);
+				//$studentData = array("id" => $student->getId(), "fullname" => $student->getFullName(), "klasse" => $student->getClass() );
+				$locker = array("locker" => $d[0], "student" => $student);
+				array_push($hiredOut,$locker);
+				} else {
+				array_push($empty, $d[0]);
+				}
+			}
+		}
+	$lockers = array("hired" => $hiredOut, "empty" => $empty);
+   return $lockers;
+   }
+   
+
+   /**
+   * hire a locker to a student
+   * @param int locker id
+   * @param int student id
+   * @return boolean
+   */
+   public function hireoutLocker($locker,$student){
+	$time = date('d.m.Y H:i');
+	\Debug::writeDebugLog(__method__,'UPDATE lockers SET hired ="' . $student . '",hiredate = "' . $time .'" WHERE nr=' . $locker);
+	$result = self::$connection->straightQuery('UPDATE lockers SET hired ="' . $student . '",hiredate = "' . $time .'" WHERE nr=' . $locker);
+   
+	}
+	
+
+	/** 
+	*return a locker
+	* @param int id
+	*/
+	public function returnLocker($locker) {
+		self::$connection->straightQuery('UPDATE lockers SET hired = null, hiredate = null WHERE nr=' . $locker);
+	}
 }
-
-
 ?>

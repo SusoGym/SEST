@@ -240,6 +240,7 @@ class Controller extends \Controller {
 					$this->addMenueItem("?type=pupilmgt", "Schüler suchen");
 					$this->addMenueItem("?type=handleregister", "Registrierungsanfragen");
 					$this->addMenueItem("?type=leaveofabsence", "Beurlaubungen");
+					$this->addMenueItem("?type=lockers", "Schließfächer");
 					$this->display("simple_menue");
 					}
                 			
@@ -293,6 +294,7 @@ class Controller extends \Controller {
 			
 			break;
 			case "leaveofabsence":
+			
 			//enter  a student absence as leave of absence
 			if(isset($input['console'])) {
 					$this->model->enterAbsentPupil($input['id'],$input['start'],$input['end'],$input['comment'],$_SESSION['user']['id'],0,1,1); 
@@ -309,9 +311,8 @@ class Controller extends \Controller {
                 $usr = $this->model->getUserByMail($usr);
                 if ($usr == null) {
                     $this->notify("Error: Invalid user to be edited!");
-                    $this->title = "Startseite";
-                    $this->display("main");
-                    
+                    $this->title = "Eltern suchen (Email)";
+                    $this->display("usermgt");
                     return;
                 }
                 if (isset($input['edit'])) {
@@ -690,6 +691,27 @@ class Controller extends \Controller {
 				$arr = array("status" => "pdfready");
 				die(json_encode($arr));
 				break;
+			case "lockers":
+				//locker management
+				
+				if (isset($input['console']) && isset($input['hire']) ) {
+					$this->model->hireoutLocker($input['lckr'],$input['stdnt']);
+					$arr = array("status" => "hired", "message" => "Schließfach erfolgreich vergeben");
+					die(json_encode($arr) );
+					} else if (isset($input['return']) ){
+						$this->model->returnLocker($input['lckr']);
+						$arr = array("status" => "returned", "message" => "Schließfach erfolgreich zurückgegeben");
+						die(json_encode($arr) );
+						}
+				//prepare data to be sent to templates
+				//lockerlist & studentList
+				//get Lockers with students as JSON
+				$lockers = $this->model->getLockerList();
+				
+				$this->infoToView['lockers'] = json_encode($lockers);
+
+				$this->display("lockermgt");
+				break;
             default:
 				//Landing Page 
                 $this->title = "Startseite";
@@ -701,6 +723,12 @@ class Controller extends \Controller {
 				$this->infoToView['missingExcuses'] =  json_encode($this->model->getMissingExcuses());
 				$this->infoToView['studentList'] = json_encode(array_merge($this->model->getAbsentStudents(),$this->model->getMissingExcuses()));
 				$this->infoToView['isadmin'] = "true";
+				//get coverLessons
+				// not yet implemented
+				$this->infoToView['VP_allDays'] = $this->model->getVPDays(true);
+				$this->infoToView['VP_coverLessons'] = $this->model->getAllCoverLessons(true, null, $this->infoToView['VP_allDays']);
+				// should include a link to show coverLessons
+				//modal or separate display??
 				
 				
                 $this->display("main");
@@ -862,11 +890,24 @@ class Controller extends \Controller {
      */
     private function checkTeacherAssignments() {
         $params = $this->model->getIniParams();
-        $fileName = "teacherassignments.csv";
+        $fileName = "teacherassignments.html";
         $path = $params['filebase'] . '/' . $params['download'] . '/' . $fileName;
+		$relPath = '../' . $params['download'] . '/' . $fileName;
         $teachers = $this->model->getTeachers();
         $data = array();
         $line = "Lehrer;Deputat;Anzahl zu vergebender Termine;Anzahl noch zu vergebender Termine;Vergebene Termine\n";
+		$line = "<html>\r\n
+				<head><meta charset=\"utf-8\"><title>Elternsprechtag-Slots</title></head>\r\n
+				<table border='1' bordercolor='#000000'>\r\n
+				<tbody>\r\n
+				<tr style=\"font-weight: bold;\">\r\n
+					<td>Lehrer</td>\r\n
+					<td>Deutat</td>\r\n
+					<td>Anzahl Pflicht:</td>\r\n
+					<td>Anzahl offen</td>\r\n
+					<td>Bereits vergeben</td>\r\n
+				</tr>\r\n";
+		
         array_push($data, $line);
         foreach ($teachers as $teacher) {
             $asString = null;
@@ -876,16 +917,26 @@ class Controller extends \Controller {
             $assignedSlots = $teacher->getAssignedSlots(); //array()
             $x = 0;
             foreach ($assignedSlots as $as) {
-                $asString = $x == 0 ? $as : $asString . "/" . $as;
+                $asString = $x == 0 ? $as : $asString . "|" . $as;
                 $x++;
             }
-            $line = $teacher->getFullName() . ";" . $deputat . ";" . $requiredSlots . ";" . $missingSlots . ";" . $asString . "\r\n";
+			$color = ($missingSlots > 0)  ? "#ff0000" : "#21610B";
+				
+            $line = "<tr style=\"color: $color;\">\r\n
+						<td >".mb_convert_encoding($teacher->getFullName(),'UTF-8')."</td>\r\n
+						<td>".$deputat."</td>\r\n
+						<td>".$requiredSlots."</td>\r\n
+						<td>".$missingSlots ."</td>\r\n
+						<td>".$asString ."</td>\r\n
+					</tr>\r\n";
             array_push($data, $line);
             
         }
         $filehandler = new Filehandler($path);
+		array_push($data,"</tbody></table></body></html>");
         $filehandler->createCSV($data);
         $this->notify("Datei " . $fileName . " erzeugt");
+		?><script type="text/javascript" language="Javascript">window.open('<?php echo $relPath; ?>');</script><?php
     }
 	
 	/**
