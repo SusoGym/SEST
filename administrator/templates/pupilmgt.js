@@ -115,11 +115,17 @@ this.eId.innerHTML = "Eltern: "+data[elementNr]['parent'] + " (ElternId: "
     + data[elementNr]['eid'] + ") - Email: " + data[elementNr]['mail'] +
     "<br/>" + data[elementNr]['parent2'] + " (ElternId: "
     + data[elementNr]['eid2'] + ") - Email: " + data[elementNr]['mail2'];
-
+if (data[elementNr]['locker']) {
+    this.lckr = document.createElement("div");
+    this.lckr.innerHTML = "Schließfach: " + data[elementNr]['locker'];
+    this.lckr.className += "red-text";
+    }
 this.content.appendChild(this.dob);
 this.content.appendChild(this.asvId);
 this.content.appendChild(this.eId);
-
+    if (data[elementNr]['locker']) {
+        this.content.appendChild(this.lckr);
+    }
 if (null != requestId) {
 this.infoDiv.action = document.createElement("div");
 this.infoDiv.action.id = this.infoDiv.id + "_action"

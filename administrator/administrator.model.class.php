@@ -413,7 +413,7 @@ class Model extends \Model {
 	public function getPupils($startingWith) {
 	$arr = array();
         $startingWith = self::$connection->escape_string($startingWith);
-        $query = "SELECT * FROM schueler WHERE name LIKE '$startingWith%'";	
+        $query = "SELECT * FROM schueler, lockers WHERE name LIKE '$startingWith%' AND schueler.id = lockers.hired";	
 		$data = self::$connection->selectAssociativeValues($query);
         if ($data != null && !empty($data))
             foreach ($data as $d) {
@@ -439,7 +439,7 @@ class Model extends \Model {
                 $arr[] = array("id"=>$d['id'],"asvId"=>$d['ASV_ID'],"dob"=>$d['gebdatum'],
 				"name"=>$d['name'],"vorname"=>$d['vorname'],"klasse"=>$d['klasse'],
 				"eid"=>$d['eid'],"parent"=>$parentFullname,"mail"=>$parentEmail, 
-				"eid2" => $d['eid2'],"parent2" => $parent2Fullname, "mail2" => $parent2Email ); 
+				"eid2" => $d['eid2'],"parent2" => $parent2Fullname, "mail2" => $parent2Email, "locker" => $d['nr'] ); 
 			}
         return $arr;	
 	}
