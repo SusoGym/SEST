@@ -412,11 +412,17 @@ class Model extends \Model {
 	*/
 	public function getPupils($startingWith) {
 	$arr = array();
+	
         $startingWith = self::$connection->escape_string($startingWith);
-        $query = "SELECT * FROM schueler, lockers WHERE name LIKE '$startingWith%' AND schueler.id = lockers.hired";	
+        $query = "SELECT * FROM schueler WHERE name LIKE '$startingWith%'"; 
 		$data = self::$connection->selectAssociativeValues($query);
         if ($data != null && !empty($data))
             foreach ($data as $d) {
+				$locker = array();
+				$lckrQueryData = self::$connection->selectValues("SELECT nr,location,hiredate FROM lockers WHERE hired = " . $d['id']);
+				if ( !empty($lckrQueryData) ) {
+					$locker = array("id" => $lckrQueryData[0][0], "location" => $lckrQueryData[0][1] , "hiredate" => $lckrQueryData[0][2] );
+					} 
 				if (isset($d['eid'])) {
 				//get parent name
 				$parent = \Model::getParentUserByParentId($d['eid']);
@@ -439,7 +445,8 @@ class Model extends \Model {
                 $arr[] = array("id"=>$d['id'],"asvId"=>$d['ASV_ID'],"dob"=>$d['gebdatum'],
 				"name"=>$d['name'],"vorname"=>$d['vorname'],"klasse"=>$d['klasse'],
 				"eid"=>$d['eid'],"parent"=>$parentFullname,"mail"=>$parentEmail, 
-				"eid2" => $d['eid2'],"parent2" => $parent2Fullname, "mail2" => $parent2Email, "locker" => $d['nr'] ); 
+				"eid2" => $d['eid2'],"parent2" => $parent2Fullname, "mail2" => $parent2Email, "locker" => $locker ); 
+				unset($locker);
 			}
         return $arr;	
 	}
