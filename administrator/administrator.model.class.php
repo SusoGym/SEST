@@ -570,17 +570,18 @@ class Model extends \Model {
    public function getLockerList() {
    $hiredOut = array();
    $empty = array();
-   $data = self::$connection->selectValues("SELECT * FROM lockers ORDER BY nr");
+   $data = self::$connection->selectValues("SELECT nr, hired, location FROM lockers ORDER BY nr");
    if (!empty($data) ){
 		foreach($data as $d) {
 			if ($d[1] !== null) {
 				//locker is hired out
 				$student = \Model::getStudentById($d[1]);
 				//$studentData = array("id" => $student->getId(), "fullname" => $student->getFullName(), "klasse" => $student->getClass() );
-				$locker = array("locker" => $d[0], "student" => $student);
+				$locker = array("locker" => $d[0], "location" => $d[2], "student" => $student);
 				array_push($hiredOut,$locker);
 				} else {
-				array_push($empty, $d[0]);
+				$emptyLocker = array("locker" =>$d[0], "location" => $d[2]);
+				array_push($empty, $emptyLocker);
 				}
 			}
 		}

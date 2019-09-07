@@ -234,7 +234,7 @@ class Controller extends \Controller {
 						$this->title = "Eltern suchen (Email)";
 						$this->display("usermgt");
 					} else {
-					$this->title = "Benutzerverwaltung";
+					$this->title = "Verwaltung";
 					$this->addMenueItem("?type=usrmgt&unused=true", "Benutzer ohne Schüler");
 					$this->addMenueItem("?type=usrmgt&search=true", "Eltern suchen");
 					$this->addMenueItem("?type=pupilmgt", "Schüler suchen");
