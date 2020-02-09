@@ -396,7 +396,7 @@ class Model extends \Model {
     public function getUsers($startingWith) {
         $arr = array();
         $startingWith = self::$connection->escape_string($startingWith);
-        $data = self::$connection->selectAssociativeValues("SELECT email FROM user WHERE email LIKE '$startingWith%'");
+        $data = self::$connection->selectAssociativeValues("SELECT email FROM user WHERE email LIKE '%$startingWith%'");
         if ($data != null && !empty($data))
             foreach ($data as $d)
                 array_push($arr, $d['email']);
