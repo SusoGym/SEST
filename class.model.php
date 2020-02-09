@@ -155,7 +155,7 @@ class Model {
      */
     public function getUserByMail($email) {
         $email = self::$connection->escape_string($email);
-        $data = self::$connection->selectAssociativeValues("SELECT * FROM user WHERE email='$email'");
+        $data = self::$connection->selectAssociativeValues("SELECT * FROM user WHERE email = '$email'");
         if (empty($data))
             return null;
         else 

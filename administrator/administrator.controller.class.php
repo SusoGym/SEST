@@ -534,6 +534,7 @@ class Controller extends \Controller {
             case "sestconfig":
             case "clrslts":
             case "chkass":
+            case "showtchrappmt":
                 $this->title = "Konfiguration Elternsprechtag";
                 $this->addMenueItem("?type=setclasses", "Unterrichtszuordnung einrichten");
                 if (date('Ymd') <= $this->model->getOptions()['assignstart']) {
@@ -541,8 +542,10 @@ class Controller extends \Controller {
                     $this->addMenueItem("?type=clrslts", "buchbare Termine zurücksetzen");
                 }
                 $this->addMenueItem("?type=chkass", "Lehrertermine prüfen");
+                $this->addMenueItem("?type=showtchrappmt", "Alle Lehrertermine anzeigen");
                 if ($this->input['type'] == "clrslts") $this->clearSlots();
                 if ($this->input['type'] == "chkass") $this->checkTeacherAssignments();
+                if ($this->input['type'] == "showtchrappmt") $this->showTeacherAppointments();
                 $this->backButton = "?type=settings";
                 $this->display("simple_menue");
                 break;
@@ -937,6 +940,18 @@ class Controller extends \Controller {
         $filehandler->createCSV($data);
         $this->notify("Datei " . $fileName . " erzeugt");
 		?><script type="text/javascript" language="Javascript">window.open('<?php echo $relPath; ?>');</script><?php
+    }
+
+    /**
+     * show all teaxcher appointments at Elternsprechtag
+     * and enable cancelling
+     * 
+     */
+    private function showTeacherappointments() {
+        $this->title = "Elternsprechtagstermine";
+        $this->notify("function not available yet");
+        $this->infoToView['teachers'] = $this->model->getTeachers();
+        $this->display("showappointments");
     }
 	
 	/**
