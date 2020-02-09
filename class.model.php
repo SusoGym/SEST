@@ -1882,7 +1882,7 @@ class Model {
 		foreach ($children as $child) {
 		$data = self::$connection->selectAssociativeValues('SELECT * FROM absenzen 
 		WHERE sid='.$child->getId().
-		' AND ende >="'.date('Y-m-d').'"');
+		' AND ende >="'.date('Y-m-d').'" AND beurlaubt = 0');
 		if ($data) {
 			$d = $data[0];
 			$childrenArr[] = array("id"=>$child->getId(),
