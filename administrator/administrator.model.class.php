@@ -471,7 +471,7 @@ class Model extends \Model {
 
 		$unused = array();
 		foreach ($users as $u) {
-			$data = self::$connection->selectValues("SELECT id FROM schueler WHERE eid = ".$u['eid']);
+			$data = self::$connection->selectValues("SELECT id FROM schueler WHERE eid = ".$u['eid']." OR eid2= ".$u['eid']);
 			if (!$data[0][0] ) {
 				array_push($unused,$u);
 				}
