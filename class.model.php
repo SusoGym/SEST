@@ -31,7 +31,7 @@ class Model {
     }
     
     static function getInstance() {
-        return self::$model == null ? self::$model = new Model() : self::$model;
+	     return self::$model == null ? self::$model = new Model() : self::$model;
     }
     
     /**
@@ -894,7 +894,7 @@ class Model {
         $email = self::$connection->escape_string($email);
         //$password = self::$connection->escape_string($userName);
         
-        $data = self::$connection->selectAssociativeValues("SELECT password_hash from user WHERE email='$email'");
+        $data = self::$connection->selectAssociativeValues("SELECT password_hash from user WHERE email='$email' AND confirm_token is null");
         
         if ($data == null)
             return false;
@@ -918,16 +918,17 @@ class Model {
      *
      * @return array newly created ids of parent (userid and parentid)
      */
-    public function registerParent($email, $pwd, $name, $surname) {
+    public function registerParent($email, $pwd, $name, $surname,$token) {
         
         $email = self::$connection->escape_string($email);
         $pwd = self::$connection->escape_string($pwd);
         $name = self::$connection->escape_string($name);
         $surname = self::$connection->escape_string($surname);
+        $token = self::$connection->escape_string($token);
         
         $pwd = password_hash($pwd, PASSWORD_DEFAULT);
         
-        $query = "INSERT INTO user (user_type, password_hash, email) VALUES (1,'$pwd', '$email');";
+        $query = "INSERT INTO user (user_type, password_hash, email,confirm_token) VALUES (1,'$pwd', '$email','$token');";
         
         //Create parent in database and return eid
         $usrId = self::$connection->insertValues($query);
@@ -939,6 +940,39 @@ class Model {
         
     }
     
+    /**
+     * checking the token for confirmation of registration
+     * @param string token
+     * @return boolean
+     */
+    public function confirmRegistration($token) {
+        //check for token
+        $data = self::$connection->selectValues('SELECT id,registered FROM user WHERE confirm_token = "'.$token.'"');
+        if (empty($data) ) {
+          return false;  
+        } else {
+            //token seems to be valid
+            $userId = $data[0][0];
+            //check for timeout
+            $then = new DateTime($data[0][1]);
+            $now = new DateTime(date("Y-m-d H:i:s"));
+            $interval = $then->diff($now)->format("%d");
+            if(intval($interval) > 0) {
+                //confirmation time more than 1 day ago;
+                //now delete the registered user from the database
+                self::$connection->straightQuery("DELETE FROM user WHERE id = $userId");
+                self::$connection->straightQuery("DELETE FROM eltern WHERE userid = $userId");
+                return false;
+            } else {
+                //confirmation is correct
+                //now delete token 
+                self::$connection->straightQuery("UPDATE user set confirm_token = null WHERE id = $userId");
+                return true;
+                }
+         }
+        
+    }
+
     /**
      * Adds new student as child to parent
      * NEEDS TO BE IMPLEMENTED:

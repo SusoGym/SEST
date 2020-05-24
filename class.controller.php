@@ -181,7 +181,7 @@ class Controller {
 				$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
 			}
 		}
-		if (self::$user != null || $this->input['type'] == "app" || $this->input['type'] == "public" || $this->input['type'] == "login" || $this->input['type'] == "register" || isset($_SESSION['timeout']) || isset($_SESSION['logout']) || $this->input['type'] == "pwdreset" ) // those cases work without login
+		if (self::$user != null || $this->input['type'] == "app" || $this->input['type'] == "public" || $this->input['type'] == "login" || $this->input['type'] == "register" || isset($_SESSION['timeout']) || isset($_SESSION['logout'])  || $this->input['type'] == "confirm" ) // those cases work without login
 		{
         switch ($this->input['type']) {
             case "public":
@@ -216,6 +216,9 @@ class Controller {
                 break;
             case "register":
                 $template = $this->register();
+                break;
+            case "confirm":
+                $template = $this->confirmRegistration($this->input['tkn']);
                 break;
             case "logout":
 				$_SESSION['logout'] = true;
@@ -1000,9 +1003,33 @@ class Controller {
         ChromePhp::info("Success: " . ($success == true ? "true" : "false"));
         
         if ($success) {
-            $ids = $model->registerParent($mail, $pwd, $name, $surname);
-            ChromePhp::info("Registered parent with user-ids " . json_encode($ids));
-            $this->checkLoginByCreds($mail, $pwd); //adapt!!!!
+            //create a token
+            $token = date("YmdHis");
+            for ($x=1;$x<30;$x++){
+                $tokentype = rand(1,3);
+                switch($tokentype){
+                    case 1:
+                        $char = chr(rand(48,57) );
+                        break;
+                    case 2:
+                        $char = chr(rand(65,90) );
+                        break;
+                    case 3:
+                        $char = chr(rand(97,122) );
+                        break;
+                    }
+                $token .=  $char;
+            }
+            $ids = $model->registerParent($mail, $pwd, $name, $surname,$token);
+            //following line is commented because login will not performed after registration instead a mail is sent to registered user
+            // $this->checkLoginByCreds($mail, $pwd); //adapt!!!!
+            //send mail
+            $this->sendRegistrationConfirmation($mail,$token);
+            //enter into logfile
+            $fh = fopen("registration.log","a");
+            $line = "Registrierung am ".date("d.m.Y H:i:s")." von Emailadresse :".$mail." [".$surname.",".$name."]\r\n";
+            fputs($fh,$line);
+            fclose($fh);
             
         }
         
@@ -1318,7 +1345,22 @@ class Controller {
         }
         
     }
-	
+    
+    /**
+     * confirm a registration via email link and token
+     * @param string token
+     * @return string template
+     */
+    private function confirmRegistration($token){
+        $registrationSuccess = $this->model->confirmRegistration($token);
+        if (!$registrationSuccess){
+            //confirmation of registration fails
+            return "registration_failure";
+        } else {
+            return "registration_success";
+        }
+    }
+
 	//============End of Login related functions====================
 	
 	/**
@@ -1628,7 +1670,7 @@ class Controller {
 	
 	 /**
      *
-     * send request registration key Email
+     * send request kids registration key Email
      * @param string email
 	 * @param string content
      */
@@ -1653,7 +1695,44 @@ class Controller {
 		return $send;
         }
     
-	
+	/**
+     * 
+     * send mail after user registration
+     * @param string email
+     * @param string token
+     */
+    private function sendRegistrationConfirmation($email,$token) {
+        require_once("PHPMailer.php");
+        //Email Text
+        $content = 'Über diese Emailadresse wurde eine Registrierungsanfrage an das interne Benutzersystem des Heinrich-Suso-Gymnasiums 
+        gesendet. Ihre Registrierung können Sie mit folgendem Link abschließen. <br> 
+        <a href="https://www.suso.schulen.konstanz.de/intern/index.php?type=confirm&tkn='.$token.'">Registrierung abschließen</a>.<br>
+        Wenn Sie den link nicht aus Ihrem Email Programm heraus anklicken können, kopieren Sie bitte diese Zeilen und fügen Sie diese in die 
+        Adresszeile Ihres Browsers ein: <br><br>
+        https://www.suso.schulen.konstanz.de/intern/index.php?type=confirm&tkn='.$token.
+        '<br> Dieser Link ist 24h aktiv!<br><br> Sollten Sie diese Registrierung nicht getätigt haben oder diese versehentlich mit Ihrem Email 
+        Konto erfolgt sein, können Sie diese Nachricht ignorieren.<br><br><b>Diese Email wurde automatisch vom System versandt. Bitte antworten Sie 
+        nicht auf diese Email.';
+    
+        
+        //sending emails
+        $phpmail = new PHPMailer();
+        $phpmail->setFrom("noreply@suso.konstanz.de", "Suso-Intern");
+		$phpmail->CharSet = "UTF-8";
+		$phpmail->isHTML();
+		$phpmail->AddAddress($email);
+		$phpmail->Subject = date('d.m.Y - H:i:s') . "Suso-Intern Ihre Benutzerregistrierung";
+		$phpmail->Body = $content;
+			
+		$send = true;
+		
+		//Senden
+		if (!$phpmail->Send()) {
+			$send = false;
+		} 
+		
+		return $send;
+    }
 	
     
     /**

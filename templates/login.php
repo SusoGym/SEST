@@ -120,13 +120,8 @@
         
         ?>
 		
-		var xhttp = new XMLHttpRequest();
-        //var captchas = [];
-		
-		xhttp.addEventListener('load', function(event) {
-			console.log(xhttp.responseText);
-			var response = JSON.parse(xhttp.responseText);
-			if (xhttp.status >= 200 && xhttp.status < 300) {
+		function evaluateResponse(response, status) {
+		if (status == "success") {
 			   if (response['success'] == true) {
 				  if(response['session']['user']['type'] == 0) { 
 					window.location.href = './administrator';
@@ -142,30 +137,11 @@
 					
 			  }
 		   } else {
-			  console.warn(xhttp.statusText, xhttp.responseText);
-		   }
-		});
+			  Materialize.toast("Interner Serverfehler!", 4000);
+		   }	
+		}
 		
 		
-		
-		
-		/*
-        var onLoadCaptcha = function () {
-            $(".g-recaptcha").each(function () {
-                var el = $(this);
-                captchas[el.attr("id")] =
-                    grecaptcha.render($(el).attr("id"), {
-                        "sitekey": "<?php echo $data['captcha'];?>",
-                        "callback": function (token) {
-                            $('.g-recaptcha-response').val(token);
-                            $(el).find(".g-recaptcha-response").val(token);
-                            $(el).parent().submit();
-                            grecaptcha.reset(captchas[el.attr("id")]);
-                        }
-                    });
-            });
-        };
-		*/
 
         function validate(type) {
             alert(type);
@@ -174,13 +150,13 @@
 
         function forgot() {
             var mail = $('#mail_forgot').val();
-            $.post("", {'type': 'pwdreset', 'console': '', 'pwdreset[mail]': mail}, function (data) {
+			$.post("", {'type': 'pwdreset', 'console': '', 'pwdreset[mail]': mail}, function (data) {
                 if (data.success == true) {
-                    $('.forgotform').hide();
+					$('.forgotform').hide();
                     $('p#forgottext').show();
                     $('p#forgottext').html('<i class="material-icons left teal-text">check</i>Bitte rufen Sie Ihre E-Mails ab, um ihr Passwort zurückzusetzen.<br>Kontrollieren Sie auch Ihren Spam Ordner!');
                 } else {
-                    $('p#forgottext').show();
+					$('p#forgottext').show();
                     $('p#forgottext').html('<i class="material-icons left red-text">clear</i>' + data.message);
                 }
             });
@@ -192,37 +168,29 @@
             var usr = $('#usr_login').val().replace(/ /g, '');
             
 			//var captcha = $('#captcha_login').val();
+	/* not needed when using jquery plus replaced strings will not be set to original characters in checking for password!		
+	if (pwd.includes('+') || pwd.includes('#') || pwd.includes('&') || pwd.includes('?')) {
+				//plus sign needs to be replaced				
+				pwd = pwd.replace('+','%2B');
+				//escaping #
+				pwd = pwd.replace('#','%23');
+				//escaping &
+				pwd = pwd.replace('&','%26');
+				//escaping ?
+				pwd = pwd.replace('?','%3F');
+
+				} */
 			
-			xhttp.open("POST","?type=login&console=true&login[password]=" + pwd +"&login[mail]=" + usr);
-			xhttp.send();
-			
-			/*
             $.post("", {
                 'type': 'login',
                 'console': '',
                 'login[password]': pwd,
-                'login[mail]': usr,
-                'captcha': captcha
-            }, function (data) {
-				 Materialize.toast("Data sent", 4000);
-				console.log(data);
-                if (data == true) {
-                    location.reload();
-                } else if (data == false) {
-                    Materialize.toast("Email-Addresse oder Passwort falsch", 4000);
-                    $('#pwd_login').val("");
-
-                    $('label[for="pwd_login"]').removeClass("active");
-                } else {
-                    Materialize.toast("Unexpected response: " + data, 4000);
-                    console.info("Unexcpected response: ");
-                    console.info(data);
-                    $('#pwd_login').val("");
-
-                    $('label[for="pwd_login"]').removeClass("active");
-                }
+                'login[mail]': usr
+            }, function (data,status) {
+				evaluateResponse(data,status);
+				 
             });
-				*/
+				
             return false;
         }
 
@@ -262,8 +230,10 @@
             }, function (data) {
 
                 try {
+                    console.log(data);
                     if (data.success) {
-                        location.reload();
+                        //location.reload();
+                        window.location = "templates/registration_accepted.php";
                     }
                     else { // oh no! ;-;
                         var notifications = data['notifications'];
