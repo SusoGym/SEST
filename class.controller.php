@@ -1705,9 +1705,8 @@ class Controller {
         require_once("PHPMailer.php");
         //Email Text
         $content = 'Über diese Emailadresse wurde eine Registrierungsanfrage an das interne Benutzersystem des Heinrich-Suso-Gymnasiums 
-        gesendet. Ihre Registrierung können Sie mit folgendem Link abschließen. <br> 
-        <a href="https://www.suso.schulen.konstanz.de/intern/index.php?type=confirm&tkn='.$token.'">Registrierung abschließen</a>.<br>
-        Wenn Sie den link nicht aus Ihrem Email Programm heraus anklicken können, kopieren Sie bitte diese Zeilen und fügen Sie diese in die 
+        gesendet. Ihre Registrierung können Sie mit folgendem Link abschließen: <a href="https://www.suso.schulen.konstanz.de/intern/index.php?type=confirm&tkn='.$token.'">Registrierung abschließen</a>.<br>
+        Wenn Sie den link nicht aus Ihrem Email Programm heraus öffnen können, kopieren Sie bitte die folgende Zeile und fügen Sie diese in die 
         Adresszeile Ihres Browsers ein: <br><br>
         https://www.suso.schulen.konstanz.de/intern/index.php?type=confirm&tkn='.$token.
         '<br> Dieser Link ist 24h aktiv!<br><br> Sollten Sie diese Registrierung nicht getätigt haben oder diese versehentlich mit Ihrem Email 

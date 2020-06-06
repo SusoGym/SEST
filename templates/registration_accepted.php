@@ -17,7 +17,7 @@
     </tr>
     <tr> 
         <td>
-        Sie erhalten eine vom System versendet Email an die angegebene Email Adresse. 
+        Sie erhalten eine vom System versendete Email an die angegebene Email Adresse. 
         Diese Nachricht enthält einen Aktivierungslink, der <b style="color:#208080">24h Stunden gültig</b> ist. 
         </td>
     </tr>

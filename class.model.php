@@ -284,7 +284,55 @@ class Model {
         
         return new Student($data['id'], $data['klasse'], $data['name'], $data['vorname'], $data['gebdatum'], $data['eid'], $data['eid2']);
     }
-    
+
+    /**
+     * get a students data as JSON 
+     * @param int id
+     * @return JSON
+     */
+    public function getStudentDataJSON($id){
+        $student = $this->getStudentById($id);
+        $eid = $student->getEid();
+        $eid2 = $student->getEid2();
+        //get data if locker is hired
+        $locker = null;
+        $lckrQueryData = self::$connection->selectValues("SELECT nr,location,hiredate FROM lockers WHERE hired = " . $id);
+				if ( !empty($lckrQueryData) ) {
+					$locker = array("id" => $lckrQueryData[0][0], "location" => $lckrQueryData[0][1] , "hiredate" => $lckrQueryData[0][2] );
+                    } 
+        //get data if library books are hired
+        $libraryData = $this->getSkolibData($student->getASVId());
+        $studentData = array("id"=>$id, 
+        "asvid"=>$student->getASVId(),
+        "klasse" => $student->getClass(),
+        "name"=> $student->getFullName(),
+        "bday"=>$student->getBday(),
+        "parent1"=> ($eid != null) ? $this->getParentUserByParentId($eid ) : null ,
+        "parent2"=> ($eid2 != null) ? $this->getParentUserByParentId($eid2 ) : null,
+        "locker" => $locker
+        ) ;
+        
+        return json_encode($studentData);
+    }
+
+    /**
+     * get data from skolib api
+     * @param string ASV Id
+     * @return array
+     */
+    public function getSkolibData($id){
+        //work on this one!!
+        $curlSession = curl_init();
+        curl_setopt($curlSession, CURLOPT_URL, 'YOUR URL');
+        curl_setopt($curlSession, CURLOPT_BINARYTRANSFER, true);
+        curl_setopt($curlSession, CURLOPT_RETURNTRANSFER, true);
+
+        $jsonData = json_decode(curl_exec($curlSession));
+        curl_close($curlSession);
+
+        //check other functions for rest
+    }
+
     /**
      * get all teachers of a class
      * @param string $class

@@ -239,7 +239,8 @@ class Controller extends \Controller {
 					$this->addMenueItem("?type=usrmgt&search=true", "Eltern suchen");
 					$this->addMenueItem("?type=pupilmgt", "Schüler suchen");
 					$this->addMenueItem("?type=handleregister", "Registrierungsanfragen");
-					$this->addMenueItem("?type=leaveofabsence", "Beurlaubungen");
+                    $this->addMenueItem("?type=leaveofabsence", "Beurlaubungen");
+                    $this->addMenueItem("?type=deregister", "Abmeldung");
 					$this->addMenueItem("?type=lockers", "Schließfächer");
 					$this->display("simple_menue");
 					}
@@ -252,7 +253,12 @@ class Controller extends \Controller {
                     $arr = $this->model->getPupils($input['partname'],$absenceManagement);
 					die(json_encode($arr));
                 }
-			//evtl Funktion zum Löschen eines Schülers
+            //Funktion zum Löschen eines Schülers
+            if (isset($input['console']) && isset($input['dereg']) ) {
+                $this->model->deregisterStudent($input['dereg']);
+                $arr = array("status" => "deleted","message" => "Schüler*in gelöscht");
+                die(json_encode($arr) );
+                }
 			$this->backButton = "?type=usrmgt";
 			$this->title = "Schüler suchen";
 			$this->display("pupilmgt");
@@ -343,6 +349,32 @@ class Controller extends \Controller {
                 $this->infoToView['user'] = $usr;
 				$this->infoToView['kids'] = $usr->getChildren();
                 $this->display("usredit");
+                break;
+            //deregister student
+            case "deregister":
+			    //enter  a student absence as leave of absence
+                if(isset($input['console'])) {
+                    if (isset($input['partname'])) {
+                        $arr = $this->model->getPupils($input['partname'],true);
+                        die(json_encode($arr));
+                        }
+                    if (isset($input['getdata'])) {
+                        $pupilData = $this->model->getStudentDataJSON($input['getdata']);
+                        $libraryData = null; //$this->model->getLibraryDataFromSkolib($pupilData['asvId']);
+                        $arr = array(); 
+                        $arr = array("status" => "chosen","studentdata" => $pupilData,"library" => $libraryData);
+                        }
+                    
+
+                    //get all the relevant data 
+                    //get parents 
+
+                    //get library books which need to be handed back
+                        
+                    die(json_encode($arr)); 
+                    }
+                
+                $this->display('deregister');
                 break;
 			//Settings
             case "settings":

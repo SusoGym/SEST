@@ -491,8 +491,18 @@ class Model extends \Model {
 		self::$connection->straightQuery("DELETE FROM eltern where id = $parent");
 		self::$connection->straightQuery("DELETE FROM user where id = $id");
 		return array("name"=>$data[0][1],"vorname"=>$data[0][2]);
-	}
+    }
+    
+    /**
+     * delete student
+     * normally in case of deregistering
+     * @param int id
+     */
+    public function deregisterStudent($id) {
+        self::$connection->straightQuery("DELETE FROM schueler WHERE id = $id");
+        self::$connection->straightQuery("DELETE FROM absenzen WHERE `sid` = $id");
 
+         }
 
 	/**
 	* get rergistration requests
