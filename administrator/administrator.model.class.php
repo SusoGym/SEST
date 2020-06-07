@@ -627,6 +627,8 @@ class Model extends \Model {
 	*/
 	public function returnLocker($locker) {
 		self::$connection->straightQuery('UPDATE lockers SET hired = null, hiredate = null WHERE nr=' . $locker);
-	}
+    }
+    
+    
 }
 ?>

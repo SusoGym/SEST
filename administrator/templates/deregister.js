@@ -41,7 +41,9 @@ function handleServerResponse(data, status)  {
 				Materialize.toast(data['message'],"2000");
 				//clear locker div
 				document.getElementById('lockerdata').innerHTML = "";
-				addDeregisterButton();
+				if (hiredBooks == false) {
+					addDeregisterButton();
+				}			
 				
 			}else {
 				// show the search result list
@@ -157,18 +159,22 @@ document.getElementById('pupildata').innerHTML = content;
 if (null != dta['locker']) {
 	hiredLocker = true;
 	content = '';
-	content += '<a style="color: #ff0000;">Schließfach vergeben: </br>';
-	content += 'Schließfach-Nr: ' + dta['locker']['id'] + ' gemietet: ' + dta['locker']['hiredate'] + '</a>';
+	content += '<br><a style="color: #ff0000;"><b>Schließfach vergeben:</b> </br>';
+	content += '<i class="material-icons black-text">lock</i> Schließfach-Nr: ' + dta['locker']['id'] + ' gemietet: ' + dta['locker']['hiredate'] + '</a>';
 	content += '<br/><button class="btn btn-primary" onClick="returnLocker(' + dta['locker']['id'] + ')" >Schließfach zurückgeben</button>';
 	document.getElementById('lockerdata').innerHTML = content;	
 	}
 //add library info
 if (null != dta['library']) {
 	hiredBooks = true;
+	libDat = $.parseJSON(dta['library']);
 	content = '';
-	content += '<a style="color: #ff0000;">Bücher aus der Schülerbibliothek entliehen: </br>';
-	//data are still missing - needs api with skolib
-	//content += 'Schließfach-Nr: ' + dta['locker']['id'] + ' gemietet: ' + dta['locker']['hiredate'] + '</a>';
+	content += '<ul><a style="color: #ff0000;"><b>Bücher aus der Schülerbibliothek entliehen:</b> </br>';
+	libDat.forEach(function (item, index) {
+		content += '<li ><i class="material-icons black-text">library_books</i>' + item['title'] + ' (' + item['author'] + ') - Barcode: ' 
+		+  item['barcode'] + ' [ fällig: ' + item['due']['duedate'] + ' ]<br/></li>';
+	  });
+	content += '</ul><b>Abmeldung erst möglich nach Rückgabe der Bücher!';
 	document.getElementById('librarydata').innerHTML = content;	
 	}
 //add a button to deregister the student

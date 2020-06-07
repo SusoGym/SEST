@@ -240,7 +240,7 @@ class Controller extends \Controller {
 					$this->addMenueItem("?type=pupilmgt", "Schüler suchen");
 					$this->addMenueItem("?type=handleregister", "Registrierungsanfragen");
                     $this->addMenueItem("?type=leaveofabsence", "Beurlaubungen");
-                    $this->addMenueItem("?type=deregister", "Abmeldung");
+                    $this->addMenueItem("?type=deregister", "Schülerabmeldung");
 					$this->addMenueItem("?type=lockers", "Schließfächer");
 					$this->display("simple_menue");
 					}
@@ -360,9 +360,8 @@ class Controller extends \Controller {
                         }
                     if (isset($input['getdata'])) {
                         $pupilData = $this->model->getStudentDataJSON($input['getdata']);
-                        $libraryData = null; //$this->model->getLibraryDataFromSkolib($pupilData['asvId']);
                         $arr = array(); 
-                        $arr = array("status" => "chosen","studentdata" => $pupilData,"library" => $libraryData);
+                        $arr = array("status" => "chosen","studentdata" => $pupilData);
                         }
                     
 

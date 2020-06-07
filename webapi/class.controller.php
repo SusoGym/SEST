@@ -138,7 +138,7 @@ private function checkUsersAndAct(){
     }
     fclose($fh);
     //trigger email report
-    $this->sendWeeklyUserReport($users,$unconfirmedUsers,"an@email.com");
+    $this->sendWeeklyUserReport($users,$unconfirmedUsers,"an@email.de");
 
     return "unused users detected and deleted. See log-file.";
 }

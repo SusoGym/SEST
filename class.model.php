@@ -309,29 +309,50 @@ class Model {
         "bday"=>$student->getBday(),
         "parent1"=> ($eid != null) ? $this->getParentUserByParentId($eid ) : null ,
         "parent2"=> ($eid2 != null) ? $this->getParentUserByParentId($eid2 ) : null,
-        "locker" => $locker
+        "locker" => $locker,
+        "library" => $libraryData
         ) ;
         
         return json_encode($studentData);
     }
 
     /**
-     * get data from skolib api
-     * @param string ASV Id
-     * @return array
+     * get library data of a student
+     * used when deregistering a student to ensure that no borrowed books are due
+     * uses the skolib api
+     * connecting with curl
+     * @param string asvid
+     * @return json string
      */
-    public function getSkolibData($id){
-        //work on this one!!
-        $curlSession = curl_init();
-        curl_setopt($curlSession, CURLOPT_URL, 'YOUR URL');
-        curl_setopt($curlSession, CURLOPT_BINARYTRANSFER, true);
-        curl_setopt($curlSession, CURLOPT_RETURNTRANSFER, true);
+    public function getSkolibData($asvid) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://skolib.konstanz.info/skolib/api/");
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_ENCODING, 'identity');
+        curl_setopt($ch, CURLOPT_POST, 1); // set POST method
+        //token is hard coded
+        curl_setopt($ch, CURLOPT_POSTFIELDS,'tkn=234jhgkjaghf-asdFouerjkor78zh3kif&type=hirestatus&c='.$asvid);
+        $result = utf8_encode(curl_exec($ch));
+                if (curl_errno($ch)) {
+                    throw new Exception(curl_error($ch));
+                }
+                
+                if ($result == false) {
+                    throw new Exception("Response was empty!");
+                }
+        curl_close($ch);
 
-        $jsonData = json_decode(curl_exec($curlSession));
-        curl_close($curlSession);
-
-        //check other functions for rest
-    }
+        
+        //remove strange symbols at the beginning and keep it a json string  -- UTF-8 BOM (should not be sent by the skolib API!!)
+        if ( strpos($result,"[") == true ) {
+        $jsonString = "[" . explode("[",$result)[1] ;
+        } else {
+            $jsonString = null;
+        }
+        return $jsonString;
+        
+        }
 
     /**
      * get all teachers of a class
