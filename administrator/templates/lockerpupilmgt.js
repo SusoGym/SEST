@@ -14,6 +14,7 @@ var studentList = []; // contains all students being shown (either absent or exc
 var classList = [];
 var isSingle = false;
 var singleLessonEntry = null;
+var actionData = {};
 
 /*
 * handle the Server response
@@ -21,7 +22,7 @@ var singleLessonEntry = null;
 */
 function handleServerResponse(data, status) {
 	content = "";
-    console.log(data);
+    //console.log(data);
     data = $.parseJSON(data);
 	if (status != "success") {
 					Materialize.toast("Interner Server Fehler", "2000");
@@ -29,18 +30,22 @@ function handleServerResponse(data, status) {
 
 	
 	if (data['status'] == "hired"){
-			Materialize.toast(data['message'],"2000");
-			location.reload();
+            Materialize.toast(data['message'],"2000");
+            $('#confirm_modal').modal('close'); 
+            actionData = {};
+           	location.reload(); //a bit rough
 		
     } else if ((data['status'] == "returned")) {
         Materialize.toast(data['message'], "2000");
-        location.reload();
+        $('#confirm_modal').modal('close'); 
+        actionData = {}; 
+        location.reload(); //a bit rough
 
     }else {
 			// enter the search request result into an array to keep it after further requests
 			searchList = [];
 			searchList = data;
-			console.log(searchList);
+			
 			//console.log(searchList);
 			activeElement = null;
 			$('#pupils').html(createResultList(searchList));
@@ -104,17 +109,39 @@ function createResultList(dta) {
  * @param {any} id
  */
 function bookLocker(id) {
-    $.post("", {
-        'type': 'lockers',
-        'console': '',
-        'hire': '',
-        'lckr': lockerToHire,
-		'stdnt': id
-    }, function (data, status) {
-        handleServerResponse(data, status);
-    });
- 
+    actionData ={"action":"hire","locker":lockerToHire,"student":id}
+    openConfirmModal(actionData);
+}
 
+/**
+ * perform the booking action
+ * 
+ */
+function confirmAction(){
+    if(actionData['action'] == "hire")
+    {
+        //booking a locker
+        $.post("", {
+            'type': 'lockers',
+            'console': '',
+            'hire': '',
+            'lckr': actionData['locker'],
+            'stdnt': actionData['student']['id']
+        }, function (data, status) {
+            handleServerResponse(data, status);
+        });
+    } else if(actionData['action'] == "return")
+    {
+        //returning a locker
+        $.post("", {
+            'type': 'lockers',
+            'console': '',
+            'return': '',
+            'lckr': actionData['locker']
+        }, function (data, status) {
+            handleServerResponse(data, status);
+        });
+    }   
 
 }
 
@@ -123,13 +150,34 @@ function bookLocker(id) {
  * @param {any} id
  */
 function unhireLocker(id) {
-    $.post("", {
-        'type': 'lockers',
-        'console': '',
-        'return': '',
-        'lckr': id
-    }, function (data, status) {
-        handleServerResponse(data, status);
-    });
+    actionData ={"action":"return","locker":id}
+    openConfirmModal(actionData);
 }
 
+/**
+ * confirm any action in a modal window
+ * @param array
+ */
+function openConfirmModal(mydata) {
+    //open modal
+    $('#confirm_modal').modal();
+    $('#confirm_modal').modal('open');
+    if (mydata['action'] == "hire") {
+        activeStudent = searchList.filter(item => item.id == mydata['student'])
+        currentStudent = activeStudent[0]['vorname'] + ' '  +activeStudent[0]['name'] + ' (' + activeStudent[0]['klasse']+ ')';
+        $('#confirm_header').html("<h3>Ausgabe eines Schließfachs</h3>");
+        $('#confirm_content').html("<h5>Schließfach " + mydata['locker'] + " an " + currentStudent + " ausgeben?</h5>") ; 
+        actionData = {"action":"hire","locker":mydata['locker'],"student":activeStudent[0]}; 
+    } else if (mydata['action'] == "return") {
+        $('#confirm_header').html("<h3>Rückgabe eines Schließfachs</h3>");
+        $('#confirm_content').html("<h5>Schließfach " + mydata['locker'] + " zurückgeben?</h5>") ;
+        actionData = {"action":"return","locker":mydata['locker']}; 
+    }
+}
+
+/**
+ * abort any action
+ */
+function abortAction(){
+    $('#confirm_modal').modal('close');  
+}

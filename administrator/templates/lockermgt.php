@@ -28,9 +28,27 @@
 </div>
 
 
+<!-- modal window to confirm any action -->
+<div id="confirm_modal" class="modal" style = "display: none;">
+	<div class="modal-header" id="confirm_header">Überschrift</div>
+	<div class="modal-content">
+        
+		<div id="confirm_content" class="col s12"> 
+			Daten zur Abwesenheit
+		</div>
+		<div class="modal-footer">
+		<a onclick="confirmAction();" class="modal-action waves-effect waves-green btn-flat right teal-text"
+           style="margin-bottom: 20px;"><i class="material-icons right">send</i>Bestätigen</a>
+		<a onclick="abortAction();" class="modal-action waves-effect waves-green btn-flat right teal-text"
+           style="margin-bottom: 20px;"><i class="material-icons right">close</i>Abbrechen</a>
+        
+		</div>
+    </div>
+</div>
+
 <script type="application/javascript">
 lockers = <?php echo $lockersJSON; ?> ;
-console.log(lockers);
+//console.log(lockers);
 </script>
 </body>
 </html>

@@ -83,6 +83,8 @@ document.getElementById("lockerList").innerHTML = content;
 * open view for hired out lockers
 */
 function openHiredOutView() {
+	$('#pupils').html('');
+	$('#pupil-input').value = null;
 //make all other fields invisible
 document.getElementById("student").style.visibility='hidden';
 document.getElementById("lockers").style.visibility='visible';
