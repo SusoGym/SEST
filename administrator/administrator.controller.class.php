@@ -253,6 +253,7 @@ class Controller extends \Controller {
                     $arr = $this->model->getPupils($input['partname'],$absenceManagement);
 					die(json_encode($arr));
                 }
+            
             //Funktion zum Löschen eines Schülers
             if (isset($input['console']) && isset($input['dereg']) ) {
                 $this->model->deregisterStudent($input['dereg']);
@@ -261,7 +262,7 @@ class Controller extends \Controller {
                 }
 			$this->backButton = "?type=usrmgt";
 			$this->title = "Schüler suchen";
-			$this->display("pupilmgt");
+			$this->display('deregister'); //"pupilmgt"
 			break;
 			case "handleregister":
 			if(isset($input['console'])) {
@@ -352,8 +353,7 @@ class Controller extends \Controller {
                 break;
             //deregister student
             case "deregister":
-			    //enter  a student absence as leave of absence
-                if(isset($input['console'])) {
+			    if(isset($input['console'])) {
                     if (isset($input['partname'])) {
                         $arr = $this->model->getPupils($input['partname'],true);
                         die(json_encode($arr));
@@ -372,7 +372,7 @@ class Controller extends \Controller {
                         
                     die(json_encode($arr)); 
                     }
-                
+                $this->title = "Schülerabmeldung";
                 $this->display('deregister');
                 break;
 			//Settings

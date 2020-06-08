@@ -9,7 +9,7 @@
 	<div class="col s12 m6 l6">
 		<div class="card">
 			<div class="card-content">
-				<span class="card-title"><?php echo "Schülerabmeldung" ?></span>
+				<span class="card-title"><?php echo $data['title'] ?></span>
 				 <br>
 					<div class="input-field ">
 					<i class="material-icons prefix">search</i>

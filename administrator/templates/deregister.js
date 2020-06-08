@@ -140,7 +140,7 @@ hiredBooks = false;
 document.getElementById("infocard").style.visibility = "visible";
 //display student basic info
 content = '';
-header = 'Abmeldung von ' + dta['name'] ;
+header = 'Datenübersicht ' + dta['name'] ;
 document.getElementById('title').innerHTML = header;
 content += 'Klasse: ' + dta['klasse'] + '<br>';
 content += 'ASV-Id: ' + dta['asvid'] + '<br>';
