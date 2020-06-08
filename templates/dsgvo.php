@@ -2,7 +2,7 @@
 $user = $this->getDataForView()['user'];
 $dsgvoText = "Wenn Sie diese Website benutzen, werden verschiedene <b>personenbezogene Daten</b> erhoben. 
 	Personenbezogene Daten sind Daten, mit denen Sie persönlich identifiziert werden können. 
-	<br/>Die vorliegende <b>Datenschutzerklärung</b> erläutert, welche Daten wir erheben und wofür wir sie nutzen. 
+	<br/>Die vorliegende aktualisierte <b>Datenschutzerklärung</b> erläutert, welche Daten wir erheben und wofür wir sie nutzen. 
 	Sie erläutert auch, wie und zu welchem Zweck das geschieht.
 	Wir weisen darauf hin, dass die Datenübertragung im Internet (z.B. bei der Kommunikation per E-Mail) Sicherheitslücken aufweisen kann. 
 	Ein lückenloser Schutz der Daten vor dem Zugriff durch Dritte ist nicht möglich.<br/>
@@ -12,13 +12,15 @@ if ($user instanceof Guardian) {
 	$dsgvoText .= "<ul>
 	<li>Ihr Name wird je nach Anwendungsfunktion anderen Nutzern angezeigt. </li>
 	<li>Ihre Emailadresse wird für interne Prozesse verwendet und Sie erhalten je nach Einstellung Emails aus dem System.</li> 
-	<li>Name, Geburtstag und Klasse Ihrer Kinder werden gespeichert und innerhalb des Systems verwendet</li>
-	<li>Abwesenheitsdaten Ihrer Kinder werden gespeichert</li>
+	<li>Name, Geburtstag und Klasse Ihrer Kinder werden gespeichert und innerhalb des Systems verwendet.</li>
+	<li>Abwesenheitsdaten Ihrer Kinder werden gespeichert.</li>
+	<li>Daten über gemietet Schließfächer (Nr und Ort, sowie Zeitpunkt der Miete) werden gespeichert.</li>
+	<li>Die Software greift auf Daten des Ausleihsystems der Schülerbibliothek zurück und ermittelt ausgeliehene Bücher und das fällige Rückgabedatum.</li>
 	</ul>
 	<b>Keine der verarbeiteten Daten werden jemals außerhalb dieser Anwendung genutzt oder an Dritte weitergegeben.</b>
 	<br/>
 	Unter Umständen werden vom Server temporäre lokale Dateien auf Ihrem Gerät gespeichert, die zu einer besseren Nutzung
-	führen sollen. (sogenannte Cookies)" ;
+	führen sollen (sogenannte Cookies)." ;
 } elseif ($user instanceof Teacher) {
 	$dsgvoText .= "<ul>
 	<li>Ihr Name wird je nach Anwendungsfunktion anderen Nutzern angezeigt. </li>
@@ -33,6 +35,8 @@ if ($user instanceof Guardian) {
 	<li>Ihr Name wird je nach Anwendungsfunktion anderen Nutzern angezeigt. </li>
 	<li>Name, Geburtstag und Klasse werden gespeichert und innerhalb des Systems verwendet</li>
 	<li>Abwesenheitsdaten werden gespeichert und weiterverarbeitet</li>
+	<li>Daten über gemietet Schließfächer (Nr und Ort, sowie Zeitpunkt der Miete) werden gespeichert.</li>
+	<li>Die Software greift auf Daten des Ausleihsystems der Schülerbibliothek zurück und ermittelt ausgeliehene Bücher und das fällige Rückgabedatum.</li>
 	</ul>
 	<b>Keine der verarbeiteten Daten werden jemals außerhalb dieser Anwendung genutzt oder an Dritte weitergegeben.</b>
 	<br/>
