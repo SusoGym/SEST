@@ -52,6 +52,7 @@ if (isset($input['type']) ) {
     switch ($input['type']) {
         case "event":
 			if(isset($input['eventdata'])) {
+            $this->model->writeLog('api_access.log',' events updated.');
 			$return = $this->updateEvents($input['eventdata']);
 			} else {
 			$return = array("message" => "no data");
@@ -60,6 +61,7 @@ if (isset($input['type']) ) {
         case "usrchk":
             //check for all invalid users, i.e. user without children or user without verification (not yet in use)
             $msg = $this->checkUsersAndAct();
+            $this->model->writeLog('api_access.log',' check for inactive users.');
             $return = array("message" => $msg);
             break;
         default:
@@ -109,10 +111,8 @@ private function checkUsersAndAct(){
     $users = $this->model->getUsersWithoutKids();
     $unconfirmedUsers = $this->model->getUsersWithoutConfirmedRegistration();
     //write actions to log
-    $fh=fopen("usrchk.log",'a');
-    $checkingTime = date("d.m.Y H:i:s");
-    fputs($fh,"******checking for users at ".$checkingTime." *******\r\n");
-    fputs($fh,"** ".count($users)." without registered kids!**\r\n");
+    $this->model->writeLog('usr_check.log',' checking for inactive users.');
+    $this->model->writeLog('usr_check.log',count($users)." without registered kids!.");
     $i = 1;
     foreach ($users as $usr){
         $addon = "";
@@ -121,24 +121,22 @@ private function checkUsersAndAct(){
             $this->model->deleteUsers($usr['id'],$usr['eid']);
             }
     $line = $i." - User with ID ".$usr['id']."[eid = ".$usr['eid']."]: ".$usr['name'].", ".$usr['vorname'].
-    " (".$usr['mail'].") - registriert am: ".$usr['registered'].$addon."\r\n"; 
-    fputs($fh,$line);
+    " (".$usr['mail'].") - registriert am: ".$usr['registered'].$addon; 
+    $this->model->writeLog('usr_check.log',$line);
     $i++;
     
     
     }
-    fputs($fh,"******checking for users at ".$checkingTime." *******\r\n");
-    fputs($fh,"** ".count($unconfirmedUsers)." without complete registration -- ALL USERS WILL BE REMOVED!**\r\n");
+    $this->model->writeLog('usr_check.log', count($unconfirmedUsers)." without complete registration");
     $i = 1;
     foreach ($unconfirmedUsers as $usr){
-    $line = $i." - User with ID ".$usr['id']."[eid = ".$usr['eid']."]: ".$usr['name'].", ".$usr['vorname']." (".$usr['mail'].") - registriert am: ".$usr['registered']."\r\n"; 
-    fputs($fh,$line);
+    $line = $i." - User with ID ".$usr['id']."[eid = ".$usr['eid']."]: ".$usr['name'].", ".$usr['vorname']." (".$usr['mail'].") - registriert am: ".$usr['registered']; 
+    $this->model->writeLog('usr_check.log',$line);
     $i++;
     $this->model->deleteUsers($usr['id'],$usr['eid']);
     }
-    fclose($fh);
     //trigger email report
-    $this->sendWeeklyUserReport($users,$unconfirmedUsers,"an@email.de");
+    $this->sendWeeklyUserReport($users,$unconfirmedUsers,"phartleitner@hotmail.de");
 
     return "unused users detected and deleted. See log-file.";
 }

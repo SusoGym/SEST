@@ -3113,7 +3113,19 @@ class Model {
 			return array($user->getId(),$user->getEmail());
 		}
 	return false;
-	}
+    }
+    
+    /**
+     * writing logfiles for all kinds of purposes
+     * @param string file
+     * @param string line 
+     */
+    public function writeLog($file,$line){
+        $fh = fopen($file,'a');
+        $write = '[ '.date('Y-m-d H:i:s')." ] *** [action: ".$line."]\r\n";
+        fputs($fh,$write);
+        fclose($fh);
+    }
 }
 
 

@@ -69,7 +69,7 @@ parent::__construct();
 		foreach ($data as $d) {
 				$then = new DateTime($d[3]);
 				$interval = $then->diff($now)->format("%a");
-				if($interval > 60 ) {//delete those where registration time is more than 60 days gone
+				if($interval > 90 ) {//delete those where registration time is more than 90 days gone
 						$del = true;
 					} else {
 						$del = false;
