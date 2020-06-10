@@ -279,7 +279,9 @@ class Controller extends \Controller {
 						$body = mb_convert_encoding("Sie haben am ".$mailData['date']." einen Registrierungscode für ".
 						$studentToRegister->getFullName()." (".$studentToRegister->getClass().") angefordert. 
 						<br>Registrieren Sie Ihr Kind mit dem Code ". $studentToRegister->getASVId().
-						'<br><br>Diese Nachricht wurde automatisch generiert!','UTF-8'); 
+						'<br/><br/>
+                        <b>Eltern kommender Sextaner beachten bitte, dass die Kinder erst ab September zugeordnet werden können. 
+                        Der Registrierungscode ist erst ab diesem Zeitpunkt gültig.</b><br><br>Diese Nachricht wurde automatisch generiert!','UTF-8'); 
 						\Debug::writeDebugLog(__method__,"Mail an: ".$mailData['email']." mit Nachricht\n".$body);
 						if ($this->sendKeyRequestMail($mailData['email'],$body) ) {
 						//sending successful

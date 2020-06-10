@@ -1352,11 +1352,12 @@ class Controller {
      * @return string template
      */
     private function confirmRegistration($token){
-        $registrationSuccess = $this->model->confirmRegistration($token);
-        if (!$registrationSuccess){
+        $userEmail = $this->model->confirmRegistration($token);
+        if ($userEmail == null){
             //confirmation of registration fails
             return "registration_failure";
         } else {
+            $this->completeRegistration($userEmail);
             return "registration_success";
         }
     }
@@ -1462,7 +1463,7 @@ class Controller {
 	$body = mb_convert_encoding("Sie haben am ".$now." einen Registrierungsschlüssel für ".$name." (".$klasse.
 	") geboren am: ".$bday." unter dieser Emailadresse angefordert. Ihre Anfrage wird bearbeitet. Bitte haben Sie etwas Geduld bis Sie den Schlüssel erhalten.
 	 <br><br>Sollten Sie diese Anforderung nicht getätigt haben und die Vermutung haben, dass jemand Ihre Email Adresse benutzt hat, 
-	 kontaktieren Sie bitte die Direktion unter direktion@suso.konstanz.de.",'UTF-8'); 
+     kontaktieren Sie bitte die Direktion unter direktion@suso.konstanz.de.",'UTF-8'); 
 	
 	$adminbody = mb_convert_encoding("Registrierungskey-Anfrage durch ".$email." für Schüler: ".$name." (".$klasse.
 	"), geboren am: ".$bday,'UTF-8');
@@ -1720,7 +1721,7 @@ class Controller {
 		$phpmail->CharSet = "UTF-8";
 		$phpmail->isHTML();
 		$phpmail->AddAddress($email);
-		$phpmail->Subject = date('d.m.Y - H:i:s') . "Suso-Intern Ihre Benutzerregistrierung";
+		$phpmail->Subject = date('d.m.Y - H:i:s') . " Suso-Intern Ihre Registrierungsanfrage";
 		$phpmail->Body = $content;
 			
 		$send = true;
@@ -1732,8 +1733,40 @@ class Controller {
 		
 		return $send;
     }
-	
-    
+
+
+    /**
+     * complete registration after user has confirmed registration
+     * and send a amil with success info
+     */
+	private function completeRegistration($email) {
+        require_once("PHPMailer.php");
+        //Email Text
+        $content = 'Ihre Registrierung für die Suso-Intern-Anwendung ist abgeschlossen!<br/><br/>
+        Zur Nutzung der Funktionalitäten müssen Sie Ihre Kinder mittels der erhaltenen Registrierungscodes Ihrem Konto zuweisen.<br/>
+        Diesen Code haben Sie mit der Anmeldebestätigung erhalten. <br/>Bitte beachten Sie auch die Nutzeranleitung auf der Website des Heinrich-Suso-Gymnasiums. 
+        <br/><b>Eltern neuer Sextaner beachten bitte, dass die Kinder erst ab September in das System integriert werden.</b><br/>
+        Wenn Sie keinen Registrierungscode erhalten haben, können Sie diesen manuell im System anfordern. Sie erhalten dann eine Email mit dem erforderlichen Code. Dieser Vorgang wird manuell bearbeitet und kann einige Tage dauern!';
+                
+        //sending emails
+        $phpmail = new PHPMailer();
+        $phpmail->setFrom("noreply@suso.konstanz.de", "Suso-Intern");
+		$phpmail->CharSet = "UTF-8";
+		$phpmail->isHTML();
+		$phpmail->AddAddress($email);
+		$phpmail->Subject = date('d.m.Y - H:i:s') . " Suso-Intern Bestätigung Ihrer Benutzerregistrierung";
+		$phpmail->Body = $content;
+			
+		$send = true;
+		
+		//Senden
+		if (!$phpmail->Send()) {
+			$send = false;
+		} 
+		
+		return $send;
+    }
+
     /**
      *
      *triggering email via phpmailer

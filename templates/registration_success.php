@@ -12,7 +12,7 @@
     <tr>
         <td align="center">
         <br><br>
-        <b style="color:#208080">Ihre Registrierung ist abgeschlossen!</b>
+        <b style="color:#208080">Ihre Registrierung ist abgeschlossen! Bitte kontrollieren Sie Ihr Emailpostfach für weitere Informationen.</b>
         </td>
     </tr>
     <tr> 
