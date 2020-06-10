@@ -181,7 +181,7 @@ class Controller {
 				$this->infoToView['dsgvo'] = self::$user->getDsgvo(self::$user);
 			}
 		}
-		if (self::$user != null || $this->input['type'] == "app" || $this->input['type'] == "public" || $this->input['type'] == "login" || $this->input['type'] == "register" || isset($_SESSION['timeout']) || isset($_SESSION['logout'])  || $this->input['type'] == "confirm" ) // those cases work without login
+		if (self::$user != null || $this->input['type'] == "app" || $this->input['type'] == "public" || $this->input['type'] == "login" || $this->input['type'] == "register" || $this->input['type'] == "pwdreset" || isset($_SESSION['timeout']) || isset($_SESSION['logout'])  || $this->input['type'] == "confirm" ) // those cases work without login
 		{
         switch ($this->input['type']) {
             case "public":
@@ -243,7 +243,7 @@ class Controller {
                 $template = $this->handleCoverLessons();
                 break;
             case "pwdreset":
-				$template = $this->handlePwdReset();
+                $template = $this->handlePwdReset();
                 break;
             case "news":
 				if (self::$user == null)
@@ -699,7 +699,7 @@ class Controller {
                         $success = false;
                         $code = 404;
                     } else {
-                        $resp = $this->model->generatePasswordReset($email);
+                        $resp = $this->model->generatePasswordReset($email); 
                         if (!$resp['success']) {
                             $message = $resp['message'];
                             $success = false;
