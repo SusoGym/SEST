@@ -325,14 +325,16 @@ class Model {
      * @return json string
      */
     public function getSkolibData($asvid) {
+        $apiData = self::$connection->selectValues('SELECT api_url,token,api_action FROM api_token WHERE customer = "skolib_library_check"'); 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://skolib.konstanz.info/skolib/api/");
+        curl_setopt($ch, CURLOPT_URL, $apiData[0][0]);
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_ENCODING, 'identity');
         curl_setopt($ch, CURLOPT_POST, 1); // set POST method
         //token is hard coded
-        curl_setopt($ch, CURLOPT_POSTFIELDS,'tkn=234jhgkjaghf-asdFouerjkor78zh3kif&type=hirestatus&c='.$asvid);
+        curl_setopt($ch, CURLOPT_POSTFIELDS,'tkn='.$apiData[0][1].'&type='.$apiData[0][2].'&c='.$asvid);
+        
         $result = utf8_encode(curl_exec($ch));
                 if (curl_errno($ch)) {
                     throw new Exception(curl_error($ch));
@@ -1012,16 +1014,17 @@ class Model {
     /**
      * checking the token for confirmation of registration
      * @param string token
-     * @return boolean
+     * @return string or null
      */
     public function confirmRegistration($token) {
         //check for token
-        $data = self::$connection->selectValues('SELECT id,registered FROM user WHERE confirm_token = "'.$token.'"');
+        $data = self::$connection->selectValues('SELECT id,registered,email FROM user WHERE confirm_token = "'.$token.'"');
         if (empty($data) ) {
           return false;  
         } else {
             //token seems to be valid
             $userId = $data[0][0];
+            $email = $data[0][2];
             //check for timeout
             $then = new DateTime($data[0][1]);
             $now = new DateTime(date("Y-m-d H:i:s"));
@@ -1031,12 +1034,12 @@ class Model {
                 //now delete the registered user from the database
                 self::$connection->straightQuery("DELETE FROM user WHERE id = $userId");
                 self::$connection->straightQuery("DELETE FROM eltern WHERE userid = $userId");
-                return false;
+                return null;
             } else {
                 //confirmation is correct
                 //now delete token 
                 self::$connection->straightQuery("UPDATE user set confirm_token = null WHERE id = $userId");
-                return true;
+                return $email;
                 }
          }
         
