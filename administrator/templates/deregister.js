@@ -11,6 +11,11 @@ var activeRequest = null;
 var searchList = [];
 var hiredLocker = null;
 var hiredBooks = null;
+var studentData = [];
+
+//variables for locker return confirmation
+var studentToDeleteId = null ;
+var lockerToReturnId = null;
 
 
 function handleServerResponse(data, status)  {
@@ -41,6 +46,9 @@ function handleServerResponse(data, status)  {
 				Materialize.toast(data['message'],"2000");
 				//clear locker div
 				document.getElementById('lockerdata').innerHTML = "";
+				var studentToDeleteId = null ;
+				var lockerToReturnId = null;
+				abortReturnLocker();	
 				if (hiredBooks == false) {
 					addDeregisterButton();
 				}			
@@ -132,6 +140,7 @@ function triggerView(id){
  * @param array data
  */
 function showPupilData(dta) {
+
 //clear all	
 resetInfoDiv();
 hiredLocker = false;
@@ -160,8 +169,8 @@ if (null != dta['locker']) {
 	hiredLocker = true;
 	content = '';
 	content += '<br><a style="color: #ff0000;"><b>Schließfach vergeben:</b> </br>';
-	content += '<i class="material-icons black-text">lock</i> Schließfach-Nr: ' + dta['locker']['id'] + ' gemietet: ' + dta['locker']['hiredate'] + '</a>';
-	content += '<br/><button class="btn btn-primary" onClick="returnLocker(' + dta['locker']['id'] + ')" >Schließfach zurückgeben</button>';
+	content += '<i class="material-icons black-text">lock</i> Schließfach-Nr: ' + dta['locker']['nr'] + ' gemietet: ' + dta['locker']['hiredate'] + '</a>';
+	content += '<br/><button class="btn btn-primary" onClick="confirmReturnLocker()" >Schließfach zurückgeben</button>';
 	document.getElementById('lockerdata').innerHTML = content;	
 	}
 //add library info
@@ -185,15 +194,27 @@ if (hiredLocker === false && hiredBooks === false) {
 }
 
 
+
+/**
+ * confirm returning of locker
+ */
+function confirmReturnLocker() {
+	studentToDeleteId = studentData['id'] ;
+    lockerToReturnId = studentData['locker']['id'];
+    
+    $('#returnLocker').modal();
+	$('#returnLocker').modal('open');
+    $('#returnLockerText').html('<h5>Schließfach wirklich zurückgeben?</h5>');
+}
+
 /**
  * trigger return of locker
- * @param int id 
  */
-function returnLocker(id) {
+function returnLocker() {
 	$.post("", {
 		'type': 'lockers',
 		'return': '',
-		'lckr': id
+		'lckr': lockerToReturnId 
 	}, function (data,status) {
 		handleServerResponse(data, status);
 	});
@@ -234,6 +255,14 @@ function deregisterStudent() {
 function abortDeregistration() {
 	$('#deregistration').modal();
 	$('#deregistration').modal('close');	
+}
+
+/**
+ * abort locker returning process
+ */
+function abortReturnLocker() {
+	$('#returnLocker').modal();
+	$('#returnLocker').modal('close');	
 }
 
 

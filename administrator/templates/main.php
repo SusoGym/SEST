@@ -5,12 +5,37 @@ $absentees = $data['missingStudents'];
 $missingExcuses = $data['missingExcuses'];
 $studentList=$data['studentList'];
 $admin = $data['isadmin'];
+$coverLessons = $data['VP_coverLessons'];
 ?>
 <div class="row">
-	<div class="col s12 m12 12">
+	<div class="col s6 m6 l6">
 		<div class="card">
 			<div class="card-content">
 				<span class="card-title"><?php echo \View::getInstance()->getTitle(); ?></span>
+				<div id = "action_required" >
+					<div>
+					<!--registration requests -->
+					<?php if ($data['reg_requests'] != null) {
+							echo '<a class="red-text" href="?type=handleregister">Neue Registrierungsanfragen ('.count($data['reg_requests']).')</a>';
+						}
+					?>
+					</div>
+					<div>
+						<?php if ($data['student_action_req'] != null) {
+								echo '<a class="red-text" href="?type=studentaction">Zu löschende Schüler*innen ('.count($data['student_action_req']).')</a>';
+							}
+						?>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+	<!-- should there be a link to a new display or rather a modal showing the coverLessons? -->
+	<div class="col s6 m6 l6">
+		<div class="card">
+			<div class="card-content">
+				<span class="card-title">Vertretungen: <?php echo count($coverLessons); ?></span>
 			</div>
 		</div>
 	</div>

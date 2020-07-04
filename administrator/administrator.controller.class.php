@@ -377,6 +377,20 @@ class Controller extends \Controller {
                 $this->title = "Schülerabmeldung";
                 $this->display('deregister');
                 break;
+            //display students that need attention because they cannot be deleted, but should be (lockers or books hired)
+            case "studentaction":
+                if (isset($input['console'])) {
+                    //do the javascript stuff here
+                    if (isset($input['lckr'])) {
+                        //return a hired locker
+                        
+                    }
+                    die();
+                    }
+                $this->title = "zu löschende Schüler";
+                $this->infoToView["studentData"] = $this->model->getDataOfAttentionRequiringStudents();
+                $this->display('studentaction');
+                break;
 			//Settings
             case "settings":
                 $this->title = "Einstellungen";
@@ -752,7 +766,13 @@ class Controller extends \Controller {
 				//Landing Page 
                 $this->title = "Startseite";
                 unset($_SESSION['file']);
-				//get startpage data
+                //get startpage data
+                //get all actions that require attention
+                //registration requests
+                $this->infoToView['reg_requests'] = $this->model->getRegistrationRequests();
+                //students that should be deleted but still have a locker or books from the library
+                $this->infoToView['student_action_req'] = $this->model->getAttentionRequiringStudents();
+                
 				//missing students for the day
 				$this->infoToView['missingStudents'] =  json_encode($this->model->getAbsentStudents());
 				

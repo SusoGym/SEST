@@ -296,9 +296,9 @@ class Model {
         $eid2 = $student->getEid2();
         //get data if locker is hired
         $locker = null;
-        $lckrQueryData = self::$connection->selectValues("SELECT nr,location,hiredate FROM lockers WHERE hired = " . $id);
+        $lckrQueryData = self::$connection->selectValues("SELECT id,nr,location,hiredate FROM lockers WHERE hired = " . $id);
 				if ( !empty($lckrQueryData) ) {
-					$locker = array("id" => $lckrQueryData[0][0], "location" => $lckrQueryData[0][1] , "hiredate" => $lckrQueryData[0][2] );
+					$locker = array("id" => $lckrQueryData[0][0],"nr" => $lckrQueryData[0][1], "location" => $lckrQueryData[0][2] , "hiredate" => $lckrQueryData[0][3] );
                     } 
         //get data if library books are hired
         $libraryData = $this->getSkolibData($student->getASVId());
@@ -1218,7 +1218,7 @@ class Model {
      * @return Array(Terminobjekt)
      */
     public function getEvents($isTeacher = null) {
-        isset($isTeacher) ? $query = "SELECT typ,start,ende,staff FROM termine ORDER BY start" : $query = "SELECT typ,start,ende,staff FROM termine WHERE staff=0 ORDER BY start";
+        isset($isTeacher) ? $query = "SELECT typ,start,ende,staff,tNr,created FROM termine ORDER BY start" : $query = "SELECT typ,start,ende,staff,tNr,created FROM termine WHERE staff=0 ORDER BY start";
         $data = self::$connection->selectValues($query);
         foreach ($data as $d) {
             $termin = new Termin();
@@ -1238,7 +1238,7 @@ class Model {
      * @return Array(Terminobjekte)
      */
     public function getNextDates($staff) {
-        $staff ? $query = "SELECT typ,start,ende,staff FROM termine ORDER BY start" : $query = "SELECT typ,start,ende,staff FROM termine WHERE staff=0 ORDER BY start";
+        $staff ? $query = "SELECT typ,start,ende,staff,tNr,created FROM termine ORDER BY start" : $query = "SELECT typ,start,ende,staff,tNr,created FROM termine WHERE staff=0 ORDER BY start";
         $data = self::$connection->selectValues($query);
         $x = 0;
         foreach ($data as $d) {

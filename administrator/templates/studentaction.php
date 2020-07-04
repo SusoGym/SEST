@@ -1,26 +1,39 @@
 <?php namespace administrator;
     include("header.php");
     $data = \View::getInstance()->getDataForView();
-	//$studentList = $data['studentList'];
+	$studentData = $data['studentData'];
 ?>
 
 
 	<div class="row">
-	<div class="col s12 m6 l6">
+	<div class="col s12 m12 l12">
 		<div class="card">
 			<div class="card-content">
 				<span class="card-title"><?php echo $data['title'] ?></span>
-				 <br>
-					<div class="input-field ">
-					<i class="material-icons prefix">search</i>
-					<input type="text" id="pupil-input" name="name"></input>
-					<label for="pupil-input" class="truncate">Nachname</label>
+				 	<div >
+                    <ul class="collapsible" id="studentlist"></ul>	
+					<?php //var_dump($studentData) ?>
 					</div>
 				<div id="pupils"></div>
 					
 			</div>
 		</div>
 	</div>
+
+
+    <!-- blueprint for collapsible list -->
+
+    <li id="row_blueprint" style="display: none;">
+      <div class="collapsible-header" name="listheader"></div>
+      <div class="collapsible-body" name="listbody">
+        <div name="pupilinfo"></div>
+        <div name="parentinfo"></div>
+        <div name="lockerinfo"></div>
+        <div name="libraryinfo"></div>
+      </div>
+    </li>	
+
+    <!-- check in absentees.js to remember how a new line is added -->
 	
 	<div id = "infocard" class="col s12 m6 l6" style="visibility: hidden">
 		<div class="card">
@@ -43,7 +56,7 @@
 		
 		<div class="modal-footer">
 		<a onclick="deregisterStudent();" class="modal-action waves-effect waves-green btn-flat right teal-text"
-           style="margin-bottom: 20px;"><i class="material-icons right">send</i>Löschen</a>
+           style="margin-bottom: 20px;"><i class="material-icons right">send</i>Bestätigen</a>
 		<a onclick="abortDeregistration();" class="modal-action waves-effect waves-green btn-flat right teal-text"
            style="margin-bottom: 20px;"><i class="material-icons right">close</i>Abbrechen</a>
         
@@ -75,13 +88,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <!-- Include Javascript -->
 <script type="application/javascript">
-<?php include("deregister.js") ?>
+<?php include("studentaction.js") ?>
 </script>
 <script type="text/javascript">
-requestReady = "true";
-
-
-
+//requestReady = "true";
+studentData = <?php echo json_encode($studentData) ?>;
+createStudentActionRequiredList();
 </script>
 </body>
 </html>

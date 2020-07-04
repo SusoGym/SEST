@@ -6,7 +6,8 @@
 
 //var xhttp = new XMLHttpRequest();
 var content = "";
-var lockerToHire;
+var lockerToHireId = null;
+var lockerToHireNr = null;
 
 var data;
 var searchList = []; //needed to keep pupil list after new request but will never be changed until new search request is triggered be reduced 
@@ -109,7 +110,7 @@ function createResultList(dta) {
  * @param {any} id
  */
 function bookLocker(id) {
-    actionData ={"action":"hire","locker":lockerToHire,"student":id}
+    actionData ={"action":"hire","lockerNr":lockerToHireNr,"lockerId":lockerToHireId,"student":id,}
     openConfirmModal(actionData);
 }
 
@@ -125,7 +126,7 @@ function confirmAction(){
             'type': 'lockers',
             'console': '',
             'hire': '',
-            'lckr': actionData['locker'],
+            'lckr': actionData['lockerId'],
             'stdnt': actionData['student']['id']
         }, function (data, status) {
             handleServerResponse(data, status);
@@ -137,7 +138,7 @@ function confirmAction(){
             'type': 'lockers',
             'console': '',
             'return': '',
-            'lckr': actionData['locker']
+            'lckr': actionData['lockerId']
         }, function (data, status) {
             handleServerResponse(data, status);
         });
@@ -150,7 +151,8 @@ function confirmAction(){
  * @param {any} id
  */
 function unhireLocker(id) {
-    actionData ={"action":"return","locker":id}
+    lockerToReturn = lockers['hired'].filter(item => item.id == id);
+    actionData ={"action":"return","lockerId":id,"lockerNr":lockerToReturn[0]['locker']}
     openConfirmModal(actionData);
 }
 
@@ -166,12 +168,12 @@ function openConfirmModal(mydata) {
         activeStudent = searchList.filter(item => item.id == mydata['student'])
         currentStudent = activeStudent[0]['vorname'] + ' '  +activeStudent[0]['name'] + ' (' + activeStudent[0]['klasse']+ ')';
         $('#confirm_header').html("<h3>Ausgabe eines Schließfachs</h3>");
-        $('#confirm_content').html("<h5>Schließfach " + mydata['locker'] + " an " + currentStudent + " ausgeben?</h5>") ; 
-        actionData = {"action":"hire","locker":mydata['locker'],"student":activeStudent[0]}; 
+        $('#confirm_content').html("<h5>Schließfach " + mydata['lockerNr'] + " an " + currentStudent + " ausgeben?</h5>") ; 
+        actionData = {"action":"hire","lockerNr":mydata['lockerNr'],"lockerId":mydata['lockerId'],"student":activeStudent[0]}; 
     } else if (mydata['action'] == "return") {
         $('#confirm_header').html("<h3>Rückgabe eines Schließfachs</h3>");
-        $('#confirm_content').html("<h5>Schließfach " + mydata['locker'] + " zurückgeben?</h5>") ;
-        actionData = {"action":"return","locker":mydata['locker']}; 
+        $('#confirm_content').html("<h5>Schließfach " + mydata['lockerNr'] + " zurückgeben?</h5>") ;
+        actionData = {"action":"return","lockerId":mydata['lockerId']}; 
     }
 }
 

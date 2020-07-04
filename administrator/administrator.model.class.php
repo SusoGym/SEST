@@ -122,7 +122,7 @@ class Model extends \Model {
     
     /**
      * delete unused data from DB
-     *
+     * especially after an update of data
      * @param bool $student
      *
      * @return int amount of deletions
@@ -131,10 +131,65 @@ class Model extends \Model {
         $toDelete = 0;
         ($student) ? $table = "schueler" : $table = "lehrer";
         $data = self::$connection->selectValues("SELECT id FROM $table WHERE upd=0");
-        $toDelete = count($data);
-        self::$connection->straightQuery("DELETE FROM $table WHERE upd=0");
+        if (!empty($data) ) {
+           if ($student == true){
+                //a more complex process is needed than just deleting a pupil
+                //i.e. it must be checked if the pupil needs further attention, e.g. because of hired lockers or hired books
+                //query all pupils who were not updated, then perform check on these. If checks are true, an additional data field will 
+                //be used to mark those pupils
+                foreach ($data as $d) {
+                    $id = $d[0];
+                    $studentData = json_decode($this->getStudentDataJSON($id),true);
+                    if($studentData['locker'] != null || $studentData['library'] ) {
+                        //enter date into action_required field
+                        self::$connection->straightQuery('UPDATE '. $table.' SET action_required = "'.date("Y-m-d H:i:s"). '" WHERE id='.$id);
+                        } else {
+                        //no lockers or books, i.e. delete the student
+                        self::$connection->straightQuery("DELETE FROM $table WHERE id=$id");
+                        $toDelete++;
+                        }
+
+                    }
+            } else {
+                $toDelete = count($data);
+                self::$connection->straightQuery("DELETE FROM $table WHERE upd=0");
+            } 
+        }
         
+
         return $toDelete;
+    }
+
+
+    /**
+     * get all students where an action is required
+     * because they should be deleted but still own a locker or have books hired
+     * @return array
+     */
+    public function getAttentionRequiringStudents() {
+        $data = self::$connection->selectValues("SELECT id FROM schueler WHERE action_required is not null");
+        if (!empty($data)) {
+            return $data;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * get all data for the students that require attention
+     * i.e. those that need to be deleted, but own lockers or have books hired
+     * @return array
+     */
+    public function getDataOfAttentionRequiringStudents(){
+        $allData = array();
+        $data = $this->getAttentionRequiringStudents();
+        foreach($data as $d) {
+            $id = $d[0];
+            $studentData = json_decode($this->getStudentDataJSON($id),true);
+            array_push($allData,$studentData);
+        }
+
+        return $allData;
     }
     
     /**
@@ -511,7 +566,7 @@ class Model extends \Model {
 	public function getRegistrationRequests(){
 		$requests = null;
 		$data = self::$connection->selectAssociativeValues("SELECT * FROM registration_request ORDER BY request_date");
-		if ($data) {
+		if (!empty($data)) {
 			foreach ($data as $d) {
 			//get Parent Data
 			//$parent = $this->getUserById($d['eid'],array("user_type"=>1,"email"=>$d['email'],"id"=>$d['eid']) ) ;
@@ -587,17 +642,17 @@ class Model extends \Model {
    public function getLockerList() {
    $hiredOut = array();
    $empty = array();
-   $data = self::$connection->selectValues("SELECT nr, hired, location FROM lockers ORDER BY nr");
+   $data = self::$connection->selectValues("SELECT nr, hired, location, id  FROM lockers ORDER BY nr");
    if (!empty($data) ){
 		foreach($data as $d) {
 			if ($d[1] !== null) {
 				//locker is hired out
 				$student = \Model::getStudentById($d[1]);
 				//$studentData = array("id" => $student->getId(), "fullname" => $student->getFullName(), "klasse" => $student->getClass() );
-				$locker = array("locker" => $d[0], "location" => $d[2], "student" => $student);
+				$locker = array("locker" => $d[0], "id" => $d[3], "location" => $d[2], "student" => $student);
 				array_push($hiredOut,$locker);
 				} else {
-				$emptyLocker = array("locker" =>$d[0], "location" => $d[2]);
+				$emptyLocker = array("locker" =>$d[0], "id" => $d[3], "location" => $d[2]);
 				array_push($empty, $emptyLocker);
 				}
 			}
@@ -615,8 +670,8 @@ class Model extends \Model {
    */
    public function hireoutLocker($locker,$student){
 	$time = date('d.m.Y H:i');
-	\Debug::writeDebugLog(__method__,'UPDATE lockers SET hired ="' . $student . '",hiredate = "' . $time .'" WHERE nr=' . $locker);
-	$result = self::$connection->straightQuery('UPDATE lockers SET hired ="' . $student . '",hiredate = "' . $time .'" WHERE nr=' . $locker);
+	\Debug::writeDebugLog(__method__,'UPDATE lockers SET hired ="' . $student . '",hiredate = "' . $time .'" WHERE id=' . $locker);
+	$result = self::$connection->straightQuery('UPDATE lockers SET hired ="' . $student . '",hiredate = "' . $time .'" WHERE id=' . $locker);
    
 	}
 	
@@ -626,7 +681,7 @@ class Model extends \Model {
 	* @param int id
 	*/
 	public function returnLocker($locker) {
-		self::$connection->straightQuery('UPDATE lockers SET hired = null, hiredate = null WHERE nr=' . $locker);
+		self::$connection->straightQuery('UPDATE lockers SET hired = null, hiredate = null WHERE id=' . $locker);
     }
     
     
