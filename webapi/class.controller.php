@@ -99,9 +99,60 @@ private function updateEvents($events) {
 $eventArray = json_decode($events,true);
 //var_dump($eventArray) ; //nur debugging
 $this->model->addEventsToDB($eventArray);
+
+//get all events from database
+
+$this->createICS($this->model->getEvents(null));
+$this->createICS($this->model->getEvents(true), true); //create StaffVersion
 $return = array("message" => "events updated");
 return $return;
 }
+
+
+
+/**
+     *Eintrag aller Termins in eine ics-Datei
+     *
+     * @param $file String Dateiname
+     * @param $termine Array(Terminobjekt)
+     */
+    public function createICS($termine, $staff = null) {
+        
+		//this really should be reused from the class TManager but does not work
+        $path = $this->model->getIniParams();
+        $filebase = $path['icsfile'];
+        $fileName = $staff ? $filebase . "Staff.ics" : $filebase . "Public.ics";
+        $file = $path['filebase'] . $path['download'] . '/' . $fileName; //used to be path['basepath'];
+       	$f = fopen($file, "w");
+        fwrite($f, "BEGIN:VCALENDAR\r\n");
+		$id = 1000;
+        foreach ($termine as $t) {
+			if ($staff || !$t->staff) {
+                fwrite($f, "BEGIN:VEVENT\r\n");
+                //if ($mail == true") {fwrite($f,'ATTENDEE;CN="Kollegium (lehrer@suso.schulen.konstanz.de)";RSVP=TRUE:mailto:lehrer@suso.schulen.konstanz.de');}
+
+                $entryTextStart = "DTSTART:";
+                $entryTextEnd = "DTEND:";
+                if (strlen($t->start) < 9) {
+                    //keine Zeitangabe, also ganztägiger Termin
+                    $entryTextStart = "DTSTART;VALUE=DATE:";
+                    $entryTextEnd = "DTEND;VALUE=DATE:";
+                }
+				fwrite($f, "UID:" . $t->id . "\r\n");
+				fwrite($f, "DTSTAMP:" . $t->createTimeStamp . "\r\n");
+                fwrite($f, $entryTextStart . $t->start . "\r\n");
+                fwrite($f, $entryTextEnd . $t->ende . "\r\n");
+                fwrite($f, "SUMMARY;LANGUAGE=de:" . $t->typ . "\r\n");
+                /*fwrite($f,'X-ALT-DESC;FMTTYPE=text/html:<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">\n<HTML>\n
+                    <HEAD>\n<TITLE></TITLE>\n</HEAD>\n<BODY>\n\n<P DIR=LTR><SPAN LANG="de"></SPAN></P>\n\n</BODY>'.$text.'</HTML>');
+                */
+                fwrite($f, "END:VEVENT\r\n");
+            }
+		$id++;
+        }
+        fwrite($f, "END:VCALENDAR");
+        fclose($f);
+    }
 
 /**
  * checking for unused users

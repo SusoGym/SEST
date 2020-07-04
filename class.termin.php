@@ -20,6 +20,8 @@ class Termin {
     public $sweekday = null;
     public $eweekday = null;
     public $sTimeStamp = null; //nur der Datumstimestamp yyyymmdd
+	public $createTimeStamp = null;
+	public $id = null;
     
     //private $text=null;
     //private $ort=null;
@@ -70,7 +72,6 @@ class Termin {
      * @param $d Array
      */
     public function createFromDB($d) {
-        //var_dump($d);
         $this->typ = $d[0];
         $this->start = $d[1];
         $this->ende = $d[2];
@@ -78,6 +79,8 @@ class Termin {
         $mt = $this->start[4] . $this->start[5];
         $this->jahr = $this->start[0] . $this->start[1] . $this->start[2] . $this->start[3];
         $this->findMonth($mt);
+		$this->id = $d[4];
+		$this->createTimeStamp = $d[5];
         
         if (strlen($this->start) < 9) {
             //ganztägiger Termin
